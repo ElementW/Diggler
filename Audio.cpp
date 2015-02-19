@@ -1,0 +1,149 @@
+#include "Audio.hpp"
+#include <AL/al.h>
+#include <AL/alext.h>
+#include "Game.hpp"
+#include "Sound.hpp"
+#include "GlobalProperties.hpp"
+
+#define AUDIO_GC_DEBUG 0
+
+namespace Diggler {
+
+Audio::Audio(Game* G) : G(G), sounds(m_sounds) {
+	if (!GlobalProperties::IsSoundEnabled)
+		return;
+	
+	int alMajor, alMinor;
+	alcGetIntegerv(nullptr, ALC_MAJOR_VERSION, 1, &alMajor);
+	alcGetIntegerv(nullptr, ALC_MINOR_VERSION, 1, &alMinor);
+	getDebugStream() << "OpenAL v" << alMajor << '.' << alMinor << std::endl;
+	
+	ALboolean enumeration = alcIsExtensionPresent(nullptr, "ALC_ENUMERATION_EXT");
+	if (enumeration == AL_FALSE)
+		; // enumeration not supported
+	else {
+		const ALCchar *devices = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
+		const ALCchar *device = devices, *next = devices + 1;
+		size_t len = 0;
+		while (device && *device != '\0' && next && *next != '\0') {
+			len = strlen(device);
+			device += (len + 1);
+			next += (len + 2);
+		}
+	}
+	const ALCchar *deviceName = nullptr;
+	m_audioDevice = alcOpenDevice(deviceName);
+	if (!m_audioDevice) {
+		getDebugStream() << "Failed opening AL device '" << deviceName << "': " << alcGetError(m_audioDevice) << std::endl;
+		GlobalProperties::IsSoundEnabled = false;
+	}
+	deviceName = alcGetString(m_audioDevice, ALC_DEVICE_SPECIFIER);
+	getDebugStream() << "Using device '" << deviceName << '\'' << std::endl;
+	
+	ALCint attrs[] = {
+		0, 0
+	};
+	
+	m_audioContext = alcCreateContext(m_audioDevice, attrs);
+	if (!alcMakeContextCurrent(m_audioContext)) {
+		getDebugStream() << "Failed setting context on AL device '" << deviceName << "': " << alcGetError(m_audioDevice) << std::endl;
+		alcCloseDevice(m_audioDevice);
+		GlobalProperties::IsSoundEnabled = false;
+	}
+}
+
+Audio::~Audio() {
+	if (!GlobalProperties::IsSoundEnabled)
+		return;
+	
+	alcMakeContextCurrent(nullptr);
+	alcDestroyContext(m_audioContext);
+	alcCloseDevice(m_audioDevice);
+}
+
+static ALfloat float3data[3], plrOrient[6];
+
+void Audio::updateAngle() {
+	const glm::vec3 &at = G->LP->camera.getLookAt(),
+					&up = G->LP->camera.getUp();
+	plrOrient[0] = at.x;
+	plrOrient[1] = at.y;
+	plrOrient[2] = at.z;
+	plrOrient[3] = up.x;
+	plrOrient[4] = up.y;
+	plrOrient[5] = up.z;
+	alListenerfv(AL_ORIENTATION, plrOrient);
+}
+
+void Audio::updatePos() {
+	float3data[0] = G->LP->position.x;
+	float3data[1] = G->LP->position.y;
+	float3data[2] = G->LP->position.z;
+	alListenerfv(AL_POSITION, float3data);
+	float3data[0] = G->LP->velocity.x;
+	float3data[1] = G->LP->velocity.y;
+	float3data[2] = G->LP->velocity.z;
+	alListenerfv(AL_VELOCITY, float3data);
+}
+
+void Audio::update() {
+	updatePos();
+	updateAngle();
+}
+
+void Audio::loadSoundAssets() {
+	std::string soundsDir = getAssetsDirectory() + "sounds/";
+	for (const std::string &fn : fs::getFiles(soundsDir)) {
+		if (fn.length() >= 4 && fn.substr(fn.length()-4) == ".ogg") {
+			addSound(fn.substr(0, fn.length()-4), soundsDir+fn);
+		}
+	}
+}
+
+void Audio::addSound(const std::string& name, const std::string& path) {
+	m_sounds.emplace(std::piecewise_construct,
+			std::forward_as_tuple(name), std::forward_as_tuple()).first->second.loadOgg(path);
+}
+
+void Audio::playSound(const std::string &name) {
+	playSound(m_sounds.at(name));
+}
+
+void Audio::playSound(const SoundBuffer &buf) {
+	m_playing.emplace_back(&buf);
+	m_playing.back().play();
+	gc();
+}
+
+void Audio::playSound(const std::string &name, const glm::vec3 &pos) {
+	playSound(m_sounds.at(name), pos);
+}
+
+void Audio::playSound(const SoundBuffer &buf, const glm::vec3& pos) {
+	m_playing.emplace_back(&buf, false, pos);
+	m_playing.back().play();
+	gc();
+}
+
+/// Garbage Collects the sound sources
+void Audio::gc() {
+#if AUDIO_GC_DEBUG
+	uint freed = 0;
+#endif
+	std::list<Sound>::const_iterator it = m_playing.begin();
+	while (it != m_playing.end()) {
+		if (!it->isPlaying()) {
+			it = m_playing.erase(it);
+#if AUDIO_GC_DEBUG
+			freed++;
+#endif
+		} else {
+			++it;
+		}
+	}
+#if AUDIO_GC_DEBUG
+	getDebugStream() << "GC'd " << freed << " sources" << std::endl;
+#endif
+}
+
+}
