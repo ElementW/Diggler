@@ -76,13 +76,15 @@ void Audio::updateAngle() {
 }
 
 void Audio::updatePos() {
-	float3data[0] = G->LP->position.x;
-	float3data[1] = G->LP->position.y;
-	float3data[2] = G->LP->position.z;
+	const glm::vec3 &pos = G->LP->position,
+					&vel = G->LP->velocity;
+	float3data[0] = pos.x;
+	float3data[1] = pos.y;
+	float3data[2] = pos.z;
 	alListenerfv(AL_POSITION, float3data);
-	float3data[0] = G->LP->velocity.x;
-	float3data[1] = G->LP->velocity.y;
-	float3data[2] = G->LP->velocity.z;
+	float3data[0] = vel.x;
+	float3data[1] = vel.y;
+	float3data[2] = vel.z;
 	alListenerfv(AL_VELOCITY, float3data);
 }
 

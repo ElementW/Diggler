@@ -14,9 +14,7 @@ private:
 	GLuint id;
 	GLint linked = GL_FALSE;
 	bool mustDestroy = false;
-#if DEBUG
 	std::string fshPath, vshPath;
-#endif
 	
 public:
 	///
@@ -30,6 +28,12 @@ public:
 	/// (shaders dtors will be called when ~Program is called)
 	///
 	Program(const std::string& vshPath, const std::string& fshPath);
+	
+	///
+	/// Set shaders' #defines
+	/// @see Shader::setDefines(const std::vector<std::string>);
+	///
+	void setDefines(const std::vector<std::string>&);
 	
 	///
 	/// Links the shaders together
@@ -63,6 +67,9 @@ public:
 	/// Makes this Program active
 	///
 	void bind() const;
+	
+	GLuint getFShId() const;
+	GLuint getVShId() const;
 	
 	///
 	/// Destroys the shader, freeing OpenGL resources and the subsequent Shaders (if needed)

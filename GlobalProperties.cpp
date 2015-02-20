@@ -6,7 +6,7 @@ bool GlobalProperties::IsClient = true;
 bool GlobalProperties::IsServer = false;
 
 const char* GlobalProperties::DefaultServerHost = "localhost";
-const int   GlobalProperties::DefaultServerPort = 61425;
+const int   GlobalProperties::DefaultServerPort = 17425;
 
 bool GlobalProperties::UseProceduralTextures = false;
 

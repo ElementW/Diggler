@@ -17,7 +17,8 @@ class ProgramManager {
 private:
 	std::unordered_map<int, Program*> m_programs;
 	std::vector<Program*> m_specialPrograms;
-	std::string getShadersName(int flags) const;
+	static std::string getShadersName(int flags);
+	static void getDefines(int flags, std::vector<std::string> &defs);
 
 public:
 	ProgramManager();

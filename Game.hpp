@@ -27,7 +27,6 @@ public:
 	// Server
 	class Server *S;
 	class ChunkChangeHelper *CCH;
-	int Port = 61425;
 	
 	// Client
 	class GameWindow *GW;

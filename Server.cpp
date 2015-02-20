@@ -175,14 +175,20 @@ void Server::handlePlayerUpdate(InMessage &msg, Peer &peer) {
 	}
 }
 
-Server::Server(Game *G) : G(G) {
-	getOutputStream() << "Diggler v" << VersionString << " Server, port " << G->Port << ", "
+Server::Server(Game *G, uint16 port) : G(G) {
+	getOutputStream() << "Diggler v" << VersionString << " Server, port " << port << ", "
 		<< std::thread::hardware_concurrency() << " HW threads supported" << endl;
 
+	if (port >= 49152) {
+		getErrorStream() << "Warning: port is within the Ephemeral Port Range as defined by IANA!" <<
+			std::endl << "  Nothing wrong with that, but for compatibility's sake please avoid this range." <<
+			std::endl;
+	}
+
 	try {
-		H.create(G->Port);
+		H.create(port);
 	} catch (Net::Exception &e) {
-		getErrorStream() << "Couldn't open port " << G->Port << " for listening" << endl <<
+		getErrorStream() << "Couldn't open port " << port << " for listening" << endl <<
 			"Make sure no other server instance is running" << endl;
 		throw "Server init failed";
 	}

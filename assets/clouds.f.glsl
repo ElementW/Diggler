@@ -1,5 +1,3 @@
-#version 120
-
 uniform vec2 texshift;
 varying vec2 v_texcoord;
 uniform sampler2D texture;

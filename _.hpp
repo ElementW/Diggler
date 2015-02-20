@@ -59,7 +59,7 @@ template<class T> struct _ {
 		return ptr;
 	}
 	
-	// Addressof
+	// Addressof, use at your own risk
 	T** operator&() const {
 		return &ptr;
 	}

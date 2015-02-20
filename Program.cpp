@@ -8,19 +8,24 @@ Program::Program(Shader* vsh, Shader* fsh) : vsh(vsh), fsh(fsh), id(0) {
 	
 }
 
-Program::Program(const std::string& vshPath, const std::string& fshPath) : id(0) {
-#if DEBUG
-	this->fshPath = fshPath;
-	this->vshPath = vshPath;
-#endif
-	vsh = new Shader(Shader::Type::VERTEX, vshPath);
-	fsh = new Shader(Shader::Type::FRAGMENT, fshPath);
+Program::Program(const std::string& vshPath, const std::string& fshPath)
+	: id(0), fshPath(fshPath), vshPath(vshPath) {
+	vsh = new Shader(Shader::Type::VERTEX);
+	fsh = new Shader(Shader::Type::FRAGMENT);
 	mustDestroy = true;
 	
 	//getDebugStream() << id << ':' << vsh->getError() << fsh->getError()<< std::endl;
 }
 
+void Program::setDefines(const std::vector<std::string> &defs) {
+	vsh->setDefines(defs);
+	fsh->setDefines(defs);
+}
+
+
 bool Program::link() {
+	fsh->compileFromFile(fshPath);
+	vsh->compileFromFile(vshPath);
 	id = glCreateProgram();
 	glAttachShader(id, vsh->getId());
 	glAttachShader(id, fsh->getId());
@@ -83,6 +88,14 @@ GLint Program::uni(const std::string &name) const {
 
 void Program::bind() const {
 	glUseProgram(id);
+}
+
+GLuint Program::getFShId() const {
+	return fsh->getId();
+}
+
+GLuint Program::getVShId() const {
+	return vsh->getId();
 }
 
 Program::~Program() {

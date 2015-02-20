@@ -10,12 +10,12 @@
 
 namespace Diggler {
 
-Program const *Font::RenderProgram = nullptr;
+const Program *Font::RenderProgram = nullptr;
 GLint Font::RenderProgram_uni_mvp = -1;
 GLint Font::RenderProgram_att_coord = -1;
 GLint Font::RenderProgram_att_texcoord = -1;
 GLint Font::RenderProgram_att_color = -1;
-struct { float r, g, b; } ColorTable[16] = {
+static const struct { float r, g, b; } ColorTable[16] = {
 	{1.0f, 1.0f, 1.0f},
 	{0.66f, 0.66f, 0.66f},
 	{0.33f, 0.33f, 0.33f},

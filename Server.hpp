@@ -25,7 +25,7 @@ private:
 public:
 	Net::Host H;
 
-	Server(Game *G);
+	Server(Game *G, uint16 port);
 	~Server();
 
 	void run();

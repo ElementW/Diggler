@@ -1,26 +1,28 @@
 #include "ProgramManager.hpp"
 #include <sstream>
 #include "Platform.hpp"
+#include "GlUtils.hpp"
 
 #define PROGRAM_MANAGER_DEBUG 0
 
 namespace Diggler {
 
-std::string ProgramManager::getShadersName(int flags) const {
-	std::ostringstream sstm;
+std::string ProgramManager::getShadersName(int flags) {
 	if (flags & PM_3D)
-		sstm << "3d";
+		return "3d";
 	else
-		sstm << "2d";
+		return "2d";
+}
+
+void ProgramManager::getDefines(int flags, std::vector<std::string> &defs) {
 	if (flags & PM_TEXTURED)
-		sstm << "Textured";
+		defs.push_back("TEXTURED");
 	if (flags & PM_TEXSHIFT)
-		sstm << "Texshift";
+		defs.push_back("TEXSHIFT");
 	if (flags & PM_COLORED)
-		sstm << "Colored";
+		defs.push_back("COLORED");
 	if (flags & PM_FOG)
-		sstm << "Fog";
-	return sstm.str();
+		defs.push_back("FOG");
 }
 
 ProgramManager::ProgramManager() {
@@ -33,7 +35,25 @@ const Program* ProgramManager::getProgram(int flags) {
 		return it->second;
 	std::string shaderName = getShadersName(flags);
 	Program* prog = new Program(getAssetPath(shaderName + ".v.glsl"), getAssetPath(shaderName + ".f.glsl"));
-	prog->link();
+	std::vector<std::string> defs;
+	getDefines(flags, defs);
+	prog->setDefines(defs);
+	if (!prog->link()) {
+		getErrorStream() << "Link failed on " << shaderName << std::endl;
+		if (defs.size() > 0) {
+			std::ostringstream oss;
+			for (const std::string &s : defs)
+				oss << s << "; ";
+			getErrorStream() << "Defs: " << oss.str() << std::endl;
+		}
+		/*FIXME: use in debug? GLint sz;
+		glGetShaderiv(prog->getVShId(), GL_SHADER_SOURCE_LENGTH, &sz);=
+		char *src = new char[sz+1];
+		src[sz] = 0;
+		glGetShaderSource(prog->getVShId(), sz, nullptr, src);
+		getErrorStream() << "Source: " << src << std::endl;
+		delete[] src; */
+	}
 	m_programs.insert(std::pair<int, Program*>(flags, prog));
 #if PROGRAM_MANAGER_DEBUG
 	getDebugStream() << "Added " << shaderName << ':' << prog->getId() << std::endl;
@@ -41,7 +61,7 @@ const Program* ProgramManager::getProgram(int flags) {
 	return prog;
 }
 
-const Program *ProgramManager::getSpecialProgram(const std::string &name) {
+const Program* ProgramManager::getSpecialProgram(const std::string &name) {
 	Program* prog = new Program(getAssetPath(name + ".v.glsl"), getAssetPath(name + ".f.glsl"));
 	prog->link();
 	m_specialPrograms.push_back(prog);

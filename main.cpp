@@ -32,40 +32,73 @@ static void InitRand() {
 		FastRand();
 }
 
+static void showHelp(char **argv) {
+	std::cout <<
+	"Usage: " << argv[0] << " [options]\n"
+	" -h           Shows this help message\n"
+	" --help\n\n"
+	"Server: -s [-p port]\n"
+	" -p port      Specifies port to run server on\n\n"
+	"Client: [--nosound] [host[:port]]\n"
+	" --nosound    Disables sound\n"
+	" host[:port]  Server (and port) to connect directly to\n"
+	<< std::endl;
+}
+
 int main(int argc, char **argv) {
 	InitRand();
-	bool networkSuccess = InitNetwork();
 	
-	string servHost = GlobalProperties::DefaultServerHost;
-	int    servPort = GlobalProperties::DefaultServerPort;
+	string host = GlobalProperties::DefaultServerHost;
+	int    port = GlobalProperties::DefaultServerPort;
 	for (int i=1; i < argc; i++) {
-		if (strcmp(argv[i], "--server") == 0) {
+		if (strcmp(argv[i], "-h") == 0 ||
+			strcmp(argv[i], "--help") == 0) {
+			showHelp(argv);
+			return 0;
+			
+		} else if (strcmp(argv[i], "-s") == 0) {
 			GlobalProperties::IsClient = false;
 			GlobalProperties::IsServer = true;
+		} else if (strcmp(argv[i], "-p") == 0 && argc > i) {
+			if (!GlobalProperties::IsServer) continue;
+			try {
+				port = std::stoi(argv[++i]);
+			} catch (const std::logic_error &e) {
+				getErrorStream() << "Failed to parse port number, keeping default (" <<
+					port << ')' << std::endl;
+			}
+			
 		} else if (strcmp(argv[i], "--nosound") == 0) {
 			GlobalProperties::IsSoundEnabled = false;
 		} else {
 			// For now, assume it's the server address
-			servHost = argv[i];
-			string::size_type colonPos = servHost.find(':');
+			host = argv[i];
+			string::size_type colonPos = host.find(':');
 			if (colonPos != string::npos) {
-				string portStr = servHost.substr(colonPos+1);
+				string portStr = host.substr(colonPos+1);
 				try {
-					servPort = std::stoi(portStr);
+					port = std::stoi(portStr);
 				} catch (const std::logic_error &e) {
 					getErrorStream() << "Failed to parse port number, keeping default (" <<
-						servPort << ')' << std::endl;
+						port << ')' << std::endl;
 				}
-				servHost = servHost.substr(0, colonPos);
+				if (port > 65535) {
+					port = GlobalProperties::DefaultServerPort;
+					getErrorStream() << "Port number too high, defaulting to" <<
+						port << std::endl;
+				}
+				host = host.substr(0, colonPos);
 			}
 		}
 	}
+	
+	bool networkSuccess = InitNetwork();
 	
 	if (GlobalProperties::IsClient) {
 		GameWindow GW;
 		/*GW.setNextState(std::make_shared<UITestState>(&GW));*/
 		if (networkSuccess)
-			GW.setNextState(std::make_shared<GameState>(&GW, servHost, servPort));
+			GW.setNextState(std::make_shared<GameState>(&GW, host, port));
 		else
 			GW.setNextState(std::make_shared<MessageState>(&GW, "Network init failed!"));
 		GW.run();
@@ -76,7 +109,7 @@ int main(int argc, char **argv) {
 			return 1;
 		}
 		Game G;
-		Server S(&G);
+		Server S(&G, port);
 		G.S = &S;
 		S.run();
 	}

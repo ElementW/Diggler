@@ -1,5 +1,3 @@
-#version 120
-
 uniform mat4 mvp;
 attribute vec4 coord;
 attribute vec2 texcoord;

@@ -1,4 +1,3 @@
-#version 120
 #define t(a,b) texture2D(mytexture, clamp(v_texcoord+vec2(a*pixshift.x*1.1,b*pixshift.y*1.1), vec2(0.0,0.0), vec2(1.0,1.0)))
 
 varying vec2 v_texcoord;
