@@ -32,7 +32,7 @@ protected:
 	Area m_area;
 	const Game *G;
 	class Manager *M;
-	glm::mat4 *PM;
+	const glm::mat4 *PM;
 
 public:
 	enum MouseButton {
@@ -56,6 +56,8 @@ public:
 	void setVisible(bool v) { m_isVisible = v; }
 	bool isVisible() const { return m_isVisible; }
 	
+	// Passing nullptr will reset matrix to default
+	void setMatrix(const glm::mat4*);
 	virtual void onMatrixChange() {}
 	virtual void render() = 0;
 	

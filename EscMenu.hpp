@@ -16,8 +16,12 @@ class Text;
 class EscMenu {
 private:
 	static const Program *RenderProgram;
-	static GLint RenderProgram_att_coord, RenderProgram_att_color, RenderProgram_uni_mvp;
+	static GLint RenderProgram_att_coord, RenderProgram_uni_unicolor, RenderProgram_uni_mvp;
 	Game *G;
+	struct {
+		double start, duration;
+		bool active;
+	} m_transition;
 	VBO vbo_background;
 	UI::Text *txt_quit;
 	glm::mat4 matrix;
@@ -26,6 +30,8 @@ private:
 public:
 	EscMenu(Game *G);
 	~EscMenu();
+	
+	void setVisible(bool);
 	void render();
 };
 

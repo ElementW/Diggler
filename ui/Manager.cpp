@@ -16,6 +16,8 @@ static GLint RP_Rect_uni_mvp = -1;
 
 Manager::Manager() {
 	PM = &m_projMatrix;
+	m_projMat1 = glm::ortho(0.f, 1.f, 0.f, 1.f);
+	PM1 = &m_projMat1;
 }
 
 void Manager::setup(Game *G) {

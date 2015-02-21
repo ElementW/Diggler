@@ -6,14 +6,17 @@ namespace Diggler {
 namespace GlobalProperties {
 	extern bool IsClient;
 	extern bool IsServer;
-	
-	extern const char* DefaultServerHost;
+
+	extern const char *DefaultServerHost;
 	extern const int   DefaultServerPort;
-	
+
+	extern const unsigned int PlayerNameMaxLen;
+	extern char *PlayerName;
+
 	extern bool UseProceduralTextures;
-	
+
 	extern bool IsSoundEnabled;
-	
+
 	extern int UIScale;
 }
 

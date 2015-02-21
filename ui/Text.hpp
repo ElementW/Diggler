@@ -34,7 +34,10 @@ public:
 	void render();
 	void render(const glm::mat4 &matrix) const;
 	void onAreaChanged();
+	void onMatrixChange();
 	void update();
+	void updateMatrix();
+	void updateText();
 };
 
 }

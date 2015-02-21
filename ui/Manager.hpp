@@ -16,13 +16,13 @@ class Manager {
 private:
 	_<VBO> m_rectVbo;
 	std::list<_<Element>> m_elements;
-	glm::mat4 m_projMatrix;
+	glm::mat4 m_projMatrix, m_projMat1;
 	
 	friend GameWindow;
 	void setProjMat(const glm::mat4&);
 
 public:
-	glm::mat4 *PM;
+	const glm::mat4 *PM, *PM1;
 	Game *G;
 
 	Manager();
@@ -49,6 +49,7 @@ public:
 	
 	// Utility
 	
+	//void drawRect(const Element::Area&, const glm::vec3 &color) const;
 	void drawTexRect(const Element::Area&, const Texture&) const;
 	
 	// Render

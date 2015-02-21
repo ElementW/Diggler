@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <sstream>
 #include <algorithm>
+#include "GlobalProperties.hpp"
 #include "Game.hpp"
 #include "FBO.hpp"
 #include "Clouds.hpp"
@@ -25,11 +26,11 @@ const int GameState::BloomScale = 4;
 GameState::GameState(GameWindow *W, const std::string &servHost, int servPort)
 	: W(W), m_serverHost(servHost), m_serverPort(servPort) {
 	G = W->G;
-	
+
 	// Initialized in setupUI
 	UI.EM = nullptr;
 	m_chatBox = nullptr;
-	
+
 	m_3dFbo = new FBO(640, 480, Texture::PixelFormat::RGB, true);
 	m_3dRenderVBO = new VBO();
 	m_clouds = new Clouds(G, 32, 32, 4);
@@ -38,7 +39,7 @@ GameState::GameState(GameWindow *W, const std::string &servHost, int servPort)
 	m_3dFboRenderer_coord = m_3dFboRenderer->att("coord");
 	m_3dFboRenderer_texcoord = m_3dFboRenderer->att("texcoord");
 	m_3dFboRenderer_mvp = m_3dFboRenderer->uni("mvp");
-	
+
 	m_extractorFbo = new FBO(640/BloomScale, 480/BloomScale, Texture::PixelFormat::RGBA);
 	m_bloomExtractorRenderer = G->PM->getSpecialProgram("bloomExtractor");
 	m_bloomExtractorRenderer_coord = m_bloomExtractorRenderer->att("coord");
@@ -50,19 +51,19 @@ GameState::GameState(GameWindow *W, const std::string &servHost, int servPort)
 	m_bloomRenderer_texcoord = m_bloomRenderer->att("texcoord");
 	m_bloomRenderer_mvp = m_bloomRenderer->uni("mvp");
 	m_bloomRenderer_pixshift = m_bloomRenderer->uni("pixshift");
-	
+
 	//"\f0H\f1e\f2l\f3l\f4l\f5o \f6d\f7e\f8m\f9b\faa\fbz\fcz\fde\fes\ff,\n\f0ye see,it werks purrfektly :D\n(and also; it's optimized)"
-	
+
 	m_mouseLocked = false;
 	nextNetUpdate = 0;
-	
+
 	enableExtractor = enableDbg = true;
 }
 
 void GameState::setupUI() {
 	m_debugTxt = G->UIM->add<UI::Text>(G->F, "\\o/", 2, 2);
 	m_debugTxt->setPos(20, 200);
-	
+
 	UI.Ore = G->UIM->add<UI::Text>(G->F); UI.Ore->setScale(2, 2);
 	UI.Loot = G->UIM->add<UI::Text>(G->F); UI.Loot->setScale(2, 2);
 	UI.Weight = G->UIM->add<UI::Text>(G->F); UI.Weight->setScale(2, 2);
@@ -72,9 +73,9 @@ void GameState::setupUI() {
 	UI.FPS = G->UIM->add<UI::Text>(G->F); UI.FPS->setScale(2, 2);
 	UI.Altitude = G->UIM->add<UI::Text>(G->F); UI.Altitude->setScale(2, 2);
 	UI.EM = new EscMenu(G);
-	
+
 	m_chatBox = new Chatbox(G);
-	
+
 	updateViewport();
 }
 
@@ -93,7 +94,7 @@ void GameState::onChar(char32 unichar) {
 void GameState::onKey(int key, int scancode, int action, int mods) {
 	if (!(action == GLFW_PRESS || action == GLFW_RELEASE))
 		return;
-	
+
 	if (m_chatBox->isChatting()) {
 		switch (key) {
 			case GLFW_KEY_ENTER:
@@ -121,8 +122,10 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 				break;
 			case GLFW_KEY_ESCAPE:
 				//glfwSetWindowShouldClose(window, GL_TRUE);
-				if (action == GLFW_PRESS)
+				if (action == GLFW_PRESS) {
 					isEscapeToggled = !isEscapeToggled;
+					UI.EM->setVisible(isEscapeToggled);
+				}
 				break;
 			/*case GLFW_KEY_TAB:
 				if (action == GLFW_PRESS) {
@@ -172,7 +175,7 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 void GameState::onMouseButton(int key, int action, int mods) {
 	if (key != GLFW_MOUSE_BUTTON_LEFT)
 		return;
-	
+
 	//snd->play();
 
 	if (action == GLFW_PRESS) {
@@ -205,13 +208,13 @@ void GameState::onCursorPos(double x, double y) {
 		angles.y = -M_PI / 2 + 0.001;
 	if(angles.y > M_PI / 2)
 		angles.y = M_PI / 2 - 0.001;
-	
+
 	lookat.x = sinf(angles.x) * cosf(angles.y);
 	lookat.y = sinf(angles.y);
 	lookat.z = cosf(angles.x) * cosf(angles.y);
 
 	G->LP->lookAt(lookat);
-	
+
 	cX = cx; cY = cy;
 }
 
@@ -221,7 +224,7 @@ void GameState::onResize(int w, int h) {
 }
 
 void GameState::onMouseScroll(double x, double y) {
-	
+
 }
 
 void GameState::updateViewport() {
@@ -235,37 +238,37 @@ void GameState::updateViewport() {
 		{0, 0, 0, 0},
 		{w, 0, 1, 0},
 		{0, h, 0, 1},
-		
+
 		{w, h, 1, 1},
 		{0, h, 0, 1},
 		{w, 0, 1, 0}
 	};
 	m_3dRenderVBO->setData(renderQuad, 6*sizeof(Coord2DTex));
-	
+
 	char str[15]; std::snprintf(str, 15, "Loot: %d/%d", 0/*G->LP->ore*/, Player::getMaxOre(G->LP->playerclass));
 	UI.Ore->setText(std::string(str));
 	UI.Ore->setPos(4, h-14);
-	
+
 	UI.Loot->setText("Loot: $0");
 	UI.Loot->setPos(w/6, h-14);
-	
+
 	UI.Weight->setText("Weight: 0");
 	UI.Weight->setPos(w/3, h-14);
-	
+
 	UI.TeamOre->setText("Team ore: 0");
 	UI.TeamOre->setPos(w/2, h-14);
-	
+
 	UI.RedCash->setText("\f4Red: $0");
 	UI.RedCash->setPos((w*5)/8, h-14);
-	
+
 	UI.BlueCash->setText("\fbBlue: $0");
 	UI.BlueCash->setPos((w*6)/8, h-14);
-	
+
 	UI.FPS->setPos(16, 16);
 	UI.Altitude->setText("Altitude: XX");
 	UI.Altitude->setPos(w-16-UI.Altitude->getSize().x, 16);
 	UI.lastAltitude = INT_MAX;
-	
+
 	m_debugTxt->update();
 	m_chatBox->setPosition(4, 64);
 	updateUI();
@@ -277,7 +280,7 @@ void GameState::sendMsg(Net::OutMessage &msg, Net::Tfer mode) {
 
 void GameState::run() {
 	if (connectLoop()) return;
-	
+
 	setupUI();
 	gameLoop();
 }
@@ -303,11 +306,11 @@ bool GameState::connectLoop() {
 		G->UIM->create<UI::Text>(G->F, ".")
 	};
 	double T; glm::mat4 mat;
-	
+
 	while (!finished && !glfwWindowShouldClose(*W)) { // Infinite loop \o/
 		T = glfwGetTime();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+
 		UI::Text::Size sz = cUI.Connecting->getSize();
 		mat = glm::scale(glm::translate(*G->GW->UIM.PM, glm::vec3(W->getW()/2-sz.x, W->getH()/2, 0.f)),
 			glm::vec3(2.f, 2.f, 1.f));
@@ -318,7 +321,7 @@ bool GameState::connectLoop() {
 				glm::vec3(2.f, 2.f, 1.f));
 			cUI.Dot->render(mat);
 		}
-		
+
 		glfwSwapBuffers(*W);
 		glfwPollEvents();
 	}
@@ -326,7 +329,7 @@ bool GameState::connectLoop() {
 		glfwHideWindow(*W);
 	m_networkThread.join();
 	delete cUI.Connecting; delete cUI.Dot;
-	
+
 	if (glfwWindowShouldClose(*W))
 		return true;
 	if (!success) {
@@ -335,17 +338,14 @@ bool GameState::connectLoop() {
 		W->showMessage("Could not connect to server", oss.str());
 		return true;
 	}
-	
-	char name[5];
-	for (int i=0; i < 4; i++)
-		name[i] = 'A' + FastRand(25);
-	name[4] = '\0';
-	
+
+	G->LP->name = GlobalProperties::PlayerName;
+
 	Net::OutMessage join(Net::MessageType::PlayerJoin);
-	std::string strname(name);
+	std::string strname(G->LP->name);
 	join.writeString(strname);
 	sendMsg(join, Net::Tfer::Rel);
-	
+
 	bool received = G->H.recv(m_msg, 5000);
 	if (!received) {
 		W->showMessage("Connected but got no response", "after 5 seconds");
@@ -365,8 +365,8 @@ bool GameState::connectLoop() {
 			W->showMessage("Received weird packet", sstm.str());
 		} return true;
 	}
-	
-	getDebugStream() << "Joined as " << name << '/' << G->LP->id << std::endl;
+
+	getDebugStream() << "Joined as " << G->LP->name << '/' << G->LP->id << std::endl;
 	return false;
 }
 
@@ -384,7 +384,7 @@ void GameState::gameLoop() {
 	LP->setHasNoclip(true);
 	while (!glfwWindowShouldClose(*W)) {
 		if (!processNetwork()) return;
-		
+
 		T = glfwGetTime(); deltaT = T - lastT;
 		G->Time = T;
 		if (T > fpsT) {
@@ -407,35 +407,35 @@ void GameState::gameLoop() {
 		m_3dFbo->bind();
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+
 		LP->update(deltaT);
 		// TODO: disable teleport and kill player
 		if (LP->position.y < -32-LP->size.y) {
 			LP->position.y = G->SC->getChunksY()*CY+32+LP->size.y;
 		}
-		
+
 		glm::mat4 m_transform = LP->getPVMatrix();
-		
+
 		/*** 3D PART ***/
 		glEnable(GL_CULL_FACE);
-		
+
 		//m_sky->render(LP->camera.getSkyMatrix());
-		
+
 		glEnable(GL_DEPTH_TEST);
-		
+
 		G->SC->render(m_transform);
 		for (Player &p : G->players) {
 			p.update(deltaT);
 			p.render(m_transform);
 		}
-		
+
 		glDisable(GL_CULL_FACE);
-		
+
 		glm::mat4 cloudmat = glm::scale(glm::translate(m_transform, glm::vec3(0.f, (G->SC->getChunksY()*CY/4)+.5f, 0.f)), glm::vec3(G->SC->getChunksX()*CX, 2, G->SC->getChunksZ()*CZ));
 		m_clouds->render(cloudmat);
-		
+
 		glDisable(GL_DEPTH_TEST);
-		
+
 		m_3dFbo->unbind();
 		m_3dFbo->tex->bind();
 		m_3dFboRenderer->bind();
@@ -448,14 +448,14 @@ void GameState::gameLoop() {
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glDisableVertexAttribArray(m_3dFboRenderer_texcoord);
 		glDisableVertexAttribArray(m_3dFboRenderer_coord);
-		
+
 		if (enableExtractor) {
 			glViewport(0, 0, W->getW()/BloomScale, W->getH()/BloomScale);
 			m_3dFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
 			m_extractorFbo->bind();
 			glClearColor(0.f, 0.f, 0.f, 0.f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			
+
 			m_bloomExtractorRenderer->bind();
 			glEnableVertexAttribArray(m_bloomExtractorRenderer_coord);
 			glEnableVertexAttribArray(m_bloomExtractorRenderer_texcoord);
@@ -466,10 +466,10 @@ void GameState::gameLoop() {
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			glDisableVertexAttribArray(m_bloomExtractorRenderer_texcoord);
 			glDisableVertexAttribArray(m_bloomExtractorRenderer_coord);
-			
+
 			m_3dFbo->tex->setFiltering(Texture::Filter::Nearest, Texture::Filter::Nearest);
 			m_extractorFbo->unbind();
-			
+
 			m_bloomFbo->bind();
 			glClearColor(0.f, 0.f, 0.f, 0.f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -487,7 +487,7 @@ void GameState::gameLoop() {
 			glDisableVertexAttribArray(m_bloomRenderer_texcoord);
 			glDisableVertexAttribArray(m_bloomRenderer_coord);
 			m_bloomFbo->unbind();
-			
+
 			// render to real surface
 			glViewport(0, 0, W->getW(), W->getH());
 			m_bloomFbo->tex->bind();
@@ -507,10 +507,10 @@ void GameState::gameLoop() {
 		/*** 2D PART ***/
 		updateUI();
 		drawUI();
-  
+
 		glfwSwapBuffers(*W);
 		glfwPollEvents();
-		
+
 		lastT = T;
 		frames++;
 	}
@@ -538,7 +538,7 @@ void GameState::drawUI() {
 		m_debugTxt->render();
 	if (isEscapeToggled)
 		UI.EM->render();
-	
+
 	static _<Texture> tex(getAssetPath("tools", "tex_tool_build.png"), Texture::PixelFormat::RGBA);
 	G->UIM->drawTexRect(UI::Element::Area {20, 20, 40, 40}, *tex);
 }
@@ -549,7 +549,7 @@ bool GameState::processNetwork() {
 			case Net::MessageType::Disconnect:
 				W->showMessage("Disconnected", "Timed out");
 				return false;
-			
+
 			case Net::MessageType::MapTransfer: {
 				G->SC->readMsg(m_msg);
 			} break;

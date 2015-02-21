@@ -1,3 +1,4 @@
+uniform vec4 unicolor = vec4(1.0, 1.0, 1.0, 1.0);
 #ifdef COLORED
 varying vec4 v_color;
 #endif
@@ -14,12 +15,12 @@ uniform float fogStart = 16.0;
 #endif
 
 void main(void) {
-	gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+	gl_FragColor = unicolor;
 #ifdef TEXTURED
  #ifdef TEXSHIFT
-	gl_FragColor = texture2D(texture, v_texcoord + texshift);
+	gl_FragColor *= texture2D(texture, v_texcoord + texshift);
  #else
-	gl_FragColor = texture2D(texture, v_texcoord);
+	gl_FragColor *= texture2D(texture, v_texcoord);
  #endif
 #endif
 #ifdef COLORED

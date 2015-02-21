@@ -31,17 +31,29 @@ void Text::setPos(int x, int y) {
 void Text::setScale(int scaleX, int scaleY) {
 	m_scaleX = scaleX;
 	m_scaleY = scaleY;
-	update();
+	updateMatrix();
+}
+
+void Text::onMatrixChange() {
+	updateMatrix();
 }
 
 void Text::onAreaChanged() {
-	update();
+	updateMatrix();
 }
 
 void Text::update() {
-	m_elementCount = m_font->updateVBO(m_vbo, m_text);
+	updateText();
+	updateMatrix();
+}
+
+void Text::updateMatrix() {
 	m_matrix = glm::translate(*PM, glm::vec3(m_area.x, m_area.y, 0.f));
 	m_matrix = glm::scale(m_matrix, glm::vec3(m_scaleX, m_scaleY, 1.f));
+}
+
+void Text::updateText() {
+	m_elementCount = m_font->updateVBO(m_vbo, m_text);
 }
 
 void Text::render() {

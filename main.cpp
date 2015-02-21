@@ -39,15 +39,16 @@ static void showHelp(char **argv) {
 	" --help\n\n"
 	"Server: -s [-p port]\n"
 	" -p port      Specifies port to run server on\n\n"
-	"Client: [--nosound] [host[:port]]\n"
+	"Client: [--nosound] [-n name] [host[:port]]\n"
 	" --nosound    Disables sound\n"
+	" -n name      Sets player nickname\n"
 	" host[:port]  Server (and port) to connect directly to\n"
 	<< std::endl;
 }
 
 int main(int argc, char **argv) {
 	InitRand();
-	
+
 	string host = GlobalProperties::DefaultServerHost;
 	int    port = GlobalProperties::DefaultServerPort;
 	for (int i=1; i < argc; i++) {
@@ -55,7 +56,7 @@ int main(int argc, char **argv) {
 			strcmp(argv[i], "--help") == 0) {
 			showHelp(argv);
 			return 0;
-			
+
 		} else if (strcmp(argv[i], "-s") == 0) {
 			GlobalProperties::IsClient = false;
 			GlobalProperties::IsServer = true;
@@ -67,9 +68,17 @@ int main(int argc, char **argv) {
 				getErrorStream() << "Failed to parse port number, keeping default (" <<
 					port << ')' << std::endl;
 			}
-			
+
 		} else if (strcmp(argv[i], "--nosound") == 0) {
 			GlobalProperties::IsSoundEnabled = false;
+		} else if ((strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--name") == 0)
+			&& argc > i) {
+			if (strlen(argv[i+1]) > GlobalProperties::PlayerNameMaxLen) {
+				getErrorStream() << "Specified nickname is too long, using random one." << std::endl;
+			} else {
+				GlobalProperties::PlayerName = argv[++i];
+				getDebugStream() << "Player's name set to " << GlobalProperties::PlayerName << std::endl;
+		    }
 		} else {
 			// For now, assume it's the server address
 			host = argv[i];
@@ -91,10 +100,18 @@ int main(int argc, char **argv) {
 			}
 		}
 	}
-	
+
 	bool networkSuccess = InitNetwork();
-	
+
 	if (GlobalProperties::IsClient) {
+		char name[5];
+		if (!GlobalProperties::PlayerName) {
+			for (int i=0; i < 4; i++)
+				name[i] = 'A' + FastRand(25);
+			name[4] = '\0';
+		}
+		GlobalProperties::PlayerName = name;
+	
 		GameWindow GW;
 		/*GW.setNextState(std::make_shared<UITestState>(&GW));*/
 		if (networkSuccess)
@@ -113,7 +130,7 @@ int main(int argc, char **argv) {
 		G.S = &S;
 		S.run();
 	}
-	
+
 	return 0;
 }
 
