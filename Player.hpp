@@ -51,16 +51,18 @@ public:
 		West	// To -Z
 	} direction;
 	enum class DeathReason : uint8 {
+		None,
 		Lava,
 		Shock,
 		Fall,
 		Explosion,
 		Void
-	};
+	} deathReason;
 	Game *G;
 	glm::vec3 position, velocity, accel;
 	std::string name;
 	uint32 id;
+	bool isAlive;
 	Net::Peer P;
 	
 	static const char* getTeamNameLowercase(Team t);
@@ -75,6 +77,7 @@ public:
 	void setPosVel(const glm::vec3 &pos, const glm::vec3 &vel, const glm::vec3 &acc = glm::vec3());
 	void update(const float &delta);
 	void render(const glm::mat4 &transform) const;
+	void setDead(bool, DeathReason = DeathReason::None);
 };
 
 }

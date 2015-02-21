@@ -14,11 +14,12 @@ private:
 	bool goingForward, goingBackward, goingLeft, goingRight;
 	bool hasGravity, hasNoclip, onGround, onRoad;
 
+public:
 	// Fixes
 	double lastJumpTime = 0.0;
+	double deathTime = 0.0; bool deathSent = false;
 
 public:
-	UI::Text *t;
 	Camera camera;
 	AABB bounds;
 	glm::vec3 size, eyesPos;
@@ -37,7 +38,7 @@ public:
 	void setHasGravity(bool fall);
 	void setHasNoclip(bool fly);
 	void jump();
-	void kill(DeathReason dr);
+	void setDead(bool, DeathReason = DeathReason::None);
 	void special1();
 };
 

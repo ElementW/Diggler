@@ -66,7 +66,8 @@ int Player::getMaxWeight(Class c) {
 }
 
 Player::Player(Game *G) : m_vbo(nullptr), team(Team::Red),
-	playerclass(Class::Prospector), tool(Tools::Pickaxe), G(G) {
+	playerclass(Class::Prospector), tool(Tools::Pickaxe), G(G),
+	isAlive(true) {
 	if (GlobalProperties::IsClient) {
 		m_vbo = new VBO();
 		if (Textures == nullptr) {
@@ -117,6 +118,7 @@ Player& Player::operator=(Player &&p) {
 	swap(name, p.name);
 	swap(id, p.id);
 	swap(P, p.P);
+	swap(isAlive, p.isAlive);
 	return *this;
 }
 
@@ -152,6 +154,11 @@ void Player::render(const glm::mat4 &transform) const {
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glDisableVertexAttribArray(RenderProgram_attrib_coord);
 	glDisableVertexAttribArray(RenderProgram_attrib_texcoord);
+}
+
+void Player::setDead(bool dead, DeathReason dr) {
+	isAlive = !dead;
+	deathReason = dr;
 }
 
 }

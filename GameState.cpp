@@ -1,11 +1,12 @@
 #include "GameState.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <memory>
-#include <thread>
-#include <cstdio>
-#include <sstream>
 #include <algorithm>
+#include <cstdio>
+#include <iomanip>
+#include <memory>
+#include <sstream>
+#include <thread>
 #include "GlobalProperties.hpp"
 #include "Game.hpp"
 #include "FBO.hpp"
@@ -57,13 +58,10 @@ GameState::GameState(GameWindow *W, const std::string &servHost, int servPort)
 	m_mouseLocked = false;
 	nextNetUpdate = 0;
 
-	enableExtractor = enableDbg = true;
+	enableExtractor = true;
 }
 
 void GameState::setupUI() {
-	m_debugTxt = G->UIM->add<UI::Text>(G->F, "\\o/", 2, 2);
-	m_debugTxt->setPos(20, 200);
-
 	UI.Ore = G->UIM->add<UI::Text>(G->F); UI.Ore->setScale(2, 2);
 	UI.Loot = G->UIM->add<UI::Text>(G->F); UI.Loot->setScale(2, 2);
 	UI.Weight = G->UIM->add<UI::Text>(G->F); UI.Weight->setScale(2, 2);
@@ -72,6 +70,7 @@ void GameState::setupUI() {
 	UI.BlueCash = G->UIM->add<UI::Text>(G->F); UI.BlueCash->setScale(2, 2);
 	UI.FPS = G->UIM->add<UI::Text>(G->F); UI.FPS->setScale(2, 2);
 	UI.Altitude = G->UIM->add<UI::Text>(G->F); UI.Altitude->setScale(2, 2);
+	UI.DebugInfo = G->UIM->add<UI::Text>(G->F); UI.DebugInfo->setVisible(false);
 	UI.EM = new EscMenu(G);
 
 	m_chatBox = new Chatbox(G);
@@ -165,6 +164,12 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 			case GLFW_KEY_U:
 				if (action == GLFW_PRESS)
 					G->LP->special1();
+				break;
+			case GLFW_KEY_F5:
+				if (action == GLFW_PRESS) {
+					showDebugInfo = !showDebugInfo;
+					UI.DebugInfo->setVisible(showDebugInfo);
+				}
 				break;
 			default:
 				break;
@@ -269,7 +274,8 @@ void GameState::updateViewport() {
 	UI.Altitude->setPos(w-16-UI.Altitude->getSize().x, 16);
 	UI.lastAltitude = INT_MAX;
 
-	m_debugTxt->update();
+	UI.DebugInfo->setPos(0, h-(UI.BlueCash->getSize().y+UI.DebugInfo->getSize().y));
+
 	m_chatBox->setPosition(4, 64);
 	updateUI();
 }
@@ -393,120 +399,132 @@ void GameState::gameLoop() {
 			fpsT = T+1;
 			frames = 0;
 		}
-		if (T > nextNetUpdate) {
-			Net::OutMessage msg(Net::MessageType::PlayerUpdate, Net::PlayerUpdateType::Move);
-			msg.writeVec3(LP->position);
-			msg.writeVec3(LP->velocity);
-			msg.writeVec3(LP->accel);
-			sendMsg(msg, Net::Tfer::Unrel);
-			nextNetUpdate = T+0.25;//+1;
-		}
-		glClearColor(0.0, 0.0, 0.0, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		m_3dFbo->bind();
-		glClearColor(0.0, 0.0, 0.0, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		LP->update(deltaT);
-		// TODO: disable teleport and kill player
-		if (LP->position.y < -32-LP->size.y) {
-			LP->position.y = G->SC->getChunksY()*CY+32+LP->size.y;
-		}
-
-		glm::mat4 m_transform = LP->getPVMatrix();
-
-		/*** 3D PART ***/
-		glEnable(GL_CULL_FACE);
-
-		//m_sky->render(LP->camera.getSkyMatrix());
-
-		glEnable(GL_DEPTH_TEST);
-
-		G->SC->render(m_transform);
-		for (Player &p : G->players) {
-			p.update(deltaT);
-			p.render(m_transform);
-		}
-
-		glDisable(GL_CULL_FACE);
-
-		glm::mat4 cloudmat = glm::scale(glm::translate(m_transform, glm::vec3(0.f, (G->SC->getChunksY()*CY/4)+.5f, 0.f)), glm::vec3(G->SC->getChunksX()*CX, 2, G->SC->getChunksZ()*CZ));
-		m_clouds->render(cloudmat);
-
-		glDisable(GL_DEPTH_TEST);
-
-		m_3dFbo->unbind();
-		m_3dFbo->tex->bind();
-		m_3dFboRenderer->bind();
-		glEnableVertexAttribArray(m_3dFboRenderer_coord);
-		glEnableVertexAttribArray(m_3dFboRenderer_texcoord);
-		m_3dRenderVBO->bind();
-		glUniformMatrix4fv(m_3dFboRenderer_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM));
-		glVertexAttribPointer(m_3dFboRenderer_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
-		glVertexAttribPointer(m_3dFboRenderer_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		glDisableVertexAttribArray(m_3dFboRenderer_texcoord);
-		glDisableVertexAttribArray(m_3dFboRenderer_coord);
-
-		if (enableExtractor) {
-			glViewport(0, 0, W->getW()/BloomScale, W->getH()/BloomScale);
-			m_3dFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
-			m_extractorFbo->bind();
-			glClearColor(0.f, 0.f, 0.f, 0.f);
+		
+		if (G->LP->isAlive) {
+			if (T > nextNetUpdate) {
+				Net::OutMessage msg(Net::MessageType::PlayerUpdate, Net::PlayerUpdateType::Move);
+				msg.writeVec3(LP->position);
+				msg.writeVec3(LP->velocity);
+				msg.writeVec3(LP->accel);
+				sendMsg(msg, Net::Tfer::Unrel);
+				nextNetUpdate = T+0.25;//+1;
+			}
+			glClearColor(0.0, 0.0, 0.0, 1.0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			m_bloomExtractorRenderer->bind();
-			glEnableVertexAttribArray(m_bloomExtractorRenderer_coord);
-			glEnableVertexAttribArray(m_bloomExtractorRenderer_texcoord);
-			m_3dRenderVBO->bind();
-			glUniformMatrix4fv(m_bloomExtractorRenderer_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM));
-			glVertexAttribPointer(m_bloomExtractorRenderer_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
-			glVertexAttribPointer(m_bloomExtractorRenderer_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-			glDisableVertexAttribArray(m_bloomExtractorRenderer_texcoord);
-			glDisableVertexAttribArray(m_bloomExtractorRenderer_coord);
-
-			m_3dFbo->tex->setFiltering(Texture::Filter::Nearest, Texture::Filter::Nearest);
-			m_extractorFbo->unbind();
-
-			m_bloomFbo->bind();
-			glClearColor(0.f, 0.f, 0.f, 0.f);
+			m_3dFbo->bind();
+			glClearColor(0.0, 0.0, 0.0, 1.0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			m_extractorFbo->tex->bind();
-			m_bloomRenderer->bind();
-			glEnableVertexAttribArray(m_bloomRenderer_coord);
-			glEnableVertexAttribArray(m_bloomRenderer_texcoord);
-			m_3dRenderVBO->bind();
-			glUniformMatrix4fv(m_bloomRenderer_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM));
-			GLfloat pixshift[2] = { 1.f/(W->getW()/BloomScale), 1.f/(W->getH()/BloomScale) };
-			glUniform2fv(m_bloomRenderer_pixshift, 1, pixshift);
-			glVertexAttribPointer(m_bloomRenderer_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
-			glVertexAttribPointer(m_bloomRenderer_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-			glDisableVertexAttribArray(m_bloomRenderer_texcoord);
-			glDisableVertexAttribArray(m_bloomRenderer_coord);
-			m_bloomFbo->unbind();
 
-			// render to real surface
-			glViewport(0, 0, W->getW(), W->getH());
-			m_bloomFbo->tex->bind();
-			m_bloomFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
-			m_bloomRenderer->bind();
-			glEnableVertexAttribArray(m_bloomRenderer_coord);
-			glEnableVertexAttribArray(m_bloomRenderer_texcoord);
+			LP->update(deltaT);
+			// TODO: disable teleport and kill player
+			if (LP->position.y < -32-LP->size.y) {
+				LP->position.y = G->SC->getChunksY()*CY+32+LP->size.y;
+			}
+
+			glm::mat4 m_transform = LP->getPVMatrix();
+
+			/*** 3D PART ***/
+			glEnable(GL_CULL_FACE);
+
+			//m_sky->render(LP->camera.getSkyMatrix());
+
+			glEnable(GL_DEPTH_TEST);
+
+			G->SC->render(m_transform);
+			for (Player &p : G->players) {
+				p.update(deltaT);
+				p.render(m_transform);
+			}
+
+			glDisable(GL_CULL_FACE);
+
+			glm::mat4 cloudmat = glm::scale(glm::translate(m_transform, glm::vec3(0.f, (G->SC->getChunksY()*CY/4)+.5f, 0.f)), glm::vec3(G->SC->getChunksX()*CX, 2, G->SC->getChunksZ()*CZ));
+			m_clouds->render(cloudmat);
+
+			glDisable(GL_DEPTH_TEST);
+
+			m_3dFbo->unbind();
+			m_3dFbo->tex->bind();
+			m_3dFboRenderer->bind();
+			glEnableVertexAttribArray(m_3dFboRenderer_coord);
+			glEnableVertexAttribArray(m_3dFboRenderer_texcoord);
 			m_3dRenderVBO->bind();
-			glUniformMatrix4fv(m_bloomRenderer_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM));
-			glVertexAttribPointer(m_bloomRenderer_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
-			glVertexAttribPointer(m_bloomRenderer_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
+			glUniformMatrix4fv(m_3dFboRenderer_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM));
+			glVertexAttribPointer(m_3dFboRenderer_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
+			glVertexAttribPointer(m_3dFboRenderer_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
 			glDrawArrays(GL_TRIANGLES, 0, 6);
-			glDisableVertexAttribArray(m_bloomRenderer_texcoord);
-			glDisableVertexAttribArray(m_bloomRenderer_coord);
+			glDisableVertexAttribArray(m_3dFboRenderer_texcoord);
+			glDisableVertexAttribArray(m_3dFboRenderer_coord);
+
+			if (enableExtractor) {
+				glViewport(0, 0, W->getW()/BloomScale, W->getH()/BloomScale);
+				m_3dFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
+				m_extractorFbo->bind();
+				glClearColor(0.f, 0.f, 0.f, 0.f);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+				m_bloomExtractorRenderer->bind();
+				glEnableVertexAttribArray(m_bloomExtractorRenderer_coord);
+				glEnableVertexAttribArray(m_bloomExtractorRenderer_texcoord);
+				m_3dRenderVBO->bind();
+				glUniformMatrix4fv(m_bloomExtractorRenderer_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM));
+				glVertexAttribPointer(m_bloomExtractorRenderer_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
+				glVertexAttribPointer(m_bloomExtractorRenderer_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				glDisableVertexAttribArray(m_bloomExtractorRenderer_texcoord);
+				glDisableVertexAttribArray(m_bloomExtractorRenderer_coord);
+
+				m_3dFbo->tex->setFiltering(Texture::Filter::Nearest, Texture::Filter::Nearest);
+				m_extractorFbo->unbind();
+
+				m_bloomFbo->bind();
+				glClearColor(0.f, 0.f, 0.f, 0.f);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				m_extractorFbo->tex->bind();
+				m_bloomRenderer->bind();
+				glEnableVertexAttribArray(m_bloomRenderer_coord);
+				glEnableVertexAttribArray(m_bloomRenderer_texcoord);
+				m_3dRenderVBO->bind();
+				glUniformMatrix4fv(m_bloomRenderer_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM));
+				GLfloat pixshift[2] = { 1.f/(W->getW()/BloomScale), 1.f/(W->getH()/BloomScale) };
+				glUniform2fv(m_bloomRenderer_pixshift, 1, pixshift);
+				glVertexAttribPointer(m_bloomRenderer_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
+				glVertexAttribPointer(m_bloomRenderer_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				glDisableVertexAttribArray(m_bloomRenderer_texcoord);
+				glDisableVertexAttribArray(m_bloomRenderer_coord);
+				m_bloomFbo->unbind();
+
+				// render to real surface
+				glViewport(0, 0, W->getW(), W->getH());
+				m_bloomFbo->tex->bind();
+				m_bloomFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
+				m_bloomRenderer->bind();
+				glEnableVertexAttribArray(m_bloomRenderer_coord);
+				glEnableVertexAttribArray(m_bloomRenderer_texcoord);
+				m_3dRenderVBO->bind();
+				glUniformMatrix4fv(m_bloomRenderer_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM));
+				glVertexAttribPointer(m_bloomRenderer_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
+				glVertexAttribPointer(m_bloomRenderer_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				glDisableVertexAttribArray(m_bloomRenderer_texcoord);
+				glDisableVertexAttribArray(m_bloomRenderer_coord);
+			}
+
+			/*** 2D PART ***/
+			updateUI();
+			drawUI();
+		} else {
+			if (!G->LP->deathSent) {
+				G->LP->deathSent = true;
+				G->A->playSound("death");
+			}
+			renderDeathScreen();
 		}
 
-		/*** 2D PART ***/
-		updateUI();
-		drawUI();
+		if (isEscapeToggled)
+			UI.EM->render();
 
 		glfwSwapBuffers(*W);
 		glfwPollEvents();
@@ -518,6 +536,12 @@ void GameState::gameLoop() {
 	sendMsg(quit, Net::Tfer::Rel);
 }
 
+void GameState::renderDeathScreen() {
+	double red = std::max(1-(G->Time-G->LP->deathTime), 0.0);
+	glClearColor(red, 0.0, 0.0, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
 void GameState::updateUI() {
 	int altitude = G->LP->position.y;
 	if (altitude != UI.lastAltitude) {
@@ -525,19 +549,19 @@ void GameState::updateUI() {
 		UI.lastAltitude = altitude;
 		UI.Altitude->setText(std::string(str));
 	}
-	/*std::ostringstream oss;
-	oss << G->LP->position.y << std::endl << i(G->LP->position.y) << std::endl <<
-	G->LP->velocity.x << " " << G->LP->velocity.y << " " << G->LP->velocity.z;
-	m_debugTxt->setText(oss.str());*/
+	if (showDebugInfo) {
+		std::ostringstream oss;
+		oss << std::setprecision(3) <<
+			"x: " << G->LP->position.x << std::endl <<
+			"y: " << G->LP->position.y << std::endl <<
+			"z: " << G->LP->position.z << std::endl;
+		UI.DebugInfo->setText(oss.str());
+	}
 }
 
 void GameState::drawUI() {
 	G->UIM->render();
 	m_chatBox->render();
-	if (enableDbg)
-		m_debugTxt->render();
-	if (isEscapeToggled)
-		UI.EM->render();
 
 	static _<Texture> tex(getAssetPath("tools", "tex_tool_build.png"), Texture::PixelFormat::RGBA);
 	G->UIM->drawTexRect(UI::Element::Area {20, 20, 40, 40}, *tex);

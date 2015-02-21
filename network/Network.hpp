@@ -42,7 +42,8 @@ enum PlayerUpdateType : uint8 {
 	Move,
 	ChangeTool,
 	ChangeClass,
-	ChangeTeam
+	ChangeTeam,
+	Respawn
 };
 
 enum QuitReason : uint8 {

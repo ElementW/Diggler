@@ -29,7 +29,7 @@ static int i(const float &f) {
 }
 
 LocalPlayer::LocalPlayer(Game *G) : Player(G), goingForward(false), goingBackward(false), goingLeft(false), goingRight(false),
-	hasGravity(true), hasNoclip(false), t(nullptr) {
+	hasGravity(true), hasNoclip(false) {
 	size = glm::vec3(0.3f, 1.9f, 0.3f);
 	eyesPos = glm::vec3(0.f, 1.7f, 0.f);
 	velocity = position = glm::vec3(0.f);
@@ -143,7 +143,7 @@ void LocalPlayer::update(const float &delta) {
 			if (velocity.x > 0.f)
 				if (!Blocks::canGoThrough(bNTop, team) || !Blocks::canGoThrough(bNBottom, team)) {
 					if (bNTop == BlockType::Lava || bNBottom == BlockType::Lava) {
-						kill(DeathReason::Lava);
+						setDead(true, DeathReason::Lava);
 						return;
 					}
 					velocity.x = 0.f;
@@ -151,7 +151,7 @@ void LocalPlayer::update(const float &delta) {
 			if (velocity.x < 0.f)
 				if (!Blocks::canGoThrough(bSTop, team) || !Blocks::canGoThrough(bSBottom, team)) {
 					if (bSTop == BlockType::Lava || bSBottom == BlockType::Lava) {
-						kill(DeathReason::Lava);
+						setDead(true, DeathReason::Lava);
 						return;
 					}
 					velocity.x = 0.f;
@@ -159,7 +159,7 @@ void LocalPlayer::update(const float &delta) {
 			if (velocity.z > 0.f)
 				if (!Blocks::canGoThrough(bETop, team) || !Blocks::canGoThrough(bEBottom, team)) {
 					if (bETop == BlockType::Lava || bEBottom == BlockType::Lava) {
-						kill(DeathReason::Lava);
+						setDead(true, DeathReason::Lava);
 						return;
 					}
 					velocity.z = 0.f;
@@ -167,17 +167,17 @@ void LocalPlayer::update(const float &delta) {
 			if (velocity.z < 0.f)
 				if (!Blocks::canGoThrough(bWTop, team) || !Blocks::canGoThrough(bWBottom, team)) {
 					if (bWTop == BlockType::Lava || bWBottom == BlockType::Lava) {
-						kill(DeathReason::Lava);
+						setDead(true, DeathReason::Lava);
 						return;
 					}
 					velocity.z = 0.f;
 				}
 			switch (bTop) {
 				case BlockType::Lava:
-					kill(DeathReason::Lava);
+					setDead(true, DeathReason::Lava);
 					return;
 				case BlockType::Shock:
-					kill(DeathReason::Shock);
+					setDead(true, DeathReason::Shock);
 					return;
 				default:
 					break;
@@ -192,7 +192,7 @@ void LocalPlayer::update(const float &delta) {
 					break;
 
 				case BlockType::Lava:
-					kill(DeathReason::Lava);
+					setDead(true, DeathReason::Lava);
 					return;
 
 				default:
@@ -202,12 +202,6 @@ void LocalPlayer::update(const float &delta) {
 		}
 		
 		camera.setPosition(position + eyesPos);
-		if (t != nullptr) {
-			std::ostringstream oss;
-			oss << G->LP->position.y << std::endl << i(G->LP->position.y) << std::endl <<
-			G->LP->velocity.x << " " << G->LP->velocity.y << " " << G->LP->velocity.z;
-			t->setText(oss.str());
-		}
 		
 		G->A->updatePos();
 	}
@@ -217,8 +211,16 @@ void LocalPlayer::forceCameraUpdate() {
 	camera.setPosition(position + eyesPos);
 }
 
-void LocalPlayer::kill(Player::DeathReason dr) {
-	getDebugStream() << "Pretend you're dead" << std::endl;
+void LocalPlayer::setDead(bool dead, DeathReason dr) {
+	if (deathTime == 0.0) {
+		deathTime = G->Time;
+		Player::setDead(dead, dr);
+	} else {
+		if (!dead) {
+			deathTime = 0.0;
+			deathSent = false;
+		}
+	}
 }
 
 void LocalPlayer::goForward(bool enable) {
