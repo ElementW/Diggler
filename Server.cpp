@@ -116,14 +116,14 @@ void Server::handleDisconnect(Peer &peer) {
 void Server::handleEvent(InMessage &msg, Peer &peer) {
 	Player &plr = G->players.getByPeer(peer);
 	switch (msg.getSubtype()) {
-		case Net::EventType::PlayerJumpOnPad: {
-			OutMessage out;
-			NetHelper::MakeEvent(out, (Net::EventType)msg.getSubtype(), plr);
-			NetHelper::Broadcast(G, out);
-		} break;
-		
-		default:
-			break;
+	case Net::EventType::PlayerJumpOnPad: {
+		OutMessage out;
+		NetHelper::MakeEvent(out, (Net::EventType)msg.getSubtype(), plr);
+		NetHelper::Broadcast(G, out);
+	} break;
+	
+	default:
+		break;
 	}
 }
 

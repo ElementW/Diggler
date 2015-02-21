@@ -35,14 +35,14 @@ std::string GetNetworkLibVersion() {
 
 static enet_uint32 TferToFlags(Tfer mode) {
 	switch (mode) {
-		case Tfer::Rel:
-			return ENET_PACKET_FLAG_RELIABLE;
-		case Tfer::Unseq:
-			return ENET_PACKET_FLAG_UNSEQUENCED;
-		//case Tfer::Unrel:
-			//return 0;
-		default:
-			break;
+	case Tfer::Rel:
+		return ENET_PACKET_FLAG_RELIABLE;
+	case Tfer::Unseq:
+		return ENET_PACKET_FLAG_UNSEQUENCED;
+	//case Tfer::Unrel:
+		//return 0;
+	default:
+		break;
 	}
 	return 0;
 }
@@ -319,22 +319,22 @@ bool Host::recv(InMessage &msg, Peer &peer, int timeout) {
 	ENetEvent event;
 	if (enet_host_service((ENetHost*)host, &event, timeout) >= 0){
 		switch (event.type) {
-			case ENET_EVENT_TYPE_NONE:
-				return false;
-			case ENET_EVENT_TYPE_CONNECT:
-				peer.peer = event.peer;
-				msg.setType(MessageType::Connect);
-				break;
-			case ENET_EVENT_TYPE_RECEIVE:
-				peer.peer = event.peer;
-				//hexDump('R', event.packet->data, event.packet->dataLength);
-				msg.fromData(event.packet->dataLength, event.packet->data);
-				enet_packet_destroy(event.packet);
-				break;
-			case ENET_EVENT_TYPE_DISCONNECT:
-				peer.peer = event.peer;
-				msg.setType(MessageType::Disconnect);
-				enet_peer_reset(event.peer);
+		case ENET_EVENT_TYPE_NONE:
+			return false;
+		case ENET_EVENT_TYPE_CONNECT:
+			peer.peer = event.peer;
+			msg.setType(MessageType::Connect);
+			break;
+		case ENET_EVENT_TYPE_RECEIVE:
+			peer.peer = event.peer;
+			//hexDump('R', event.packet->data, event.packet->dataLength);
+			msg.fromData(event.packet->dataLength, event.packet->data);
+			enet_packet_destroy(event.packet);
+			break;
+		case ENET_EVENT_TYPE_DISCONNECT:
+			peer.peer = event.peer;
+			msg.setType(MessageType::Disconnect);
+			enet_peer_reset(event.peer);
 		}
 		return true;
 	}
@@ -345,19 +345,19 @@ bool Host::recv(InMessage &msg, int timeout) {
 	ENetEvent event;
 	if (enet_host_service((ENetHost*)host, &event, timeout) >= 0){
 		switch (event.type) {
-			case ENET_EVENT_TYPE_NONE:
-				return false;
-			case ENET_EVENT_TYPE_CONNECT:
-				msg.setType(MessageType::Connect);
-				break;
-			case ENET_EVENT_TYPE_RECEIVE:
-				//hexDump('R', event.packet->data, event.packet->dataLength);
-				msg.fromData(event.packet->dataLength, event.packet->data);
-				enet_packet_destroy(event.packet);
-				break;
-			case ENET_EVENT_TYPE_DISCONNECT:
-				msg.setType(MessageType::Disconnect);
-				enet_peer_reset(event.peer);
+		case ENET_EVENT_TYPE_NONE:
+			return false;
+		case ENET_EVENT_TYPE_CONNECT:
+			msg.setType(MessageType::Connect);
+			break;
+		case ENET_EVENT_TYPE_RECEIVE:
+			//hexDump('R', event.packet->data, event.packet->dataLength);
+			msg.fromData(event.packet->dataLength, event.packet->data);
+			enet_packet_destroy(event.packet);
+			break;
+		case ENET_EVENT_TYPE_DISCONNECT:
+			msg.setType(MessageType::Disconnect);
+			enet_peer_reset(event.peer);
 		}
 		return true;
 	}

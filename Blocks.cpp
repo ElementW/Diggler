@@ -30,12 +30,12 @@ BlockTex sideTextures[(int)BlockType::LAST][6] = {
 
 bool Blocks::isTransparent(BlockType t) {
 	switch (t) {
-		case BlockType::Air:
-		case BlockType::TransBlue:
-		case BlockType::TransRed:
-			return true;
-		default:
-			return false;
+	case BlockType::Air:
+	case BlockType::TransBlue:
+	case BlockType::TransRed:
+		return true;
+	default:
+		return false;
 	}
 }
 

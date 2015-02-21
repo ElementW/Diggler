@@ -175,30 +175,30 @@ void LocalPlayer::update(const float &delta) {
 					velocity.z = 0.f;
 				}
 			switch (bTop) {
-				case BlockType::Lava:
-					setDead(true, DeathReason::Lava);
-					return;
-				case BlockType::Shock:
-					setDead(true, DeathReason::Shock);
-					return;
-				default:
-					break;
+			case BlockType::Lava:
+				setDead(true, DeathReason::Lava);
+				return;
+			case BlockType::Shock:
+				setDead(true, DeathReason::Shock);
+				return;
+			default:
+				break;
 			}
 			switch (bBottom) {
-				case BlockType::Jump:
-					if (G->Time - lastJumpTime > 0.2) {
-						velocity.y = JumpForce * 2;
-						NetHelper::SendEvent(G, Net::EventType::PlayerJumpOnPad);
-						lastJumpTime = G->Time;
-					}
-					break;
+			case BlockType::Jump:
+				if (G->Time - lastJumpTime > 0.2) {
+					velocity.y = JumpForce * 2;
+					NetHelper::SendEvent(G, Net::EventType::PlayerJumpOnPad);
+					lastJumpTime = G->Time;
+				}
+				break;
 
-				case BlockType::Lava:
-					setDead(true, DeathReason::Lava);
-					return;
+			case BlockType::Lava:
+				setDead(true, DeathReason::Lava);
+				return;
 
-				default:
-					break;
+			default:
+				break;
 			}
 			position += velocity * delta;
 		}

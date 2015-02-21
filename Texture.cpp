@@ -32,14 +32,14 @@ Texture::Texture(const std::string& path, Texture::PixelFormat format) {
 	create();
 	int stbiFormat;
 	switch (format) {
-		case PixelFormat::RGB:
-			stbiFormat = STBI_rgb;
+	case PixelFormat::RGB:
+		stbiFormat = STBI_rgb;
 		break;
-		case PixelFormat::RGBA:
-			stbiFormat = STBI_rgb_alpha;
+	case PixelFormat::RGBA:
+		stbiFormat = STBI_rgb_alpha;
 		break;
-		case PixelFormat::Monochrome8:
-			stbiFormat = STBI_grey;
+	case PixelFormat::Monochrome8:
+		stbiFormat = STBI_grey;
 		break;
 	}
 	int width, height, channels;

@@ -94,43 +94,66 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 	if (!(action == GLFW_PRESS || action == GLFW_RELEASE))
 		return;
 
+	switch (key) {
+	case GLFW_KEY_ESCAPE:
+		if (mods & GLFW_MOD_SHIFT)
+			glfwSetWindowShouldClose(*G->GW, true);
+		break;
+	case GLFW_KEY_F5:
+		if (action == GLFW_PRESS) {
+			showDebugInfo = !showDebugInfo;
+			UI.DebugInfo->setVisible(showDebugInfo);
+		}
+		break;
+	case GLFW_KEY_F6:
+		if (action == GLFW_PRESS) {
+			unlockMouse();
+		}
+		break;
+	default:
+		break;
+	}
+
 	if (m_chatBox->isChatting()) {
 		switch (key) {
-			case GLFW_KEY_ENTER:
-				if (action == GLFW_PRESS) {
-					std::string str = m_chatBox->getChatString();
-					if (str.size() > 0) {
-						NetHelper::SendChat(G, str);
-					}
-					m_chatBox->setIsChatting(false);
+		case GLFW_KEY_ENTER:
+			if (action == GLFW_PRESS) {
+				std::string str = m_chatBox->getChatString();
+				if (str.size() > 0) {
+					NetHelper::SendChat(G, str);
 				}
-				break;
-			case GLFW_KEY_ESCAPE:
-				if (action == GLFW_PRESS)
-					m_chatBox->setIsChatting(false);
-				break;
-			default:
-				m_chatBox->handleKey(key, scancode, action, mods);
-				break;
+				m_chatBox->setIsChatting(false);
+			}
+			break;
+		case GLFW_KEY_ESCAPE:
+			if (action == GLFW_PRESS)
+				m_chatBox->setIsChatting(false);
+			break;
+		default:
+			m_chatBox->handleKey(key, scancode, action, mods);
+			break;
 		}
 	} else {
 		switch (key) {
-			case GLFW_KEY_F1:
-				if (action == GLFW_PRESS)
-					enableExtractor = !enableExtractor;
-				break;
-			case GLFW_KEY_ESCAPE:
-				if (mods & GLFW_MOD_SHIFT)
-					glfwSetWindowShouldClose(*G->GW, true);
-				if (action == GLFW_PRESS) {
-					isEscapeToggled = !isEscapeToggled;
-					UI.EM->setVisible(isEscapeToggled);
-					if (isEscapeToggled)
-						unlockMouse();
-					else
-						lockMouse();
-				}
-				break;
+		case GLFW_KEY_F1:
+			if (action == GLFW_PRESS)
+				enableExtractor = !enableExtractor;
+			break;
+		case GLFW_KEY_ESCAPE:
+			if (action == GLFW_PRESS) {
+				isEscapeToggled = !isEscapeToggled;
+				UI.EM->setVisible(isEscapeToggled);
+				if (isEscapeToggled)
+					unlockMouse();
+				else
+					lockMouse();
+			}
+			break;
+		default:
+			break;
+		}
+		if (!isEscapeToggled) {
+			switch (key) {
 			/*case GLFW_KEY_TAB:
 				if (action == GLFW_PRESS) {
 					isTabDown = true;
@@ -170,19 +193,7 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 				if (action == GLFW_PRESS)
 					G->LP->special1();
 				break;
-			case GLFW_KEY_F5:
-				if (action == GLFW_PRESS) {
-					showDebugInfo = !showDebugInfo;
-					UI.DebugInfo->setVisible(showDebugInfo);
-				}
-				break;
-			case GLFW_KEY_F6:
-				if (action == GLFW_PRESS) {
-					unlockMouse();
-				}
-				break;
-			default:
-				break;
+			}
 		}
 	}
 }
@@ -205,7 +216,7 @@ void GameState::onMouseButton(int key, int action, int mods) {
 	if (key != GLFW_MOUSE_BUTTON_LEFT)
 		return;
 
-	if (!m_mouseLocked && action == GLFW_PRESS) {
+	if (!m_mouseLocked && action == GLFW_PRESS && !isEscapeToggled) {
 		lockMouse();
 	}
 }

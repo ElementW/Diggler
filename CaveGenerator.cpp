@@ -219,15 +219,15 @@ void CaveGenerator::AddGold(Superchunk &sc) {
 				sc.set((int)x, (int)y, (int)z, BlockType::Gold);
 			int tx = 0, ty = 0, tz = 0;
 			switch (FastRand(0, 3)) {
-				case 0:
-					tx += 1;
-					break;
-				case 1:
-					ty += 1;
-					break;
-				case 2:
-					tz += 1;
-					break;
+			case 0:
+				tx += 1;
+				break;
+			case 1:
+				ty += 1;
+				break;
+			case 2:
+				tz += 1;
+				break;
 			}
 			if (x + tx >= 0 && y + ty>= 0 && z+tz >= 0 && x+tx < xs && y+ty < ys && z+tz < zs)
 				sc.set((int)x+tx, (int)y+ty, (int)z+tz, BlockType::Gold);
