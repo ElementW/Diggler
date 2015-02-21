@@ -85,8 +85,8 @@ void LocalPlayer::update(const float &delta) {
 	if (hasGravity) {
 		if (onGround) {
 			BlockType b = G->SC->get(position.x, position.y-1, position.z);
-			onRoad = (b == BlockType::Road);
 			onGround = !Blocks::canGoThrough(b, team);
+			onRoad = (b == BlockType::Road);
 		}
 		if (!onGround)
 			velocity.y -= Gravity * delta;
@@ -100,6 +100,8 @@ void LocalPlayer::update(const float &delta) {
 			velocity.x = velXZ.x * maxSpeed;
 			velocity.z = velXZ.z * maxSpeed;
 		}
+		if (velocity.y < -80)
+			velocity.y = -80;
 	}
 	
 	if (velocity.x > -0.001f && velocity.x < 0.001f) velocity.x = 0.f;

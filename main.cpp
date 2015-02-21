@@ -109,9 +109,9 @@ int main(int argc, char **argv) {
 			for (int i=0; i < 4; i++)
 				name[i] = 'A' + FastRand(25);
 			name[4] = '\0';
+			GlobalProperties::PlayerName = name;
 		}
-		GlobalProperties::PlayerName = name;
-	
+
 		GameWindow GW;
 		/*GW.setNextState(std::make_shared<UITestState>(&GW));*/
 		if (networkSuccess)

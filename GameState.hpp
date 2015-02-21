@@ -88,6 +88,8 @@ private:
 	} UI;
 
 	void setupUI();
+	void lockMouse();
+	void unlockMouse();
 
 public:
 	GameState(GameWindow *W, const std::string &servHost, int servPort);

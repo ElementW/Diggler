@@ -120,10 +120,15 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 					enableExtractor = !enableExtractor;
 				break;
 			case GLFW_KEY_ESCAPE:
-				//glfwSetWindowShouldClose(window, GL_TRUE);
+				if (mods & GLFW_MOD_SHIFT)
+					glfwSetWindowShouldClose(*G->GW, true);
 				if (action == GLFW_PRESS) {
 					isEscapeToggled = !isEscapeToggled;
 					UI.EM->setVisible(isEscapeToggled);
+					if (isEscapeToggled)
+						unlockMouse();
+					else
+						lockMouse();
 				}
 				break;
 			/*case GLFW_KEY_TAB:
@@ -171,27 +176,37 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 					UI.DebugInfo->setVisible(showDebugInfo);
 				}
 				break;
+			case GLFW_KEY_F6:
+				if (action == GLFW_PRESS) {
+					unlockMouse();
+				}
+				break;
 			default:
 				break;
 		}
 	}
 }
 
+void GameState::lockMouse() {
+	glfwSetInputMode(*W, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	double x, y;
+	glfwGetCursorPos(*W, &x, &y);
+	cX = (int)x; cY = (int)y;
+	m_mouseLocked = true;
+}
+
+void GameState::unlockMouse() {
+	m_mouseLocked = false;
+	glfwSetInputMode(*W, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
+
+
 void GameState::onMouseButton(int key, int action, int mods) {
 	if (key != GLFW_MOUSE_BUTTON_LEFT)
 		return;
 
-	//snd->play();
-
-	if (action == GLFW_PRESS) {
-		glfwSetInputMode(*W, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		double x, y;
-		glfwGetCursorPos(*W, &x, &y);
-		cX = (int)x; cY = (int)y;
-		m_mouseLocked = true;
-	} else {
-		m_mouseLocked = false;
-		glfwSetInputMode(*W, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	if (!m_mouseLocked && action == GLFW_PRESS) {
+		lockMouse();
 	}
 }
 
@@ -554,7 +569,8 @@ void GameState::updateUI() {
 		oss << std::setprecision(3) <<
 			"x: " << G->LP->position.x << std::endl <<
 			"y: " << G->LP->position.y << std::endl <<
-			"z: " << G->LP->position.z << std::endl;
+			"z: " << G->LP->position.z << std::endl <<
+			"vy: " << G->LP->velocity.y << std::endl;
 		UI.DebugInfo->setText(oss.str());
 	}
 }

@@ -267,11 +267,6 @@ void chunk_updater(Game *G, Superchunk *sc, Host &H) {
 				H.send(p.P, msg, Tfer::Rel);
 			}
 		}
-		OutMessage msg(MessageType::Event, EventType::ExplosivesBlow);
-		msg.writeVec3(glm::vec3(0.f, 0.f, 0.f));
-		for (Player &p : G->players) {
-			H.send(p.P, msg, Tfer::Rel);
-		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	}
 }
