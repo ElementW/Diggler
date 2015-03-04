@@ -20,6 +20,7 @@ enum class Tfer {
 enum class Channels : uint8 {
 	Base = 0,
 	Life,
+	Movement,
 	MAX
 };
 

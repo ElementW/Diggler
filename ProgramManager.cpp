@@ -2,6 +2,7 @@
 #include <sstream>
 #include "Platform.hpp"
 #include "GlUtils.hpp"
+#include "Game.hpp"
 
 #define PROGRAM_MANAGER_DEBUG 0
 
@@ -25,7 +26,7 @@ void ProgramManager::getDefines(int flags, std::vector<std::string> &defs) {
 		defs.push_back("FOG");
 }
 
-ProgramManager::ProgramManager() {
+ProgramManager::ProgramManager(Game &G) : G(G) {
 
 }
 

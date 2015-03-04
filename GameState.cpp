@@ -96,7 +96,7 @@ void GameState::setupUI() {
 
 GameState::~GameState() {
 	delete UI.EM;
-	delete m_3dFbo; delete m_3DRenderVBO; delete m_extractorFbo; delete m_clouds; delete m_bloomFbo;
+	delete m_3dFbo; delete m_3dRenderVBO; delete m_extractorFbo; delete m_clouds; delete m_bloomFbo;
 	delete m_chatBox;
 	//delete m_sky;
 }
@@ -406,14 +406,14 @@ void GameState::gameLoop() {
 			fpsT = T+1;
 			frames = 0;
 		}
-		
+
 		if (G->LP->isAlive) {
 			if (T > nextNetUpdate) {
 				Net::OutMessage msg(Net::MessageType::PlayerUpdate, Net::PlayerUpdateType::Move);
 				msg.writeVec3(LP->position);
 				msg.writeVec3(LP->velocity);
 				msg.writeVec3(LP->accel);
-				sendMsg(msg, Net::Tfer::Unrel);
+				sendMsg(msg, Net::Tfer::Unrel, Net::Channels::Movement);
 				nextNetUpdate = T+0.25;//+1;
 			}
 			glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -455,9 +455,9 @@ void GameState::gameLoop() {
 			G->UIM->drawFullTexV(*m_3dFbo->tex);
 
 			if (0) { //enableExtractor) {
-				glViewport(0, 0, W->getW()/BloomScale, W->getH()/BloomScale);
 				m_3dFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
 				m_extractorFbo->bind();
+				glViewport(0, 0, W->getW()/BloomScale, W->getH()/BloomScale);
 				glClearColor(0.f, 0.f, 0.f, 0.f);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -557,6 +557,7 @@ void GameState::updateUI() {
 	if (showDebugInfo) {
 		std::ostringstream oss;
 		oss << std::setprecision(3) <<
+			W->getW() << 'x' << W->getH() << std::endl <<
 			"x: " << G->LP->position.x << std::endl <<
 			"y: " << G->LP->position.y << std::endl <<
 			"z: " << G->LP->position.z << std::endl <<
