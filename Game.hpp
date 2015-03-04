@@ -30,6 +30,7 @@ public:
 	class ChunkChangeHelper *CCH;
 	
 	// Client
+	class Config *C;
 	class GameWindow *GW;
 	UI::Manager *UIM;
 	LocalPlayer *LP;
@@ -43,6 +44,7 @@ public:
 	KeyBinds *KB;
 	
 	Game();
+	void init();
 	~Game();
 };
 

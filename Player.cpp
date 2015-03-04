@@ -67,6 +67,7 @@ int Player::getMaxWeight(Class c) {
 
 Player::Player(Game *G) : m_vbo(nullptr), team(Team::Red),
 	playerclass(Class::Prospector), tool(Tools::Pickaxe), G(G),
+	position(0), velocity(0), accel(0),
 	isAlive(true) {
 	if (GlobalProperties::IsClient) {
 		m_vbo = new VBO();

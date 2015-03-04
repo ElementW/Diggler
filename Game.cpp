@@ -8,7 +8,9 @@ namespace Diggler {
 
 Game::Game() : players(this), CCH(nullptr), GW(nullptr), LP(nullptr), PM(nullptr) {
 	SC = std::make_shared<Superchunk>(this);
-	
+}
+
+void Game::init() {
 	if (GlobalProperties::IsClient) {
 		PM = new ProgramManager;
 		LP = new LocalPlayer(this);

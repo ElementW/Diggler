@@ -10,7 +10,7 @@ static void unref(int *rc, GLuint id) {
 }
 
 VBO::VBO() {
-	*(m_refcount = new int[1]) = 1;
+	*(m_refcount = new int) = 1;
 	glGenBuffers(1, &id);
 }
 

@@ -30,7 +30,7 @@ public:
 	
 	Game *G;
 	
-	GameWindow();
+	GameWindow(Game*);
 	~GameWindow();
 	
 	operator GLFWwindow&() const { return *m_window; }

@@ -95,7 +95,8 @@ void GameState::setupUI() {
 }
 
 GameState::~GameState() {
-	delete m_3dFbo; delete m_extractorFbo; delete m_clouds; delete m_bloomFbo;
+	delete UI.EM;
+	delete m_3dFbo; delete m_3DRenderVBO; delete m_extractorFbo; delete m_clouds; delete m_bloomFbo;
 	delete m_chatBox;
 	//delete m_sky;
 }

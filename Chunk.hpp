@@ -31,7 +31,9 @@ public:
 		uint16 tx, ty;
 		float r, g, b;
 	};
-	constexpr static float CullSphereRadius = (CZ > (CX > CY ? CX : CY) ? CZ : (CX > CY ? CX : CY));// * 1.4142135623f; // sqrt(2)
+	constexpr static float CullSphereRadius =
+		(CZ > (CX > CY ? CX : CY) ? CZ : (CX > CY ? CX : CY));
+		// * 1.4142135623f; but we're already at 2x the radius (i.e. diameter)
 	constexpr static float MidX = CX/2.f, MidY = CY/2.f, MidZ = CZ/2.f;
 	static const Program *RenderProgram;
 	static Texture *TextureAtlas;

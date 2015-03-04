@@ -12,9 +12,10 @@
 #include "GlobalProperties.hpp"
 #include "Server.hpp"
 #include "network/Network.hpp"
-
+#include "Config.hpp"
 
 #include "UITestState.hpp"
+
 
 namespace Diggler {
 
@@ -101,6 +102,13 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	// TODO: mix up config correctly with all this ^^^^^
+	Config cfg;
+	cfg.load(getConfigDirectory() + "/config.cfg");
+
+	Game G;
+	G.C = &cfg;
+
 	bool networkSuccess = InitNetwork();
 
 	if (GlobalProperties::IsClient) {
@@ -112,7 +120,8 @@ int main(int argc, char **argv) {
 			GlobalProperties::PlayerName = name;
 		}
 
-		GameWindow GW;
+		GameWindow GW(&G);
+		
 		/*GW.setNextState(std::make_shared<UITestState>(&GW));*/
 		if (networkSuccess)
 			GW.setNextState(std::make_shared<GameState>(&GW, host, port));
@@ -125,7 +134,6 @@ int main(int argc, char **argv) {
 			getErrorStream() << "Network init failed!" << std::endl;
 			return 1;
 		}
-		Game G;
 		Server S(&G, port);
 		G.S = &S;
 		S.run();

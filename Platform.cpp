@@ -121,6 +121,7 @@ std::vector<std::string> Diggler::fs::getContents(const std::string &path) {
 			continue;
 		entitys.push_back(entity->d_name);
 	}
+	closedir(dir);
 	return entitys;
 }
 
@@ -136,6 +137,7 @@ std::vector<std::string> Diggler::fs::getDirs(const std::string &path) {
 		if(isDir(pathCat(path, entity->d_name)))
 			entitys.push_back(entity->d_name);
 	}
+	closedir(dir);
 	return entitys;
 }
 
@@ -151,6 +153,7 @@ std::vector<std::string> Diggler::fs::getFiles(const std::string &path) {
 		if(!isDir(pathCat(path, entity->d_name)))
 			entitys.push_back(entity->d_name);
 	}
+	closedir(dir);
 	return entitys;
 }
 

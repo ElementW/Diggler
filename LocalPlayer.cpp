@@ -6,9 +6,6 @@
 #include "Audio.hpp"
 #include "network/NetHelper.hpp"
 
-// I'm shit at player physics, so I kinda copied jMonkey
-// https://github.com/jMonkeyEngine/jmonkeyengine/blob/1b0f6d0f59650772bac4588d1733c061ff50d8c8/jme3-bullet/src/common/java/com/jme3/bullet/control/BetterCharacterControl.java
-
 namespace Diggler {
 
 static float Acceleration = 24.0f;
@@ -32,13 +29,13 @@ LocalPlayer::LocalPlayer(Game *G) : Player(G), goingForward(false), goingBackwar
 	hasGravity(true), hasNoclip(false) {
 	size = glm::vec3(0.3f, 1.9f, 0.3f);
 	eyesPos = glm::vec3(0.f, 1.7f, 0.f);
-	velocity = position = glm::vec3(0.f);
 }
 
 void LocalPlayer::special1() {
 }
 
-// thx http://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/
+// Thanks http://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/
+// FIXME: not all platforms use IEEE754
 inline double fpow(double a, double b) {
 	union {
 		double d;

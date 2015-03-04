@@ -47,7 +47,7 @@ find_package(PkgConfig REQUIRED)
 pkg_search_module(GLFW REQUIRED glfw3)
 include_directories(${GLFW_INCLUDE_DIRS} ${OPENAL_INCLUDE_DIR} ${ENET_INCLUDE_DIR})
 
-add_executable(diggler Audio.cpp ui/Element.cpp ui/Manager.cpp UITestState.cpp ChunkChangeHelper.cpp Mutex.cpp PlayerList.cpp network/NetHelper.cpp network/Network.cpp Skybox.cpp Frustum.cpp CaveGenerator.cpp MessageState.cpp GameState.cpp network/Network.cpp Server.cpp Chatbox.cpp GlUtils.cpp ui/Button.cpp KeyBinds.cpp GameWindow.cpp GLFWHandler.cpp Player.cpp Clouds.cpp Game.cpp ProgramManager.cpp LocalPlayer.cpp AABB.cpp SoundBuffer.cpp Sound.cpp stb_vorbis.c Camera.cpp EscMenu.cpp ui/Text.cpp Font.cpp AtlasCreator.cpp Blocks.cpp GlobalProperties.cpp Superchunk.cpp Chunk.cpp FBO.cpp Texture.cpp stb_image.c Program.cpp VBO.cpp Shader.cpp Platform.cpp main.cpp)
+add_executable(diggler Config.cpp Audio.cpp ui/Element.cpp ui/Manager.cpp UITestState.cpp ChunkChangeHelper.cpp Mutex.cpp PlayerList.cpp network/NetHelper.cpp network/Network.cpp Skybox.cpp Frustum.cpp CaveGenerator.cpp MessageState.cpp GameState.cpp network/Network.cpp Server.cpp Chatbox.cpp GlUtils.cpp ui/Button.cpp KeyBinds.cpp GameWindow.cpp GLFWHandler.cpp Player.cpp Clouds.cpp Game.cpp ProgramManager.cpp LocalPlayer.cpp AABB.cpp SoundBuffer.cpp Sound.cpp stb_vorbis.c Camera.cpp EscMenu.cpp ui/Text.cpp Font.cpp AtlasCreator.cpp Blocks.cpp GlobalProperties.cpp Superchunk.cpp Chunk.cpp FBO.cpp Texture.cpp stb_image.c Program.cpp VBO.cpp Shader.cpp Platform.cpp main.cpp)
 
 target_link_libraries(diggler GLEW GL enet lzfx ${GLFW_STATIC_LIBRARIES} ${OPENAL_LIBRARY})
 

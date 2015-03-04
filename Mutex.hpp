@@ -13,7 +13,7 @@ public:
 	Mutex& operator=(Mutex &m) = delete;
 	
 	void lock();
-	bool try_lock();
+	bool tryLock();
 	void unlock();
 };
 

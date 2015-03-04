@@ -14,7 +14,7 @@ namespace Diggler {
 int GameWindow::InstanceCount = 0;
 bool GameWindow::IsGlewInited = false;
 
-GameWindow::GameWindow() {
+GameWindow::GameWindow(Game *G) : G(G) {
 	if (InstanceCount++ == 0) {
 		int glfwStatus = glfwInit();
 		if (glfwStatus != GL_TRUE) {
@@ -41,6 +41,7 @@ GameWindow::GameWindow() {
 	glfwSetCursorPosCallback(m_window, GLFWHandler::cursorPos);
 	glfwSetKeyCallback(m_window, GLFWHandler::key);
 	glfwSetMouseButtonCallback(m_window, GLFWHandler::mouseButton);
+	glfwSetScrollCallback(m_window, GLFWHandler::mouseScroll);
 	glfwSetCharCallback(m_window, GLFWHandler::unichar);
 	glfwMakeContextCurrent(m_window);
 	glfwSwapInterval(1);
@@ -67,7 +68,7 @@ GameWindow::GameWindow() {
 	
 	UIM.setProjMat(glm::ortho(0.0f, (float)m_w, 0.0f, (float)m_h));
 	
-	G = new Game;
+	G->init();
 	UIM.setup(G);
 	G->GW = this;
 	G->UIM = &UIM;
@@ -81,7 +82,6 @@ GameWindow::GameWindow() {
 
 GameWindow::~GameWindow() {
 	delete G->F;
-	delete G;
 	
 	glfwDestroyWindow(m_window);
 	

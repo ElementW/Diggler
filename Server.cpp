@@ -208,6 +208,8 @@ void Server::handlePlayerDeath(InMessage &msg, Player &plr) {
 }
 
 Server::Server(Game *G, uint16 port) : G(G) {
+	G->init();
+
 	getOutputStream() << "Diggler v" << VersionString << " Server, port " << port << ", "
 		<< std::thread::hardware_concurrency() << " HW threads supported" << endl;
 

@@ -18,7 +18,7 @@ void Mutex::lock() {
 	pthread_mutex_lock((pthread_mutex_t*)data);
 }
 
-bool Mutex::try_lock() {
+bool Mutex::tryLock() {
 	return pthread_mutex_trylock((pthread_mutex_t*)data) == 0;
 }
 

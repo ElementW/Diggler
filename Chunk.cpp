@@ -53,7 +53,7 @@ Chunk::Chunk(bool buffer, int scx, int scy, int scz, Game *G) : blk2(nullptr),
 }
  
 Chunk::~Chunk() {
-	delete blk;
+	delete[] blk;
 	delete[] blk2;
 	delete vbo; delete ibo;
 }
