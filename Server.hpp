@@ -21,6 +21,7 @@ private:
 	void handleEvent(Net::InMessage&, Net::Peer&);
 	void handleChat(Net::InMessage&, Net::Peer&);
 	void handlePlayerUpdate(Net::InMessage&, Net::Peer&);
+		void handlePlayerDeath(Net::InMessage&, Player&);
 
 public:
 	Net::Host H;

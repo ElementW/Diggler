@@ -17,6 +17,7 @@ static GLint RP_Rect_uni_mvp = -1;
 Manager::Manager() {
 	PM = &m_projMatrix;
 	m_projMat1 = glm::ortho(0.f, 1.f, 0.f, 1.f);
+	m_projMat1V = glm::ortho(0.f, 1.f, 1.f, 0.f);
 	PM1 = &m_projMat1;
 }
 
@@ -29,14 +30,14 @@ void Manager::setup(Game *G) {
 		RP_Rect_uni_mvp = RP_Rect->uni("mvp");
 	}
 	m_rectVbo = new VBO();
-	float verts[6*6] = {
-		0.f, 0.f, 0.f, 1.f,
-		1.f, 0.f, 1.f, 1.f,
-		0.f, 1.f, 0.f, 0.f,
+	uint8 verts[6*4] = {
+		0, 0, 0, 1,
+		1, 0, 1, 1,
+		0, 1, 0, 0,
 		
-		0.f, 1.f, 0.f, 0.f,
-		1.f, 0.f, 1.f, 1.f,
-		1.f, 1.f, 1.f, 0.f,
+		0, 1, 0, 0,
+		1, 0, 1, 1,
+		1, 1, 1, 0
 	};
 	m_rectVbo->setData(verts, 6*4);
 }
@@ -74,8 +75,24 @@ void Manager::drawTexRect(const Element::Area &a, const Texture &t) const {
 	m_rectVbo->bind();
 	glUniformMatrix4fv(RP_Rect_uni_mvp, 1, GL_FALSE, glm::value_ptr(
 		glm::scale(glm::translate(*PM, glm::vec3(a.x, a.y, 0)), glm::vec3(a.w, a.h, 0))));
-	glVertexAttribPointer(RP_Rect_att_coord, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), 0);
-	glVertexAttribPointer(RP_Rect_att_texcoord, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (GLvoid*)(2*sizeof(float)));
+	glVertexAttribPointer(RP_Rect_att_coord, 2, GL_UNSIGNED_BYTE, GL_FALSE, 4*sizeof(uint8), 0);
+	glVertexAttribPointer(RP_Rect_att_texcoord, 2, GL_UNSIGNED_BYTE, GL_FALSE, 4*sizeof(uint8), (void*)(2*sizeof(uint8)));
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	
+	glDisableVertexAttribArray(RP_Rect_att_texcoord);
+	glDisableVertexAttribArray(RP_Rect_att_coord);
+}
+
+void Manager::drawFullTexV(const Texture &t) {
+	RP_Rect->bind();
+	glEnableVertexAttribArray(RP_Rect_att_coord);
+	glEnableVertexAttribArray(RP_Rect_att_texcoord);
+	
+	t.bind();
+	m_rectVbo->bind();
+	glUniformMatrix4fv(RP_Rect_uni_mvp, 1, GL_FALSE, glm::value_ptr(m_projMat1V));
+	glVertexAttribPointer(RP_Rect_att_coord, 2, GL_UNSIGNED_BYTE, GL_FALSE, 4*sizeof(uint8), 0);
+	glVertexAttribPointer(RP_Rect_att_texcoord, 2, GL_UNSIGNED_BYTE, GL_FALSE, 4*sizeof(uint8), (void*)(2*sizeof(uint8)));
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	
 	glDisableVertexAttribArray(RP_Rect_att_texcoord);

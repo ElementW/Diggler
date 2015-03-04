@@ -7,20 +7,21 @@
 #if defined(WINDOWS) || defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64) // Windows
 	#define BUILDINFO_PLATFORM "Windows"
 	#define BUILDINFO_PLATFORM_WINDOWS
-#elif defined(__ANDROID_API__)
+#elif defined(__ANDROID_API__) // Android
 	#define BUILDINFO_PLATFORM "Android"
 	#define BUILDINFO_PLATFORM_ANDROID
 #elif defined(__linux__) || defined(linux) || defined(_linux) // Linux
 	#define BUILDINFO_PLATFORM "Linux"
 	#define BUILDINFO_PLATFORM_LINUX
-#elif defined(__APPLE__) || defined(__MACH__) // Mac
+#elif defined(__APPLE__) // Mac
 	#define BUILDINFO_PLATFORM "Mac"
 	#define BUILDINFO_PLATFORM_MAC
 #else // Any other
 	#define BUILDINFO_PLATFORM "Unknown"
+	#define BUILDINFO_PLATFORM_UNKNOWN
 #endif
 
-#if _WIN64 || __x86_64__ || __ppc64__
+#if __x86_64__ || __ppc64__ || _WIN64
 	#define HAS_NATIVE_64BIT 1
 #endif
 
@@ -51,35 +52,31 @@ std::string getExecutablePath();
 /// @returns The executable's absolute path directory, including the end slash (/)
 std::string getExecutableDirectory();
 
-#ifdef IN_IDE_PARSER
 /// @returns The system's error output stream
 std::ostream& getErrorStream();
-#else
-std::ostream& getErrorStreamImpl();
-#define getErrorStream() getErrorStreamImpl() << __FILENAME__ << ':' << __LINE__ << ' '
-#endif
+std::ostream& getErrorStreamRaw();
+#define getErrorStream() getErrorStreamRaw() << __FILENAME__ << ':' << __LINE__ << ' '
 
-#ifdef IN_IDE_PARSER
 /// @returns The system's debug output stream
 std::ostream& getDebugStream();
-#else
-std::ostream& getDebugStreamImpl();
-#define getDebugStream() getDebugStreamImpl() << __FILENAME__ << ':' << __LINE__ << ' '
-#endif
+std::ostream& getDebugStreamRaw();
+#define getDebugStream() getDebugStreamRaw() << __FILENAME__ << ':' << __LINE__ << ' '
 
-#ifdef IN_IDE_PARSER
 /// @returns The system's output stream
 std::ostream& getOutputStream();
-#else
-std::ostream& getOutputStreamImpl();
-#define getOutputStream() getOutputStreamImpl() << __FILENAME__ << ':' << __LINE__ << ' '
-#endif
+std::ostream& getOutputStreamRaw();
+#define getOutputStream() getOutputStreamRaw() << __FILENAME__ << ':' << __LINE__ << ' '
+
+extern const char *UserdataDirsName;
+
+std::string getConfigDirectory();
+std::string getCacheDirectory();
 
 
-/// @returns The absolute specific assets directory path, including the end slash (/)
+/// @returns The absolute assets directory path
 std::string getAssetsDirectory(const std::string &type);
 
-/// @returns The absolute assets directory path, including the end slash (/)
+/// @returns The absolute assets directory path
 std::string getAssetsDirectory();
 
 /// @returns The absolute asset path

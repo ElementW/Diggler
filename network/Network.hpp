@@ -19,6 +19,7 @@ enum class Tfer {
 
 enum class Channels : uint8 {
 	Base = 0,
+	Life,
 	MAX
 };
 
@@ -43,6 +44,7 @@ enum PlayerUpdateType : uint8 {
 	ChangeTool,
 	ChangeClass,
 	ChangeTeam,
+	Die,
 	Respawn
 };
 
@@ -86,6 +88,7 @@ public:
 class InMessage : public Message {
 protected:
 	friend class Host;
+	Channels m_chan;
 	void setType(MessageType type);
 	void fromData(int length, void *data);
 
@@ -107,6 +110,8 @@ public:
 	double readDouble();
 	void readData(void *const data, int len);
 	glm::vec3 readVec3();
+	
+	Channels getChannel() const;
 };
 
 class OutMessage : public Message {

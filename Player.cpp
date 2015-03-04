@@ -156,7 +156,7 @@ void Player::render(const glm::mat4 &transform) const {
 	glDisableVertexAttribArray(RenderProgram_attrib_texcoord);
 }
 
-void Player::setDead(bool dead, DeathReason dr) {
+void Player::setDead(bool dead, DeathReason dr, bool send) {
 	isAlive = !dead;
 	deathReason = dr;
 }

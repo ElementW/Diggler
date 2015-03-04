@@ -16,7 +16,7 @@ class Manager {
 private:
 	_<VBO> m_rectVbo;
 	std::list<_<Element>> m_elements;
-	glm::mat4 m_projMatrix, m_projMat1;
+	glm::mat4 m_projMatrix, m_projMat1, m_projMat1V;
 	
 	friend GameWindow;
 	void setProjMat(const glm::mat4&);
@@ -51,6 +51,7 @@ public:
 	
 	//void drawRect(const Element::Area&, const glm::vec3 &color) const;
 	void drawTexRect(const Element::Area&, const Texture&) const;
+	void drawFullTexV(const Texture&);
 	
 	// Render
 	

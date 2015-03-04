@@ -31,7 +31,7 @@ Player* Server::getPlayerById(uint32 id) {
 		return nullptr;
 	}
 }
-Player *Server::getPlayerByName(const std::string &name) {
+Player* Server::getPlayerByName(const std::string &name) {
 	try {
 		return &G->players.getByName(name);
 	} catch (const std::out_of_range &e) {
@@ -166,6 +166,9 @@ void Server::handlePlayerUpdate(InMessage &msg, Peer &peer) {
 				H.send(p.P, bcast, Tfer::Unrel);
 			}
 		} break;
+		case PlayerUpdateType::Die:
+			handlePlayerDeath(msg, plr);
+			break;
 		default:
 			break;
 		}
@@ -173,6 +176,35 @@ void Server::handlePlayerUpdate(InMessage &msg, Peer &peer) {
 		// TODO: log?
 		return;
 	}
+}
+
+void Server::handlePlayerDeath(InMessage &msg, Player &plr) {
+	uint8 drb = msg.readU8();
+	Player::DeathReason dr = (Player::DeathReason)drb;
+	plr.setDead(false, dr);
+	OutMessage out(MessageType::PlayerUpdate, PlayerUpdateType::Die);
+	out.writeU32(plr.id);
+	out.writeU8(drb);
+	for (Player &p : G->players) {
+		if (p.id != plr.id)
+			H.send(p.P, out, Tfer::Rel, Channels::Life);
+	}
+	
+	// Respawn player later
+	Game *G = this->G; uint32 id = plr.id;
+	std::thread respawn([G, id] {
+		getDebugStream() << "Respawn " << id << " in 2 secs " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() << std::endl;
+		std::this_thread::sleep_for(std::chrono::seconds(2));
+		getDebugStream() << "Respawn " << id << " in 2 secs " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() << std::endl;
+		Player *plr = G->S->getPlayerById(id);
+		if (plr) {
+			plr->setDead(false);
+			OutMessage out(MessageType::PlayerUpdate, PlayerUpdateType::Die);
+			out.writeU32(id);
+			NetHelper::Broadcast(G, out, Tfer::Rel, Channels::Life);
+		}
+	});
+	respawn.detach();
 }
 
 Server::Server(Game *G, uint16 port) : G(G) {

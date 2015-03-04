@@ -166,8 +166,9 @@ GLuint Texture::getId() const {
 }
 
 void Texture::resize(int w, int h) {
+	if (this->w == w && this->h == h)
+		return;
 	PushBoundTex();
-	//glGenTextures(1, &id);
 	bind();
 	GLenum glFormat;
 	switch (m_format) {

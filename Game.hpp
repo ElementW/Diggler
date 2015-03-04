@@ -15,6 +15,7 @@ class Manager;
 }
 
 class Audio;
+class KeyBinds;
 
 class Game {
 public:
@@ -39,6 +40,7 @@ public:
 	} *RP;
 	Audio *A;
 	Net::Peer NS; // Net Server
+	KeyBinds *KB;
 	
 	Game();
 	~Game();

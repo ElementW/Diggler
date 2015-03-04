@@ -17,7 +17,8 @@ private:
 public:
 	// Fixes
 	double lastJumpTime = 0.0;
-	double deathTime = 0.0; bool deathSent = false;
+	double deathTime = 0.0;
+	bool deathSent = false, deathShown = false;
 
 public:
 	Camera camera;
@@ -38,7 +39,7 @@ public:
 	void setHasGravity(bool fall);
 	void setHasNoclip(bool fly);
 	void jump();
-	void setDead(bool, DeathReason = DeathReason::None);
+	void setDead(bool, DeathReason = DeathReason::None, bool send = false);
 	void special1();
 };
 

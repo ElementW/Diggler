@@ -12,7 +12,9 @@
 	}
 #endif
 
-Diggler::FBO::FBO(int w, int h, Diggler::Texture::PixelFormat format, bool stencil) : m_hasStencil(stencil) {
+namespace Diggler {
+
+FBO::FBO(int w, int h, Texture::PixelFormat format, bool stencil) : m_hasStencil(stencil) {
 	GLint currentBoundFBO; glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentBoundFBO);
 	GLint currentBoundRBO; glGetIntegerv(GL_RENDERBUFFER_BINDING, &currentBoundRBO);
 	
@@ -37,7 +39,7 @@ Diggler::FBO::FBO(int w, int h, Diggler::Texture::PixelFormat format, bool stenc
 	glBindRenderbuffer(GL_RENDERBUFFER, currentBoundRBO);
 }
 
-void Diggler::FBO::resize(int w, int h) {
+void FBO::resize(int w, int h) {
 	GLint currentBoundRBO; glGetIntegerv(GL_RENDERBUFFER_BINDING, &currentBoundRBO);
 	glBindRenderbuffer(GL_RENDERBUFFER, rboId);
 	if (m_hasStencil)
@@ -49,21 +51,23 @@ void Diggler::FBO::resize(int w, int h) {
 	tex->resize(w, h);
 }
 
-bool Diggler::FBO::hasStencil() const {
+bool FBO::hasStencil() const {
 	return m_hasStencil;
 }
 
-void Diggler::FBO::bind() {
+void FBO::bind() {
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 }
 
-void Diggler::FBO::unbind() {
+void FBO::unbind() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-Diggler::FBO::~FBO() {
+FBO::~FBO() {
 	glDeleteFramebuffers(1, &id);
 	delete tex;
 	glDeleteRenderbuffers(1, &rboId);
 	
+}
+
 }

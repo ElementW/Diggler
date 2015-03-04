@@ -115,7 +115,7 @@ public:
 	void drawUI();
 	bool processNetwork();
 
-	void sendMsg(Net::OutMessage &msg, Net::Tfer mode);
+	void sendMsg(Net::OutMessage &msg, Net::Tfer mode, Net::Channels chan = Net::Channels::Base);
 };
 
 }

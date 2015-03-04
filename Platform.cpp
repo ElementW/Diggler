@@ -13,7 +13,15 @@
 #include <GLFW/glfw3.h>
 
 double (*Diggler::getTime)() = glfwGetTime;
+const char *Diggler::UserdataDirsName = "Diggler";
 
+struct {
+	std::string
+		executableBin,
+		executableDir,
+		configDir,
+		cacheDir;
+} pathCache;
 
 #ifdef BUILDINFO_PLATFORM_WINDOWS // Windows
 
@@ -27,9 +35,9 @@ double (*Diggler::getTime)() = glfwGetTime;
 #include <cstdio>
 
 std::string do_readlink(const char *path) throw(int) {
-	char buff[PATH_MAX];
+	char buff[PATH_MAX+1];
 	ssize_t len = readlink(path, buff, sizeof(buff) - 1);
-	if(len >= 0) {
+	if (len >= 0) {
 		buff[len] = '\0';
 		return std::string(buff);
 	} else {
@@ -37,43 +45,60 @@ std::string do_readlink(const char *path) throw(int) {
 	}
 }
 std::string do_readlink(const std::string &path) throw(int) {
-	if(path.length() > PATH_MAX)
+	if (path.length() > PATH_MAX)
 		throw -1;
 	return do_readlink(path.c_str());
 }
 
-bool buildCachedExecutablePath = true;
-std::string cachedExecutablePath;
-
 std::string Diggler::getExecutablePath() {
-	if(buildCachedExecutablePath) {
+	if (pathCache.executableBin.length() == 0) {
 		pid_t pid = getpid();
 		// Assuming 32-bit pid -> max of 10 digits, we need only "/proc/xxxxxxxxxx/exe" space
 		char path[22];
 		std::sprintf(path, "/proc/%d/exe", pid);
-		cachedExecutablePath = do_readlink(path);
-		buildCachedExecutablePath = false;
+		pathCache.executableBin = do_readlink(path);
 	}
-	return cachedExecutablePath;
+	return pathCache.executableBin;
 }
-
-bool buildCachedExecutableDirectory = true;
-std::string cachedExecutableDirectory;
 
 std::string Diggler::getExecutableDirectory() {
-	if(buildCachedExecutableDirectory) {
+	if (pathCache.executableDir.length() == 0) {
 		std::string filename(getExecutablePath());
 		const size_t last_slash_idx = filename.rfind('/');
-		if(last_slash_idx != std::string::npos) {
-			cachedExecutableDirectory = filename.substr(0, last_slash_idx + 1);
+		if (last_slash_idx != std::string::npos) {
+			pathCache.executableDir = filename.substr(0, last_slash_idx);
 		} else {
 			getErrorStream() << "Ill-formed executable path: " << filename << std::endl;
-			cachedExecutableDirectory = filename;
+			pathCache.executableDir = filename;
 		}
-		buildCachedExecutableDirectory = false;
 	}
-	return cachedExecutableDirectory;
+	return pathCache.executableDir;
 }
+
+std::string Diggler::getCacheDirectory() {
+	if (pathCache.cacheDir.length() == 0) {
+		const char *xdgCache = std::getenv("XDG_CACHE_HOME");
+		if (xdgCache) {
+			pathCache.cacheDir = std::string(xdgCache) + "/" + UserdataDirsName;
+		} else {
+			pathCache.cacheDir = std::string(std::getenv("HOME")) + "/.cache/" + UserdataDirsName;
+		}
+	}
+	return pathCache.cacheDir;
+}
+
+std::string Diggler::getConfigDirectory() {
+	if (pathCache.configDir.length() == 0) {
+		const char *xdgCache = std::getenv("XDG_CONFIG_HOME");
+		if (xdgCache) {
+			pathCache.configDir = std::string(xdgCache) + "/" + UserdataDirsName;
+		} else {
+			pathCache.configDir = std::string(std::getenv("HOME")) + "/.config/" + UserdataDirsName;
+		}
+	}
+	return pathCache.configDir;
+}
+
 
 std::string Diggler::fs::pathCat(const std::string &first, const std::string &second) {
 	if(first.at(first.length()-1) == '/')
@@ -164,30 +189,30 @@ std::string Diggler::fs::readFile(const std::string &path) {
 }
 
 std::string Diggler::getAssetsDirectory() {
-	return Diggler::getExecutableDirectory() + "assets/";
+	return Diggler::getExecutableDirectory() + "/assets";
 }
 
 std::string Diggler::getAssetsDirectory(const std::string &type) {
-	return Diggler::getExecutableDirectory() + "assets/" + type + '/';
+	return Diggler::getExecutableDirectory() + "/assets/" + type + '/';
 }
 
 std::string Diggler::getAssetPath(const std::string &name) {
-	return Diggler::getExecutableDirectory() + "assets/" + name;
+	return Diggler::getExecutableDirectory() + "/assets/" + name;
 }
 
 std::string Diggler::getAssetPath(const std::string &type, const std::string &name) {
-	return Diggler::getExecutableDirectory() + "assets/" + type + '/' + name;
+	return Diggler::getExecutableDirectory() + "/assets/" + type + '/' + name;
 }
 
-std::ostream& Diggler::getErrorStreamImpl() {
+std::ostream& Diggler::getErrorStreamRaw() {
 	return std::cerr;
 }
 
-std::ostream& Diggler::getDebugStreamImpl() {
+std::ostream& Diggler::getDebugStreamRaw() {
 	return std::cout;
 }
 
-std::ostream &Diggler::getOutputStreamImpl() {
+std::ostream &Diggler::getOutputStreamRaw() {
 	return std::cout;
 }
 

@@ -145,7 +145,7 @@ void LocalPlayer::update(const float &delta) {
 			if (velocity.x > 0.f)
 				if (!Blocks::canGoThrough(bNTop, team) || !Blocks::canGoThrough(bNBottom, team)) {
 					if (bNTop == BlockType::Lava || bNBottom == BlockType::Lava) {
-						setDead(true, DeathReason::Lava);
+						setDead(true, DeathReason::Lava, true);
 						return;
 					}
 					velocity.x = 0.f;
@@ -153,7 +153,7 @@ void LocalPlayer::update(const float &delta) {
 			if (velocity.x < 0.f)
 				if (!Blocks::canGoThrough(bSTop, team) || !Blocks::canGoThrough(bSBottom, team)) {
 					if (bSTop == BlockType::Lava || bSBottom == BlockType::Lava) {
-						setDead(true, DeathReason::Lava);
+						setDead(true, DeathReason::Lava, true);
 						return;
 					}
 					velocity.x = 0.f;
@@ -161,7 +161,7 @@ void LocalPlayer::update(const float &delta) {
 			if (velocity.z > 0.f)
 				if (!Blocks::canGoThrough(bETop, team) || !Blocks::canGoThrough(bEBottom, team)) {
 					if (bETop == BlockType::Lava || bEBottom == BlockType::Lava) {
-						setDead(true, DeathReason::Lava);
+						setDead(true, DeathReason::Lava, true);
 						return;
 					}
 					velocity.z = 0.f;
@@ -169,17 +169,17 @@ void LocalPlayer::update(const float &delta) {
 			if (velocity.z < 0.f)
 				if (!Blocks::canGoThrough(bWTop, team) || !Blocks::canGoThrough(bWBottom, team)) {
 					if (bWTop == BlockType::Lava || bWBottom == BlockType::Lava) {
-						setDead(true, DeathReason::Lava);
+						setDead(true, DeathReason::Lava, true);
 						return;
 					}
 					velocity.z = 0.f;
 				}
 			switch (bTop) {
 			case BlockType::Lava:
-				setDead(true, DeathReason::Lava);
+				setDead(true, DeathReason::Lava, true);
 				return;
 			case BlockType::Shock:
-				setDead(true, DeathReason::Shock);
+				setDead(true, DeathReason::Shock, true);
 				return;
 			default:
 				break;
@@ -194,7 +194,7 @@ void LocalPlayer::update(const float &delta) {
 				break;
 
 			case BlockType::Lava:
-				setDead(true, DeathReason::Lava);
+				setDead(true, DeathReason::Lava, true);
 				return;
 
 			default:
@@ -213,16 +213,19 @@ void LocalPlayer::forceCameraUpdate() {
 	camera.setPosition(position + eyesPos);
 }
 
-void LocalPlayer::setDead(bool dead, DeathReason dr) {
-	if (deathTime == 0.0) {
-		deathTime = G->Time;
-		Player::setDead(dead, dr);
-	} else {
-		if (!dead) {
-			deathTime = 0.0;
-			deathSent = false;
+void LocalPlayer::setDead(bool dead, DeathReason dr, bool send) {
+	if (dead) {
+		if (isAlive) {
+			deathShown = false;
+			deathSent = !send;
+			deathTime = G->Time;
 		}
+	} else {
+		deathTime = 0.0;
+		deathShown = false;
+		deathSent = false;
 	}
+	Player::setDead(dead, dr, send);
 }
 
 void LocalPlayer::goForward(bool enable) {

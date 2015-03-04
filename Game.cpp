@@ -2,6 +2,7 @@
 #include "GlobalProperties.hpp"
 #include "ChunkChangeHelper.hpp"
 #include "Audio.hpp"
+#include "KeyBinds.hpp"
 
 namespace Diggler {
 
@@ -13,6 +14,7 @@ Game::Game() : players(this), CCH(nullptr), GW(nullptr), LP(nullptr), PM(nullptr
 		LP = new LocalPlayer(this);
 		RP = new RenderProperties;
 		A = new Audio(this);
+		KB = new KeyBinds();
 	}
 	if (GlobalProperties::IsServer) {
 		CCH = new ChunkChangeHelper();
@@ -21,7 +23,9 @@ Game::Game() : players(this), CCH(nullptr), GW(nullptr), LP(nullptr), PM(nullptr
 
 Game::~Game() {
 	if (GlobalProperties::IsClient) {
-		delete PM; delete LP; delete RP; delete A;
+		delete PM; delete LP;
+		delete RP; delete A;
+		delete KB;
 	}
 	if (GlobalProperties::IsServer) {
 		delete CCH;

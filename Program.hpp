@@ -2,10 +2,6 @@
 #define PROGRAM_HPP
 #include "Shader.hpp"
 
-namespace std {
-class thread;
-}
-
 namespace Diggler {
 
 class Program {

@@ -226,7 +226,9 @@ double InMessage::readDouble() {
 	return val;
 }
 
-
+Channels InMessage::getChannel() const {
+	return m_chan;
+}
 
 bool Peer::operator==(const Peer &other) const {
 	return peer == other.peer;
@@ -269,12 +271,12 @@ Host::Host() : host(nullptr) {
 
 void Host::create(int port, int maxconn) {
 	if (port == -1) { // Client
-		host = enet_host_create(nullptr, 1, (uint8)Channels::MAX, 0, 0);
+		host = enet_host_create(nullptr, 1, (size_t)Channels::MAX, 0, 0);
 	} else { // Server
 		ENetAddress address;
 		address.host = ENET_HOST_ANY;
 		address.port = port;
-		host = enet_host_create(&address, maxconn, (uint8)Channels::MAX, 0, 0);
+		host = enet_host_create(&address, maxconn, (size_t)Channels::MAX, 0, 0);
 	}
 	if (host == nullptr) {
 		throw Exception();
@@ -289,7 +291,7 @@ Peer Host::connect(const std::string &host, int port, int timeout) {
 	enet_address_set_host(&address, host.c_str());
 	address.port = port;
 	
-	peer = enet_host_connect((ENetHost*)this->host, &address, 1, 0);
+	peer = enet_host_connect((ENetHost*)this->host, &address, (size_t)Channels::MAX, 0);
 	if (peer == nullptr) {
 		throw Exception();
 	}
@@ -329,6 +331,7 @@ bool Host::recv(InMessage &msg, Peer &peer, int timeout) {
 			peer.peer = event.peer;
 			//hexDump('R', event.packet->data, event.packet->dataLength);
 			msg.fromData(event.packet->dataLength, event.packet->data);
+			msg.m_chan = (Channels)event.channelID;
 			enet_packet_destroy(event.packet);
 			break;
 		case ENET_EVENT_TYPE_DISCONNECT:
@@ -353,6 +356,7 @@ bool Host::recv(InMessage &msg, int timeout) {
 		case ENET_EVENT_TYPE_RECEIVE:
 			//hexDump('R', event.packet->data, event.packet->dataLength);
 			msg.fromData(event.packet->dataLength, event.packet->data);
+			msg.m_chan = (Channels)event.channelID;
 			enet_packet_destroy(event.packet);
 			break;
 		case ENET_EVENT_TYPE_DISCONNECT:

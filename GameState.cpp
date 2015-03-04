@@ -7,6 +7,7 @@
 #include <memory>
 #include <sstream>
 #include <thread>
+#include "KeyBinds.hpp"
 #include "GlobalProperties.hpp"
 #include "Game.hpp"
 #include "FBO.hpp"
@@ -27,12 +28,14 @@ const int GameState::BloomScale = 4;
 GameState::GameState(GameWindow *W, const std::string &servHost, int servPort)
 	: W(W), m_serverHost(servHost), m_serverPort(servPort) {
 	G = W->G;
+	int w = W->getW(),
+		h = W->getH();
 
 	// Initialized in setupUI
 	UI.EM = nullptr;
 	m_chatBox = nullptr;
 
-	m_3dFbo = new FBO(640, 480, Texture::PixelFormat::RGB, true);
+	m_3dFbo = new FBO(w, h, Texture::PixelFormat::RGB, true);
 	m_3dRenderVBO = new VBO();
 	m_clouds = new Clouds(G, 32, 32, 4);
 	//m_sky = new Skybox(G, getAssetPath("alpine"));
@@ -41,17 +44,30 @@ GameState::GameState(GameWindow *W, const std::string &servHost, int servPort)
 	m_3dFboRenderer_texcoord = m_3dFboRenderer->att("texcoord");
 	m_3dFboRenderer_mvp = m_3dFboRenderer->uni("mvp");
 
-	m_extractorFbo = new FBO(640/BloomScale, 480/BloomScale, Texture::PixelFormat::RGBA);
+	m_extractorFbo = new FBO(w/BloomScale, h/BloomScale, Texture::PixelFormat::RGBA);
+	m_extractorFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
 	m_bloomExtractorRenderer = G->PM->getSpecialProgram("bloomExtractor");
 	m_bloomExtractorRenderer_coord = m_bloomExtractorRenderer->att("coord");
 	m_bloomExtractorRenderer_texcoord = m_bloomExtractorRenderer->att("texcoord");
 	m_bloomExtractorRenderer_mvp = m_bloomExtractorRenderer->uni("mvp");
-	m_bloomFbo = new FBO(640/BloomScale, 480/BloomScale, Texture::PixelFormat::RGBA);
+	m_bloomFbo = new FBO(w/BloomScale, h/BloomScale, Texture::PixelFormat::RGBA);
+	m_bloomFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
 	m_bloomRenderer = G->PM->getSpecialProgram("bloom");
 	m_bloomRenderer_coord = m_bloomRenderer->att("coord");
 	m_bloomRenderer_texcoord = m_bloomRenderer->att("texcoord");
 	m_bloomRenderer_mvp = m_bloomRenderer->uni("mvp");
 	m_bloomRenderer_pixshift = m_bloomRenderer->uni("pixshift");
+
+	Coord2DTex renderQuad[6] = {
+		{0, 0, 0, 0},
+		{1, 0, 1, 0},
+		{0, 1, 0, 1},
+
+		{1, 1, 1, 1},
+		{0, 1, 0, 1},
+		{1, 0, 1, 0}
+	};
+	m_3dRenderVBO->setData(renderQuad, 6*sizeof(Coord2DTex));
 
 	//"\f0H\f1e\f2l\f3l\f4l\f5o \f6d\f7e\f8m\f9b\faa\fbz\fcz\fde\fes\ff,\n\f0ye see,it werks purrfektly :D\n(and also; it's optimized)"
 
@@ -99,6 +115,10 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 		if (mods & GLFW_MOD_SHIFT)
 			glfwSetWindowShouldClose(*G->GW, true);
 		break;
+	case GLFW_KEY_F1:
+		if (action == GLFW_PRESS)
+			enableExtractor = !enableExtractor;
+		break;
 	case GLFW_KEY_F5:
 		if (action == GLFW_PRESS) {
 			showDebugInfo = !showDebugInfo;
@@ -134,66 +154,35 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 			break;
 		}
 	} else {
-		switch (key) {
-		case GLFW_KEY_F1:
-			if (action == GLFW_PRESS)
-				enableExtractor = !enableExtractor;
-			break;
-		case GLFW_KEY_ESCAPE:
-			if (action == GLFW_PRESS) {
-				isEscapeToggled = !isEscapeToggled;
-				UI.EM->setVisible(isEscapeToggled);
-				if (isEscapeToggled)
-					unlockMouse();
-				else
-					lockMouse();
-			}
-			break;
-		default:
-			break;
+		if (key == G->KB->gameMenu && action == GLFW_PRESS) {
+			isEscapeToggled = !isEscapeToggled;
+			UI.EM->setVisible(isEscapeToggled);
+			if (isEscapeToggled)
+				unlockMouse();
+			else
+				lockMouse();
 		}
 		if (!isEscapeToggled) {
-			switch (key) {
-			/*case GLFW_KEY_TAB:
-				if (action == GLFW_PRESS) {
-					isTabDown = true;
-					//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-				} else {
-					//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-					isTabDown = false;
-				}
-				break;*/
-			case GLFW_KEY_ENTER:
-				if (action == GLFW_PRESS)
-					m_chatBox->setIsChatting(true);
-				break;
-			case GLFW_KEY_W:
+			if (key == G->KB->forward) {
 				G->LP->goForward(action == GLFW_PRESS);
-				break;
-			case GLFW_KEY_S:
+			} else if (key == G->KB->backward) {
 				G->LP->goBackward(action == GLFW_PRESS);
-				break;
-			case GLFW_KEY_A:
+			} else if (key == G->KB->left) {
 				G->LP->goLeft(action == GLFW_PRESS);
-				break;
-			case GLFW_KEY_D:
+			} else if (key == G->KB->right) {
 				G->LP->goRight(action == GLFW_PRESS);
-				break;
-			case GLFW_KEY_V:
-				G->LP->setHasNoclip(true);
-				break;
-			case GLFW_KEY_B:
-				G->LP->setHasNoclip(false);
-				break;
-			case GLFW_KEY_SPACE:
+			} else if (key == G->KB->jump) {
 				if (action == GLFW_PRESS)
 					G->LP->jump();
-				break;
-			case GLFW_KEY_U:
+			} else if (key == G->KB->chat) {
 				if (action == GLFW_PRESS)
-					G->LP->special1();
-				break;
+					m_chatBox->setIsChatting(true);
+			} else if (key == GLFW_KEY_V) {
+				G->LP->setHasNoclip(true);
+			} else if (key == GLFW_KEY_B) {
+				G->LP->setHasNoclip(false);
 			}
+			// TODO remove me G->LP->special1();
 		}
 	}
 }
@@ -250,7 +239,6 @@ void GameState::onCursorPos(double x, double y) {
 }
 
 void GameState::onResize(int w, int h) {
-	//W->getW() = w; W->getH() = h;
 	updateViewport();
 }
 
@@ -264,17 +252,9 @@ void GameState::updateViewport() {
 	G->LP->camera.setPersp((float)M_PI/180*75.0f, (float)w / h, 0.1f, 32.0f);
 	m_3dFbo->resize(w, h);
 	m_extractorFbo->resize(w/BloomScale, h/BloomScale);
+	//m_extractorFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
 	m_bloomFbo->resize(w/BloomScale, h/BloomScale);
-	Coord2DTex renderQuad[6] = {
-		{0, 0, 0, 0},
-		{w, 0, 1, 0},
-		{0, h, 0, 1},
-
-		{w, h, 1, 1},
-		{0, h, 0, 1},
-		{w, 0, 1, 0}
-	};
-	m_3dRenderVBO->setData(renderQuad, 6*sizeof(Coord2DTex));
+	//m_bloomFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
 
 	char str[15]; std::snprintf(str, 15, "Loot: %d/%d", 0/*G->LP->ore*/, Player::getMaxOre(G->LP->playerclass));
 	UI.Ore->setText(std::string(str));
@@ -306,8 +286,8 @@ void GameState::updateViewport() {
 	updateUI();
 }
 
-void GameState::sendMsg(Net::OutMessage &msg, Net::Tfer mode) {
-	G->H.send(G->NS, msg, mode);
+void GameState::sendMsg(Net::OutMessage &msg, Net::Tfer mode, Net::Channels chan) {
+	G->H.send(G->NS, msg, mode, chan);
 }
 
 void GameState::run() {
@@ -405,7 +385,7 @@ bool GameState::connectLoop() {
 void GameState::gameLoop() {
 	double lastT, deltaT, T, fpsT = 0; int frames = 0;
 	LocalPlayer *LP = G->LP;
-	LP->position = glm::vec3(2, G->SC->getChunksY()*CY/2, 2);
+	LP->position = glm::vec3(-2, 2, -2);
 	angles.x = M_PI/4; angles.y = M_PI/4;
 	lookat.x = sinf(angles.x) * cosf(angles.y);
 	lookat.y = sinf(angles.y);
@@ -471,19 +451,9 @@ void GameState::gameLoop() {
 			glDisable(GL_DEPTH_TEST);
 
 			m_3dFbo->unbind();
-			m_3dFbo->tex->bind();
-			m_3dFboRenderer->bind();
-			glEnableVertexAttribArray(m_3dFboRenderer_coord);
-			glEnableVertexAttribArray(m_3dFboRenderer_texcoord);
-			m_3dRenderVBO->bind();
-			glUniformMatrix4fv(m_3dFboRenderer_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM));
-			glVertexAttribPointer(m_3dFboRenderer_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
-			glVertexAttribPointer(m_3dFboRenderer_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-			glDisableVertexAttribArray(m_3dFboRenderer_texcoord);
-			glDisableVertexAttribArray(m_3dFboRenderer_coord);
+			G->UIM->drawFullTexV(*m_3dFbo->tex);
 
-			if (enableExtractor) {
+			if (0) { //enableExtractor) {
 				glViewport(0, 0, W->getW()/BloomScale, W->getH()/BloomScale);
 				m_3dFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
 				m_extractorFbo->bind();
@@ -494,14 +464,14 @@ void GameState::gameLoop() {
 				glEnableVertexAttribArray(m_bloomExtractorRenderer_coord);
 				glEnableVertexAttribArray(m_bloomExtractorRenderer_texcoord);
 				m_3dRenderVBO->bind();
-				glUniformMatrix4fv(m_bloomExtractorRenderer_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM));
+				glUniformMatrix4fv(m_bloomExtractorRenderer_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM1));
 				glVertexAttribPointer(m_bloomExtractorRenderer_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
 				glVertexAttribPointer(m_bloomExtractorRenderer_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
 				glDrawArrays(GL_TRIANGLES, 0, 6);
 				glDisableVertexAttribArray(m_bloomExtractorRenderer_texcoord);
 				glDisableVertexAttribArray(m_bloomExtractorRenderer_coord);
-
 				m_3dFbo->tex->setFiltering(Texture::Filter::Nearest, Texture::Filter::Nearest);
+
 				m_extractorFbo->unbind();
 
 				m_bloomFbo->bind();
@@ -524,27 +494,35 @@ void GameState::gameLoop() {
 
 				// render to real surface
 				glViewport(0, 0, W->getW(), W->getH());
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 				m_bloomFbo->tex->bind();
 				m_bloomFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
 				m_bloomRenderer->bind();
 				glEnableVertexAttribArray(m_bloomRenderer_coord);
 				glEnableVertexAttribArray(m_bloomRenderer_texcoord);
 				m_3dRenderVBO->bind();
-				glUniformMatrix4fv(m_bloomRenderer_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM));
+				glUniformMatrix4fv(m_bloomRenderer_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM1));
 				glVertexAttribPointer(m_bloomRenderer_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
 				glVertexAttribPointer(m_bloomRenderer_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
 				glDrawArrays(GL_TRIANGLES, 0, 6);
 				glDisableVertexAttribArray(m_bloomRenderer_texcoord);
 				glDisableVertexAttribArray(m_bloomRenderer_coord);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			}
 
 			/*** 2D PART ***/
 			updateUI();
 			drawUI();
 		} else {
+			if (!G->LP->deathShown) {
+				G->LP->deathShown = true;
+				G->A->playSound("death");
+			}
 			if (!G->LP->deathSent) {
 				G->LP->deathSent = true;
-				G->A->playSound("death");
+				Net::OutMessage out(Net::MessageType::PlayerUpdate, Net::PlayerUpdateType::Die);
+				out.writeU8((uint8)G->LP->deathReason);
+				sendMsg(out, Net::Tfer::Rel, Net::Channels::Life);
 			}
 			renderDeathScreen();
 		}
@@ -634,6 +612,12 @@ bool GameState::processNetwork() {
 									  acc = m_msg.readVec3();
 							plr.setPosVel(pos, vel, acc);
 						} break;
+						case Net::PlayerUpdateType::Die:
+							plr.setDead(false, (Player::DeathReason)m_msg.readU8());
+							break;
+						case Net::PlayerUpdateType::Respawn:
+							plr.setDead(false);
+							break;
 						default:
 							break;
 					}
