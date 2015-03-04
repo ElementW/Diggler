@@ -94,7 +94,7 @@ void Audio::update() {
 }
 
 void Audio::loadSoundAssets() {
-	std::string soundsDir = getAssetsDirectory() + "sounds/";
+	std::string soundsDir = getAssetsDirectory() + "/sounds/";
 	for (const std::string &fn : fs::getFiles(soundsDir)) {
 		if (fn.length() >= 4 && fn.substr(fn.length()-4) == ".ogg") {
 			addSound(fn.substr(0, fn.length()-4), soundsDir+fn);
