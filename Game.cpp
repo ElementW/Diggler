@@ -12,7 +12,7 @@ Game::Game() : players(this), CCH(nullptr), GW(nullptr), LP(nullptr), PM(nullptr
 
 void Game::init() {
 	if (GlobalProperties::IsClient) {
-		PM = new ProgramManager;
+		PM = new ProgramManager(*this);
 		LP = new LocalPlayer(this);
 		RP = new RenderProperties;
 		A = new Audio(this);
