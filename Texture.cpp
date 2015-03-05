@@ -191,6 +191,8 @@ void Texture::resize(int w, int h) {
 		glFormat,  // format
 		GL_UNSIGNED_BYTE, // type
 		nullptr);
+	this->w = w;
+	this->h = h;
 	PopBoundTex();
 }
 
