@@ -40,8 +40,8 @@ public:
 	void setHasNoclip(bool fly);
 	void jump();
 	void setDead(bool, DeathReason = DeathReason::None, bool send = false);
-	glm::ivec3 getPointedBlock(int maxDist) const;
-	glm::ivec3 getPointedBlock() const;
+	bool raytracePointed(glm::ivec3 *pointed, glm::ivec3 *face);
+	bool raytracePointed(int maxDist, glm::ivec3 *pointed, glm::ivec3 *face);
 	void special1();
 };
 

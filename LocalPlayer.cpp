@@ -256,28 +256,39 @@ void LocalPlayer::jump() {
 	velocity.y += JumpForce;
 }
 
-glm::ivec3 LocalPlayer::getPointedBlock(int maxDist) const {
+bool LocalPlayer::raytracePointed(glm::ivec3 *pointed, glm::ivec3 *face) {
+	return raytracePointed(sqrt(
+		(G->SC->getChunksX()*CX)*(G->SC->getChunksX()*CX) +
+		(G->SC->getChunksY()*CY)*(G->SC->getChunksY()*CY) +
+		(G->SC->getChunksX()*CZ)*(G->SC->getChunksX()*CZ)
+	), pointed, face);
+}
+
+bool LocalPlayer::raytracePointed(int maxDist, glm::ivec3 *pointed, glm::ivec3 *face) {
 	const float searchGranularity = .2f;
 	glm::vec3 pos = position+eyesPos;
 	glm::vec3 rayDir = camera.m_lookAt;
 	glm::vec3 delta = rayDir * searchGranularity;
+	int x, y, z;
+	glm::ivec3 lastTested(pos);
 	int cnt = ceil(maxDist / glm::length(delta));
-	for (int i = 0; i < cnt; i++) {
+	for (int n = 0; n < cnt; n++) {
 		pos += delta;
-		BlockType testBlock = G->SC->get(pos.x, pos.y, pos.z);
-		if (testBlock != BlockType::Air) {
-			return glm::ivec3(pos);
+		x = i(pos.x); y = i(pos.y); z = i(pos.z);
+		if (lastTested.x != x || lastTested.y != y || lastTested.z != z) {
+			BlockType testBlock = G->SC->get(x, y, z);
+			if (testBlock != BlockType::Air) {
+				if (pointed)
+					*(pointed) = glm::ivec3(x, y, z);
+				if (face)
+					*(face) = lastTested;
+				return true;
+			}
+			lastTested.x = x; lastTested.y = y; lastTested.z = z;
 		}
+		
 	}
-	return glm::ivec3(std::numeric_limits<glm::ivec3::value_type>::lowest());
-}
-
-glm::ivec3 LocalPlayer::getPointedBlock() const {
-	return getPointedBlock(sqrt(
-		(G->SC->getChunksX()*CX)*(G->SC->getChunksX()*CX) +
-		(G->SC->getChunksY()*CY)*(G->SC->getChunksY()*CY) +
-		(G->SC->getChunksX()*CZ)*(G->SC->getChunksX()*CZ)
-	));
+	return false;
 }
 
 }

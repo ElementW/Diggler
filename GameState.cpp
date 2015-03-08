@@ -494,15 +494,25 @@ void GameState::gameLoop() {
 			}
 
 			// TODO: move
-			m_highlightBox.program->bind();
-			glEnableVertexAttribArray(m_highlightBox.att_coord);
-			m_highlightBox.vbo.bind();
-			glUniform4f(m_highlightBox.uni_unicolor, 1.f, 0.f, 0.f, .5f);
-			glUniformMatrix4fv(m_highlightBox.uni_mvp, 1, GL_FALSE, glm::value_ptr(
-				glm::scale(glm::translate(m_transform, glm::vec3(G->LP->getPointedBlock())+glm::vec3(.5f)), glm::vec3(0.5*1.1))));
-			glVertexAttribPointer(m_highlightBox.att_coord, 3, GL_FLOAT, GL_FALSE, 0, 0);
-			glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
-			glDisableVertexAttribArray(m_highlightBox.att_coord);
+			glm::ivec3 pointed, face;
+			if (G->LP->raytracePointed(&pointed, &face)) {
+				m_highlightBox.program->bind();
+				glEnableVertexAttribArray(m_highlightBox.att_coord);
+				m_highlightBox.vbo.bind();
+				glVertexAttribPointer(m_highlightBox.att_coord, 3, GL_FLOAT, GL_FALSE, 0, 0);
+				
+				glUniform4f(m_highlightBox.uni_unicolor, 1.f, 0.f, 0.f, .5f);
+				glUniformMatrix4fv(m_highlightBox.uni_mvp, 1, GL_FALSE, glm::value_ptr(
+					glm::scale(glm::translate(m_transform, glm::vec3(pointed)+glm::vec3(.5f)), glm::vec3(0.5*1.1))));
+				glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
+				
+				glUniform4f(m_highlightBox.uni_unicolor, 0.f, 0.f, 1.f, .5f);
+				glUniformMatrix4fv(m_highlightBox.uni_mvp, 1, GL_FALSE, glm::value_ptr(
+					glm::scale(glm::translate(m_transform, glm::vec3(face)+glm::vec3(.5f)), glm::vec3(0.5*1.1))));
+				glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
+				
+				glDisableVertexAttribArray(m_highlightBox.att_coord);
+			}
 
 			glDisable(GL_CULL_FACE);
 
