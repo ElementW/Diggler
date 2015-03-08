@@ -252,11 +252,28 @@ void GameState::unlockMouse() {
 
 
 void GameState::onMouseButton(int key, int action, int mods) {
-	if (key != GLFW_MOUSE_BUTTON_LEFT)
-		return;
-
 	if (!m_mouseLocked && action == GLFW_PRESS && !isEscapeToggled) {
 		lockMouse();
+	}
+	
+	if (action == GLFW_PRESS) {
+		glm::ivec3 pointed, face;
+		if (G->LP->raytracePointed(32, &pointed, &face, .1f)) {
+			//G->SC->set(pointed.x, pointed.y, pointed.z, BlockType::Air);
+			Net::OutMessage msg(Net::MessageType::MapUpdate);
+			if (key == GLFW_MOUSE_BUTTON_LEFT) {
+				msg.writeU16(pointed.x);
+				msg.writeU16(pointed.y);
+				msg.writeU16(pointed.z);
+				msg.writeU8((uint8)BlockType::Air);
+			} else {
+				msg.writeU16(face.x);
+				msg.writeU16(face.y);
+				msg.writeU16(face.z);
+				msg.writeU8((uint8)BlockType::Dirt);
+			}
+			sendMsg(msg, Net::Tfer::Rel, Net::Channels::MapUpdate);
+		}
 	}
 }
 
@@ -502,14 +519,14 @@ void GameState::gameLoop() {
 				m_highlightBox.vbo.bind();
 				glVertexAttribPointer(m_highlightBox.att_coord, 3, GL_FLOAT, GL_FALSE, 0, 0);
 				
-				glUniform4f(m_highlightBox.uni_unicolor, 1.f, 0.f, 0.f, .5f);
+				glUniform4f(m_highlightBox.uni_unicolor, 1.f, 0.f, 0.f, .3f);
 				glUniformMatrix4fv(m_highlightBox.uni_mvp, 1, GL_FALSE, glm::value_ptr(
 					glm::scale(glm::translate(m_transform, glm::vec3(pointed)+glm::vec3(.5f)), glm::vec3(0.5*1.1))));
 				glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
 				
-				glUniform4f(m_highlightBox.uni_unicolor, 0.f, 0.f, 1.f, .5f);
+				glUniform4f(m_highlightBox.uni_unicolor, 0.f, 0.f, 1.f, .2f);
 				glUniformMatrix4fv(m_highlightBox.uni_mvp, 1, GL_FALSE, glm::value_ptr(
-					glm::scale(glm::translate(m_transform, glm::vec3(face)+glm::vec3(.5f)), glm::vec3(0.5*1.1))));
+					glm::scale(glm::translate(m_transform, glm::vec3(face)+glm::vec3(.5f)), glm::vec3(0.40f+ sin(G->Time*4)*0.01f ))));
 				glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
 				
 				glDisableVertexAttribArray(m_highlightBox.att_coord);

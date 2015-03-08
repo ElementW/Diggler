@@ -178,6 +178,19 @@ void Server::handlePlayerUpdate(InMessage &msg, Peer &peer) {
 	}
 }
 
+void Server::handlePlayerMapUpdate(InMessage &msg, Peer &peer) {
+	// TODO: distance & tool check, i.e. legitimate update
+	int x = msg.readU16(), y = msg.readU16(), z = msg.readU16();
+	BlockType b = (BlockType)msg.readU8();
+	G->SC->set(x, y, z, b);
+	// FIXME: v This might interfere with the ticker
+	if (!G->CCH->empty()) {
+		OutMessage msg(MessageType::MapUpdate, G->CCH->count());
+		G->CCH->flush(msg);
+		NetHelper::Broadcast(G, msg, Tfer::Rel, Channels::MapUpdate);
+	}
+}
+
 void Server::handlePlayerDeath(InMessage &msg, Player &plr) {
 	uint8 drb = msg.readU8();
 	Player::DeathReason dr = (Player::DeathReason)drb;
@@ -297,9 +310,7 @@ void chunk_updater(Game *G, Superchunk *sc, Host &H) {
 			OutMessage msg(MessageType::MapUpdate, G->CCH->count());
 			// Message subtype = update count, trickery ;)
 			G->CCH->flush(msg);
-			for (Player &p : G->players) {
-				H.send(p.P, msg, Tfer::Rel);
-			}
+			NetHelper::Broadcast(G, msg, Tfer::Rel, Channels::MapUpdate);
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	}
@@ -334,6 +345,9 @@ void Server::run() {
 				break;
 			case MessageType::Event:
 				handleEvent(msg, peer);
+				break;
+			case MessageType::MapUpdate:
+				handlePlayerMapUpdate(msg, peer);
 				break;
 			
 			default:

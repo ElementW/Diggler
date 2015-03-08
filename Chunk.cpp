@@ -88,6 +88,8 @@ void Chunk::set(int x, int y, int z, BlockType type) {
 	if (type == BlockType::Lava)
 		lavaCount++;
 	*b = type;
+	if (G && G->CCH)
+		G->CCH->add(scx * CX + x, scy * CY + y, scz * CZ + z, type);
 	changed = true;
 	mut.unlock();
 }
