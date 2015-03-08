@@ -1,8 +1,9 @@
 #include "LocalPlayer.hpp"
 #include "Game.hpp"
 #include <cstdio>
-#include <glm/gtx/rotate_vector.hpp>
+#include <limits>
 #include <sstream>
+#include <glm/gtx/rotate_vector.hpp>
 #include "Audio.hpp"
 #include "network/NetHelper.hpp"
 
@@ -255,5 +256,28 @@ void LocalPlayer::jump() {
 	velocity.y += JumpForce;
 }
 
+glm::ivec3 LocalPlayer::getPointedBlock(int maxDist) const {
+	const float searchGranularity = .2f;
+	glm::vec3 pos = position+eyesPos;
+	glm::vec3 rayDir = camera.m_lookAt;
+	glm::vec3 delta = rayDir * searchGranularity;
+	int cnt = ceil(maxDist / glm::length(delta));
+	for (int i = 0; i < cnt; i++) {
+		pos += delta;
+		BlockType testBlock = G->SC->get(pos.x, pos.y, pos.z);
+		if (testBlock != BlockType::Air) {
+			return glm::ivec3(pos);
+		}
+	}
+	return glm::ivec3(std::numeric_limits<glm::ivec3::value_type>::lowest());
+}
+
+glm::ivec3 LocalPlayer::getPointedBlock() const {
+	return getPointedBlock(sqrt(
+		(G->SC->getChunksX()*CX)*(G->SC->getChunksX()*CX) +
+		(G->SC->getChunksY()*CY)*(G->SC->getChunksY()*CY) +
+		(G->SC->getChunksX()*CZ)*(G->SC->getChunksX()*CZ)
+	));
+}
 
 }

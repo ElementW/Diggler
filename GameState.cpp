@@ -35,6 +35,55 @@ GameState::GameState(GameWindow *W, const std::string &servHost, int servPort)
 	UI.EM = nullptr;
 	m_chatBox = nullptr;
 
+	float coords[6*3*2*3] = {
+		-1.0f,-1.0f,-1.0f,
+		-1.0f,-1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f,-1.0f, 
+		-1.0f,-1.0f,-1.0f,
+		-1.0f, 1.0f,-1.0f,
+		
+		1.0f,-1.0f, 1.0f, 
+		-1.0f,-1.0f,-1.0f,
+		1.0f,-1.0f,-1.0f, 
+		1.0f, 1.0f,-1.0f, 
+		1.0f,-1.0f,-1.0f, 
+		-1.0f,-1.0f,-1.0f,
+		
+		-1.0f,-1.0f,-1.0f,
+		-1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f,-1.0f,
+		1.0f,-1.0f, 1.0f, 
+		-1.0f,-1.0f, 1.0f,
+		-1.0f,-1.0f,-1.0f,
+		
+		-1.0f, 1.0f, 1.0f,
+		-1.0f,-1.0f, 1.0f,
+		1.0f,-1.0f, 1.0f, 
+		1.0f, 1.0f, 1.0f, 
+		1.0f,-1.0f,-1.0f, 
+		1.0f, 1.0f,-1.0f, 
+		
+		1.0f,-1.0f,-1.0f, 
+		1.0f, 1.0f, 1.0f, 
+		1.0f,-1.0f, 1.0f, 
+		1.0f, 1.0f, 1.0f, 
+		1.0f, 1.0f,-1.0f, 
+		-1.0f, 1.0f,-1.0f,
+		
+		1.0f, 1.0f, 1.0f, 
+		-1.0f, 1.0f,-1.0f,
+		-1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 
+		-1.0f, 1.0f, 1.0f,
+		1.0f,-1.0f, 1.0f, 
+	};
+	m_highlightBox.vbo.setData(coords, 6*3*2*3);
+	m_highlightBox.program = G->PM->getProgram(PM_3D);
+	m_highlightBox.att_coord = m_highlightBox.program->att("coord");
+	m_highlightBox.uni_unicolor = m_highlightBox.program->uni("unicolor");
+	m_highlightBox.uni_mvp = m_highlightBox.program->uni("mvp");
+
 	m_3dFbo = new FBO(w, h, Texture::PixelFormat::RGB, true);
 	m_3dRenderVBO = new VBO();
 	m_clouds = new Clouds(G, 32, 32, 4);
@@ -444,6 +493,17 @@ void GameState::gameLoop() {
 				p.render(m_transform);
 			}
 
+			// TODO: move
+			m_highlightBox.program->bind();
+			glEnableVertexAttribArray(m_highlightBox.att_coord);
+			m_highlightBox.vbo.bind();
+			glUniform4f(m_highlightBox.uni_unicolor, 1.f, 0.f, 0.f, .5f);
+			glUniformMatrix4fv(m_highlightBox.uni_mvp, 1, GL_FALSE, glm::value_ptr(
+				glm::scale(glm::translate(m_transform, glm::vec3(G->LP->getPointedBlock())+glm::vec3(.5f)), glm::vec3(0.5*1.1))));
+			glVertexAttribPointer(m_highlightBox.att_coord, 3, GL_FLOAT, GL_FALSE, 0, 0);
+			glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
+			glDisableVertexAttribArray(m_highlightBox.att_coord);
+
 			glDisable(GL_CULL_FACE);
 
 			glm::mat4 cloudmat = glm::scale(glm::translate(m_transform, glm::vec3(0.f, (G->SC->getChunksY()*CY/4)+.5f, 0.f)), glm::vec3(G->SC->getChunksX()*CX, 2, G->SC->getChunksZ()*CZ));
@@ -571,7 +631,7 @@ void GameState::drawUI() {
 	m_chatBox->render();
 
 	static _<Texture> tex(getAssetPath("tools", "tex_tool_build.png"), Texture::PixelFormat::RGBA);
-	G->UIM->drawTexRect(UI::Element::Area {20, 20, 40, 40}, *tex);
+	G->UIM->drawTexRect(UI::Element::Area {20, 0, 120, 126}, *tex);
 }
 
 bool GameState::processNetwork() {

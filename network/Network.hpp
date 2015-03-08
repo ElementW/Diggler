@@ -21,6 +21,8 @@ enum class Channels : uint8 {
 	Base = 0,
 	Life,
 	Movement,
+	PlayerInfo,
+	MapUpdate,
 	MAX
 };
 

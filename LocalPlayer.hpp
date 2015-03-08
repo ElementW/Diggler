@@ -40,6 +40,8 @@ public:
 	void setHasNoclip(bool fly);
 	void jump();
 	void setDead(bool, DeathReason = DeathReason::None, bool send = false);
+	glm::ivec3 getPointedBlock(int maxDist) const;
+	glm::ivec3 getPointedBlock() const;
 	void special1();
 };
 

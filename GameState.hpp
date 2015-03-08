@@ -51,6 +51,12 @@ private:
 	Clouds *m_clouds;
 	Skybox *m_sky;
 
+	struct {
+		VBO vbo;
+		const Program *program;
+		GLuint att_coord, uni_unicolor, uni_mvp;
+	} m_highlightBox;
+
 	KeyBindings *m_keybinds;
 
 	Chatbox *m_chatBox;
