@@ -41,7 +41,7 @@ public:
 	void jump();
 	void setDead(bool, DeathReason = DeathReason::None, bool send = false);
 	bool raytracePointed(glm::ivec3 *pointed, glm::ivec3 *face);
-	bool raytracePointed(int maxDist, glm::ivec3 *pointed, glm::ivec3 *face);
+	bool raytracePointed(int maxDist, glm::ivec3 *pointed, glm::ivec3 *face, float granularity = .2f);
 	void special1();
 };
 

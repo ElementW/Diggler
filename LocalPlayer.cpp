@@ -81,6 +81,15 @@ void LocalPlayer::update(const float &delta) {
 	
 	// Apply gravity
 	if (hasGravity) {
+		if (!onGround && velocity.y <= -60) {
+			BlockType b = G->SC->get(position.x, position.y-1, position.z);
+			onGround = !Blocks::canGoThrough(b, team);
+			if (onGround) {
+				setDead(true, DeathReason::Fall, true);
+				velocity = glm::vec3(0);
+				return;
+			}
+		}
 		if (onGround) {
 			BlockType b = G->SC->get(position.x, position.y-1, position.z);
 			onGround = !Blocks::canGoThrough(b, team);
@@ -264,11 +273,10 @@ bool LocalPlayer::raytracePointed(glm::ivec3 *pointed, glm::ivec3 *face) {
 	), pointed, face);
 }
 
-bool LocalPlayer::raytracePointed(int maxDist, glm::ivec3 *pointed, glm::ivec3 *face) {
-	const float searchGranularity = .2f;
+bool LocalPlayer::raytracePointed(int maxDist, glm::ivec3 *pointed, glm::ivec3 *face, float granularity) {
 	glm::vec3 pos = position+eyesPos;
 	glm::vec3 rayDir = camera.m_lookAt;
-	glm::vec3 delta = rayDir * searchGranularity;
+	glm::vec3 delta = rayDir * granularity;
 	int x, y, z;
 	glm::ivec3 lastTested(pos);
 	int cnt = ceil(maxDist / glm::length(delta));

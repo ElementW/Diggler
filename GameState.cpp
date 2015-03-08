@@ -495,7 +495,8 @@ void GameState::gameLoop() {
 
 			// TODO: move
 			glm::ivec3 pointed, face;
-			if (G->LP->raytracePointed(&pointed, &face)) {
+			// TODO: replace harcoded 32 viewdistance
+			if (G->LP->raytracePointed(32, &pointed, &face, .1f)) {
 				m_highlightBox.program->bind();
 				glEnableVertexAttribArray(m_highlightBox.att_coord);
 				m_highlightBox.vbo.bind();
