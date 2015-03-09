@@ -1,0 +1,9 @@
+.kdev4 
+assets-orig
+build
+*.fossil
+*.project
+*.kdev4
+TODO.txt
+diggler.cfg
+.kdev_include_paths
