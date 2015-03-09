@@ -498,11 +498,11 @@ void GameState::gameLoop() {
 			glm::mat4 m_transform = LP->getPVMatrix();
 
 			/*** 3D PART ***/
-			glEnable(GL_CULL_FACE);
-
-			//m_sky->render(LP->camera.getSkyMatrix());
+			glm::mat4 cloudmat = glm::scale(glm::translate(m_transform, glm::vec3(0.f, (G->SC->getChunksY()*CY/4)+.5f, 0.f)), glm::vec3(G->SC->getChunksX()*CX, 2, G->SC->getChunksZ()*CZ));
+			m_clouds->render(cloudmat);
 
 			glEnable(GL_DEPTH_TEST);
+			glEnable(GL_CULL_FACE);
 
 			G->SC->render(m_transform);
 			for (Player &p : G->players) {
@@ -533,9 +533,6 @@ void GameState::gameLoop() {
 			}
 
 			glDisable(GL_CULL_FACE);
-
-			glm::mat4 cloudmat = glm::scale(glm::translate(m_transform, glm::vec3(0.f, (G->SC->getChunksY()*CY/4)+.5f, 0.f)), glm::vec3(G->SC->getChunksX()*CX, 2, G->SC->getChunksZ()*CZ));
-			m_clouds->render(cloudmat);
 
 			glDisable(GL_DEPTH_TEST);
 
