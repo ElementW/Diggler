@@ -2,10 +2,12 @@
 #define GAME_STATE_HPP
 #include "State.hpp"
 #include <thread>
+#include <map>
 #include <glm/detail/type_vec2.hpp>
 #include <glm/detail/type_vec.hpp>
 #include "GameWindow.hpp"
 #include "VBO.hpp"
+#include "Blocks.hpp"
 #include "network/Network.hpp"
 
 namespace Diggler {
@@ -51,11 +53,27 @@ private:
 	Clouds *m_clouds;
 	Skybox *m_sky;
 
+	struct CrossHair {
+		Texture *tex;
+		glm::mat4 mat;
+	} m_crossHair;
+
 	struct {
 		VBO vbo;
 		const Program *program;
 		GLuint att_coord, uni_unicolor, uni_mvp;
 	} m_highlightBox;
+
+	struct BuilderGun {
+		Texture *tex;
+		std::map<BlockType, Texture*> blockTexs;
+		int index;
+		bool deconstruct;
+		BlockType currentBlock;
+		Texture  *currentBlockTex;
+		BuilderGun();
+		~BuilderGun();
+	} m_builderGun;
 
 	KeyBindings *m_keybinds;
 

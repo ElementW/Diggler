@@ -12,7 +12,7 @@ AtlasCreator::AtlasCreator(int w, int h, int uw, int uh) : atlasWidth(w), atlasH
 	if (fmod((1 << (sizeof(Coord::x)*8))/(float)atlasWidth, 1) != 0 ||
 		fmod((1 << (sizeof(Coord::y)*8))/(float)atlasHeight, 1) != 0)
 		throw std::invalid_argument("Atlas W/H is not divisor of Coord's type");
-	
+
 	atlasData = new uint8[w * h * 4];
 	std::fill_n(atlasData, w * h * 4, static_cast<uint8>(0));
 }
@@ -43,9 +43,9 @@ AtlasCreator::Coord AtlasCreator::add(const std::string& path) {
 		stbi_image_free(ptr);
 		return Coord { 0, 0, 0, 0 };
 	}
-	
+
 	Coord result = add(width, height, channels, ptr);
-	
+
 	// Free the image buffer
 	stbi_image_free(ptr);
 	return result;
@@ -61,7 +61,7 @@ AtlasCreator::Coord AtlasCreator::add(int width, int height, int channels, const
 		targetX = lastX;
 		targetY = lastY;
 	}
-	
+
 	//auto t1 = std::chrono::high_resolution_clock::now();
 	// Blit the texture onto the atlas
 	for(int sourceY = 0; sourceY < height; ++sourceY) {
@@ -82,21 +82,18 @@ AtlasCreator::Coord AtlasCreator::add(int width, int height, int channels, const
 	}
 	//auto t2 = std::chrono::high_resolution_clock::now();
 	//getDebugStream() << std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count() << std::endl;
-	
+
 	lastX = targetX + unitWidth;
 	lastY = targetY;
 	uint glScaleX = (1 << (sizeof(Coord::x)*8))/atlasWidth,
 		 glScaleY = (1 << (sizeof(Coord::y)*8))/atlasHeight;
-	//getDebugStream() << width << 'x' << height << '@' << targetX << ',' << targetY << " * " << glScaleX << ',' << glScaleY << std::endl;
-	
+
 	Coord c = {
 		targetX*glScaleX,
 		targetY*glScaleY,
 		(targetX + width)*glScaleX-1,
 		(targetY + height)*glScaleY-1,
 	};
-	//getDebugStream() << '{' << c.x << ',' << c.y << ';' << c.u << ',' << c.v << '}' << std::endl;
-	//getDebugStream() << '{' << targetX << ',' << targetY << "→" << (targetX + width) << ',' << (targetY + height) << '}' << std::endl;
 	return c;
 }
 
@@ -107,6 +104,5 @@ Texture* AtlasCreator::getAtlas() {
 AtlasCreator::~AtlasCreator() {
 	delete[] atlasData;
 }
-
 
 }

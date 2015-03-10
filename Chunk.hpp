@@ -38,7 +38,8 @@ public:
 	static const Program *RenderProgram;
 	static Texture *TextureAtlas;
 	static Blocks *BlkInf;
-	static GLint RenderProgram_attrib_coord, RenderProgram_attrib_color, RenderProgram_attrib_texcoord, RenderProgram_uni_mvp;
+	static GLint RenderProgram_uni_unicolor, RenderProgram_attrib_coord, RenderProgram_attrib_color,
+		RenderProgram_attrib_texcoord, RenderProgram_uni_mvp;
 	BlockType *blk;
 	int scx, scy, scz;
 	Game *G;
@@ -48,7 +49,7 @@ public:
 	int lavaCount;
 	
 	/// @param buffer Wether the chunk is just a buffer chunk
-	Chunk(bool buffer = false, int scx = -1, int scy = -1, int scz = -1, Game *G = nullptr);
+	Chunk(int scx = -1, int scy = -1, int scz = -1, Game *G = nullptr);
 	~Chunk();
 	BlockType get(int x, int y, int z);
 	void set(int x, int y, int z, BlockType type);

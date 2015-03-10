@@ -8,7 +8,7 @@ using std::fopen; using std::fwrite; using std::fread; using std::fclose;
 
 namespace Diggler {
 
-Superchunk::Superchunk(Diggler::Game *G) : G(G), c(nullptr),
+Superchunk::Superchunk(Game *G) : G(G), c(nullptr),
 	chunksX(0), chunksY(0), chunksZ(0) {
 }
 
@@ -78,7 +78,7 @@ void Superchunk::set(int x, int y, int z, BlockType type) {
 	z %= CZ;
 
 	if(!c[cx][cy][cz])
-		c[cx][cy][cz] = new Chunk(false, cx, cy, cz, G);
+		c[cx][cy][cz] = new Chunk(cx, cy, cz, G);
 
 	c[cx][cy][cz]->set(x, y, z, type);
 }
@@ -95,7 +95,7 @@ void Superchunk::set2(int x, int y, int z, BlockType type) {
 	z %= CZ;
 
 	if(!c[cx][cy][cz])
-		c[cx][cy][cz] = new Chunk(false, cx, cy, cz, G);
+		c[cx][cy][cz] = new Chunk(cx, cy, cz, G);
 
 	c[cx][cy][cz]->set2(x, y, z, type);
 }
@@ -111,10 +111,11 @@ BlockType Superchunk::get(float x, float y, float z) {
 }
 
 Chunk* Superchunk::getChunk(int cx, int cy, int cz) {
-	if (cx >= chunksX || cy >= chunksY || cz >= chunksZ)
+	if (cx < 0 || cy < 0 || cz < 0 ||
+		cx >= chunksX || cy >= chunksY || cz >= chunksZ)
 		return nullptr;
 	if(!c[cx][cy][cz])
-		c[cx][cy][cz] = new Chunk(false, cx, cy, cz, G);
+		c[cx][cy][cz] = new Chunk(cx, cy, cz, G);
 	return c[cx][cy][cz];
 }
 
@@ -208,7 +209,7 @@ void Superchunk::load(const std::string &path) {
 				if (size == -1) { // Chunk is empty
 					c[sx][sy][sz] = nullptr;
 				} else {
-					c[sx][sy][sz] = new Chunk(false, sx, sy, sz, G);
+					c[sx][sy][sz] = new Chunk(sx, sy, sz, G);
 					byte *compressedData = (byte*)malloc(size);
 					fread(compressedData, size, 1, f);
 					uncompressedDataSize = CX * CY * CZ;
@@ -280,7 +281,7 @@ void Superchunk::readMsg(Net::InMessage &M) {
 				if (size == -1) { // Chunk is empty
 					c[sx][sy][sz] = nullptr; // Keep out
 				} else {
-					c[sx][sy][sz] = new Chunk(false, sx, sy, sz, G);
+					c[sx][sy][sz] = new Chunk(sx, sy, sz, G);
 					byte *compressedData = (byte*)malloc(size);
 					M.readData(compressedData, size);
 					bytesRead += size;

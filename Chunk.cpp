@@ -12,11 +12,14 @@
 #define CXY (CX*CY)
 #define I(x,y,z) (x+y*CX+z*CXY)
 
+#define SHOW_CHUNK_UPDATES 0
+
 namespace Diggler {
 
 const Program *Chunk::RenderProgram = nullptr;
 Texture *Chunk::TextureAtlas = nullptr;
 Blocks *Chunk::BlkInf = nullptr;
+GLint Chunk::RenderProgram_uni_unicolor = -1;
 GLint Chunk::RenderProgram_attrib_texcoord = -1;
 GLint Chunk::RenderProgram_attrib_coord = -1;
 GLint Chunk::RenderProgram_attrib_color = -1;
@@ -25,18 +28,19 @@ GLint Chunk::RenderProgram_uni_mvp = -1;
 constexpr float Chunk::CullSphereRadius;
 constexpr float Chunk::MidX, Chunk::MidY, Chunk::MidZ;
 
-Chunk::Chunk(bool buffer, int scx, int scy, int scz, Game *G) : blk2(nullptr),
+Chunk::Chunk(int scx, int scy, int scz, Game *G) : blk2(nullptr),
 	scx(scx), scy(scy), scz(scz), G(G), vbo(nullptr), lavaCount(0) {
 	changed = true;
 	blk = new BlockType[CX*CY*CZ];
 	for (int i=0; i < CX*CY*CZ; ++i)
 		blk[i] = BlockType::Air;
 	
-	if (!buffer && GlobalProperties::IsClient) {
+	if (GlobalProperties::IsClient) {
 		vbo = new VBO;
 		ibo = new VBO;
 		if (RenderProgram == nullptr) {
 			RenderProgram = G->PM->getProgram(PM_3D | PM_TEXTURED | PM_COLORED | PM_FOG);
+			RenderProgram_uni_unicolor = RenderProgram->uni("unicolor");
 			RenderProgram_attrib_coord = RenderProgram->att("coord");
 			RenderProgram_attrib_color = RenderProgram->att("color");
 			RenderProgram_attrib_texcoord = RenderProgram->att("texcoord");
@@ -88,8 +92,22 @@ void Chunk::set(int x, int y, int z, BlockType type) {
 	if (type == BlockType::Lava)
 		lavaCount++;
 	*b = type;
-	if (G && G->CCH)
-		G->CCH->add(scx * CX + x, scy * CY + y, scz * CZ + z, type);
+	if (G) {
+		if (G->CCH)
+			G->CCH->add(scx * CX + x, scy * CY + y, scz * CZ + z, type);
+		if (GlobalProperties::IsClient) {
+			int u = x==CX-1?1:(x==0)?-1:0,
+				v = y==CY-1?1:(y==0)?-1:0,
+				w = z==CZ-1?1:(z==0)?-1:0;
+			Chunk *nc;
+			if (u && (nc = G->SC->getChunk(scx+u, scy, scz)))
+				nc->changed = true;
+			if (v && (nc = G->SC->getChunk(scx, scy+v, scz)))
+				nc->changed = true;
+			if (w && (nc = G->SC->getChunk(scx, scy, scz+w)))
+				nc->changed = true;
+		}
+	}
 	changed = true;
 	mut.unlock();
 }
@@ -250,6 +268,9 @@ void Chunk::render(const glm::mat4 &transform) {
 }
 
 void Chunk::renderBatched(const glm::mat4& transform) {
+#if SHOW_CHUNK_UPDATES
+	glUniform4f(RenderProgram_uni_unicolor, 1.f, changed ? 0.f : 1.f, changed ? 0.f : 1.f, 1.f);
+#endif
 	if (changed)
 		updateClient();
 	if (!indices)

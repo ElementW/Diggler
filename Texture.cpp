@@ -14,9 +14,7 @@ namespace Diggler {
 Texture::Texture(int w, int h, Texture::PixelFormat format, bool makeXor) : w(w), h(h), m_format(format) {
 	PushBoundTex();
 	create();
-	//if (makeXor) { // Actually it's damn expensive to do this
-		setPlaceholder(makeXor);
-	//}
+	setPlaceholder(makeXor);
 	PopBoundTex();
 }
 
@@ -27,7 +25,8 @@ Texture::Texture(int w, int h, uint8_t* data, Texture::PixelFormat format) {
 	PopBoundTex();
 }
 
-Texture::Texture(const std::string& path, Texture::PixelFormat format) {
+static GLenum getGlTexFormat(Texture::PixelFormat fmt);
+Texture::Texture(const std::string& path, PixelFormat format) {
 	PushBoundTex();
 	create();
 	int stbiFormat;
@@ -53,7 +52,8 @@ Texture::Texture(const std::string& path, Texture::PixelFormat format) {
 		setTexture(w, h, ptr, format);
 		stbi_image_free(ptr);
 #if TEXTURE_LOAD_DEBUG
-		getDebugStream() << "Loaded image " << path << std::endl;
+		getDebugStream() << "Loaded image \"" << path << "\" w=" << w << " h=" << h <<
+			" c=" << channels << " pf=" << (int)format << " glPf=" << (int)getGlTexFormat(format) << std::endl;
 #endif
 	} else {
 		w = 64; h = 64;
@@ -90,7 +90,7 @@ void Texture::setFiltering(Filter min, Filter mag) {
 	PopBoundTex();
 }
 
-GLenum getWrapGlConstant(Texture::Wrapping wrap) {
+static GLenum getWrapGlConstant(Texture::Wrapping wrap) {
 	switch (wrap) {
 		case Texture::Wrapping::Clamp:
 			return GL_CLAMP;
@@ -135,21 +135,26 @@ void Texture::setPlaceholder(bool makeXor) {
 	delete[] white;
 }
 
-void Texture::setTexture(int w, int h, uint8_t *data, Texture::PixelFormat format) {
-	this->w = w; this->h = h;
-	this->m_format = format;
-	GLenum glFormat;
-	switch (format) {
-		case PixelFormat::RGB:
-			glFormat = GL_RGB;
+static GLenum getGlTexFormat(Texture::PixelFormat fmt) {
+	switch (fmt) {
+		case Texture::PixelFormat::RGB:
+			return GL_RGB;
 		break;
-		case PixelFormat::RGBA:
-			glFormat = GL_RGBA;
+		case Texture::PixelFormat::RGBA:
+			return  GL_RGBA;
 		break;
-		case PixelFormat::Monochrome8:
-			glFormat = GL_LUMINANCE8;
+		case Texture::PixelFormat::Monochrome8:
+			return GL_R8;
 		break;
 	}
+	return 0;
+}
+
+void Texture::setTexture(int w, int h, uint8_t *data, PixelFormat format) {
+	this->w = w; this->h = h;
+	this->m_format = format;
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // This. GL = state machine
+	GLenum glFormat = getGlTexFormat(format);
 	glTexImage2D(GL_TEXTURE_2D, // target
 			0,  // level, 0 = base, no minimap
 			glFormat, // internalformat
@@ -170,18 +175,7 @@ void Texture::resize(int w, int h) {
 		return;
 	PushBoundTex();
 	bind();
-	GLenum glFormat;
-	switch (m_format) {
-		case PixelFormat::RGB:
-			glFormat = GL_RGB;
-		break;
-		case PixelFormat::RGBA:
-			glFormat = GL_RGBA;
-		break;
-		case PixelFormat::Monochrome8:
-			glFormat = GL_LUMINANCE8;
-		break;
-	}
+	GLenum glFormat = getGlTexFormat(m_format);
 	glTexImage2D(GL_TEXTURE_2D, // target
 		0,  // level, 0 = base, no minimap,
 		glFormat, // internalformat

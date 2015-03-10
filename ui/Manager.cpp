@@ -66,6 +66,22 @@ void Manager::setProjMat(const glm::mat4 &mat) {
 	m_projMatrix = mat;
 }
 
+void Manager::drawTex(const glm::mat4 &mat, const Texture &t) {
+	RP_Rect->bind();
+	glEnableVertexAttribArray(RP_Rect_att_coord);
+	glEnableVertexAttribArray(RP_Rect_att_texcoord);
+	
+	t.bind();
+	m_rectVbo->bind();
+	glUniformMatrix4fv(RP_Rect_uni_mvp, 1, GL_FALSE, glm::value_ptr(mat));
+	glVertexAttribPointer(RP_Rect_att_coord, 2, GL_UNSIGNED_BYTE, GL_FALSE, 4*sizeof(uint8), 0);
+	glVertexAttribPointer(RP_Rect_att_texcoord, 2, GL_UNSIGNED_BYTE, GL_FALSE, 4*sizeof(uint8), (void*)(2*sizeof(uint8)));
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	
+	glDisableVertexAttribArray(RP_Rect_att_texcoord);
+	glDisableVertexAttribArray(RP_Rect_att_coord);
+}
+
 void Manager::drawTexRect(const Element::Area &a, const Texture &t) const {
 	RP_Rect->bind();
 	glEnableVertexAttribArray(RP_Rect_att_coord);

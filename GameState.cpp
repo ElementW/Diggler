@@ -118,12 +118,29 @@ GameState::GameState(GameWindow *W, const std::string &servHost, int servPort)
 	};
 	m_3dRenderVBO->setData(renderQuad, 6*sizeof(Coord2DTex));
 
+	m_crossHair.tex = new Texture(getAssetPath("crosshair.png"), Texture::PixelFormat::RGBA);
+
 	//"\f0H\f1e\f2l\f3l\f4l\f5o \f6d\f7e\f8m\f9b\faa\fbz\fcz\fde\fes\ff,\n\f0ye see,it werks purrfektly :D\n(and also; it's optimized)"
 
 	m_mouseLocked = false;
 	nextNetUpdate = 0;
 
 	enableExtractor = true;
+}
+
+GameState::BuilderGun::BuilderGun() {
+	tex = new Texture(getAssetPath("tools", "tex_tool_build.png"), Texture::PixelFormat::RGBA);
+	blockTexs.emplace(BlockType::Metal, new Texture(getAssetPath("icons", "tex_icon_metal.png")));
+	currentBlock = BlockType::Metal;
+	currentBlockTex = blockTexs.at(BlockType::Metal);
+	index = 0;
+	deconstruct = false;
+}
+
+GameState::BuilderGun::~BuilderGun() {
+	delete tex;
+	for (auto it : blockTexs)
+		delete it.second;
 }
 
 void GameState::setupUI() {
@@ -146,6 +163,7 @@ void GameState::setupUI() {
 GameState::~GameState() {
 	delete UI.EM;
 	delete m_3dFbo; delete m_3dRenderVBO; delete m_extractorFbo; delete m_clouds; delete m_bloomFbo;
+	delete m_crossHair.tex;
 	delete m_chatBox;
 	//delete m_sky;
 }
@@ -232,7 +250,6 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 			} else if (key == GLFW_KEY_B) {
 				G->LP->setHasNoclip(false);
 			}
-			// TODO remove me G->LP->special1();
 		}
 	}
 }
@@ -259,7 +276,6 @@ void GameState::onMouseButton(int key, int action, int mods) {
 	if (action == GLFW_PRESS) {
 		glm::ivec3 pointed, face;
 		if (G->LP->raytracePointed(32, &pointed, &face, .1f)) {
-			//G->SC->set(pointed.x, pointed.y, pointed.z, BlockType::Air);
 			Net::OutMessage msg(Net::MessageType::MapUpdate);
 			if (key == GLFW_MOUSE_BUTTON_LEFT) {
 				msg.writeU16(pointed.x);
@@ -322,6 +338,10 @@ void GameState::updateViewport() {
 	//m_extractorFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
 	m_bloomFbo->resize(w/BloomScale, h/BloomScale);
 	//m_bloomFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
+	
+	m_crossHair.mat = glm::scale(glm::translate(*G->UIM->PM,
+		glm::vec3(w/2-5, h/2-5, 0)),
+		glm::vec3(5*2, 5*2, 0));
 
 	char str[15]; std::snprintf(str, 15, "Loot: %d/%d", 0/*G->LP->ore*/, Player::getMaxOre(G->LP->playerclass));
 	UI.Ore->setText(std::string(str));
@@ -513,7 +533,7 @@ void GameState::gameLoop() {
 			// TODO: move
 			glm::ivec3 pointed, face;
 			// TODO: replace harcoded 32 viewdistance
-			if (G->LP->raytracePointed(32, &pointed, &face, .1f)) {
+			if (G->LP->raytracePointed(32, &pointed, &face, .05f)) {
 				m_highlightBox.program->bind();
 				glEnableVertexAttribArray(m_highlightBox.att_coord);
 				m_highlightBox.vbo.bind();
@@ -655,8 +675,11 @@ void GameState::drawUI() {
 	G->UIM->render();
 	m_chatBox->render();
 
-	static _<Texture> tex(getAssetPath("tools", "tex_tool_build.png"), Texture::PixelFormat::RGBA);
-	G->UIM->drawTexRect(UI::Element::Area {20, 0, 120, 126}, *tex);
+	
+	G->UIM->drawTex(m_crossHair.mat, *m_crossHair.tex);
+	// TODO render weapon
+	//G->UIM->drawTexRect(UI::Element::Area {20, -20*3, 120*3, 126*3}, *m_builderGun.tex);
+	//G->UIM->drawTexRect(UI::Element::Area {20+37*3, 35*3, 117, 63}, *m_builderGun.currentBlockTex);
 }
 
 bool GameState::processNetwork() {
