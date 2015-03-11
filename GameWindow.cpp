@@ -1,5 +1,6 @@
 #include "GameWindow.hpp"
 #include <al.h>
+#include <glm/detail/setup.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Game.hpp"
@@ -21,13 +22,13 @@ GameWindow::GameWindow(Game *G) : G(G) {
 			getDebugStream() << "GLFW init failed: " << glfwStatus << std::endl;
 			std::terminate();
 		}
-		std::cout << "GLFW " << glfwGetVersionString() << std::endl;
+		getOutputStreamRaw() << "GLFW " << glfwGetVersionString() << std::endl;
 	}
-	
+
 	GLFWHandler::getInstance().setWindow(this, m_window);
-	
+
 	m_w = 640; m_h = 480;
-	
+
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_SAMPLES, 0); // Gimme aliasing everywhere
@@ -48,7 +49,25 @@ GameWindow::GameWindow(Game *G) : G(G) {
 	/*GLint bits;
 	glGetIntegerv(GL_STENCIL_BITS, &bits);
 	getDebugStream() << bits << " stencil bits" << std::endl;*/
-	
+
+	getOutputStreamRaw() << "GLM " << GLM_VERSION_MAJOR << '.' << GLM_VERSION_MINOR << '.' << GLM_VERSION_PATCH << ' '
+#if GLM_ARCH & GLM_ARCH_AVX2
+	<< "AVX2"
+#endif
+#if GLM_ARCH & GLM_ARCH_AVX
+	<< "AVX"
+#endif
+#if GLM_ARCH & GLM_ARCH_SSE4
+	<< "SSE4"
+#endif
+#if GLM_ARCH & GLM_ARCH_SSE3
+	<< "SSE3"
+#endif
+#if GLM_ARCH & GLM_ARCH_SSE2
+	<< "SSE2"
+#endif
+	<< std::endl;
+
 	if (!IsGlewInited) {
 		GLenum glewStatus = glewInit();
 		if (glewStatus != GLEW_OK) {
@@ -56,26 +75,28 @@ GameWindow::GameWindow(Game *G) : G(G) {
 			std::terminate();
 		}
 		IsGlewInited = true;
-		std::cout << "GLEW " << glewGetString(GLEW_VERSION) << std::endl;
+		getOutputStreamRaw() << "GLEW " << glewGetString(GLEW_VERSION) << std::endl;
 	}
-	
+
 	if (InstanceCount == 1) { // If we're the first instance
 		const uint8 *GL_version = glGetString(GL_VERSION);
 		//const uint8 *GL_vendor = glGetString(GL_VENDOR);
 		const uint8 *GL_renderer = glGetString(GL_RENDERER);
-		std::cout << "GL " << GL_version << " / " << GL_renderer << std::endl;
+		getOutputStreamRaw() << "GL " << GL_version << " / " << GL_renderer << std::endl;
 	}
 	
-	UIM.setProjMat(glm::ortho(0.0f, (float)m_w, 0.0f, (float)m_h));
 	
+	
+	UIM.setProjMat(glm::ortho(0.0f, (float)m_w, 0.0f, (float)m_h));
+
 	G->init();
 	UIM.setup(G);
 	G->GW = this;
 	G->UIM = &UIM;
 	G->A->loadSoundAssets();
-	
+
 	G->F = new Font(G, getAssetPath("04b08.png"));
-	
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }

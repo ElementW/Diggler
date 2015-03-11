@@ -23,10 +23,8 @@ using std::unique_ptr;
 
 namespace Diggler {
 
-const int GameState::BloomScale = 4;
-
 GameState::GameState(GameWindow *W, const std::string &servHost, int servPort)
-	: W(W), m_serverHost(servHost), m_serverPort(servPort) {
+	: W(W), m_serverHost(servHost), m_serverPort(servPort), bloom(*W->G) {
 	G = W->G;
 	int w = W->getW(),
 		h = W->getH();
@@ -93,20 +91,6 @@ GameState::GameState(GameWindow *W, const std::string &servHost, int servPort)
 	m_3dFboRenderer_texcoord = m_3dFboRenderer->att("texcoord");
 	m_3dFboRenderer_mvp = m_3dFboRenderer->uni("mvp");
 
-	m_extractorFbo = new FBO(w/BloomScale, h/BloomScale, Texture::PixelFormat::RGBA);
-	m_extractorFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
-	m_bloomExtractorRenderer = G->PM->getSpecialProgram("bloomExtractor");
-	m_bloomExtractorRenderer_coord = m_bloomExtractorRenderer->att("coord");
-	m_bloomExtractorRenderer_texcoord = m_bloomExtractorRenderer->att("texcoord");
-	m_bloomExtractorRenderer_mvp = m_bloomExtractorRenderer->uni("mvp");
-	m_bloomFbo = new FBO(w/BloomScale, h/BloomScale, Texture::PixelFormat::RGBA);
-	m_bloomFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
-	m_bloomRenderer = G->PM->getSpecialProgram("bloom");
-	m_bloomRenderer_coord = m_bloomRenderer->att("coord");
-	m_bloomRenderer_texcoord = m_bloomRenderer->att("texcoord");
-	m_bloomRenderer_mvp = m_bloomRenderer->uni("mvp");
-	m_bloomRenderer_pixshift = m_bloomRenderer->uni("pixshift");
-
 	Coord2DTex renderQuad[6] = {
 		{0, 0, 0, 0},
 		{1, 0, 1, 0},
@@ -119,13 +103,37 @@ GameState::GameState(GameWindow *W, const std::string &servHost, int servPort)
 	m_3dRenderVBO->setData(renderQuad, 6*sizeof(Coord2DTex));
 
 	m_crossHair.tex = new Texture(getAssetPath("crosshair.png"), Texture::PixelFormat::RGBA);
+	UI.headerBg.color = glm::vec4(0, 0, 0, .5f);
 
 	//"\f0H\f1e\f2l\f3l\f4l\f5o \f6d\f7e\f8m\f9b\faa\fbz\fcz\fde\fes\ff,\n\f0ye see,it werks purrfektly :D\n(and also; it's optimized)"
 
 	m_mouseLocked = false;
 	nextNetUpdate = 0;
+}
 
-	enableExtractor = true;
+GameState::Bloom::Bloom(Game &G) {
+	enable = true;
+	scale = 4;
+
+	extractor.fbo = new FBO(G.GW->getW()/scale, G.GW->getH()/scale, Texture::PixelFormat::RGBA);
+	extractor.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
+	extractor.prog = G.PM->getSpecialProgram("bloomExtractor");
+	extractor.att_coord = extractor.prog->att("coord");
+	extractor.att_texcoord = extractor.prog->att("texcoord");
+	extractor.uni_mvp = extractor.prog->uni("mvp");
+
+	renderer.fbo = new FBO(G.GW->getW()/scale, G.GW->getH()/scale, Texture::PixelFormat::RGBA);
+	renderer.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
+	renderer.prog = G.PM->getSpecialProgram("bloom");
+	renderer.att_coord = renderer.prog->att("coord");
+	renderer.att_texcoord = renderer.prog->att("texcoord");
+	renderer.uni_mvp = renderer.prog->uni("mvp");
+	renderer.uni_pixshift = renderer.prog->uni("pixshift");
+}
+
+GameState::Bloom::~Bloom() {
+	delete extractor.fbo;
+	delete renderer.fbo;
 }
 
 GameState::BuilderGun::BuilderGun() {
@@ -162,7 +170,7 @@ void GameState::setupUI() {
 
 GameState::~GameState() {
 	delete UI.EM;
-	delete m_3dFbo; delete m_3dRenderVBO; delete m_extractorFbo; delete m_clouds; delete m_bloomFbo;
+	delete m_clouds;
 	delete m_crossHair.tex;
 	delete m_chatBox;
 	//delete m_sky;
@@ -185,7 +193,7 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 		break;
 	case GLFW_KEY_F1:
 		if (action == GLFW_PRESS)
-			enableExtractor = !enableExtractor;
+			bloom.enable = !bloom.enable;
 		break;
 	case GLFW_KEY_F5:
 		if (action == GLFW_PRESS) {
@@ -334,11 +342,11 @@ void GameState::updateViewport() {
 	glViewport(0, 0, w, h);
 	G->LP->camera.setPersp((float)M_PI/180*75.0f, (float)w / h, 0.1f, 32.0f);
 	m_3dFbo->resize(w, h);
-	m_extractorFbo->resize(w/BloomScale, h/BloomScale);
-	//m_extractorFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
-	m_bloomFbo->resize(w/BloomScale, h/BloomScale);
-	//m_bloomFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
-	
+	bloom.extractor.fbo->resize(w/bloom.scale, h/bloom.scale);
+	//bloom.extractor.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
+	bloom.renderer.fbo->resize(w/bloom.scale, h/bloom.scale);
+	//bloom.renderer.fb->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
+
 	m_crossHair.mat = glm::scale(glm::translate(*G->UIM->PM,
 		glm::vec3(w/2-5, h/2-5, 0)),
 		glm::vec3(5*2, 5*2, 0));
@@ -357,15 +365,19 @@ void GameState::updateViewport() {
 	UI.TeamOre->setPos(w/2, h-14);
 
 	UI.RedCash->setText("\f4Red: $0");
-	UI.RedCash->setPos((w*5)/8, h-14);
+	UI.RedCash->setPos((w*6)/8, h-14);
 
 	UI.BlueCash->setText("\fbBlue: $0");
-	UI.BlueCash->setPos((w*6)/8, h-14);
+	UI.BlueCash->setPos((w*7)/8, h-14);
 
 	UI.FPS->setPos(16, 16);
 	UI.Altitude->setText("Altitude: XX");
 	UI.Altitude->setPos(w-16-UI.Altitude->getSize().x, 16);
 	UI.lastAltitude = INT_MAX;
+
+	UI.headerBg.mat = glm::scale(glm::translate(*G->UIM->PM,
+		glm::vec3(0, h-UI.Ore->getSize().y*2, 0)),
+		glm::vec3(2*w, 2*UI.Ore->getSize().y, 0));
 
 	UI.DebugInfo->setPos(0, h-(UI.BlueCash->getSize().y+UI.DebugInfo->getSize().y));
 
@@ -559,60 +571,57 @@ void GameState::gameLoop() {
 			m_3dFbo->unbind();
 			G->UIM->drawFullTexV(*m_3dFbo->tex);
 
-			if (0) { //enableExtractor) {
+			if (bloom.enable) {
 				m_3dFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
-				m_extractorFbo->bind();
-				glViewport(0, 0, W->getW()/BloomScale, W->getH()/BloomScale);
+				bloom.extractor.fbo->bind();
+				glViewport(0, 0, W->getW()/bloom.scale, W->getH()/bloom.scale);
 				glClearColor(0.f, 0.f, 0.f, 0.f);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-				m_bloomExtractorRenderer->bind();
-				glEnableVertexAttribArray(m_bloomExtractorRenderer_coord);
-				glEnableVertexAttribArray(m_bloomExtractorRenderer_texcoord);
+				bloom.extractor.prog->bind();
+				glEnableVertexAttribArray(bloom.extractor.att_coord);
+				glEnableVertexAttribArray(bloom.extractor.att_texcoord);
 				m_3dRenderVBO->bind();
-				glUniformMatrix4fv(m_bloomExtractorRenderer_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM1));
-				glVertexAttribPointer(m_bloomExtractorRenderer_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
-				glVertexAttribPointer(m_bloomExtractorRenderer_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
+				glUniformMatrix4fv(bloom.extractor.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM1));
+				glVertexAttribPointer(bloom.extractor.att_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
+				glVertexAttribPointer(bloom.extractor.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
 				glDrawArrays(GL_TRIANGLES, 0, 6);
-				glDisableVertexAttribArray(m_bloomExtractorRenderer_texcoord);
-				glDisableVertexAttribArray(m_bloomExtractorRenderer_coord);
+				glDisableVertexAttribArray(bloom.extractor.att_texcoord);
+				glDisableVertexAttribArray(bloom.extractor.att_coord);
 				m_3dFbo->tex->setFiltering(Texture::Filter::Nearest, Texture::Filter::Nearest);
 
-				m_extractorFbo->unbind();
-
-				m_bloomFbo->bind();
+				bloom.renderer.fbo->bind();
 				glClearColor(0.f, 0.f, 0.f, 0.f);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-				m_extractorFbo->tex->bind();
-				m_bloomRenderer->bind();
-				glEnableVertexAttribArray(m_bloomRenderer_coord);
-				glEnableVertexAttribArray(m_bloomRenderer_texcoord);
+				bloom.extractor.fbo->tex->bind();
+				bloom.renderer.prog->bind();
+				glEnableVertexAttribArray(bloom.renderer.att_coord);
+				glEnableVertexAttribArray(bloom.renderer.att_texcoord);
 				m_3dRenderVBO->bind();
-				glUniformMatrix4fv(m_bloomRenderer_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM));
-				GLfloat pixshift[2] = { 1.f/(W->getW()/BloomScale), 1.f/(W->getH()/BloomScale) };
-				glUniform2fv(m_bloomRenderer_pixshift, 1, pixshift);
-				glVertexAttribPointer(m_bloomRenderer_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
-				glVertexAttribPointer(m_bloomRenderer_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
+				glUniformMatrix4fv(bloom.renderer.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM1));
+				glUniform2f(bloom.renderer.uni_pixshift, 1.f/(W->getW()/bloom.scale), 1.f/(W->getH()/bloom.scale));
+				glVertexAttribPointer(bloom.renderer.att_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
+				glVertexAttribPointer(bloom.renderer.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
 				glDrawArrays(GL_TRIANGLES, 0, 6);
-				glDisableVertexAttribArray(m_bloomRenderer_texcoord);
-				glDisableVertexAttribArray(m_bloomRenderer_coord);
-				m_bloomFbo->unbind();
+				glDisableVertexAttribArray(bloom.renderer.att_texcoord);
+				glDisableVertexAttribArray(bloom.renderer.att_coord);
+				bloom.renderer.fbo->unbind();
 
 				// render to real surface
 				glViewport(0, 0, W->getW(), W->getH());
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-				m_bloomFbo->tex->bind();
-				m_bloomFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
-				m_bloomRenderer->bind();
-				glEnableVertexAttribArray(m_bloomRenderer_coord);
-				glEnableVertexAttribArray(m_bloomRenderer_texcoord);
+				bloom.extractor.fbo->tex->bind();
+				bloom.extractor.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
+				bloom.renderer.prog->bind();
+				glEnableVertexAttribArray(bloom.renderer.att_coord);
+				glEnableVertexAttribArray(bloom.renderer.att_texcoord);
 				m_3dRenderVBO->bind();
-				glUniformMatrix4fv(m_bloomRenderer_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM1));
-				glVertexAttribPointer(m_bloomRenderer_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
-				glVertexAttribPointer(m_bloomRenderer_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
+				glUniformMatrix4fv(bloom.renderer.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM1));
+				glVertexAttribPointer(bloom.renderer.att_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
+				glVertexAttribPointer(bloom.renderer.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
 				glDrawArrays(GL_TRIANGLES, 0, 6);
-				glDisableVertexAttribArray(m_bloomRenderer_texcoord);
-				glDisableVertexAttribArray(m_bloomRenderer_coord);
+				glDisableVertexAttribArray(bloom.renderer.att_texcoord);
+				glDisableVertexAttribArray(bloom.renderer.att_coord);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			}
 
@@ -672,10 +681,10 @@ void GameState::updateUI() {
 }
 
 void GameState::drawUI() {
+	G->UIM->drawRect(UI.headerBg.mat, UI.headerBg.color);
 	G->UIM->render();
 	m_chatBox->render();
 
-	
 	G->UIM->drawTex(m_crossHair.mat, *m_crossHair.tex);
 	// TODO render weapon
 	//G->UIM->drawTexRect(UI::Element::Area {20, -20*3, 120*3, 126*3}, *m_builderGun.tex);

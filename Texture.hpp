@@ -30,6 +30,8 @@ public:
 	Texture(int w, int h, PixelFormat format = PixelFormat::RGB, bool makeXor = false);
 	Texture(int w, int h, uint8_t *data, PixelFormat format = PixelFormat::RGB);
 	Texture(const std::string& path, PixelFormat format = PixelFormat::RGB);
+	static void unbind();
+
 	GLuint getId() const;
 	operator GLuint() const { return getId(); }
 	void resize(int w, int h);

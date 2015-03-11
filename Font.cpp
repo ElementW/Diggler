@@ -66,7 +66,6 @@ Font::Font(Game *G, const std::string& path) : G(G) {
 
 struct Vertex { int x, y; float tx, ty; float r, g, b ,a; };
 
-//#define eraseCurChar() std::fill_n((char*)&verts[i*6], sizeof(Vertex)*6, 0);
 #define eraseCurChar() elements -= 6;
 
 int Font::updateVBO(VBO &vbo, const std::string &text) const {
@@ -83,8 +82,7 @@ int Font::updateVBO(VBO &vbo, const std::string &text) const {
 			continue;
 		}
 		if (c == '\f' && i < text.length()) {
-			/* Used to be '§', but wouldn't support UTF8
-			Additionally, \f can mean "format" */
+			/* \f can mean "format" */
 			eraseCurChar();
 			uint8 arg = text[++i];
 			eraseCurChar();

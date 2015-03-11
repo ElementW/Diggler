@@ -39,14 +39,22 @@ private:
 	const Program *m_3dFboRenderer;
 	GLuint m_3dFboRenderer_coord, m_3dFboRenderer_texcoord, m_3dFboRenderer_mvp;
 
-	bool enableExtractor;
-	FBO *m_extractorFbo;
-	const Program *m_bloomExtractorRenderer;
-	GLuint m_bloomExtractorRenderer_coord, m_bloomExtractorRenderer_texcoord, m_bloomExtractorRenderer_mvp;
-	static const int BloomScale;
-	FBO *m_bloomFbo;
-	const Program *m_bloomRenderer;
-	GLuint m_bloomRenderer_coord, m_bloomRenderer_texcoord, m_bloomRenderer_mvp, m_bloomRenderer_pixshift;
+	struct Bloom {
+		bool enable;
+		int scale;
+		struct Extractor {
+			FBO *fbo;
+			const Program *prog;
+			GLuint att_coord, att_texcoord, uni_mvp;
+		} extractor;
+		struct Renderer {
+			FBO *fbo;
+			const Program *prog;
+			GLuint att_coord, att_texcoord, uni_pixshift, uni_mvp;
+		} renderer;
+		Bloom(Game&);
+		~Bloom();
+	} bloom;
 
 	VBO *m_3dRenderVBO;
 	struct Coord2DTex { int x, y; uint8 u, v; };
@@ -95,6 +103,11 @@ private:
 	bool isEscapeToggled = false,
 		 showDebugInfo = false;
 	struct {
+		struct {
+			glm::mat4 mat;
+			glm::vec4 color;
+		} headerBg;
+
 		UI::Text *Ore;
 		UI::Text *Loot;
 		UI::Text *Weight;

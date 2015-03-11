@@ -12,7 +12,6 @@
 
 #include <GLFW/glfw3.h>
 
-double (*Diggler::getTime)() = glfwGetTime;
 const char *Diggler::UserdataDirsName = "Diggler";
 
 struct {

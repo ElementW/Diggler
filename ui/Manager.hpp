@@ -49,10 +49,11 @@ public:
 	
 	// Utility
 	
-	void drawTex(const glm::mat4&, const Texture&);
-	//void drawRect(const Element::Area&, const glm::vec3 &color) const;
-	void drawTexRect(const Element::Area&, const Texture&) const;
-	void drawFullTexV(const Texture&);
+	void drawRect(const Element::Area&, const glm::vec4 &color) const;
+	void drawRect(const glm::mat4&, const glm::vec4 &color) const;
+	void drawTex(const Element::Area&, const Texture&) const;
+	void drawTex(const glm::mat4&, const Texture&) const;
+	void drawFullTexV(const Texture&) const;
 	
 	// Render
 	

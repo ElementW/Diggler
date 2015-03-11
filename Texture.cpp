@@ -25,6 +25,10 @@ Texture::Texture(int w, int h, uint8_t* data, Texture::PixelFormat format) {
 	PopBoundTex();
 }
 
+void Texture::unbind() {
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 static GLenum getGlTexFormat(Texture::PixelFormat fmt);
 Texture::Texture(const std::string& path, PixelFormat format) {
 	PushBoundTex();

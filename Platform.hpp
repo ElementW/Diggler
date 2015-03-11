@@ -44,8 +44,6 @@ typedef char16_t char16;
 
 namespace Diggler {
 
-extern double (*getTime)();
-
 /// @returns The executable's absolute path
 std::string getExecutablePath();
 
@@ -53,19 +51,28 @@ std::string getExecutablePath();
 std::string getExecutableDirectory();
 
 /// @returns The system's error output stream
-std::ostream& getErrorStream();
 std::ostream& getErrorStreamRaw();
+#ifdef IN_IDE_PARSER
+std::ostream& getErrorStream();
+#else
 #define getErrorStream() getErrorStreamRaw() << __FILENAME__ << ':' << __LINE__ << ' '
+#endif
 
 /// @returns The system's debug output stream
-std::ostream& getDebugStream();
 std::ostream& getDebugStreamRaw();
+#ifdef IN_IDE_PARSER
+std::ostream& getDebugStream();
+#else
 #define getDebugStream() getDebugStreamRaw() << __FILENAME__ << ':' << __LINE__ << ' '
+#endif
 
 /// @returns The system's output stream
-std::ostream& getOutputStream();
 std::ostream& getOutputStreamRaw();
+#ifdef IN_IDE_PARSER
+std::ostream& getOutputStream();
+#else
 #define getOutputStream() getOutputStreamRaw() << __FILENAME__ << ':' << __LINE__ << ' '
+#endif
 
 extern const char *UserdataDirsName;
 
