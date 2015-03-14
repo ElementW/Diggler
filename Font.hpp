@@ -39,6 +39,7 @@ public:
 	int updateVBO(VBO &vbo, const std::string &text) const;
 	void draw(const Diggler::VBO &vbo, int count, const glm::mat4& matrix) const;
 	Size getSize(const std::string &text) const;
+	int getHeight() const;
 };
 
 }

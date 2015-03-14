@@ -24,6 +24,8 @@ void ProgramManager::getDefines(int flags, std::vector<std::string> &defs) {
 		defs.push_back("COLORED");
 	if (flags & PM_FOG)
 		defs.push_back("FOG");
+	if (flags & PM_DISCARD)
+		defs.push_back("DISCARD");
 }
 
 ProgramManager::ProgramManager(Game &G) : G(G) {

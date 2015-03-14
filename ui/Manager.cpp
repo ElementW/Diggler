@@ -15,7 +15,7 @@ static GLint RP_Rect_att_coord = -1;
 static GLint RP_Rect_uni_mvp = -1;
 static GLint RP_Rect_uni_unicolor = -1;
 
-Manager::Manager() {
+Manager::Manager() : Scale(2) {
 	PM = &m_projMatrix;
 	m_projMat1 = glm::ortho(0.f, 1.f, 0.f, 1.f);
 	m_projMat1V = glm::ortho(0.f, 1.f, 1.f, 0.f);

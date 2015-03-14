@@ -24,6 +24,7 @@ private:
 public:
 	const glm::mat4 *PM, *PM1;
 	Game *G;
+	int Scale;
 
 	Manager();
 	void setup(Game*);

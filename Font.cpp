@@ -163,6 +163,10 @@ Font::Size Font::getSize(const std::string &text) const {
 	return Size { x, y };
 }
 
+int Font::getHeight() const {
+	return height;
+}
+
 Font::~Font() {
 	delete m_texture;
 	if (texPos)

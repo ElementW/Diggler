@@ -22,6 +22,10 @@ void main(void) {
  #else
 	gl_FragColor *= texture2D(texture, v_texcoord);
  #endif
+ #ifdef DISCARD
+	if (gl_FragColor.a == 0.0)
+		discard;
+ #endif
 #endif
 #ifdef COLORED
 	gl_FragColor *= v_color;

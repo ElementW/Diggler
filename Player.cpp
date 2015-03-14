@@ -8,7 +8,7 @@
 
 namespace Diggler {
 
-Texture ***Player::Textures = nullptr;
+Player::TexInfo ***Player::TexInfos = nullptr;
 const Program *Player::RenderProgram = nullptr;
 GLint Player::RenderProgram_attrib_texcoord = -1;
 GLint Player::RenderProgram_attrib_coord = -1;
@@ -65,49 +65,60 @@ int Player::getMaxWeight(Class c) {
 	return 0;
 }
 
-Player::Player(Game *G) : m_vbo(nullptr), team(Team::Red),
+Player::Player(Game *G) : team(Team::Red),
 	playerclass(Class::Prospector), tool(Tools::Pickaxe), G(G),
 	position(0), velocity(0), accel(0),
-	isAlive(true) {
+	isAlive(true), ore(0), loot(0) {
 	if (GlobalProperties::IsClient) {
-		m_vbo = new VBO();
-		if (Textures == nullptr) {
-			RenderProgram = G->PM->getProgram(PM_3D | PM_TEXTURED);
+		if (TexInfos == nullptr) {
+			RenderProgram = G->PM->getProgram(PM_3D | PM_TEXTURED | PM_DISCARD);
 			RenderProgram_attrib_coord = RenderProgram->att("coord");
 			RenderProgram_attrib_texcoord = RenderProgram->att("texcoord");
 			RenderProgram_uni_mvp = RenderProgram->uni("mvp");
-			
-			Textures = new Texture**[Team::LAST-1];
-			for (uint8 t=1; t < (uint8)Team::LAST-1; t++) {
-				Textures[t] = new Texture*[Tools::LAST];
+
+			TexInfos = new TexInfo**[Team::LAST];
+			for (uint8 t=0; t < (uint8)Team::LAST; t++) {
+				TexInfos[t] = new TexInfo*[Tools::LAST];
 				for (uint8 tool=0; tool < (uint8)Tools::LAST; tool++) {
 					std::string aa = std::string("tex_sprite_") + getTeamNameLowercase(team) + '_' + getToolNameLowercase(this->tool) + ".png";
-					Textures[t][tool] = new Texture(
+					TexInfos[t][tool] = new TexInfo;
+					TexInfos[t][tool]->tex = new Texture(
 						getAssetPath("sprites", std::string("tex_sprite_") + getTeamNameLowercase((Team)t) + '_' + getToolNameLowercase((Tools)tool) + ".png"),
 						Texture::PixelFormat::RGBA);
+					static const float
+						w = 24.f, h = 32.f,
+						sheetW = 128.f, sheetH = 128.f,
+						wt = w/sheetW, ht = h/sheetH, ratio = h/w,
+						sz = .9f, szH = (sz*2)*ratio;
+					for (int side=0; side < 4; ++side) {
+						float ya = 1-(side*ht), yb = 1-((side+1)*ht);
+						for (int action=0; action < 4; ++action) {
+							float xa = action*wt, xb = (action+1)*wt;
+							float coords[6*5] = {
+								-sz, .0f, 0.0f,  xa, ya,
+								 sz, .0f, 0.0f,  xb, ya,
+								 sz, szH, 0.0f,  xb, yb,
+
+								-sz, szH, 0.0f,  xa, yb,
+								-sz, .0f, 0.0f,  xa, ya,
+								 sz, szH, 0.0f,  xb, yb,
+							};
+							TexInfos[t][tool]->side[side].vbos[action] = new VBO;
+							TexInfos[t][tool]->side[side].vbos[action]->setData(coords, 6*5);
+						}
+					}
 				}
 			}
 		}
-		float coords[6*5] = {
-			-.5f, 0.0f, 0.0f,  0.0f, 1.0f,
-			0.5f, 0.0f, 0.0f,  1.0f, 1.0f,
-			0.5f, 1.0f, 0.0f,  1.0f, 0.0f,
-			
-			-.5f, 1.0f, 0.0f,  0.0f, 0.0f,
-			-.5f, 0.0f, 0.0f,  0.0f, 1.0f,
-			0.5f, 1.0f, 0.0f,  1.0f, 0.0f,
-		};
-		m_vbo->setData(coords, 6*5);
 	}
 }
 
 using std::swap;
-Player::Player(Player &&p) : m_vbo(nullptr) {
+Player::Player(Player &&p) {
 	*this = std::move(p);
 }
 
 Player& Player::operator=(Player &&p) {
-	swap(m_vbo, p.m_vbo);
 	swap(team, p.team);
 	swap(playerclass, p.playerclass);
 	swap(tool, p.tool);
@@ -124,9 +135,6 @@ Player& Player::operator=(Player &&p) {
 }
 
 Player::~Player() {
-	if (GlobalProperties::IsClient) {
-		delete m_vbo; m_vbo = nullptr;
-	}
 }
 
 void Player::setPosVel(const glm::vec3 &pos, const glm::vec3 &vel, const glm::vec3 &acc) {
@@ -142,8 +150,9 @@ void Player::update(const float &delta) {
 
 void Player::render(const glm::mat4 &transform) const {
 	RenderProgram->bind();
-	Textures[(uint8)team][(uint8)tool]->bind();
-	m_vbo->bind();
+	TexInfos[(uint8)team][(uint8)tool]->tex->bind();
+	TexInfos[(uint8)team][(uint8)tool]->side[(int)(G->Time*4)%4].vbos[((int)G->Time)%4]->bind();
+	//idle->bind();
 	glEnableVertexAttribArray(RenderProgram_attrib_texcoord);
 	glEnableVertexAttribArray(RenderProgram_attrib_coord);
 	glm::vec3 &lpPos = G->LP->position;

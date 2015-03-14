@@ -339,6 +339,7 @@ void GameState::onMouseScroll(double x, double y) {
 
 void GameState::updateViewport() {
 	int w = W->getW(), h = W->getH();
+	Diggler::UI::Manager &UIM = *G->UIM;
 	glViewport(0, 0, w, h);
 	G->LP->camera.setPersp((float)M_PI/180*75.0f, (float)w / h, 0.1f, 32.0f);
 	m_3dFbo->resize(w, h);
@@ -347,39 +348,40 @@ void GameState::updateViewport() {
 	bloom.renderer.fbo->resize(w/bloom.scale, h/bloom.scale);
 	//bloom.renderer.fb->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
 
-	m_crossHair.mat = glm::scale(glm::translate(*G->UIM->PM,
+	m_crossHair.mat = glm::scale(glm::translate(*UIM.PM,
 		glm::vec3(w/2-5, h/2-5, 0)),
-		glm::vec3(5*2, 5*2, 0));
+		glm::vec3(5*UIM.Scale, 5*UIM.Scale, 0));
 
-	char str[15]; std::snprintf(str, 15, "Loot: %d/%d", 0/*G->LP->ore*/, Player::getMaxOre(G->LP->playerclass));
+	int lineHeight = G->F->getHeight()*UIM.Scale;
+	char str[15]; std::snprintf(str, 15, "Loot: %d/%d", G->LP->ore, Player::getMaxOre(G->LP->playerclass));
 	UI.Ore->setText(std::string(str));
-	UI.Ore->setPos(4, h-14);
+	UI.Ore->setPos(2*UIM.Scale, h-lineHeight);
 
 	UI.Loot->setText("Loot: $0");
-	UI.Loot->setPos(w/6, h-14);
+	UI.Loot->setPos(w/6, h-lineHeight);
 
 	UI.Weight->setText("Weight: 0");
-	UI.Weight->setPos(w/3, h-14);
+	UI.Weight->setPos(w/3, h-lineHeight);
 
 	UI.TeamOre->setText("Team ore: 0");
-	UI.TeamOre->setPos(w/2, h-14);
+	UI.TeamOre->setPos(w/2, h-lineHeight);
 
 	UI.RedCash->setText("\f4Red: $0");
-	UI.RedCash->setPos((w*6)/8, h-14);
+	UI.RedCash->setPos((w*6)/8, h-lineHeight);
 
 	UI.BlueCash->setText("\fbBlue: $0");
-	UI.BlueCash->setPos((w*7)/8, h-14);
+	UI.BlueCash->setPos((w*7)/8, h-lineHeight);
 
 	UI.FPS->setPos(16, 16);
 	UI.Altitude->setText("Altitude: XX");
 	UI.Altitude->setPos(w-16-UI.Altitude->getSize().x, 16);
 	UI.lastAltitude = INT_MAX;
 
-	UI.headerBg.mat = glm::scale(glm::translate(*G->UIM->PM,
-		glm::vec3(0, h-UI.Ore->getSize().y*2, 0)),
-		glm::vec3(2*w, 2*UI.Ore->getSize().y, 0));
+	UI.headerBg.mat = glm::scale(glm::translate(*UIM.PM,
+		glm::vec3(0, h-lineHeight, 0)),
+		glm::vec3(2*w, lineHeight, 0));
 
-	UI.DebugInfo->setPos(0, h-(UI.BlueCash->getSize().y+UI.DebugInfo->getSize().y));
+	UI.DebugInfo->setPos(0, h-(lineHeight+UI.DebugInfo->getSize().y));
 
 	m_chatBox->setPosition(4, 64);
 	updateUI();
@@ -539,7 +541,8 @@ void GameState::gameLoop() {
 			G->SC->render(m_transform);
 			for (Player &p : G->players) {
 				p.update(deltaT);
-				p.render(m_transform);
+				if (G->LP->camera.frustum.sphereInFrustum(p.position, 2))
+					p.render(m_transform);
 			}
 
 			// TODO: move

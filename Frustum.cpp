@@ -1,7 +1,6 @@
 #include "Frustum.hpp"
 #include <cmath>
 #include <glm/glm.hpp>
-#define ANG2RAD 3.14159265358979323846/180.0
 
 namespace Diggler {
 
@@ -39,7 +38,7 @@ void Frustum::setCamDef(const glm::vec3 &p, const glm::vec3 &l, const glm::vec3 
 	// compute the centers of the near and far planes
 	nc = p - Z * nearD;
 	fc = p - Z * farD;
-	{
+
 	// compute the 4 corners of the frustum on the near plane
 	ntl = nc + Y * nh - X * nw;
 	ntr = nc + Y * nh + X * nw;
@@ -51,27 +50,7 @@ void Frustum::setCamDef(const glm::vec3 &p, const glm::vec3 &l, const glm::vec3 
 	ftr = fc + Y * fh + X * fw;
 	fbl = fc - Y * fh - X * fw;
 	fbr = fc - Y * fh + X * fw;
-	}
-	/*pl[NEAR].setNormalAndPoint(-Z,nc);
-	pl[FAR].setNormalAndPoint(Z,fc);
 
-	glm::vec3 aux, normal;
-
-	aux = glm::normalize((nc + Y*nh) - p);
-	normal = glm::cross(aux, X);
-	pl[TOP].setNormalAndPoint(normal, nc+Y*nh);
-
-	aux = (nc - Y*nh) - p;
-	normal = glm::normalize(glm::cross(aux, X));
-	pl[BOTTOM].setNormalAndPoint(normal, nc-Y*nh);
-
-	aux = (nc - X*nw) - p;
-	normal = glm::normalize(glm::cross(aux, X));
-	pl[LEFT].setNormalAndPoint(normal, nc-X*nw);
-
-	aux = (nc + X*nw) - p;
-	normal = glm::normalize(glm::cross(aux, X));
-	pl[RIGHT].setNormalAndPoint(normal,nc+X*nw);*/
 	pl[TOP].set3Points(ntr,ntl,ftl);
 	pl[BOTTOM].set3Points(nbl,nbr,fbr);
 	pl[LEFT].set3Points(ntl,nbl,fbl);
@@ -80,7 +59,7 @@ void Frustum::setCamDef(const glm::vec3 &p, const glm::vec3 &l, const glm::vec3 
 	pl[FAR].set3Points(ftr,ftl,fbl);
 }
 
-bool Frustum::pointInFrustum(const glm::vec3& p) {
+bool Frustum::pointInFrustum(const glm::vec3& p) const {
 	for(int i=0; i < 6; i++) {
 		if (pl[i].distance(p) < 0.f)
 			return false;
@@ -88,9 +67,9 @@ bool Frustum::pointInFrustum(const glm::vec3& p) {
 	return true;
 }
 
-bool Frustum::sphereInFrustum(const glm::vec3 &p, float raio) {
+bool Frustum::sphereInFrustum(const glm::vec3 &p, float radius) const {
 	for(int i=0; i < 6; i++) {
-		if (pl[i].distance(p) < -raio)
+		if (pl[i].distance(p) < -radius)
 			return false;
 	}
 	return true;

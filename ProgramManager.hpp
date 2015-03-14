@@ -4,12 +4,13 @@
 #include <vector>
 #include "Program.hpp"
 
-#define PM_2D 0
-#define PM_3D 1
-#define PM_TEXTURED 2
-#define PM_COLORED 4
-#define PM_FOG 8
-#define PM_TEXSHIFT 16
+#define PM_2D			0x0
+#define PM_3D			0x1
+#define PM_TEXTURED		0x2
+#define PM_COLORED		0x4
+#define PM_FOG			0x8
+#define PM_TEXSHIFT		0x10
+#define PM_DISCARD		0x20
 
 namespace Diggler {
 

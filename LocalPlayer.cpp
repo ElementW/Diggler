@@ -9,16 +9,19 @@
 
 namespace Diggler {
 
-static float Acceleration = 24.0f;
+static float Acceleration = 18.0f;
 
-static float MvmtDamping = 1/24.0f;
+static float MvmtDamping = 1/Acceleration;
 
 static float Gravity = 18.0f; // -Y acceleration (blocks/sec/sec)
 
 static float JumpForce = Gravity/2.8f;
 
-static float MaxSpeed = 6.f;
-static float RoadMaxSpeed = 12.f;
+static float MaxSpeed = 5.f;
+static float RoadMaxSpeed = MaxSpeed*2;
+
+static float MinYVelocity = -80.f;
+static float MinLethalYVelocity = -20.f;
 
 static int i(const float &f) {
 	if (f >= 0)
@@ -29,7 +32,7 @@ static int i(const float &f) {
 LocalPlayer::LocalPlayer(Game *G) : Player(G), goingForward(false), goingBackward(false), goingLeft(false), goingRight(false),
 	hasGravity(true), hasNoclip(false) {
 	size = glm::vec3(0.3f, 1.9f, 0.3f);
-	eyesPos = glm::vec3(0.f, 1.7f, 0.f);
+	eyesPos = glm::vec3(0.f, 1.3f, 0.f);
 }
 
 void LocalPlayer::special1() {
@@ -81,7 +84,7 @@ void LocalPlayer::update(const float &delta) {
 	
 	// Apply gravity
 	if (hasGravity) {
-		if (!onGround && velocity.y <= -60) {
+		if (!onGround && velocity.y <= MinLethalYVelocity) {
 			BlockType b = G->SC->get(position.x, position.y-1, position.z);
 			onGround = !Blocks::canGoThrough(b, team);
 			if (onGround) {
@@ -107,8 +110,8 @@ void LocalPlayer::update(const float &delta) {
 			velocity.x = velXZ.x * maxSpeed;
 			velocity.z = velXZ.z * maxSpeed;
 		}
-		if (velocity.y < -80)
-			velocity.y = -80;
+		if (velocity.y < MinYVelocity)
+			velocity.y = MinYVelocity;
 	}
 	
 	if (velocity.x > -0.001f && velocity.x < 0.001f) velocity.x = 0.f;
