@@ -39,7 +39,7 @@ bool Blocks::isTransparent(BlockType t) {
 	}
 }
 
-bool Blocks::isFaceRemoved(BlockType t, BlockType other) {
+bool Blocks::isFaceVisible(BlockType t, BlockType other) {
 	if (isTransparent(t)) {
 		return (t != other);
 	} else {

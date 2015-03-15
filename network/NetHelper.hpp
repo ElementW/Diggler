@@ -12,6 +12,7 @@ namespace NetHelper {
 
 // Server only
 void Broadcast(Game*, const Net::OutMessage&, Net::Tfer = Net::Tfer::Rel, Net::Channels = Net::Channels::Base);
+void Broadcast(Game&, const Net::OutMessage&, Net::Tfer = Net::Tfer::Rel, Net::Channels = Net::Channels::Base);
 void MakeEvent(Net::OutMessage&, Net::EventType, const glm::vec3&);
 void MakeEvent(Net::OutMessage&, Net::EventType, const Player&);
 

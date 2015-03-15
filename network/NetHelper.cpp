@@ -7,8 +7,12 @@ namespace Diggler {
 namespace NetHelper {
 
 void Broadcast(Game *G, const Net::OutMessage &msg, Net::Tfer tfer, Net::Channels chan) {
-	for (Player &p : G->players) {
-		G->S->H.send(p.P, msg, tfer, chan);
+	Broadcast(*G, msg, tfer, chan);
+}
+
+void Broadcast(Game &G, const Net::OutMessage &msg, Net::Tfer tfer, Net::Channels chan) {
+	for (Player &p : G.players) {
+		G.S->H.send(p.P, msg, tfer, chan);
 	}
 }
 

@@ -10,9 +10,11 @@
 #elif defined(__ANDROID_API__) // Android
 	#define BUILDINFO_PLATFORM "Android"
 	#define BUILDINFO_PLATFORM_ANDROID
+	#define BUILDINFO_PLATFORM_PTHREAD
 #elif defined(__linux__) || defined(linux) || defined(_linux) // Linux
 	#define BUILDINFO_PLATFORM "Linux"
 	#define BUILDINFO_PLATFORM_LINUX
+	#define BUILDINFO_PLATFORM_PTHREAD
 #elif defined(__APPLE__) // Mac
 	#define BUILDINFO_PLATFORM "Mac"
 	#define BUILDINFO_PLATFORM_MAC
@@ -125,6 +127,11 @@ inline float FastRandF() {
 	return (float)FastRand() / 0x7FFFFFFF;
 }
 
+///
+/// Real Modulus
+/// @returns Real modulus operation result, as such mod(x,y) is always positive
+///
+float rmod(float x, float y);
 
 namespace fs {
 bool isDir(const std::string &path);

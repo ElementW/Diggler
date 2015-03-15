@@ -12,7 +12,7 @@ class Game;
 
 class Server {
 private:
-	Game *G;
+	Game &G;
 	
 	void handlePlayerJoin(Net::InMessage&, Net::Peer&);
 	void handlePlayerQuit(Net::Peer&, Net::QuitReason reason = Net::QuitReason::Quit);
@@ -27,7 +27,7 @@ private:
 public:
 	Net::Host H;
 
-	Server(Game *G, uint16 port);
+	Server(Game &G, uint16 port);
 	~Server();
 
 	void run();

@@ -15,8 +15,8 @@ void Game::init() {
 		PM = new ProgramManager(*this);
 		LP = new LocalPlayer(this);
 		RP = new RenderProperties;
-		A = new Audio(this);
-		KB = new KeyBinds();
+		A = new Audio(*this);
+		KB = new KeyBinds;
 	}
 	if (GlobalProperties::IsServer) {
 		CCH = new ChunkChangeHelper();

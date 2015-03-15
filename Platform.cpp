@@ -218,4 +218,11 @@ std::ostream &Diggler::getOutputStreamRaw() {
 	return std::cout;
 }
 
+float Diggler::rmod(float x, float y) {
+	float ret = fmod(x, y);
+	if (ret < 0)
+		return y+ret;
+	return ret;
+}
+
 uint Diggler::FastRand_Seed = 0;

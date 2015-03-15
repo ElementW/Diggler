@@ -11,17 +11,19 @@ namespace Diggler {
 
 static float Acceleration = 18.0f;
 
-static float MvmtDamping = 1/Acceleration;
+static float MvmtDamping = 1/(Acceleration*2.f);
 
 static float Gravity = 18.0f; // -Y acceleration (blocks/sec/sec)
 
-static float JumpForce = Gravity/2.8f;
+static float JumpForce = Gravity/2.7f;
 
 static float MaxSpeed = 5.f;
 static float RoadMaxSpeed = MaxSpeed*2;
 
 static float MinYVelocity = -80.f;
-static float MinLethalYVelocity = -20.f;
+
+static float HurtYVelocity = -12.f;
+static float LethalYVelocity = -16.f;
 
 static int i(const float &f) {
 	if (f >= 0)
@@ -30,12 +32,9 @@ static int i(const float &f) {
 }
 
 LocalPlayer::LocalPlayer(Game *G) : Player(G), goingForward(false), goingBackward(false), goingLeft(false), goingRight(false),
-	hasGravity(true), hasNoclip(false) {
+	hasGravity(true), hasNoclip(false), health(1) {
 	size = glm::vec3(0.3f, 1.9f, 0.3f);
 	eyesPos = glm::vec3(0.f, 1.3f, 0.f);
-}
-
-void LocalPlayer::special1() {
 }
 
 // Thanks http://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/
@@ -56,6 +55,10 @@ void LocalPlayer::lookAt(const glm::vec3& at) {
 }
 
 void LocalPlayer::update(const float &delta) {
+	health += delta/10;
+	if (health >= 1)
+		health = 1;
+
 	bool moving = goingForward || goingBackward || goingLeft || goingRight;
 	glm::vec3 initialVel = velocity;
 	if (!moving) {
@@ -65,7 +68,7 @@ void LocalPlayer::update(const float &delta) {
 		if (!this->hasGravity)
 			velocity.y *= finalDamp;
 	}
-	
+
 	// Apply player's will movement
 	glm::vec3 normMove = glm::normalize(glm::vec3(camera.m_lookAt.x, camera.m_lookAt.y * !hasGravity, camera.m_lookAt.z));
 	float acceleration = Acceleration*delta;
@@ -81,16 +84,20 @@ void LocalPlayer::update(const float &delta) {
 	if (goingRight) {
 		velocity -= acceleration * glm::rotateY(glm::normalize(glm::vec3(normMove.x, 0, normMove.z)), (float)M_PI/2);
 	}
-	
+
 	// Apply gravity
 	if (hasGravity) {
-		if (!onGround && velocity.y <= MinLethalYVelocity) {
+		if (!onGround && velocity.y <= HurtYVelocity) {
 			BlockType b = G->SC->get(position.x, position.y-1, position.z);
 			onGround = !Blocks::canGoThrough(b, team);
 			if (onGround) {
-				setDead(true, DeathReason::Fall, true);
-				velocity = glm::vec3(0);
-				return;
+				if (velocity.y <= LethalYVelocity) {
+					setDead(true, DeathReason::Fall, true);
+					velocity = glm::vec3(0);
+					return;
+				}
+				G->A->playSound("hitground");
+				health -= (velocity.y-HurtYVelocity)/(LethalYVelocity-HurtYVelocity);
 			}
 		}
 		if (onGround) {
@@ -101,7 +108,7 @@ void LocalPlayer::update(const float &delta) {
 		if (!onGround)
 			velocity.y -= Gravity * delta;
 	}
-	
+
 	if (!hasNoclip) {
 		glm::vec3 velXZ(velocity.x, 0, velocity.z);
 		int maxSpeed = (onRoad ? RoadMaxSpeed : MaxSpeed);
@@ -113,14 +120,14 @@ void LocalPlayer::update(const float &delta) {
 		if (velocity.y < MinYVelocity)
 			velocity.y = MinYVelocity;
 	}
-	
+
 	if (velocity.x > -0.001f && velocity.x < 0.001f) velocity.x = 0.f;
 	if (velocity.y > -0.001f && velocity.y < 0.001f) velocity.y = 0.f;
 	if (velocity.z > -0.001f && velocity.z < 0.001f) velocity.z = 0.f;
-	
+
 	glm::vec3 destPos = position + velocity * delta;
 	accel = velocity - initialVel;
-	
+
 	if (velocity != glm::vec3(0.f)) { // avoids useless calculus
 		if (hasNoclip) {
 			position = destPos;
@@ -197,7 +204,7 @@ void LocalPlayer::update(const float &delta) {
 			switch (bBottom) {
 			case BlockType::Jump:
 				if (G->Time - lastJumpTime > 0.2) {
-					velocity.y = JumpForce * 2;
+					velocity.y = JumpForce * 1.6f;
 					NetHelper::SendEvent(G, Net::EventType::PlayerJumpOnPad);
 					lastJumpTime = G->Time;
 				}
@@ -212,9 +219,7 @@ void LocalPlayer::update(const float &delta) {
 			}
 			position += velocity * delta;
 		}
-		
 		camera.setPosition(position + eyesPos);
-		
 		G->A->updatePos();
 	}
 }

@@ -13,7 +13,7 @@ class Game;
 
 class Audio {
 private:
-	Game *G;
+	Game &G;
 	std::map<std::string, SoundBuffer> m_sounds;
 	std::list<Sound> m_playing;
 	void gc();
@@ -21,7 +21,7 @@ private:
 	ALCcontext *m_audioContext;
 
 public:
-	Audio(Game *G);
+	Audio(Game &G);
 	~Audio();
 	
 	const std::map<std::string, SoundBuffer> &sounds;

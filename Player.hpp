@@ -66,6 +66,7 @@ public:
 	} deathReason;
 	Game *G;
 	glm::vec3 position, velocity, accel;
+	float angle;
 	std::string name;
 	uint32 id;
 	bool isAlive;

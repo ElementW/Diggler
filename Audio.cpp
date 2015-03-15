@@ -9,7 +9,7 @@
 
 namespace Diggler {
 
-Audio::Audio(Game* G) : G(G), sounds(m_sounds) {
+Audio::Audio(Game &G) : G(G), sounds(m_sounds) {
 	if (!GlobalProperties::IsSoundEnabled)
 		return;
 	
@@ -64,8 +64,8 @@ Audio::~Audio() {
 static ALfloat float3data[3], plrOrient[6];
 
 void Audio::updateAngle() {
-	const glm::vec3 &at = G->LP->camera.getLookAt(),
-					&up = G->LP->camera.getUp();
+	const glm::vec3 &at = G.LP->camera.getLookAt(),
+					&up = G.LP->camera.getUp();
 	plrOrient[0] = at.x;
 	plrOrient[1] = at.y;
 	plrOrient[2] = at.z;
@@ -76,8 +76,8 @@ void Audio::updateAngle() {
 }
 
 void Audio::updatePos() {
-	const glm::vec3 &pos = G->LP->position,
-					&vel = G->LP->velocity;
+	const glm::vec3 &pos = G.LP->position,
+					&vel = G.LP->velocity;
 	float3data[0] = pos.x;
 	float3data[1] = pos.y;
 	float3data[2] = pos.z;

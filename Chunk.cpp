@@ -146,10 +146,11 @@ void Chunk::updateServerSwap() {
 	std::swap(blk, blk2);
 }
 
+struct RGB { float r, g, b; };
 void Chunk::updateClient() {
 	mut.lock();
-	GLCoord		vertex[CX * CY * CZ * 6 /* faces */ * 6 /* vertices */ / 2 /* face removing (HSR) makes a lower vert max */];
-	GLushort	index[CX * CY * CZ * 6 /* faces */ * 4 /* indexes */ / 2 /* HSR */];
+	GLCoord		vertex[CX * CY * CZ * 6 /* faces */ * 4 /* vertices */ / 2 /* face removing (HSR) makes a lower vert max */];
+	GLushort	index[CX * CY * CZ * 6 /* faces */ * 4 /* indices */ / 2 /* HSR */];
 	int v = 0, i = 0;
 
 	BlockType bt;
@@ -158,13 +159,43 @@ void Chunk::updateClient() {
 		for(uint8 y = 0; y < CY; y++) {
 			for(uint8 z = 0; z < CZ; z++) {
 				bt = blk[I(x,y,z)];
-				
+
 				// Empty block?
 				if (!bt)
 					continue;
 
+#if 0
+				BlockType
+					/* -X face*/
+					bNNZ = get(x-1, y-1, z),
+					bNPZ = get(x-1, y+1, z),
+					bNZN = get(x-1, y, z-1),
+					bNZP = get(x-1, y, z+1),
+					/* +X face*/
+					bPNZ = get(x+1, y-1, z),
+					bPPZ = get(x+1, y+1, z),
+					bPZN = get(x+1, y, z-1),
+					bPZP = get(x+1, y, z+1),
+					/* Top & bottom */
+					bZPN = get(x, y+1, z-1),
+					bZPP = get(x, y+1, z+1),
+					bZNN = get(x, y-1, z-1),
+					bZNP = get(x, y+1, z+1);
+					
+					RGB bl = {.6f, .6f, .6f}, br = {.6f, .6f, .6f},
+						tl = {.6f, .6f, .6f}, tr = {.6f, .6f, .6f};
+					if (bNZN == BlockType::Lava || bNNZ == BlockType::Lava) { bl.r = 1.6f; bl.g = 1.2f; }
+					if (bNNZ == BlockType::Lava || bNZP == BlockType::Lava) { br.r = 1.6f; br.g = 1.2f; }
+					if (bNZP == BlockType::Lava || bNPZ == BlockType::Lava) { tr.r = 1.6f; tr.g = 1.2f; }
+					if (bNPZ == BlockType::Lava || bNZN == BlockType::Lava) { tl.r = 1.6f; tl.g = 1.2f; }
+					vertex[v++] = {x,     y,     z,     tc->x, tc->v, bl.r, bl.g, bl.b};
+					vertex[v++] = {x,     y,     z + 1, tc->u, tc->v, br.r, br.g, br.b};
+					vertex[v++] = {x,     y + 1, z,     tc->x, tc->y, tl.r, tl.g, tl.b};
+					vertex[v++] = {x,     y + 1, z + 1, tc->u, tc->y, tr.r, tr.g, tr.b};
+#endif
+
 				// View from negative x
-				if (Blocks::isFaceRemoved(bt, get(x - 1, y, z))) {
+				if (Blocks::isFaceVisible(bt, get(x - 1, y, z))) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
 					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
 					tc = BlkInf->gTC(bt, FaceDirection::XDec);
@@ -175,7 +206,7 @@ void Chunk::updateClient() {
 				}
 
 				// View from positive x
-				if (Blocks::isFaceRemoved(bt, get(x + 1, y, z))) {
+				if (Blocks::isFaceVisible(bt, get(x + 1, y, z))) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
 					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
 					tc = BlkInf->gTC(bt, FaceDirection::XInc);
@@ -186,7 +217,7 @@ void Chunk::updateClient() {
 				}
 
 				// Negative Y
-				if (Blocks::isFaceRemoved(bt, get(x, y - 1, z))) {
+				if (Blocks::isFaceVisible(bt, get(x, y - 1, z))) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
 					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
 					float shade = (blk[I(x,y,z)] == BlockType::Shock) ? 1.5f : .2f;;
@@ -198,7 +229,7 @@ void Chunk::updateClient() {
 				}
 
 				// Positive Y
-				if (Blocks::isFaceRemoved(bt, get(x, y + 1, z))) {
+				if (Blocks::isFaceVisible(bt, get(x, y + 1, z))) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
 					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
 					tc = BlkInf->gTC(bt, FaceDirection::YInc);
@@ -209,7 +240,7 @@ void Chunk::updateClient() {
 				}
 
 				// Negative Z
-				if (Blocks::isFaceRemoved(bt, get(x, y, z - 1))) {
+				if (Blocks::isFaceVisible(bt, get(x, y, z - 1))) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
 					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
 					tc = BlkInf->gTC(bt, FaceDirection::ZDec);
@@ -220,7 +251,7 @@ void Chunk::updateClient() {
 				}
 
 				// Positive Z
-				if (Blocks::isFaceRemoved(bt, get(x, y, z + 1))) {
+				if (Blocks::isFaceVisible(bt, get(x, y, z + 1))) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
 					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
 					tc = BlkInf->gTC(bt, FaceDirection::ZInc);

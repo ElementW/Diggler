@@ -320,6 +320,7 @@ void GameState::onCursorPos(double x, double y) {
 	if(angles.y > M_PI / 2)
 		angles.y = M_PI / 2 - 0.001;
 
+	G->LP->angle = angles.x;
 	lookat.x = sinf(angles.x) * cosf(angles.y);
 	lookat.y = sinf(angles.y);
 	lookat.z = cosf(angles.x) * cosf(angles.y);
@@ -513,6 +514,7 @@ void GameState::gameLoop() {
 				msg.writeVec3(LP->position);
 				msg.writeVec3(LP->velocity);
 				msg.writeVec3(LP->accel);
+				msg.writeFloat(LP->angle);
 				sendMsg(msg, Net::Tfer::Unrel, Net::Channels::Movement);
 				nextNetUpdate = T+0.25;//+1;
 			}
@@ -665,7 +667,8 @@ void GameState::renderDeathScreen() {
 }
 
 void GameState::updateUI() {
-	int altitude = G->LP->position.y;
+	LocalPlayer &LP = *G->LP;
+	int altitude = LP.position.y;
 	if (altitude != UI.lastAltitude) {
 		char str[15]; std::snprintf(str, 15, "Altitude: %d", altitude);
 		UI.lastAltitude = altitude;
@@ -674,11 +677,12 @@ void GameState::updateUI() {
 	if (showDebugInfo) {
 		std::ostringstream oss;
 		oss << std::setprecision(3) <<
-			W->getW() << 'x' << W->getH() << std::endl <<
-			"x: " << G->LP->position.x << std::endl <<
-			"y: " << G->LP->position.y << std::endl <<
-			"z: " << G->LP->position.z << std::endl <<
-			"vy: " << G->LP->velocity.y << std::endl;
+			"HP: " << LP.health << std::endl <<
+			"x: " << LP.position.x << std::endl <<
+			"y: " << LP.position.y << std::endl <<
+			"z: " << LP.position.z << std::endl <<
+			"vy: " << LP.velocity.y << std::endl <<
+			"rx: " << LP.angle << std::endl;
 		UI.DebugInfo->setText(oss.str());
 	}
 }
@@ -733,6 +737,7 @@ bool GameState::processNetwork() {
 									  vel = m_msg.readVec3(),
 									  acc = m_msg.readVec3();
 							plr.setPosVel(pos, vel, acc);
+							plr.angle = m_msg.readFloat();
 						} break;
 						case Net::PlayerUpdateType::Die:
 							plr.setDead(false, (Player::DeathReason)m_msg.readU8());

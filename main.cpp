@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
 			getErrorStream() << "Network init failed!" << std::endl;
 			return 1;
 		}
-		Server S(&G, port);
+		Server S(G, port);
 		G.S = &S;
 		S.run();
 	}

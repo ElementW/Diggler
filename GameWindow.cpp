@@ -66,7 +66,7 @@ GameWindow::GameWindow(Game *G) : G(G) {
 #if GLM_ARCH & GLM_ARCH_SSE2
 	<< "SSE2"
 #endif
-	<< std::endl;
+	;
 
 	if (!IsGlewInited) {
 		GLenum glewStatus = glewInit();
@@ -75,7 +75,7 @@ GameWindow::GameWindow(Game *G) : G(G) {
 			std::terminate();
 		}
 		IsGlewInited = true;
-		getOutputStreamRaw() << "GLEW " << glewGetString(GLEW_VERSION) << std::endl;
+		getOutputStreamRaw() << " -- GLEW " << glewGetString(GLEW_VERSION) << std::endl;
 	}
 
 	if (InstanceCount == 1) { // If we're the first instance

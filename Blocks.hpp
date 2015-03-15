@@ -103,7 +103,7 @@ public:
 	Blocks();
 	~Blocks();
 	static bool isTransparent(BlockType t);
-	static bool isFaceRemoved(BlockType t, BlockType other);
+	static bool isFaceVisible(BlockType t, BlockType other);
 	static bool canGoThrough(BlockType t, Player::Team team);
 	const AtlasCreator::Coord* gTC(BlockType, FaceDirection) const;
 	Texture* getAtlas() const;

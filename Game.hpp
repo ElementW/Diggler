@@ -14,9 +14,6 @@ namespace UI {
 class Manager;
 }
 
-class Audio;
-class KeyBinds;
-
 class Game {
 public:
 	// Shared
@@ -39,9 +36,9 @@ public:
 	struct RenderProperties {
 		bool bloom;
 	} *RP;
-	Audio *A;
-	Net::Peer NS; // Net Server
-	KeyBinds *KB;
+	class Audio *A;
+	Net::Peer NS;
+	class KeyBinds *KB;
 	
 	Game();
 	void init();

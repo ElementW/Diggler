@@ -1,5 +1,8 @@
 #include "Mutex.hpp"
 #include <cstdlib>
+#include "Platform.hpp"
+
+#ifdef BUILDINFO_PLATFORM_PTHREAD
 #include <pthread.h>
 
 namespace Diggler {
@@ -27,3 +30,5 @@ void Mutex::unlock() {
 }
 
 }
+
+#endif
