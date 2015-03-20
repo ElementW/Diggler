@@ -2,6 +2,7 @@
 #define NET_HELPER_HPP
 #include <string>
 #include "Network.hpp"
+#include "../Blocks.hpp"
 
 namespace Diggler {
 
@@ -20,6 +21,8 @@ void MakeEvent(Net::OutMessage&, Net::EventType, const Player&);
 void SendEvent(Game*, Net::EventType);
 
 void SendChat(Game*, const std::string&);
+void SendToolUse(Game*);
+void SendToolUse(Game*, BlockType, int x, int y, int z);
 
 }
 }

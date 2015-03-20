@@ -26,10 +26,8 @@ public:
 	Superchunk(Game *G = nullptr);
 	~Superchunk();
 
-	void save(const std::string &path) const;
-	void load(const std::string &path);
-	void writeMsg(Net::OutMessage&) const;
-	void readMsg(Net::InMessage&);
+	void write(OutStream&) const;
+	void read(InStream&);
 
 	void setSize(int x, int y, int z);
 	int getChunksX() const;

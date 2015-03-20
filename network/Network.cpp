@@ -94,44 +94,16 @@ void OutMessage::fit(int len) {
 	m_dataMemSize = targetSize;
 }
 
-void OutMessage::writeData(const void *const data, int len) {
+void OutMessage::writeData(const void *data, int len) {
 	fit(m_length + len);
 	std::memcpy(&(m_data[m_length]), data, len);
 	m_length += len;
 }
-void InMessage::readData(void *const data, int len) {
+void InMessage::readData(void *data, int len) {
 	if (m_cursor + len > m_length)
 		throw std::underflow_error("No more data to be read");
 	std::memcpy(data, &(m_data[m_cursor]), len);
 	m_cursor += len;
-}
-void OutMessage::writeString(const std::string &str) {
-	if (str.size() > UINT16_MAX)
-		throw std::length_error("String too long");
-	int len = str.size();
-	writeU16(len);
-	fit(m_length + len);
-	std::memcpy(&(m_data[m_length]), str.c_str(), len);
-	m_length += len;
-}
-std::string InMessage::readString() {
-	uint16 len = readU16();
-	m_cursor += len;
-	return std::string((char*)&(m_data[m_cursor-len]), len);
-}
-void OutMessage::writeString32(const std::u32string &str) {
-	if (str.size() > UINT16_MAX)
-		throw std::length_error("String too long");
-	int len = str.size();
-	writeU16(len);
-	fit(m_length + len*4);
-	std::memcpy(&(m_data[m_length]), str.c_str(), len*4);
-	m_length += len*4;
-}
-std::u32string InMessage::readString32() {
-	uint16 len = readU16();
-	m_cursor += len*4;
-	return std::u32string((char32_t*)&(m_data[m_cursor-len*4]), len);
 }
 void OutMessage::writeVec3(const glm::vec3 &vec) {
 	writeFloat(vec.x);
@@ -144,86 +116,6 @@ glm::vec3 InMessage::readVec3() {
 	data.y = readFloat();
 	data.z = readFloat();
 	return glm::vec3(data.x, data.y, data.z);
-}
-void OutMessage::writeI64(int64 i) {
-	writeData(&i, 8);
-}
-int64 InMessage::readI64() {
-	int64 val;
-	readData(&val, 8);
-	return val;
-}
-void OutMessage::writeU64(uint64 i) {
-	writeData(&i, 8);
-}
-uint64 InMessage::readU64() {
-	uint64 val;
-	readData(&val, 8);
-	return val;
-}
-void OutMessage::writeI32(int32 i) {
-	writeData(&i, 4);
-}
-int32 InMessage::readI32() {
-	int32 val;
-	readData(&val, 4);
-	return val;
-}
-void OutMessage::writeU32(uint32 i) {
-	writeData(&i, 4);
-}
-uint32 InMessage::readU32() {
-	uint32 val;
-	readData(&val, 4);
-	return val;
-}
-void OutMessage::writeI16(int16 i) {
-	writeData(&i, 2);
-}
-int16 InMessage::readI16() {
-	int16 val;
-	readData(&val, 2);
-	return val;
-}
-void OutMessage::writeU16(uint16 i) {
-	writeData(&i, 2);
-}
-uint16 InMessage::readU16() {
-	uint16 val;
-	readData(&val, 2);
-	return val;
-}
-void OutMessage::writeI8(int8 i) {
-	writeData(&i, 1);
-}
-int8 InMessage::readI8() {
-	int8 val;
-	readData(&val, 1);
-	return val;
-}
-void OutMessage::writeU8(uint8 i) {
-	writeData(&i, 1);
-}
-uint8 InMessage::readU8() {
-	uint8 val;
-	readData(&val, 1);
-	return val;
-}
-void OutMessage::writeFloat(float f) {
-	writeData(&f, sizeof(float));
-}
-float InMessage::readFloat() {
-	float val;
-	readData(&val, sizeof(float));
-	return val;
-}
-void OutMessage::writeDouble(double d) {
-	writeData(&d, sizeof(double));
-}
-double InMessage::readDouble() {
-	double val;
-	readData(&val, sizeof(double));
-	return val;
 }
 
 Channels InMessage::getChannel() const {

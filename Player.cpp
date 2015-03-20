@@ -67,7 +67,7 @@ int Player::getMaxWeight(Class c) {
 
 Player::Player(Game *G) : team(Team::Red),
 	playerclass(Class::Prospector), tool(Tools::Pickaxe), G(G),
-	position(0), velocity(0), accel(0), angle(0),
+	position(0), velocity(0), accel(0), angle(0), toolUseTime(0),
 	isAlive(true), ore(0), loot(0) {
 	if (GlobalProperties::IsClient) {
 		if (TexInfos == nullptr) {
@@ -161,13 +161,22 @@ static inline int getSide(float angle) {
 void Player::render(const glm::mat4 &transform) const {
 	RenderProgram->bind();
 	TexInfos[(uint8)team][(uint8)tool]->tex->bind();
-	TexInfos[(uint8)team][(uint8)tool]->side[getSide(rmod(atan2(position.x-G->LP->position.x, position.z-G->LP->position.z)-angle, M_PI*2))].vbos[((int)G->Time)%4]->bind();
+	int action = 1;
+	if (velocity.x < -.5f || velocity.x > .5f ||
+		velocity.z < -.5f || velocity.z > .5f)
+		action = ((int)(G->Time*3))%2*2;
+	if (G->Time-1 < toolUseTime)
+		action = 3;
+	TexInfos[(uint8)team][(uint8)tool]->side[
+		getSide(rmod(atan2(position.x-G->LP->position.x, position.z-G->LP->position.z)-angle, M_PI*2))]
+		.vbos[action]->bind();
 	glEnableVertexAttribArray(RenderProgram_attrib_texcoord);
 	glEnableVertexAttribArray(RenderProgram_attrib_coord);
 	glm::vec3 &lpPos = G->LP->position;
 	float angle = atan2(lpPos.x-m_predictPos.x, lpPos.z-m_predictPos.z);
+	static const glm::vec3 vecY(0.0, 1.0, 0.0);
 	glUniformMatrix4fv(RenderProgram_uni_mvp, 1, GL_FALSE, glm::value_ptr(
-		glm::translate(transform, m_predictPos) * glm::rotate(angle, glm::vec3(0.0, 1.0, 0.0))));
+		glm::translate(transform, m_predictPos) * glm::rotate(angle, vecY)));
 	glVertexAttribPointer(RenderProgram_attrib_coord, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), 0);
 	glVertexAttribPointer(RenderProgram_attrib_texcoord, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (GLvoid*)(3*sizeof(float)));
 	glDrawArrays(GL_TRIANGLES, 0, 6);

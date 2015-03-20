@@ -516,7 +516,7 @@ void GameState::gameLoop() {
 				msg.writeVec3(LP->accel);
 				msg.writeFloat(LP->angle);
 				sendMsg(msg, Net::Tfer::Unrel, Net::Channels::Movement);
-				nextNetUpdate = T+0.25;//+1;
+				nextNetUpdate = T+0.25;
 			}
 			glClearColor(0.0, 0.0, 0.0, 1.0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -527,14 +527,16 @@ void GameState::gameLoop() {
 
 			LP->update(deltaT);
 			// TODO: disable teleport and kill player
-			if (LP->position.y < -32-LP->size.y) {
-				LP->position.y = G->SC->getChunksY()*CY+32+LP->size.y;
+			if (LP->position.y < -32) {
+				LP->setDead(true, Player::DeathReason::Void, true);
+				// TODO: remove, TP player
+				LP->position.y = 10;
 			}
 
 			glm::mat4 m_transform = LP->getPVMatrix();
 
 			/*** 3D PART ***/
-			glm::mat4 cloudmat = glm::scale(glm::translate(m_transform, glm::vec3(0.f, (G->SC->getChunksY()*CY/4)+.5f, 0.f)), glm::vec3(G->SC->getChunksX()*CX, 2, G->SC->getChunksZ()*CZ));
+			glm::mat4 cloudmat = glm::scale(glm::translate(m_transform, glm::vec3(0.f, G->SC->getChunksY()*CY+4, 0.f)), glm::vec3(G->SC->getChunksX()*CX, 1, G->SC->getChunksZ()*CZ));
 			m_clouds->render(cloudmat);
 
 			glEnable(GL_DEPTH_TEST);
@@ -706,7 +708,7 @@ bool GameState::processNetwork() {
 				return false;
 
 			case Net::MessageType::MapTransfer: {
-				G->SC->readMsg(m_msg);
+				G->SC->read(m_msg);
 			} break;
 			case Net::MessageType::Chat: {
 				m_chatBox->addChatEntry(m_msg.readString());

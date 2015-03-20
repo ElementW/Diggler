@@ -14,6 +14,8 @@ private:
 	std::vector<Change> m_changes;
 
 public:
+	bool enabled;
+
 	ChunkChangeHelper();
 	void add(int x, int y, int z, BlockType b);
 	bool empty() const;

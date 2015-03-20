@@ -35,6 +35,7 @@ public:
 	Font *F;
 	struct RenderProperties {
 		bool bloom;
+		float fogStart, fogEnd;
 	} *RP;
 	class Audio *A;
 	Net::Peer NS;

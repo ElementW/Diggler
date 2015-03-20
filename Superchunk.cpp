@@ -120,12 +120,14 @@ Chunk* Superchunk::getChunk(int cx, int cy, int cz) {
 }
 
 void Superchunk::render(const glm::mat4& transform) {
-	if (Chunk::RenderProgram == nullptr)
+	if (Chunk::R.prog == nullptr)
 		return;
-	Chunk::RenderProgram->bind();
-	glEnableVertexAttribArray(Chunk::RenderProgram_attrib_coord);
-	glEnableVertexAttribArray(Chunk::RenderProgram_attrib_texcoord);
-	glEnableVertexAttribArray(Chunk::RenderProgram_attrib_color);
+	Chunk::R.prog->bind();
+	glUniform1f(Chunk::R.uni_fogStart, G->RP->fogStart);
+	glUniform1f(Chunk::R.uni_fogEnd, G->RP->fogEnd);
+	glEnableVertexAttribArray(Chunk::R.att_coord);
+	glEnableVertexAttribArray(Chunk::R.att_texcoord);
+	glEnableVertexAttribArray(Chunk::R.att_color);
 	Chunk::TextureAtlas->bind();
 
 	const static glm::vec3 cShift(Chunk::MidX, Chunk::MidY, Chunk::MidZ);
@@ -141,9 +143,9 @@ void Superchunk::render(const glm::mat4& transform) {
 					}
 				}
 	
-	glDisableVertexAttribArray(Chunk::RenderProgram_attrib_color);
-	glDisableVertexAttribArray(Chunk::RenderProgram_attrib_texcoord);
-	glDisableVertexAttribArray(Chunk::RenderProgram_attrib_coord);
+	glDisableVertexAttribArray(Chunk::R.att_color);
+	glDisableVertexAttribArray(Chunk::R.att_texcoord);
+	glDisableVertexAttribArray(Chunk::R.att_coord);
 }
 
 int Superchunk::getChunksX() const {
@@ -158,74 +160,6 @@ int Superchunk::getChunksZ() const {
 	return chunksZ;
 }
 
-void Superchunk::save(const std::string &path) const {
-	FILE *f = fopen(path.c_str(), "w");
-	int32 chunkSize[3] = {CX, CY, CZ};
-	int32 superChunkSize[3] = {getChunksX(), getChunksY(), getChunksZ()};
-	fwrite(chunkSize, sizeof(int32), 3, f);
-	fwrite(superChunkSize, sizeof(int32), 3, f);
-	const BlockType *chunkData = nullptr;
-	uint compressedSize = CX * CY * CZ;
-	byte *compressed = (byte*)malloc(compressedSize);
-	for (int sx=0; sx < superChunkSize[0]; sx++) {
-		for (int sy=0; sy < superChunkSize[1]; sy++) {
-			for (int sz=0; sz < superChunkSize[2]; sz++) {
-				// Chunk may be uninitialized
-				if (c[sx][sy][sz] == nullptr) {
-					// Chunk is empty (not initialized), mark as missing
-					int16 size = -1;
-					fwrite(&size, sizeof(int16), 1, f);
-				} else {
-					chunkData = c[sx][sy][sz]->blk;
-					compressedSize = CX * CY * CZ;
-					lzfx_compress(chunkData, CX*CY*CZ, compressed, &compressedSize);
-					int16 size = (int16)compressedSize;
-					fwrite(&size, sizeof(int16), 1, f);
-					fwrite(compressed, compressedSize, 1, f);
-				}
-			}
-		}
-	}
-	::free(compressed);
-	fclose(f);
-}
-
-void Superchunk::load(const std::string &path) {
-	FILE *f = fopen(path.c_str(), "r");
-	int32 chunkSize[3];
-	int32 superChunkSize[3];
-	fread(chunkSize, sizeof(int32), 3, f);
-	fread(superChunkSize, sizeof(int32), 3, f);
-	setSize(superChunkSize[0], superChunkSize[1], superChunkSize[1]);
-	uint uncompressedDataSize = CX * CY * CZ; // Should not change
-	BlockType *uncompressedData = (BlockType*)malloc(uncompressedDataSize);
-	for (int sx=0; sx < superChunkSize[0]; sx++) {
-		for (int sy=0; sy < superChunkSize[1]; sy++) {
-			for (int sz=0; sz < superChunkSize[2]; sz++) {
-				int16 size; fread(&size, sizeof(int16), 1, f);
-				if (c[sx][sy][sz] != nullptr) {
-					delete c[sx][sy][sz]; // Bash out the old chunk
-				}
-				if (size == -1) { // Chunk is empty
-					c[sx][sy][sz] = nullptr;
-				} else {
-					c[sx][sy][sz] = new Chunk(sx, sy, sz, G);
-					byte *compressedData = (byte*)malloc(size);
-					fread(compressedData, size, 1, f);
-					uncompressedDataSize = CX * CY * CZ;
-					lzfx_decompress(compressedData, size, uncompressedData, &uncompressedDataSize);
-					for (int i=0; i < CX*CY*CZ; ++i) {
-						c[sx][sy][sz]->blk[i] = uncompressedData[i];
-					}
-					::free(compressedData);
-				}
-			}
-		}
-	}
-	::free(uncompressedData);
-	fclose(f);
-}
-
 struct MapTransferHeader {
 	struct {
 		int32 x, y, z;
@@ -235,7 +169,7 @@ struct MapTransferHeader {
 	} Chunks;
 };
 
-void Superchunk::writeMsg(Net::OutMessage &msg) const {
+void Superchunk::write(OutStream &msg) const {
 	MapTransferHeader mth {
 		{CX, CY, CZ},
 		{getChunksX(), getChunksY(), getChunksZ()}
@@ -243,7 +177,7 @@ void Superchunk::writeMsg(Net::OutMessage &msg) const {
 	msg.writeData(&mth, sizeof(MapTransferHeader));
 	const BlockType *chunkData = nullptr;
 	uint compressedSize = CX * CY * CZ;
-	byte *compressed = (byte*)malloc(compressedSize);
+	byte *compressed = new byte[compressedSize];
 	for (int sx=0; sx < getChunksX(); sx++) {
 		for (int sy=0; sy < getChunksY(); sy++) {
 			for (int sz=0; sz < getChunksZ(); sz++) {
@@ -261,16 +195,16 @@ void Superchunk::writeMsg(Net::OutMessage &msg) const {
 			}
 		}
 	}
-	::free(compressed);
+	delete[] compressed;
 }
 
-void Superchunk::readMsg(Net::InMessage &M) {
+void Superchunk::read(InStream &M) {
 	MapTransferHeader mth;
 	M.readData(&mth, sizeof(mth));
 	setSize(mth.Chunks.x, mth.Chunks.y, mth.Chunks.z);
 	int bytesRead = 0;
 	uint uncompressedDataSize = CX * CY * CZ; // Should not change
-	BlockType *uncompressedData = (BlockType*)malloc(uncompressedDataSize);
+	BlockType *uncompressedData = new BlockType[uncompressedDataSize/sizeof(BlockType)];
 	for (int sx=0; sx < mth.Chunks.x; sx++) {
 		for (int sy=0; sy < mth.Chunks.y; sy++) {
 			for (int sz=0; sz < mth.Chunks.z; sz++) {
@@ -295,8 +229,8 @@ void Superchunk::readMsg(Net::InMessage &M) {
 			}
 		}
 	}
-	::free(uncompressedData);
-	getDebugStream() << "MapTransfer: read " << bytesRead << " b, MsgSize: " << M.getSize() << std::endl;
+	delete[] uncompressedData;
+	getDebugStream() << "MapRead: read " << bytesRead << std::endl;
 }
 
 }

@@ -75,7 +75,7 @@ void Server::handlePlayerJoin(InMessage &msg, Peer &peer) {
 	}
 	
 	OutMessage map(MessageType::MapTransfer);
-	G.SC->writeMsg(map);
+	G.SC->write(map);
 	H.send(peer, map, Tfer::Rel);
 	
 	// Broadcast player's join
@@ -243,7 +243,7 @@ Server::Server(Game &G, uint16 port) : G(G) {
 		throw "Server init failed";
 	}
 
-#if 1
+#if 0
 	G.SC->setSize(4, 4, 4);
 
 	//for (int i=0; i < 8192; i++) G.SC->set(FastRand(CX*G.SC->getChunksX()), FastRand(CY*G.SC->getChunksY()), FastRand(CZ*G.SC->getChunksZ()), (BlockType)(FastRand((int)BlockType::LAST)));
@@ -272,8 +272,10 @@ Server::Server(Game &G, uint16 port) : G(G) {
 	for(int x=0;x<CX*G.SC->getChunksX();x++) for(int z=0;z<(CZ*G.SC->getChunksZ())/2;z++) G.SC->set(x, 64, z, BlockType::Dirt);
 	G.SC->set(2*CX, 68, 2*CY, BlockType::Lava);
 #else
+	G.CCH->enabled = false;
 	G.SC->setSize(4, 4, 4);
 	CaveGenerator::GenerateCaveSystem(*(G.SC), true, 15);
+	G.CCH->enabled = true;
 #endif
 
 	//G.SC->save("/tmp/a");

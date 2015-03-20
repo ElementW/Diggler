@@ -1,6 +1,7 @@
 #ifndef NETWORK_HPP
 #define NETWORK_HPP
 #include "../Platform.hpp"
+#include "../io/Stream.hpp"
 #include <glm/vec3.hpp>
 #include <exception>
 
@@ -19,9 +20,11 @@ enum class Tfer {
 
 enum class Channels : uint8 {
 	Base = 0,
+	Chat,
 	Life,
 	Movement,
 	PlayerInfo,
+	PlayerInteract,
 	MapUpdate,
 	MAX
 };
@@ -48,7 +51,8 @@ enum PlayerUpdateType : uint8 {
 	ChangeClass,
 	ChangeTeam,
 	Die,
-	Respawn
+	Respawn,
+	ToolUse
 };
 
 enum QuitReason : uint8 {
@@ -88,7 +92,7 @@ public:
 	int getSize() const { return m_length; }
 };
 
-class InMessage : public Message {
+class InMessage : public Message, public InStream {
 protected:
 	friend class Host;
 	Channels m_chan;
@@ -98,49 +102,25 @@ protected:
 public:
 	InMessage();
 	~InMessage();
-	
-	std::string readString();
-	std::u32string readString32();
-	int64 readI64();
-	uint64 readU64();
-	int32 readI32();
-	uint32 readU32();
-	int16 readI16();
-	uint16 readU16();
-	int8 readI8();
-	uint8 readU8();
-	float readFloat();
-	double readDouble();
-	void readData(void *const data, int len);
+
+	void readData(void *data, int len);
 	glm::vec3 readVec3();
-	
+
 	Channels getChannel() const;
 };
 
-class OutMessage : public Message {
+class OutMessage : public Message, public OutStream {
 protected:
 	void fit(int);
 
 public:
 	OutMessage(MessageType t = MessageType::Null, uint8 subtype = 0);
 	~OutMessage();
-	
+
 	void setType(MessageType t) { m_type = t; }
 	void setSubtype(uint8 t) { m_subtype = t; }
-	
-	void writeString(const std::string &str);
-	void writeString32(const std::u32string &str);
-	void writeI64(int64 i);
-	void writeU64(uint64 i);
-	void writeI32(int32 i);
-	void writeU32(uint32 i);
-	void writeI16(int16 i);
-	void writeU16(uint16 i);
-	void writeI8(int8 i);
-	void writeU8(uint8 i);
-	void writeFloat(float f);
-	void writeDouble(double d);
-	void writeData(const void *const data, int len);
+
+	void writeData(const void *data, int len);
 	void writeVec3(const glm::vec3 &vec);
 };
 
@@ -149,10 +129,10 @@ class Exception : public std::exception {
 
 struct Peer {
 	void *peer;
-	
+
 	bool operator==(const Peer&) const;
 	bool operator!=(const Peer&) const;
-	
+
 	void disconnect();
 	std::string getHost();
 	std::string getIp();
@@ -162,7 +142,7 @@ struct Peer {
 class Host {
 private:
 	void *host;
-	
+
 	Host(const Host&) = delete;
 	Host& operator=(Host&) = delete;
 	Host& operator=(const Host&) = delete;
@@ -172,7 +152,7 @@ public:
 	void create(int port = -1, int maxconn = 64);
 	Peer connect(const std::string &host, int port, int timeout);
 	~Host();
-	
+
 	void send(Peer &peer, const OutMessage &msg, Tfer mode = Tfer::Rel, Channels chan = Channels::Base);
 	bool recv(InMessage &msg, Peer &peer, int timeout);
 	bool recv(InMessage &msg, int timeout = 0);

@@ -4,40 +4,54 @@
 #include "../Server.hpp"
 
 namespace Diggler {
+
+using namespace Net;
+
 namespace NetHelper {
 
-void Broadcast(Game *G, const Net::OutMessage &msg, Net::Tfer tfer, Net::Channels chan) {
+void Broadcast(Game *G, const OutMessage &msg, Tfer tfer, Channels chan) {
 	Broadcast(*G, msg, tfer, chan);
 }
 
-void Broadcast(Game &G, const Net::OutMessage &msg, Net::Tfer tfer, Net::Channels chan) {
+void Broadcast(Game &G, const OutMessage &msg, Tfer tfer, Channels chan) {
 	for (Player &p : G.players) {
 		G.S->H.send(p.P, msg, tfer, chan);
 	}
 }
 
-void MakeEvent(Net::OutMessage &msg, Net::EventType t, const Player &p) {
-	msg.setType(Net::MessageType::Event);
+void MakeEvent(OutMessage &msg, EventType t, const Player &p) {
+	msg.setType(MessageType::Event);
 	msg.setSubtype(t);
 	msg.writeU32(p.id);
 }
 
-void MakeEvent(Net::OutMessage &msg, Net::EventType t, const glm::vec3 &p) {
-	msg.setType(Net::MessageType::Event);
+void MakeEvent(OutMessage &msg, EventType t, const glm::vec3 &p) {
+	msg.setType(MessageType::Event);
 	msg.setSubtype(t);
 	msg.writeVec3(p);
 }
 
 void SendChat(Game *G, const std::string &str) {
-	Net::OutMessage chat(Net::MessageType::Chat);
+	OutMessage chat(MessageType::Chat);
 	chat.writeString(str);
-	G->H.send(G->NS, chat, Net::Tfer::Unseq);
+	G->H.send(G->NS, chat, Tfer::Unseq);
 }
 
-void SendEvent(Game* G, Net::EventType t) {
-	Net::OutMessage msg(Net::MessageType::Event, t);
-	G->H.send(G->NS, msg, Net::Tfer::Unseq);
+void SendEvent(Game *G, EventType t) {
+	OutMessage msg(MessageType::Event, t);
+	G->H.send(G->NS, msg, Tfer::Unseq);
 }
+
+void SendToolUse(Game *G, BlockType bt, int x, int y, int z) {
+	OutMessage msg(MessageType::PlayerUpdate, PlayerUpdateType::ToolUse);
+	
+	G->H.send(G->NS, msg, Tfer::Rel, Channels::PlayerInteract);
+}
+
+void SendToolUse(Game *G) {
+	SendToolUse(G, BlockType::Air, 0, 0, 0);
+}
+
 
 }
 }

@@ -2,11 +2,13 @@
 
 namespace Diggler {
 
-ChunkChangeHelper::ChunkChangeHelper() {
+ChunkChangeHelper::ChunkChangeHelper() : enabled(true) {
 	m_changes.reserve(64);
 }
 
 void ChunkChangeHelper::add(int x, int y, int z, BlockType b) {
+	if (!enabled)
+		return;
 	for (Change &c : m_changes) {
 		if (c.x == x && c.y == y && c.z == z) {
 			c.b = b;

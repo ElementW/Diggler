@@ -35,11 +35,18 @@ public:
 		(CZ > (CX > CY ? CX : CY) ? CZ : (CX > CY ? CX : CY));
 		// * 1.4142135623f; but we're already at 2x the radius (i.e. diameter)
 	constexpr static float MidX = CX/2.f, MidY = CY/2.f, MidZ = CZ/2.f;
-	static const Program *RenderProgram;
+	static struct Renderer {
+		const Program *prog;
+		GLint att_coord,
+			  att_color,
+			  att_texcoord,
+			  uni_mvp,
+			  uni_unicolor,
+			  uni_fogStart,
+			  uni_fogEnd;
+	} R;
 	static Texture *TextureAtlas;
 	static Blocks *BlkInf;
-	static GLint RenderProgram_uni_unicolor, RenderProgram_attrib_coord, RenderProgram_attrib_color,
-		RenderProgram_attrib_texcoord, RenderProgram_uni_mvp;
 	BlockType *blk;
 	int scx, scy, scz;
 	Game *G;

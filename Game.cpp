@@ -14,7 +14,11 @@ void Game::init() {
 	if (GlobalProperties::IsClient) {
 		PM = new ProgramManager(*this);
 		LP = new LocalPlayer(this);
-		RP = new RenderProperties;
+		RP = new RenderProperties; { // TODO move somewhere else?
+			RP->bloom = true;
+			RP->fogStart = 16;
+			RP->fogEnd = 32;
+		}
 		A = new Audio(*this);
 		KB = new KeyBinds;
 	}

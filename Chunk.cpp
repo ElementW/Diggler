@@ -16,14 +16,9 @@
 
 namespace Diggler {
 
-const Program *Chunk::RenderProgram = nullptr;
+Chunk::Renderer Chunk::R = {0};
 Texture *Chunk::TextureAtlas = nullptr;
 Blocks *Chunk::BlkInf = nullptr;
-GLint Chunk::RenderProgram_uni_unicolor = -1;
-GLint Chunk::RenderProgram_attrib_texcoord = -1;
-GLint Chunk::RenderProgram_attrib_coord = -1;
-GLint Chunk::RenderProgram_attrib_color = -1;
-GLint Chunk::RenderProgram_uni_mvp = -1;
 
 constexpr float Chunk::CullSphereRadius;
 constexpr float Chunk::MidX, Chunk::MidY, Chunk::MidZ;
@@ -38,13 +33,15 @@ Chunk::Chunk(int scx, int scy, int scz, Game *G) : blk2(nullptr),
 	if (GlobalProperties::IsClient) {
 		vbo = new VBO;
 		ibo = new VBO;
-		if (RenderProgram == nullptr) {
-			RenderProgram = G->PM->getProgram(PM_3D | PM_TEXTURED | PM_COLORED | PM_FOG);
-			RenderProgram_uni_unicolor = RenderProgram->uni("unicolor");
-			RenderProgram_attrib_coord = RenderProgram->att("coord");
-			RenderProgram_attrib_color = RenderProgram->att("color");
-			RenderProgram_attrib_texcoord = RenderProgram->att("texcoord");
-			RenderProgram_uni_mvp = RenderProgram->uni("mvp");
+		if (R.prog == nullptr) {
+			R.prog = G->PM->getProgram(PM_3D | PM_TEXTURED | PM_COLORED | PM_FOG);
+			R.att_coord = R.prog->att("coord");
+			R.att_color = R.prog->att("color");
+			R.att_texcoord = R.prog->att("texcoord");
+			R.uni_mvp = R.prog->uni("mvp");
+			R.uni_unicolor = R.prog->uni("unicolor");
+			R.uni_fogStart = R.prog->uni("fogStart");
+			R.uni_fogEnd = R.prog->uni("fogEnd");
 			
 			BlkInf = new Blocks();
 			
@@ -278,41 +275,43 @@ void Chunk::render(const glm::mat4 &transform) {
 	if (!indices)
 		return;
 	
-	RenderProgram->bind();
+	R.prog->bind();
 	
-	glEnableVertexAttribArray(RenderProgram_attrib_coord);
-	glEnableVertexAttribArray(RenderProgram_attrib_texcoord);
-	glEnableVertexAttribArray(RenderProgram_attrib_color);
-	glUniformMatrix4fv(RenderProgram_uni_mvp, 1, GL_FALSE, glm::value_ptr(transform));
+	glEnableVertexAttribArray(R.att_coord);
+	glEnableVertexAttribArray(R.att_texcoord);
+	glEnableVertexAttribArray(R.att_color);
+	glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(transform));
+	glUniform1f(R.uni_fogStart, G->RP->fogStart);
+	glUniform1f(R.uni_fogEnd, G->RP->fogEnd);
 	
 	TextureAtlas->bind();
 	vbo->bind();
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo->id);
-	glVertexAttribPointer(RenderProgram_attrib_coord, 3, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLCoord), 0);
-	glVertexAttribPointer(RenderProgram_attrib_texcoord, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, tx));
-	glVertexAttribPointer(RenderProgram_attrib_color, 3, GL_FLOAT, GL_FALSE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, r));
+	glVertexAttribPointer(R.att_coord, 3, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLCoord), 0);
+	glVertexAttribPointer(R.att_texcoord, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, tx));
+	glVertexAttribPointer(R.att_color, 3, GL_FLOAT, GL_FALSE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, r));
 	glDrawElements(GL_TRIANGLES, indices, GL_UNSIGNED_SHORT, nullptr);
 	
-	glDisableVertexAttribArray(RenderProgram_attrib_color);
-	glDisableVertexAttribArray(RenderProgram_attrib_texcoord);
-	glDisableVertexAttribArray(RenderProgram_attrib_coord);
+	glDisableVertexAttribArray(R.att_color);
+	glDisableVertexAttribArray(R.att_texcoord);
+	glDisableVertexAttribArray(R.att_coord);
 }
 
 void Chunk::renderBatched(const glm::mat4& transform) {
 #if SHOW_CHUNK_UPDATES
-	glUniform4f(RenderProgram_uni_unicolor, 1.f, changed ? 0.f : 1.f, changed ? 0.f : 1.f, 1.f);
+	glUniform4f(R.uni_unicolor, 1.f, changed ? 0.f : 1.f, changed ? 0.f : 1.f, 1.f);
 #endif
 	if (changed)
 		updateClient();
 	if (!indices)
 		return;
 	
-	glUniformMatrix4fv(RenderProgram_uni_mvp, 1, GL_FALSE, glm::value_ptr(transform));
+	glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(transform));
 	vbo->bind();
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo->id);
-	glVertexAttribPointer(RenderProgram_attrib_coord, 3, GL_BYTE, GL_FALSE, sizeof(GLCoord), 0);
-	glVertexAttribPointer(RenderProgram_attrib_texcoord, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, tx));
-	glVertexAttribPointer(RenderProgram_attrib_color, 3, GL_FLOAT, GL_FALSE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, r));
+	glVertexAttribPointer(R.att_coord, 3, GL_BYTE, GL_FALSE, sizeof(GLCoord), 0);
+	glVertexAttribPointer(R.att_texcoord, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, tx));
+	glVertexAttribPointer(R.att_color, 3, GL_FLOAT, GL_FALSE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, r));
 	glDrawElements(GL_TRIANGLES, indices, GL_UNSIGNED_SHORT, nullptr);
 }
 
