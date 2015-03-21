@@ -206,6 +206,12 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 			unlockMouse();
 		}
 		break;
+	case GLFW_KEY_F7:
+		if (action == GLFW_PRESS) {
+			G->RP->wavingLiquids = !G->RP->wavingLiquids;
+			G->SC->onRenderPropertiesChanged();
+		}
+		break;
 	default:
 		break;
 	}

@@ -125,9 +125,11 @@ void Superchunk::render(const glm::mat4& transform) {
 	Chunk::R.prog->bind();
 	glUniform1f(Chunk::R.uni_fogStart, G->RP->fogStart);
 	glUniform1f(Chunk::R.uni_fogEnd, G->RP->fogEnd);
+	glUniform1f(Chunk::R.uni_time, G->Time);
 	glEnableVertexAttribArray(Chunk::R.att_coord);
 	glEnableVertexAttribArray(Chunk::R.att_texcoord);
 	glEnableVertexAttribArray(Chunk::R.att_color);
+	glEnableVertexAttribArray(Chunk::R.att_wave);
 	Chunk::TextureAtlas->bind();
 
 	const static glm::vec3 cShift(Chunk::MidX, Chunk::MidY, Chunk::MidZ);
@@ -143,9 +145,23 @@ void Superchunk::render(const glm::mat4& transform) {
 					}
 				}
 	
+	glDisableVertexAttribArray(Chunk::R.att_wave);
 	glDisableVertexAttribArray(Chunk::R.att_color);
 	glDisableVertexAttribArray(Chunk::R.att_texcoord);
 	glDisableVertexAttribArray(Chunk::R.att_coord);
+}
+
+void Superchunk::onRenderPropertiesChanged() {
+	c[0][0][0]->onRenderPropertiesChanged();
+	refresh();
+}
+
+void Superchunk::refresh() {
+	for (int x = 0; x < chunksX; x++)
+		for (int y = 0; y < chunksY; y++)
+			for (int z = 0; z < chunksZ; z++)
+				if (c[x][y][z])
+					c[x][y][z]->updateClient();
 }
 
 int Superchunk::getChunksX() const {

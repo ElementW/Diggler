@@ -11,21 +11,26 @@
 #define PM_FOG			0x8
 #define PM_TEXSHIFT		0x10
 #define PM_DISCARD		0x20
+#define PM_TIME			0x40
+#define PM_WAVE			(0x80 | PM_TIME)
 
 namespace Diggler {
 
 class ProgramManager {
+public:
+	typedef uint32_t FlagsT;
+
 private:
 	class Game &G;
-	std::unordered_map<int, Program*> m_programs;
+	std::unordered_map<FlagsT, Program*> m_programs;
 	std::vector<Program*> m_specialPrograms;
-	static std::string getShadersName(int flags);
-	static void getDefines(int flags, std::vector<std::string> &defs);
+	static std::string getShadersName(FlagsT flags);
+	static void getDefines(FlagsT flags, std::vector<std::string> &defs);
 
 public:
 	ProgramManager(Game&);
 	~ProgramManager();
-	const Program* getProgram(int flags);
+	const Program* getProgram(FlagsT flags);
 	const Program* getSpecialProgram(const std::string &name);
 };
 

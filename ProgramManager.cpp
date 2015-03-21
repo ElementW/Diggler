@@ -8,14 +8,14 @@
 
 namespace Diggler {
 
-std::string ProgramManager::getShadersName(int flags) {
+std::string ProgramManager::getShadersName(FlagsT flags) {
 	if (flags & PM_3D)
 		return "3d";
 	else
 		return "2d";
 }
 
-void ProgramManager::getDefines(int flags, std::vector<std::string> &defs) {
+void ProgramManager::getDefines(FlagsT flags, std::vector<std::string> &defs) {
 	if (flags & PM_TEXTURED)
 		defs.push_back("TEXTURED");
 	if (flags & PM_TEXSHIFT)
@@ -26,13 +26,17 @@ void ProgramManager::getDefines(int flags, std::vector<std::string> &defs) {
 		defs.push_back("FOG");
 	if (flags & PM_DISCARD)
 		defs.push_back("DISCARD");
+	if (flags & PM_TIME)
+		defs.push_back("TIME");
+	if (flags & PM_WAVE)
+		defs.push_back("WAVE");
 }
 
 ProgramManager::ProgramManager(Game &G) : G(G) {
 
 }
 
-const Program* ProgramManager::getProgram(int flags) {
+const Program* ProgramManager::getProgram(FlagsT flags) {
 	auto it = m_programs.find(flags);
 	if (it != m_programs.end())
 		return it->second;
@@ -75,7 +79,7 @@ const Program* ProgramManager::getSpecialProgram(const std::string &name) {
 }
 
 ProgramManager::~ProgramManager() {
-	for (const std::pair<const int, Program*> pair : m_programs) {
+	for (const std::pair<FlagsT, Program*> pair : m_programs) {
 		delete pair.second;
 	}
 	for (const Program* prog : m_specialPrograms) {

@@ -38,6 +38,8 @@ public:
 	BlockType get(float x, float y, float z);
 	void set(int x, int y, int z, BlockType type);
 	Chunk* getChunk(int cx, int cy, int cz);
+	void onRenderPropertiesChanged();
+	void refresh();
 
 	void render(const glm::mat4 &transform);
 };

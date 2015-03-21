@@ -34,7 +34,7 @@ public:
 	ProgramManager *PM;
 	Font *F;
 	struct RenderProperties {
-		bool bloom;
+		bool bloom, wavingLiquids;
 		float fogStart, fogEnd;
 	} *RP;
 	class Audio *A;

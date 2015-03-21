@@ -20,6 +20,12 @@ Chunk::Renderer Chunk::R = {0};
 Texture *Chunk::TextureAtlas = nullptr;
 Blocks *Chunk::BlkInf = nullptr;
 
+struct GLCoord {
+	uint8 x, y, z, w;
+	uint16 tx, ty;
+	float r, g, b;
+};
+
 constexpr float Chunk::CullSphereRadius;
 constexpr float Chunk::MidX, Chunk::MidY, Chunk::MidZ;
 
@@ -34,14 +40,7 @@ Chunk::Chunk(int scx, int scy, int scz, Game *G) : blk2(nullptr),
 		vbo = new VBO;
 		ibo = new VBO;
 		if (R.prog == nullptr) {
-			R.prog = G->PM->getProgram(PM_3D | PM_TEXTURED | PM_COLORED | PM_FOG);
-			R.att_coord = R.prog->att("coord");
-			R.att_color = R.prog->att("color");
-			R.att_texcoord = R.prog->att("texcoord");
-			R.uni_mvp = R.prog->uni("mvp");
-			R.uni_unicolor = R.prog->uni("unicolor");
-			R.uni_fogStart = R.prog->uni("fogStart");
-			R.uni_fogEnd = R.prog->uni("fogEnd");
+			loadShader();
 			
 			BlkInf = new Blocks();
 			
@@ -52,7 +51,28 @@ Chunk::Chunk(int scx, int scy, int scz, Game *G) : blk2(nullptr),
 		blk2 = new BlockType[CX*CY*CZ];
 	}
 }
- 
+
+void Chunk::loadShader() {
+	bool w = G->RP->wavingLiquids;
+	ProgramManager::FlagsT flags = PM_3D | PM_TEXTURED | PM_COLORED | PM_FOG;
+	if (w)
+		flags |= PM_WAVE;
+	R.prog = G->PM->getProgram(flags);
+	R.att_coord = R.prog->att("coord");
+	R.att_color = R.prog->att("color");
+	R.att_texcoord = R.prog->att("texcoord");
+	R.att_wave = w ? R.prog->att("wave") : -1;
+	R.uni_mvp = R.prog->uni("mvp");
+	R.uni_unicolor = R.prog->uni("unicolor");
+	R.uni_fogStart = R.prog->uni("fogStart");
+	R.uni_fogEnd = R.prog->uni("fogEnd");
+	R.uni_time = w ? R.prog->uni("time") : -1;
+}
+
+void Chunk::onRenderPropertiesChanged() {
+	loadShader();
+}
+
 Chunk::~Chunk() {
 	delete[] blk;
 	delete[] blk2;
@@ -150,7 +170,9 @@ void Chunk::updateClient() {
 	GLushort	index[CX * CY * CZ * 6 /* faces */ * 4 /* indices */ / 2 /* HSR */];
 	int v = 0, i = 0;
 
-	BlockType bt;
+	bool hasWaves = G->RP->wavingLiquids;
+	BlockType bt, bu /*BlockUp*/, bn /*BlockNear*/;
+	bool mayDisp;
 	const AtlasCreator::Coord *tc;
 	for(uint8 x = 0; x < CX; x++) {
 		for(uint8 y = 0; y < CY; y++) {
@@ -190,72 +212,93 @@ void Chunk::updateClient() {
 					vertex[v++] = {x,     y + 1, z,     tc->x, tc->y, tl.r, tl.g, tl.b};
 					vertex[v++] = {x,     y + 1, z + 1, tc->u, tc->y, tr.r, tr.g, tr.b};
 #endif
+				uint8 w;
+				if (hasWaves) {
+					w = (bt == BlockType::Lava && get(x, y+1, z) != BlockType::Lava) ? 8 : 0;
+					bu = get(x, y+1, z);
+					mayDisp = (bt != BlockType::Lava) || (bt == BlockType::Lava && bu == BlockType::Lava);
+				} else {
+					w = 0;
+					mayDisp = false;
+				}
 
 				// View from negative x
-				if (Blocks::isFaceVisible(bt, get(x - 1, y, z))) {
+				bn = get(x - 1, y, z);
+				if ((mayDisp && bn == BlockType::Lava && get(x-1, y+1, z) != BlockType::Lava)
+					|| Blocks::isFaceVisible(bt, bn)) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
 					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
 					tc = BlkInf->gTC(bt, FaceDirection::XDec);
-					vertex[v++] = {x,     y,     z,     tc->x, tc->v, .6f, .6f, .6f};
-					vertex[v++] = {x,     y,     z + 1, tc->u, tc->v, .6f, .6f, .6f};
-					vertex[v++] = {x,     y + 1, z,     tc->x, tc->y, .6f, .6f, .6f};
-					vertex[v++] = {x,     y + 1, z + 1, tc->u, tc->y, .6f, .6f, .6f};
+					vertex[v++] = {x,     y,     z,     0, tc->x, tc->v, .6f, .6f, .6f};
+					vertex[v++] = {x,     y,     z + 1, 0, tc->u, tc->v, .6f, .6f, .6f};
+					vertex[v++] = {x,     y + 1, z,     w, tc->x, tc->y, .6f, .6f, .6f};
+					vertex[v++] = {x,     y + 1, z + 1, w, tc->u, tc->y, .6f, .6f, .6f};
 				}
 
 				// View from positive x
-				if (Blocks::isFaceVisible(bt, get(x + 1, y, z))) {
+				bn = get(x + 1, y, z);
+				if ((mayDisp && bn == BlockType::Lava && get(x+1, y+1, z) != BlockType::Lava)
+					|| Blocks::isFaceVisible(bt, bn)) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
 					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
 					tc = BlkInf->gTC(bt, FaceDirection::XInc);
-					vertex[v++] = {x + 1, y,     z,     tc->u, tc->v, .6f, .6f, .6f};
-					vertex[v++] = {x + 1, y + 1, z,     tc->u, tc->y, .6f, .6f, .6f};
-					vertex[v++] = {x + 1, y,     z + 1, tc->x, tc->v, .6f, .6f, .6f};
-					vertex[v++] = {x + 1, y + 1, z + 1, tc->x, tc->y, .6f, .6f, .6f};
+					vertex[v++] = {x + 1, y,     z,     0, tc->u, tc->v, .6f, .6f, .6f};
+					vertex[v++] = {x + 1, y + 1, z,     w, tc->u, tc->y, .6f, .6f, .6f};
+					vertex[v++] = {x + 1, y,     z + 1, 0, tc->x, tc->v, .6f, .6f, .6f};
+					vertex[v++] = {x + 1, y + 1, z + 1, w, tc->x, tc->y, .6f, .6f, .6f};
 				}
 
 				// Negative Y
-				if (Blocks::isFaceVisible(bt, get(x, y - 1, z))) {
+				bn = get(x, y - 1, z);
+				if ((hasWaves && bn == BlockType::Lava)
+					|| Blocks::isFaceVisible(bt, bn)) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
 					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
 					float shade = (blk[I(x,y,z)] == BlockType::Shock) ? 1.5f : .2f;;
 					tc = BlkInf->gTC(bt, FaceDirection::YDec);
-					vertex[v++] = {x,     y,     z, tc->x, tc->v, shade, shade, shade};
-					vertex[v++] = {x + 1, y,     z, tc->u, tc->v, shade, shade, shade};
-					vertex[v++] = {x,     y, z + 1, tc->x, tc->y, shade, shade, shade};
-					vertex[v++] = {x + 1, y, z + 1, tc->u, tc->y, shade, shade, shade};
+					vertex[v++] = {x,     y,     z, 0, tc->x, tc->v, shade, shade, shade};
+					vertex[v++] = {x + 1, y,     z, 0, tc->u, tc->v, shade, shade, shade};
+					vertex[v++] = {x,     y, z + 1, 0, tc->x, tc->y, shade, shade, shade};
+					vertex[v++] = {x + 1, y, z + 1, 0, tc->u, tc->y, shade, shade, shade};
 				}
 
 				// Positive Y
-				if (Blocks::isFaceVisible(bt, get(x, y + 1, z))) {
+				bn = get(x, y + 1, z);
+				if ((hasWaves && bt == BlockType::Lava && bu != BlockType::Lava)
+					|| Blocks::isFaceVisible(bt, bn)) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
 					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
 					tc = BlkInf->gTC(bt, FaceDirection::YInc);
-					vertex[v++] = {x,     y + 1,     z, tc->u, tc->v, .8f, .8f, .8f};
-					vertex[v++] = {x,     y + 1, z + 1, tc->u, tc->y, .8f, .8f, .8f};
-					vertex[v++] = {x + 1, y + 1,     z, tc->x, tc->v, .8f, .8f, .8f};
-					vertex[v++] = {x + 1, y + 1, z + 1, tc->x, tc->y, .8f, .8f, .8f};
+					vertex[v++] = {x,     y + 1,     z, w, tc->u, tc->v, .8f, .8f, .8f};
+					vertex[v++] = {x,     y + 1, z + 1, w, tc->u, tc->y, .8f, .8f, .8f};
+					vertex[v++] = {x + 1, y + 1,     z, w, tc->x, tc->v, .8f, .8f, .8f};
+					vertex[v++] = {x + 1, y + 1, z + 1, w, tc->x, tc->y, .8f, .8f, .8f};
 				}
 
 				// Negative Z
-				if (Blocks::isFaceVisible(bt, get(x, y, z - 1))) {
+				bn = get(x, y, z - 1);
+				if ((mayDisp && bn == BlockType::Lava && get(x, y+1, z-1) != BlockType::Lava)
+					|| Blocks::isFaceVisible(bt, bn)) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
 					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
 					tc = BlkInf->gTC(bt, FaceDirection::ZDec);
-					vertex[v++] = {x,     y,     z, tc->u, tc->v, .4f, .4f, .4f};
-					vertex[v++] = {x,     y + 1, z, tc->u, tc->y, .4f, .4f, .4f};
-					vertex[v++] = {x + 1, y,     z, tc->x, tc->v, .4f, .4f, .4f};
-					vertex[v++] = {x + 1, y + 1, z, tc->x, tc->y, .4f, .4f, .4f};
+					vertex[v++] = {x,     y,     z, 0, tc->u, tc->v, .4f, .4f, .4f};
+					vertex[v++] = {x,     y + 1, z, w, tc->u, tc->y, .4f, .4f, .4f};
+					vertex[v++] = {x + 1, y,     z, 0, tc->x, tc->v, .4f, .4f, .4f};
+					vertex[v++] = {x + 1, y + 1, z, w, tc->x, tc->y, .4f, .4f, .4f};
 				}
 
 				// Positive Z
-				if (Blocks::isFaceVisible(bt, get(x, y, z + 1))) {
+				bn = get(x, y, z + 1);
+				if ((mayDisp && bn == BlockType::Lava && get(x, y+1, z+1) != BlockType::Lava)
+					|| Blocks::isFaceVisible(bt, bn)) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
 					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
 					tc = BlkInf->gTC(bt, FaceDirection::ZInc);
-					vertex[v++] = {x,     y,     z + 1, tc->x, tc->v, .4f, .4f, .4f};
-					vertex[v++] = {x + 1, y,     z + 1, tc->u, tc->v, .4f, .4f, .4f};
-					vertex[v++] = {x,     y + 1, z + 1, tc->x, tc->y, .4f, .4f, .4f};
-					vertex[v++] = {x + 1, y + 1, z + 1, tc->u, tc->y, .4f, .4f, .4f};
+					vertex[v++] = {x,     y,     z + 1, 0, tc->x, tc->v, .4f, .4f, .4f};
+					vertex[v++] = {x + 1, y,     z + 1, 0, tc->u, tc->v, .4f, .4f, .4f};
+					vertex[v++] = {x,     y + 1, z + 1, w, tc->x, tc->y, .4f, .4f, .4f};
+					vertex[v++] = {x + 1, y + 1, z + 1, w, tc->u, tc->y, .4f, .4f, .4f};
 				}
 			}
 		}
@@ -280,18 +323,22 @@ void Chunk::render(const glm::mat4 &transform) {
 	glEnableVertexAttribArray(R.att_coord);
 	glEnableVertexAttribArray(R.att_texcoord);
 	glEnableVertexAttribArray(R.att_color);
+	glEnableVertexAttribArray(R.att_wave);
 	glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(transform));
 	glUniform1f(R.uni_fogStart, G->RP->fogStart);
 	glUniform1f(R.uni_fogEnd, G->RP->fogEnd);
-	
+	glUniform1f(R.uni_time, G->Time);
+
 	TextureAtlas->bind();
 	vbo->bind();
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo->id);
 	glVertexAttribPointer(R.att_coord, 3, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLCoord), 0);
+	glVertexAttribPointer(R.att_wave, 1, GL_BYTE, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, w));
 	glVertexAttribPointer(R.att_texcoord, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, tx));
 	glVertexAttribPointer(R.att_color, 3, GL_FLOAT, GL_FALSE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, r));
 	glDrawElements(GL_TRIANGLES, indices, GL_UNSIGNED_SHORT, nullptr);
-	
+
+	glDisableVertexAttribArray(R.att_wave);
 	glDisableVertexAttribArray(R.att_color);
 	glDisableVertexAttribArray(R.att_texcoord);
 	glDisableVertexAttribArray(R.att_coord);
@@ -305,11 +352,12 @@ void Chunk::renderBatched(const glm::mat4& transform) {
 		updateClient();
 	if (!indices)
 		return;
-	
+
 	glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(transform));
 	vbo->bind();
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo->id);
 	glVertexAttribPointer(R.att_coord, 3, GL_BYTE, GL_FALSE, sizeof(GLCoord), 0);
+	glVertexAttribPointer(R.att_wave, 1, GL_BYTE, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, w));
 	glVertexAttribPointer(R.att_texcoord, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, tx));
 	glVertexAttribPointer(R.att_color, 3, GL_FLOAT, GL_FALSE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, r));
 	glDrawElements(GL_TRIANGLES, indices, GL_UNSIGNED_SHORT, nullptr);

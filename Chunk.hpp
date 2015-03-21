@@ -23,14 +23,10 @@ private:
 	
 	BlockType *blk2;
 	Mutex mut;
+	void loadShader();
 	void set2(int x, int y, int z, BlockType type);
 
 public:
-	struct GLCoord {
-		uint8 x, y, z;
-		uint16 tx, ty;
-		float r, g, b;
-	};
 	constexpr static float CullSphereRadius =
 		(CZ > (CX > CY ? CX : CY) ? CZ : (CX > CY ? CX : CY));
 		// * 1.4142135623f; but we're already at 2x the radius (i.e. diameter)
@@ -40,10 +36,12 @@ public:
 		GLint att_coord,
 			  att_color,
 			  att_texcoord,
+			  att_wave,
 			  uni_mvp,
 			  uni_unicolor,
 			  uni_fogStart,
-			  uni_fogEnd;
+			  uni_fogEnd,
+			  uni_time;
 	} R;
 	static Texture *TextureAtlas;
 	static Blocks *BlkInf;
@@ -54,10 +52,11 @@ public:
 	int vertices, indices;
 	bool changed;
 	int lavaCount;
-	
+
 	/// @param buffer Wether the chunk is just a buffer chunk
 	Chunk(int scx = -1, int scy = -1, int scz = -1, Game *G = nullptr);
 	~Chunk();
+	void onRenderPropertiesChanged();
 	BlockType get(int x, int y, int z);
 	void set(int x, int y, int z, BlockType type);
 	void updateClient();

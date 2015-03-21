@@ -16,6 +16,7 @@ void Game::init() {
 		LP = new LocalPlayer(this);
 		RP = new RenderProperties; { // TODO move somewhere else?
 			RP->bloom = true;
+			RP->wavingLiquids = !true;
 			RP->fogStart = 16;
 			RP->fogEnd = 32;
 		}
