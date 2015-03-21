@@ -94,7 +94,7 @@ private:
 	AtlasCreator *m_atlasCreator;
 	Texture *m_atlas;
 	AtlasCreator::Coord *m_coords;
-	
+
 	// No copy
 	Blocks(const Blocks&) = delete;
 	Blocks& operator=(const Blocks&) = delete;

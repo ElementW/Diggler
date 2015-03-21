@@ -85,6 +85,9 @@ void Manager::drawRect(const glm::mat4 &mat, const glm::vec4 &color) const {
 	glDisableVertexAttribArray(RP_Rect_att_coord);
 }
 
+void Manager::drawFullRect(const glm::vec4 &color) const {
+	drawRect(m_projMat1, color);
+}
 
 void Manager::drawTex(const Element::Area &a, const Texture &t) const {
 	drawTex(glm::scale(glm::translate(*PM, glm::vec3(a.x, a.y, 0)), glm::vec3(a.w, a.h, 0)), t);
@@ -108,6 +111,12 @@ void Manager::drawTex(const glm::mat4 &mat, const Texture &t) const {
 
 void Manager::drawFullTexV(const Texture &t) const {
 	drawTex(m_projMat1V, t);
+}
+
+void Manager::drawFullTexV(const Texture &t, const glm::vec4 &color) const {
+	glUniform4f(RP_Rect_uni_unicolor, color.r, color.g, color.b, color.a);
+	drawTex(m_projMat1V, t);
+	glUniform4f(RP_Rect_uni_unicolor, 1.f, 1.f, 1.f, 1.f);
 }
 
 }

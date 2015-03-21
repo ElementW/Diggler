@@ -583,6 +583,7 @@ void GameState::gameLoop() {
 
 			m_3dFbo->unbind();
 			G->UIM->drawFullTexV(*m_3dFbo->tex);
+			//G->UIM->drawFullRect(glm::vec4(1.f, 0.f, 0.f, 1-G->LP->health));
 
 			if (bloom.enable) {
 				m_3dFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);

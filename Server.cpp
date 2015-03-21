@@ -274,7 +274,8 @@ Server::Server(Game &G, uint16 port) : G(G) {
 #else
 	G.CCH->enabled = false;
 	G.SC->setSize(4, 4, 4);
-	CaveGenerator::GenerateCaveSystem(*(G.SC), true, 15);
+	CaveGenerator::GenConf gc;
+	CaveGenerator::Generate(*(G.SC), gc);
 	G.CCH->enabled = true;
 #endif
 

@@ -22,7 +22,7 @@ static float RoadMaxSpeed = MaxSpeed*2;
 
 static float MinYVelocity = -80.f;
 
-static float HurtYVelocity = -12.f;
+static float HurtYVelocity = -10.5f;
 static float LethalYVelocity = -16.f;
 
 static int i(const float &f) {
