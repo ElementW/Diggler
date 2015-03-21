@@ -50,7 +50,7 @@ public:
 	Game *G;
 	VBO *vbo, *ibo;
 	int vertices, indices;
-	bool changed;
+	bool dirty;
 	int lavaCount;
 
 	/// @param buffer Wether the chunk is just a buffer chunk

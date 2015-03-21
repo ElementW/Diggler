@@ -161,7 +161,7 @@ void Superchunk::refresh() {
 		for (int y = 0; y < chunksY; y++)
 			for (int z = 0; z < chunksZ; z++)
 				if (c[x][y][z])
-					c[x][y][z]->updateClient();
+					c[x][y][z]->dirty = true;
 }
 
 int Superchunk::getChunksX() const {

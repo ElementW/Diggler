@@ -31,7 +31,7 @@ constexpr float Chunk::MidX, Chunk::MidY, Chunk::MidZ;
 
 Chunk::Chunk(int scx, int scy, int scz, Game *G) : blk2(nullptr),
 	scx(scx), scy(scy), scz(scz), G(G), vbo(nullptr), lavaCount(0) {
-	changed = true;
+	dirty = true;
 	blk = new BlockType[CX*CY*CZ];
 	for (int i=0; i < CX*CY*CZ; ++i)
 		blk[i] = BlockType::Air;
@@ -118,14 +118,14 @@ void Chunk::set(int x, int y, int z, BlockType type) {
 				w = z==CZ-1?1:(z==0)?-1:0;
 			Chunk *nc;
 			if (u && (nc = G->SC->getChunk(scx+u, scy, scz)))
-				nc->changed = true;
+				nc->dirty = true;
 			if (v && (nc = G->SC->getChunk(scx, scy+v, scz)))
-				nc->changed = true;
+				nc->dirty = true;
 			if (w && (nc = G->SC->getChunk(scx, scy, scz+w)))
-				nc->changed = true;
+				nc->dirty = true;
 		}
 	}
-	changed = true;
+	dirty = true;
 	mut.unlock();
 }
 
@@ -308,12 +308,12 @@ void Chunk::updateClient() {
 	vbo->setData(vertex, v);
 	indices = i;
 	ibo->setData(index, i);
-	changed = false;
+	dirty = false;
 	mut.unlock();
 }
 
 void Chunk::render(const glm::mat4 &transform) {
-	if (changed)
+	if (dirty)
 		updateClient();
 	if (!indices)
 		return;
@@ -348,7 +348,7 @@ void Chunk::renderBatched(const glm::mat4& transform) {
 #if SHOW_CHUNK_UPDATES
 	glUniform4f(R.uni_unicolor, 1.f, changed ? 0.f : 1.f, changed ? 0.f : 1.f, 1.f);
 #endif
-	if (changed)
+	if (dirty)
 		updateClient();
 	if (!indices)
 		return;
