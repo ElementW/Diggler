@@ -232,7 +232,7 @@ void Superchunk::read(InStream &M) {
 					c[sx][sy][sz] = nullptr; // Keep out
 				} else {
 					c[sx][sy][sz] = new Chunk(sx, sy, sz, G);
-					byte *compressedData = (byte*)malloc(size);
+					byte *compressedData = new byte[size];
 					M.readData(compressedData, size);
 					bytesRead += size;
 					uncompressedDataSize = CX * CY * CZ;
@@ -240,7 +240,7 @@ void Superchunk::read(InStream &M) {
 					for (int i=0; i < CX*CY*CZ; ++i) {
 						c[sx][sy][sz]->blk[i] = uncompressedData[i];
 					}
-					::free(compressedData);
+					delete[] compressedData;
 				}
 			}
 		}

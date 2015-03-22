@@ -274,8 +274,12 @@ Server::Server(Game &G, uint16 port) : G(G) {
 #else
 	G.CCH->enabled = false;
 	G.SC->setSize(4, 4, 4);
+	auto genStart = std::chrono::high_resolution_clock::now();
 	CaveGenerator::GenConf gc;
 	CaveGenerator::Generate(*(G.SC), gc);
+	auto genEnd = std::chrono::high_resolution_clock::now();
+	auto genDelta = std::chrono::duration_cast<std::chrono::milliseconds>(genEnd - genStart);
+	getOutputStream() << "Map gen took " << genDelta.count() << "ms" << std::endl;
 	G.CCH->enabled = true;
 #endif
 

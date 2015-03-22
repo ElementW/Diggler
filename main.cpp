@@ -27,7 +27,9 @@ static bool InitNetwork() {
 }
 
 static void InitRand() {
-	FastRandSeed(std::time(nullptr););
+	typedef std::chrono::high_resolution_clock Time;
+	typedef std::chrono::milliseconds ms;
+	FastRandSeed(std::chrono::duration_cast<ms>(Time::now().time_since_epoch()).count()%0x7FFFFFFF);
 	int n = FastRand(128);
 	for (int i=0; i < n; ++i)
 		FastRand();

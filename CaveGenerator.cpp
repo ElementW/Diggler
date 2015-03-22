@@ -20,7 +20,7 @@ CaveGenerator::GenConf::GenConf() :
 	ore.thresold = 0.3;
 
 	lava.enabled = true;
-	lava.freq = 0.0005;
+	lava.freq = 0.0001;
 	lava.freqAmpl = 0;
 	lava.minLevel = 0;
 	lava.maxLevel = 0.5;
@@ -149,10 +149,10 @@ static void AddLava(Superchunk &sc, const CaveGenerator::GenConf &gc) {
 	int numFlows = FastRandF()*(maxNum-minNum)+minNum;
 	while (numFlows > 0) {
 		int x = FastRand(0, xs);
-		int z = FastRand(0, zs);
+		int z = FastRand(2, zs);
 		int y = FastRandF()*(maxY-minY)+minY;
 
-		if (y > 2 && sc.get(x, y, z) == BlockType::Air) {
+		if (sc.get(x, y, z) == BlockType::Air) {
 			sc.set(x, y, z, BlockType::Lava);
 			numFlows--;
 		}
@@ -183,7 +183,7 @@ static void AddDiamond(Superchunk &sc, const CaveGenerator::GenConf &gc) {
 		int y = FastRandF()*(maxY-minY)+minY;
 
 		if (y > 2 && sc.get(x, y, z) == BlockType::Dirt) {
-			sc.set(x, y, z, BlockType::Lava);
+			sc.set(x, y, z, BlockType::Diamond);
 			numDiam--;
 		}
 	}
