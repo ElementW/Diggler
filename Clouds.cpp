@@ -1,25 +1,21 @@
 #include "Clouds.hpp"
-#include "Texture.hpp"
+#include <glm/gtc/type_ptr.hpp>
+#include "Game.hpp"
 #include "Platform.hpp"
 #include "Program.hpp"
-#include "Game.hpp"
-#include <glm/gtc/type_ptr.hpp>
+#include "Texture.hpp"
 
 namespace Diggler {
 
-const Program *Clouds::RenderProgram = nullptr;
-GLint Clouds::RenderProgram_attrib_texcoord = -1;
-GLint Clouds::RenderProgram_attrib_coord = -1;
-GLint Clouds::RenderProgram_uni_mvp = -1;
-GLint Clouds::RenderProgram_uni_texshift = -1;
+Clouds::Renderer Clouds::R = {0};
 
 Clouds::Clouds(Game *G, int w, int h, int layers) : m_layers(layers), G(G) {
-	if (RenderProgram == nullptr) {
-		RenderProgram = G->PM->getProgram(PM_3D | PM_FOG | PM_TEXTURED | PM_TEXSHIFT | PM_DISCARD);
-		RenderProgram_attrib_coord = RenderProgram->att("coord");
-		RenderProgram_attrib_texcoord = RenderProgram->att("texcoord");
-		RenderProgram_uni_texshift = RenderProgram->uni("texshift");
-		RenderProgram_uni_mvp = RenderProgram->uni("mvp");
+	if (R.prog == nullptr) {
+		R.prog = G->PM->getProgram(PM_3D | PM_FOG | PM_TEXTURED | PM_TEXSHIFT | PM_DISCARD);
+		R.att_coord = R.prog->att("coord");
+		R.att_texcoord = R.prog->att("texcoord");
+		R.uni_texshift = R.prog->uni("texshift");
+		R.uni_mvp = R.prog->uni("mvp");
 	}
 
 	m_tex = new Texture*[m_layers];
@@ -48,25 +44,25 @@ Clouds::Clouds(Game *G, int w, int h, int layers) : m_layers(layers), G(G) {
 }
 
 void Clouds::render(const glm::mat4 &transform) {
-	RenderProgram->bind();
+	R.prog->bind();
 
-	glEnableVertexAttribArray(RenderProgram_attrib_coord);
-	glEnableVertexAttribArray(RenderProgram_attrib_texcoord);
+	glEnableVertexAttribArray(R.att_coord);
+	glEnableVertexAttribArray(R.att_texcoord);
 
 	m_vbo.bind();
-	glVertexAttribPointer(RenderProgram_attrib_coord, 3, GL_BYTE, GL_FALSE, sizeof(Coord), 0);
-	glVertexAttribPointer(RenderProgram_attrib_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord), (GLvoid*)offsetof(Coord, u));
+	glVertexAttribPointer(R.att_coord, 3, GL_BYTE, GL_FALSE, sizeof(Coord), 0);
+	glVertexAttribPointer(R.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord), (GLvoid*)offsetof(Coord, u));
 
 	float shift = G->Time/100;
 	for (int i=m_layers-1; i >= 0; i--) {
-		glUniformMatrix4fv(RenderProgram_uni_mvp, 1, GL_FALSE, glm::value_ptr(transform));
-		glUniform2f(RenderProgram_uni_texshift, shift*(1+i*.5f), shift*(1+i*.5f));
+		glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(transform));
+		glUniform2f(R.uni_texshift, shift*(1+i*.5f), shift*(1+i*.5f));
 		m_tex[i]->bind();
 		glDrawArrays(GL_TRIANGLES, i*6, 6);
 	}
 
-	glDisableVertexAttribArray(RenderProgram_attrib_texcoord);
-	glDisableVertexAttribArray(RenderProgram_attrib_coord);
+	glDisableVertexAttribArray(R.att_texcoord);
+	glDisableVertexAttribArray(R.att_coord);
 }
 
 Clouds::~Clouds() {

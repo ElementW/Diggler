@@ -68,7 +68,8 @@ static void WalkL(Superchunk &sc, int x, int y, int z, int len, int paintRadius,
 	int m = len, count = 0;
 
 	while (count < m) {
-		PaintAtPoint(sc, x, y, z, paintRadius, paintValue);
+		if (!cond || (cond && sc.get(x, y, z) == condType))
+			PaintAtPoint(sc, x, y, z, paintRadius, paintValue);
 		int dx = FastRand(-paintRadius, paintRadius);
 		int dy = FastRand(-paintRadius, paintRadius);
 		int dz = FastRand(-paintRadius, paintRadius);
@@ -91,7 +92,8 @@ static void WalkL(Superchunk &sc, int x, int y, int z, int len, int paintRadius,
 		}
 
 		if (FastRand() & 0x800) {
-			PaintAtPoint(sc, x, y, z, paintRadius, paintValue);
+			if (!cond || (cond && sc.get(x, y, z) == condType))
+				PaintAtPoint(sc, x, y, z, paintRadius, paintValue);
 			x += dx;
 			y += dy;
 			z += dz;

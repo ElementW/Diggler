@@ -2,7 +2,6 @@
 #define CAVE_GENERATOR_HPP
 #include <string>
 #include "Superchunk.hpp"
-#include "Arr3Utils.hpp"
 
 namespace Diggler {
 

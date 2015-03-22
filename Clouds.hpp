@@ -12,8 +12,10 @@ class Texture;
 
 class Clouds {
 private:
-	static const Program *RenderProgram;
-	static GLint RenderProgram_attrib_coord, RenderProgram_attrib_texcoord, RenderProgram_uni_mvp, RenderProgram_uni_texshift;
+	static struct Renderer {
+		const Program *prog;
+		GLint att_coord, att_texcoord, uni_mvp, uni_texshift;
+	} R;
 	Texture **m_tex;
 	VBO m_vbo;
 	int m_layers;
