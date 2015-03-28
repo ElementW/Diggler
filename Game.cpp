@@ -19,7 +19,7 @@ void Game::init() {
 			RP->bloom = true;
 			RP->wavingLiquids = !true;
 			RP->fogStart = 16;
-			RP->fogEnd = 32;
+			RP->fogEnd = 24;
 		}
 		A = new Audio(*this);
 		KB = new KeyBinds;

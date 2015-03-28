@@ -52,4 +52,11 @@ int VBO::getSize() const {
 	return data;
 }
 
+void VBO::setSize(uint size, GLenum usage) {
+	GLint currentBoundArray; glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentBoundArray);
+	glBindBuffer(GL_ARRAY_BUFFER, id);
+	glBufferData(GL_ARRAY_BUFFER, size, nullptr, usage);
+	glBindBuffer(GL_ARRAY_BUFFER, currentBoundArray);
+}
+
 }

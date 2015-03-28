@@ -87,6 +87,7 @@ private:
 	KeyBindings *m_keybinds;
 
 	Chatbox *m_chatBox;
+	bool m_chatIgnFirstKey;
 
 	bool m_mouseLocked; int cX, cY;
 	glm::vec3 angles, lookat;

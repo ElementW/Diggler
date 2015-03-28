@@ -12,7 +12,7 @@ namespace Diggler {
 
 static float Acceleration = 18.0f;
 
-static float MvmtDamping = 1/(Acceleration*2.f);
+static float MvmtDamping = 1/(Acceleration*10.f);
 
 static float Gravity = 18.0f; // -Y acceleration (blocks/sec/sec)
 
@@ -91,7 +91,7 @@ void LocalPlayer::update(float delta) {
 	if (hasGravity) {
 		if (!onGround && velocity.y <= HurtYVelocity) {
 			BlockType b = G->SC->get(position.x, position.y-1, position.z);
-			onGround = !Blocks::canGoThrough(b, team);
+			onGround = !Blocks::canGoThrough(b, team) && (b != BlockType::Jump);
 			if (onGround) {
 				if (velocity.y <= LethalYVelocity) {
 					setDead(true, DeathReason::Fall, true);

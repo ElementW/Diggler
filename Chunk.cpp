@@ -166,8 +166,9 @@ void Chunk::updateClient() {
 	mut.lock();
 	Blocks &B = *G->B;
 	GLCoord		vertex[CX * CY * CZ * 6 /* faces */ * 4 /* vertices */ / 2 /* face removing (HSR) makes a lower vert max */];
-	GLushort	index[CX * CY * CZ * 6 /* faces */ * 4 /* indices */ / 2 /* HSR */];
-	int v = 0, i = 0;
+	GLushort	idxOpaque[CX * CY * CZ * 6 /* faces */ * 6 /* indices */ / 2 /* HSR */],
+				idxTransp[CX*CY*CZ*6*6/2];
+	int v = 0, io = 0, it = 0;
 
 	bool hasWaves = G->RP->wavingLiquids;
 	BlockType bt, bu /*BlockUp*/, bn /*BlockNear*/;
@@ -219,6 +220,15 @@ void Chunk::updateClient() {
 				} else {
 					w = 0;
 					mayDisp = false;
+				}
+
+				GLushort *index; int i; bool transp = Blocks::isTransparent(bt);
+				if (transp) {
+					index = idxTransp;
+					i = it;
+				} else {
+					index = idxOpaque;
+					i = io;
 				}
 
 				// View from negative x
@@ -299,14 +309,22 @@ void Chunk::updateClient() {
 					vertex[v++] = {x,     y + 1, z + 1, w, tc->x, tc->y, .4f, .4f, .4f};
 					vertex[v++] = {x + 1, y + 1, z + 1, w, tc->u, tc->y, .4f, .4f, .4f};
 				}
+
+				if (transp) {
+					it = i;
+				} else {
+					io = i;
+				}
 			}
 		}
 	}
 
 	vertices = v;
 	vbo->setData(vertex, v);
-	indices = i;
-	ibo->setData(index, i);
+	indices = io + it;
+	ibo->setSize(indices * sizeof(*idxOpaque));
+	ibo->setSubData(idxOpaque, 0, io);
+	ibo->setSubData(idxTransp, io, it);
 	dirty = false;
 	mut.unlock();
 }

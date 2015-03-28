@@ -190,6 +190,10 @@ GameState::~GameState() {
 }
 
 void GameState::onChar(char32 unichar) {
+	if (m_chatIgnFirstKey) {
+		m_chatIgnFirstKey = false;
+		return;
+	}
 	if (m_chatBox->isChatting()) {
 		m_chatBox->handleChar(unichar);
 	}
@@ -252,10 +256,15 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 		if (key == G->KB->gameMenu && action == GLFW_PRESS) {
 			isEscapeToggled = !isEscapeToggled;
 			UI.EM->setVisible(isEscapeToggled);
-			if (isEscapeToggled)
+			if (isEscapeToggled) {
 				unlockMouse();
-			else
+				G->LP->goForward(false);
+				G->LP->goBackward(false);
+				G->LP->goLeft(false);
+				G->LP->goRight(false);
+			} else {
 				lockMouse();
+			}
 		}
 		if (!isEscapeToggled) {
 			if (key == G->KB->forward) {
@@ -270,8 +279,10 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 				if (action == GLFW_PRESS)
 					G->LP->jump();
 			} else if (key == G->KB->chat) {
-				if (action == GLFW_PRESS)
+				if (action == GLFW_PRESS) {
 					m_chatBox->setIsChatting(true);
+					m_chatIgnFirstKey = true;
+				}
 			} else if (key == GLFW_KEY_V) {
 				G->LP->setHasNoclip(true);
 			} else if (key == GLFW_KEY_B) {

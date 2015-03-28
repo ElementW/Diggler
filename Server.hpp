@@ -13,7 +13,9 @@ class Game;
 class Server {
 private:
 	Game &G;
-	
+
+	void handleCommand(Player *, const std::string &command, const std::vector<std::string> &args);
+
 	void handlePlayerJoin(Net::InMessage&, Net::Peer&);
 	void handlePlayerQuit(Net::Peer&, Net::QuitReason reason = Net::QuitReason::Quit);
 	void handleDisconnect(Net::Peer&);

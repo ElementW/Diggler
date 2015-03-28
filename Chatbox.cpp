@@ -48,7 +48,7 @@ bool Chatbox::isChatting() const {
 
 void Chatbox::setIsChatting(bool value) {
 	m_chatString.clear();
-	m_chatText->setText(m_chatString);
+	m_chatText->setText(m_chatString + '_');
 	m_isChatting = value;
 }
 
@@ -70,7 +70,7 @@ void Chatbox::handleChar(char32 unichar) {
 		// TODO: Update when libstdc++ supports locale codecvt facets
 		//std::codecvt_utf8<char32_t> convert32;
 		m_chatString.append(1, (char)unichar);
-		m_chatText->setText(m_chatString);
+		m_chatText->setText(m_chatString + '_');
 	}
 }
 
@@ -78,7 +78,7 @@ void Chatbox::handleKey(int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS && key == GLFW_KEY_BACKSPACE) {
 		if (m_chatString.size() > 0) {
 			m_chatString.erase(m_chatString.end()-1);
-			m_chatText->setText(m_chatString);
+			m_chatText->setText(m_chatString + '_');
 		}
 	}
 }

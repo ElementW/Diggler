@@ -128,20 +128,33 @@ void Server::handleEvent(InMessage &msg, Peer &peer) {
 }
 
 void Server::handleChat(InMessage &msg, Peer &peer) {
-	try {
-		// TODO: implement codecvt_utf8<utf32> when libstdc++ supports it
-		Player &plr = G.players.getByPeer(peer);
-		std::string chatMsg = msg.readString();
-		getOutputStream() << plr.name << ": " << chatMsg << endl;
-		std::ostringstream contentFormatter;
-		contentFormatter << plr.name << "> " << chatMsg;
-		std::string content = contentFormatter.str();
-		OutMessage newMsg(MessageType::Chat);
-		newMsg.writeString(content);
-		NetHelper::Broadcast(G, newMsg, Tfer::Rel);
-	} catch (const std::out_of_range &e) {
-		getErrorStream() << peer.getHost() << " sent chat message but is not connected" << std::endl;
+	std::string chatMsg = msg.readString();
+	if (chatMsg.length() > 1 && chatMsg[0] == '/') {
+		size_t pos = chatMsg.find_first_of(' ');
+		if (pos == std::string::npos) {
+			handleCommand(getPlayerByPeer(peer), chatMsg.substr(1), std::vector<std::string>());
+		} else {
+			handleCommand(getPlayerByPeer(peer), chatMsg.substr(1, pos-1), std::vector<std::string>());
+		}
+	} else {
+		try {
+			// TODO: implement codecvt_utf8<utf32> when libstdc++ supports it
+			Player &plr = G.players.getByPeer(peer);
+			getOutputStream() << plr.name << ": " << chatMsg << endl;
+			std::ostringstream contentFormatter;
+			contentFormatter << plr.name << "> " << chatMsg;
+			std::string content = contentFormatter.str();
+			OutMessage newMsg(MessageType::Chat);
+			newMsg.writeString(content);
+			NetHelper::Broadcast(G, newMsg, Tfer::Rel);
+		} catch (const std::out_of_range &e) {
+			getErrorStream() << peer.getHost() << " sent chat message but is not connected" << std::endl;
+		}
 	}
+}
+
+void Server::handleCommand(Player *plr, const std::string &command, const std::vector<std::string> &args) {
+	getDebugStream() << "Command \"" << command << '"' << std::endl;
 }
 
 void Server::handlePlayerUpdate(InMessage &msg, Peer &peer) {
