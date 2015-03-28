@@ -243,35 +243,14 @@ Server::Server(Game &G, uint16 port) : G(G) {
 		throw "Server init failed";
 	}
 
-#if 0
-	G.SC->setSize(4, 4, 4);
+	setup();
+}
 
-	//for (int i=0; i < 8192; i++) G.SC->set(FastRand(CX*G.SC->getChunksX()), FastRand(CY*G.SC->getChunksY()), FastRand(CZ*G.SC->getChunksZ()), (BlockType)(FastRand((int)BlockType::LAST)));
-	for(int x=0;x<CX*G.SC->getChunksX();x++) for(int z=0;z<(CZ*G.SC->getChunksZ())/2;z++) G.SC->set(x, 0, z, BlockType::Dirt);
-	for(int x=0;x<CX*G.SC->getChunksX();x++) for(int z=0;z<(CZ*G.SC->getChunksZ())/2;z++) G.SC->set(x, 0, z+(CZ*G.SC->getChunksZ())/2, BlockType::Road);
-	//	for(int x=0;x<CX*G.SC->getChunksX();x++) for(int y=0;y<16;y++) for(int z=0;z<CZ*G.SC->getChunksZ();z++) G.SC->set(x,y,z,BlockType::Dirt);
-	for(int x=0; x < (int)BlockType::LAST; x++) G.SC->set(x, 2, 0, (BlockType)(x));
-	G.SC->set(4, 4, 4, BlockType::Shock);
-	G.SC->set(4, 0, 4, BlockType::Jump);
-	
-	G.SC->set(0, 1, 1, BlockType::Metal);
-	G.SC->set(0, 2, 1, BlockType::Metal);
-	G.SC->set(0, 3, 1, BlockType::Metal);
-	
-	G.SC->set(1, 3, 1, BlockType::Metal);
-	G.SC->set(2, 3, 1, BlockType::Metal);
-	
-	G.SC->set(3, 1, 1, BlockType::Metal);
-	G.SC->set(3, 2, 1, BlockType::Metal);
-	G.SC->set(3, 3, 1, BlockType::Metal);
-	
-	CaveGenerator::PaintAtPoint(*(G.SC), 8, 8, 8, 1, BlockType::Dirt);
-	CaveGenerator::PaintAtPoint(*(G.SC), 16, 8, 8, 2, BlockType::Dirt);
-	CaveGenerator::PaintAtPoint(*(G.SC), 24, 8, 8, 3, BlockType::Dirt);
-	
-	for(int x=0;x<CX*G.SC->getChunksX();x++) for(int z=0;z<(CZ*G.SC->getChunksZ())/2;z++) G.SC->set(x, 64, z, BlockType::Dirt);
-	G.SC->set(2*CX, 68, 2*CY, BlockType::Lava);
-#else
+void Server::setupInternals() {
+
+}
+
+void Server::setup() {
 	G.CCH->enabled = false;
 	G.SC->setSize(4, 4, 4);
 	auto genStart = std::chrono::high_resolution_clock::now();
@@ -281,7 +260,6 @@ Server::Server(Game &G, uint16 port) : G(G) {
 	auto genDelta = std::chrono::duration_cast<std::chrono::milliseconds>(genEnd - genStart);
 	getOutputStream() << "Map gen took " << genDelta.count() << "ms" << std::endl;
 	G.CCH->enabled = true;
-#endif
 
 	//G.SC->save("/tmp/a");
 	//G.SC->load("/tmp/a");
@@ -292,6 +270,7 @@ Server::Server(Game &G, uint16 port) : G(G) {
 		make.detach();
 	}*/
 }
+
 
 void chunk_updater(Game *G, Superchunk *sc, Host &H) {
 	while (true) {
@@ -375,7 +354,7 @@ bool Server::isPlayerOnline(const std::string &playername) const {
 	return false;
 }
 
-void Server::kick(Player& p, Net::QuitReason r, const std::string& message) {
+void Server::kick(Player &p, Net::QuitReason r, const std::string &message) {
 	OutMessage msg(MessageType::PlayerQuit, r);
 	msg.writeU32(p.id);
 	msg.writeString(message);

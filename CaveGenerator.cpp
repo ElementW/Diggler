@@ -168,8 +168,7 @@ static void AddOre(Superchunk &sc, const CaveGenerator::GenConf &gc) {
 		for (int y = 0; y < ys; y++)
 			for (int z = 0; z < zs; z++) {
 				float noise = stb_perlin_noise3(x/8.f, y/8.f+yRand, z/8.f);
-				if (sc.get(x, y, z) == BlockType::Dirt && noise > gc.ore.thresold)
-					sc.set(x, y, z, BlockType::Ore);
+				sc.set(x, y, z, (noise > gc.ore.thresold) ? BlockType::Ore : BlockType::Dirt);
 			}
 }
 
@@ -184,7 +183,7 @@ static void AddDiamond(Superchunk &sc, const CaveGenerator::GenConf &gc) {
 		int z = FastRand(0, zs);
 		int y = FastRandF()*(maxY-minY)+minY;
 
-		if (y > 2 && sc.get(x, y, z) == BlockType::Dirt) {
+		if (y > 2 && (sc.get(x, y, z) == BlockType::Dirt || sc.get(x, y, z) == BlockType::Ore)) {
 			sc.set(x, y, z, BlockType::Diamond);
 			numDiam--;
 		}
@@ -202,7 +201,7 @@ static void AddGold(Superchunk &sc, const CaveGenerator::GenConf &gc) {
 		int z = FastRand(0, zs);
 		int y = FastRandF()*(maxY-minY)+minY;
 
-		if (y > 2 && sc.get(x, y, z) == BlockType::Dirt) {
+		if (y > 2 && (sc.get(x, y, z) == BlockType::Dirt || sc.get(x, y, z) == BlockType::Ore)) {
 			WalkL(sc, x, y, z, FastRand(gc.gold.minSize, gc.gold.maxSize), 1, BlockType::Gold, false, true);
 			numVeins--;
 		}
@@ -214,10 +213,15 @@ void CaveGenerator::Generate(Superchunk &sc, const GenConf &gc) {
 	int groundLevel = ys*gc.groundLevel;
 	FastRandSeed(gc.seed);
 
-	for (int x = 0; x < xs; x++)
-		for (int y = 0; y < groundLevel; y++)
-			for (int z = 0; z < zs; z++)
-				sc.set(x, y, z, BlockType::Dirt);
+	if (gc.ore.enabled)
+		AddOre(sc, gc);
+	else
+		for (int x = 0; x < xs; x++)
+			for (int y = 0; y < groundLevel; y++)
+				for (int z = 0; z < zs; z++)
+					sc.set(x, y, z, BlockType::Dirt);
+
+	// Mountains
 	int yRand = FastRand(0xFFFF);
 	for (int y = groundLevel; y < ys; y++) {
 		float intensity = (groundLevel-y)/(float)(ys-groundLevel)+1;
@@ -241,8 +245,6 @@ void CaveGenerator::Generate(Superchunk &sc, const GenConf &gc) {
 		AddDiamond(sc, gc);
 	if (gc.gold.enabled)
 		AddGold(sc, gc);
-	if (gc.ore.enabled)
-		AddOre(sc, gc);
 }
 
 }

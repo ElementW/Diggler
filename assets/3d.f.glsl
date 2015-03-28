@@ -32,6 +32,6 @@ void main(void) {
 #endif
 #ifdef FOG
 	float fogCoord = (gl_FragCoord.z/gl_FragCoord.w);
-	gl_FragColor = mix(gl_FragColor, vec4(0.0, 0.0, 0.0, 1.0), 1.0-clamp((fogEnd-fogCoord)/(fogEnd-fogStart), 0.0, 1.0));
+	gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(0.0, 0.0, 0.0), 1.0-clamp((fogEnd-fogCoord)/(fogEnd-fogStart), 0.0, 1.0));
 #endif
 }

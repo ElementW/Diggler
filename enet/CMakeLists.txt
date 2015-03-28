@@ -2,8 +2,10 @@ cmake_minimum_required(VERSION 2.6)
 
 project(enet)
 
-set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CC_FLAGS_DEBUG "${CMAKE_CC_FLAGS_DEBUG} -g")
+set(CMAKE_CC_FLAGS_RELEASE "${CMAKE_CC_FLAGS_RELEASE} -O3")
+
 add_definitions(-DHAS_FCNTL -DHAS_POLL -DHAS_SOCKLEN_T)
 
 set(ENET_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")

@@ -31,7 +31,8 @@ public:
 	inline glm::mat4 getPVMatrix() { return camera.getPVMatrix(); }
 	void lookAt(const glm::vec3 &at);
 	inline void setProjection(const glm::mat4 &p) { camera.setProjection(p); }
-	void update(const float &delta);
+	void update(float delta);
+	void render(const glm::mat4 &transform) const;
 	void forceCameraUpdate();
 	void goForward(bool enable);
 	void goBackward(bool enable);

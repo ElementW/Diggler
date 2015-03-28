@@ -9,11 +9,10 @@
 namespace Diggler {
 namespace UI {
 
-static const Program *RP_Rect = nullptr;
-static GLint RP_Rect_att_texcoord = -1;
-static GLint RP_Rect_att_coord = -1;
-static GLint RP_Rect_uni_mvp = -1;
-static GLint RP_Rect_uni_unicolor = -1;
+struct Renderer {
+	const Program *prog;
+	GLint att_texcoord, att_coord, uni_mvp, uni_unicolor;
+} R = {0}, RR = {0};
 
 Manager::Manager() : Scale(2) {
 	PM = &m_projMatrix;
@@ -24,12 +23,18 @@ Manager::Manager() : Scale(2) {
 
 void Manager::setup(Game *G) {
 	this->G = G;
-	if (RP_Rect == nullptr) {
-		RP_Rect = G->PM->getProgram(PM_2D | PM_TEXTURED);
-		RP_Rect_att_coord = RP_Rect->att("coord");
-		RP_Rect_att_texcoord = RP_Rect->att("texcoord");
-		RP_Rect_uni_mvp = RP_Rect->uni("mvp");
-		RP_Rect_uni_unicolor = RP_Rect->uni("unicolor");
+	if (R.prog == nullptr) {
+		R.prog = G->PM->getProgram(PM_2D | PM_TEXTURED);
+		R.att_texcoord = R.prog->att("texcoord");
+		R.att_coord = R.prog->att("coord");
+		R.uni_mvp = R.prog->uni("mvp");
+		R.uni_unicolor = R.prog->uni("unicolor");
+	}
+	if (RR.prog == nullptr) {
+		RR.prog = G->PM->getProgram(PM_2D);
+		RR.att_coord = RR.prog->att("coord");
+		RR.uni_mvp = RR.prog->uni("mvp");
+		RR.uni_unicolor = RR.prog->uni("unicolor");
 	}
 	m_rectVbo = new VBO();
 	uint8 verts[6*4] = {
@@ -69,44 +74,50 @@ void Manager::setProjMat(const glm::mat4 &mat) {
 }
 
 void Manager::drawRect(const glm::mat4 &mat, const glm::vec4 &color) const {
-	RP_Rect->bind();
-	glEnableVertexAttribArray(RP_Rect_att_coord);
+	RR.prog->bind();
+	glEnableVertexAttribArray(RR.att_coord);
 
-	Texture::unbind();
 	m_rectVbo->bind();
-	glUniform4f(RP_Rect_uni_unicolor, color.r, color.g, color.b, color.a);
-	glUniformMatrix4fv(RP_Rect_uni_mvp, 1, GL_FALSE, glm::value_ptr(mat));
-	glVertexAttribPointer(RP_Rect_att_coord, 2, GL_UNSIGNED_BYTE, GL_FALSE, 4*sizeof(uint8), 0);
+	Texture::unbind();
+	glUniform4f(RR.uni_unicolor, color.r, color.g, color.b, color.a);
+	glUniformMatrix4fv(RR.uni_mvp, 1, GL_FALSE, glm::value_ptr(mat));
+	glVertexAttribPointer(RR.att_coord, 2, GL_UNSIGNED_BYTE, GL_FALSE, 4*sizeof(uint8), 0);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	// OpenGL needs to be stateless. Definitely. Wait for Vulkan.
-	glUniform4f(RP_Rect_uni_unicolor, 1.f, 1.f, 1.f, 1.f);
+	glUniform4f(RR.uni_unicolor, 1.f, 1.f, 1.f, 1.f);
 
-	glDisableVertexAttribArray(RP_Rect_att_coord);
+	glDisableVertexAttribArray(RR.att_coord);
 }
 
 void Manager::drawFullRect(const glm::vec4 &color) const {
 	drawRect(m_projMat1, color);
 }
 
-void Manager::drawTex(const Element::Area &a, const Texture &t) const {
-	drawTex(glm::scale(glm::translate(*PM, glm::vec3(a.x, a.y, 0)), glm::vec3(a.w, a.h, 0)), t);
-}
-
-void Manager::drawTex(const glm::mat4 &mat, const Texture &t) const {
-	RP_Rect->bind();
-	glEnableVertexAttribArray(RP_Rect_att_coord);
-	glEnableVertexAttribArray(RP_Rect_att_texcoord);
+void Manager::drawTex(const glm::mat4 &mat, const Texture &t, const glm::vec4 &color) const {
+	R.prog->bind();
+	glEnableVertexAttribArray(R.att_coord);
+	glEnableVertexAttribArray(R.att_texcoord);
 
 	t.bind();
 	m_rectVbo->bind();
-	glUniformMatrix4fv(RP_Rect_uni_mvp, 1, GL_FALSE, glm::value_ptr(mat));
-	glVertexAttribPointer(RP_Rect_att_coord, 2, GL_UNSIGNED_BYTE, GL_FALSE, 4*sizeof(uint8), 0);
-	glVertexAttribPointer(RP_Rect_att_texcoord, 2, GL_UNSIGNED_BYTE, GL_FALSE, 4*sizeof(uint8), (void*)(2*sizeof(uint8)));
+	glUniform4f(R.uni_unicolor, color.r, color.g, color.b, color.a);
+	glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(mat));
+	glVertexAttribPointer(R.att_coord, 2, GL_UNSIGNED_BYTE, GL_FALSE, 4*sizeof(uint8), 0);
+	glVertexAttribPointer(R.att_texcoord, 2, GL_UNSIGNED_BYTE, GL_FALSE, 4*sizeof(uint8), (void*)(2*sizeof(uint8)));
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glUniform4f(R.uni_unicolor, 1.f, 1.f, 1.f, 1.f);
 
-	glDisableVertexAttribArray(RP_Rect_att_texcoord);
-	glDisableVertexAttribArray(RP_Rect_att_coord);
+	glDisableVertexAttribArray(R.att_texcoord);
+	glDisableVertexAttribArray(R.att_coord);
+}
+
+void Manager::drawTex(const glm::mat4 &mat, const Texture &t) const {
+	drawTex(mat, t, glm::vec4(1.f));
+}
+
+void Manager::drawTex(const Element::Area &a, const Texture &t) const {
+	drawTex(glm::scale(glm::translate(*PM, glm::vec3(a.x, a.y, 0)), glm::vec3(a.w, a.h, 0)), t);
 }
 
 void Manager::drawFullTexV(const Texture &t) const {
@@ -114,9 +125,7 @@ void Manager::drawFullTexV(const Texture &t) const {
 }
 
 void Manager::drawFullTexV(const Texture &t, const glm::vec4 &color) const {
-	glUniform4f(RP_Rect_uni_unicolor, color.r, color.g, color.b, color.a);
-	drawTex(m_projMat1V, t);
-	glUniform4f(RP_Rect_uni_unicolor, 1.f, 1.f, 1.f, 1.f);
+	drawTex(m_projMat1V, t, color);
 }
 
 }

@@ -9,10 +9,7 @@
 namespace Diggler {
 
 Player::TexInfo ***Player::TexInfos = nullptr;
-const Program *Player::RenderProgram = nullptr;
-GLint Player::RenderProgram_attrib_texcoord = -1;
-GLint Player::RenderProgram_attrib_coord = -1;
-GLint Player::RenderProgram_uni_mvp = -1;
+Player::Renderer Player::R = {0};
 
 const char* Player::getTeamNameLowercase(Player::Team t) {
 	switch (t) {
@@ -71,10 +68,13 @@ Player::Player(Game *G) : team(Team::Red),
 	isAlive(true), ore(0), loot(0) {
 	if (GlobalProperties::IsClient) {
 		if (TexInfos == nullptr) {
-			RenderProgram = G->PM->getProgram(PM_3D | PM_TEXTURED | PM_DISCARD);
-			RenderProgram_attrib_coord = RenderProgram->att("coord");
-			RenderProgram_attrib_texcoord = RenderProgram->att("texcoord");
-			RenderProgram_uni_mvp = RenderProgram->uni("mvp");
+			R.prog = G->PM->getProgram(PM_3D | PM_TEXTURED | PM_FOG | PM_DISCARD);
+			R.att_coord = R.prog->att("coord");
+			R.att_texcoord = R.prog->att("texcoord");
+			R.uni_mvp = R.prog->uni("mvp");
+			R.uni_unicolor = R.prog->uni("unicolor");
+			R.uni_fogStart = R.prog->uni("fogStart");
+			R.uni_fogEnd = R.prog->uni("fogEnd");
 
 			TexInfos = new TexInfo**[Team::LAST];
 			for (uint8 t=0; t < (uint8)Team::LAST; t++) {
@@ -159,7 +159,7 @@ static inline int getSide(float angle) {
 }
 
 void Player::render(const glm::mat4 &transform) const {
-	RenderProgram->bind();
+	R.prog->bind();
 	TexInfos[(uint8)team][(uint8)tool]->tex->bind();
 	int action = 1;
 	if (velocity.x < -.5f || velocity.x > .5f ||
@@ -170,18 +170,20 @@ void Player::render(const glm::mat4 &transform) const {
 	TexInfos[(uint8)team][(uint8)tool]->side[
 		getSide(rmod(atan2(position.x-G->LP->position.x, position.z-G->LP->position.z)-angle, M_PI*2))]
 		.vbos[action]->bind();
-	glEnableVertexAttribArray(RenderProgram_attrib_texcoord);
-	glEnableVertexAttribArray(RenderProgram_attrib_coord);
+	glEnableVertexAttribArray(R.att_texcoord);
+	glEnableVertexAttribArray(R.att_coord);
+	glUniform1f(R.uni_fogStart, G->RP->fogStart);
+	glUniform1f(R.uni_fogEnd, G->RP->fogEnd);
 	glm::vec3 &lpPos = G->LP->position;
 	float angle = atan2(lpPos.x-m_predictPos.x, lpPos.z-m_predictPos.z);
 	static const glm::vec3 vecY(0.0, 1.0, 0.0);
-	glUniformMatrix4fv(RenderProgram_uni_mvp, 1, GL_FALSE, glm::value_ptr(
+	glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(
 		glm::translate(transform, m_predictPos) * glm::rotate(angle, vecY)));
-	glVertexAttribPointer(RenderProgram_attrib_coord, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), 0);
-	glVertexAttribPointer(RenderProgram_attrib_texcoord, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (GLvoid*)(3*sizeof(float)));
+	glVertexAttribPointer(R.att_coord, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), 0);
+	glVertexAttribPointer(R.att_texcoord, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (GLvoid*)(3*sizeof(float)));
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-	glDisableVertexAttribArray(RenderProgram_attrib_coord);
-	glDisableVertexAttribArray(RenderProgram_attrib_texcoord);
+	glDisableVertexAttribArray(R.att_coord);
+	glDisableVertexAttribArray(R.att_texcoord);
 }
 
 void Player::setDead(bool dead, DeathReason dr, bool send) {

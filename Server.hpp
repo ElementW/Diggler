@@ -29,6 +29,8 @@ public:
 
 	Server(Game &G, uint16 port);
 	~Server();
+	void setupInternals();
+	void setup();
 
 	void run();
 	bool isPlayerOnline(const std::string &playername) const;
@@ -36,7 +38,7 @@ public:
 	Player* getPlayerById(uint32 id);
 	Player* getPlayerByPeer(const Net::Peer &peer);
 	Player* getPlayerByName(const std::string &name);
-	void kick(Player &p, Net::QuitReason r, const std::string& message = "");
+	void kick(Player &p, Net::QuitReason r = Net::QuitReason::Kicked, const std::string& message = "");
 };
 
 }

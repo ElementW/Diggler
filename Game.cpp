@@ -12,6 +12,7 @@ Game::Game() : players(this), CCH(nullptr), GW(nullptr), LP(nullptr), PM(nullptr
 
 void Game::init() {
 	if (GlobalProperties::IsClient) {
+		B = new Blocks;
 		PM = new ProgramManager(*this);
 		LP = new LocalPlayer(this);
 		RP = new RenderProperties; { // TODO move somewhere else?
@@ -30,6 +31,7 @@ void Game::init() {
 
 Game::~Game() {
 	if (GlobalProperties::IsClient) {
+		delete B;
 		delete PM; delete LP;
 		delete RP; delete A;
 		delete KB;

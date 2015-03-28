@@ -63,23 +63,22 @@ void SoundBuffer::loadOgg(const std::string &path) {
 		getDebugStream() << "Could not load " << path << " : " << error << std::endl;
 		return;
 	}
-	
+
 	// Get file info
 	stb_vorbis_info info = stb_vorbis_get_info(stream);
 	ALenum format = alGetFormat(info.channels, 16); // stb_vorbis always 16-bit samples
-	uint bufferSize = stb_vorbis_stream_length_in_samples(stream); //4096*8;
-	
+	uint bufferSize = stb_vorbis_stream_length_in_samples(stream);
+
 	// Create buffer
 	ALshort *bufferData = new ALshort[bufferSize];
-	
+
 	// Fill the buffer
 	stb_vorbis_get_samples_short_interleaved(stream, info.channels, bufferData, bufferSize);
-	
+
 	// Send the buffer data
 	alBufferData(id, format, bufferData, stb_vorbis_stream_length_in_samples(stream)*sizeof(ALshort), info.sample_rate);
 	//getDebugStream() << path << ' ' << info.sample_rate << "Hz" << std::endl;
-	
-	// avoid memory leaks: delete the buffer and stb_vorbis instance
+
 	delete[] bufferData;
 	stb_vorbis_close(stream);
 }

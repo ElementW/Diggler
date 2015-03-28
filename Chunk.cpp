@@ -18,7 +18,6 @@ namespace Diggler {
 
 Chunk::Renderer Chunk::R = {0};
 Texture *Chunk::TextureAtlas = nullptr;
-Blocks *Chunk::BlkInf = nullptr;
 
 struct GLCoord {
 	uint8 x, y, z, w;
@@ -29,26 +28,25 @@ struct GLCoord {
 constexpr float Chunk::CullSphereRadius;
 constexpr float Chunk::MidX, Chunk::MidY, Chunk::MidZ;
 
-Chunk::Chunk(int scx, int scy, int scz, Game *G) : blk2(nullptr),
+Chunk::Chunk(int scx, int scy, int scz, Game *G) : blk2(nullptr), blk(nullptr),
 	scx(scx), scy(scy), scz(scz), G(G), vbo(nullptr), lavaCount(0) {
 	dirty = true;
 	blk = new BlockType[CX*CY*CZ];
-	for (int i=0; i < CX*CY*CZ; ++i)
-		blk[i] = BlockType::Air;
+	memset(blk, (int)BlockType::Air, CX*CY*CZ*sizeof(BlockType));
+	//for (int i=0; i < CX*CY*CZ; ++i)
+	//	blk[i] = BlockType::Air;
 	
 	if (GlobalProperties::IsClient) {
 		vbo = new VBO;
 		ibo = new VBO;
 		if (R.prog == nullptr) {
 			loadShader();
-			
-			BlkInf = new Blocks();
-			
-			TextureAtlas = BlkInf->getAtlas();
+			TextureAtlas = G->B->getAtlas();
 		}
 	}
 	if (GlobalProperties::IsServer) {
 		blk2 = new BlockType[CX*CY*CZ];
+		memset(blk, (int)BlockType::Air, CX*CY*CZ*sizeof(BlockType));
 	}
 }
 
@@ -166,6 +164,7 @@ void Chunk::updateServerSwap() {
 struct RGB { float r, g, b; };
 void Chunk::updateClient() {
 	mut.lock();
+	Blocks &B = *G->B;
 	GLCoord		vertex[CX * CY * CZ * 6 /* faces */ * 4 /* vertices */ / 2 /* face removing (HSR) makes a lower vert max */];
 	GLushort	index[CX * CY * CZ * 6 /* faces */ * 4 /* indices */ / 2 /* HSR */];
 	int v = 0, i = 0;
@@ -227,8 +226,8 @@ void Chunk::updateClient() {
 				if ((mayDisp && bn == BlockType::Lava && get(x-1, y+1, z) != BlockType::Lava)
 					|| Blocks::isFaceVisible(bt, bn)) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
-					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
-					tc = BlkInf->gTC(bt, FaceDirection::XDec);
+					index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
+					tc = B.gTC(bt, FaceDirection::XDec);
 					vertex[v++] = {x,     y,     z,     0, tc->x, tc->v, .6f, .6f, .6f};
 					vertex[v++] = {x,     y,     z + 1, 0, tc->u, tc->v, .6f, .6f, .6f};
 					vertex[v++] = {x,     y + 1, z,     w, tc->x, tc->y, .6f, .6f, .6f};
@@ -240,8 +239,8 @@ void Chunk::updateClient() {
 				if ((mayDisp && bn == BlockType::Lava && get(x+1, y+1, z) != BlockType::Lava)
 					|| Blocks::isFaceVisible(bt, bn)) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
-					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
-					tc = BlkInf->gTC(bt, FaceDirection::XInc);
+					index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
+					tc = B.gTC(bt, FaceDirection::XInc);
 					vertex[v++] = {x + 1, y,     z,     0, tc->u, tc->v, .6f, .6f, .6f};
 					vertex[v++] = {x + 1, y + 1, z,     w, tc->u, tc->y, .6f, .6f, .6f};
 					vertex[v++] = {x + 1, y,     z + 1, 0, tc->x, tc->v, .6f, .6f, .6f};
@@ -253,13 +252,13 @@ void Chunk::updateClient() {
 				if ((hasWaves && bn == BlockType::Lava)
 					|| Blocks::isFaceVisible(bt, bn)) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
-					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
+					index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
 					float shade = (blk[I(x,y,z)] == BlockType::Shock) ? 1.5f : .2f;;
-					tc = BlkInf->gTC(bt, FaceDirection::YDec);
-					vertex[v++] = {x,     y,     z, 0, tc->x, tc->v, shade, shade, shade};
-					vertex[v++] = {x + 1, y,     z, 0, tc->u, tc->v, shade, shade, shade};
-					vertex[v++] = {x,     y, z + 1, 0, tc->x, tc->y, shade, shade, shade};
-					vertex[v++] = {x + 1, y, z + 1, 0, tc->u, tc->y, shade, shade, shade};
+					tc = B.gTC(bt, FaceDirection::YDec);
+					vertex[v++] = {x,     y,     z, 0, tc->u, tc->v, shade, shade, shade};
+					vertex[v++] = {x + 1, y,     z, 0, tc->u, tc->y, shade, shade, shade};
+					vertex[v++] = {x,     y, z + 1, 0, tc->x, tc->v, shade, shade, shade};
+					vertex[v++] = {x + 1, y, z + 1, 0, tc->x, tc->y, shade, shade, shade};
 				}
 
 				// Positive Y
@@ -267,12 +266,12 @@ void Chunk::updateClient() {
 				if ((hasWaves && bt == BlockType::Lava && bu != BlockType::Lava)
 					|| Blocks::isFaceVisible(bt, bn)) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
-					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
-					tc = BlkInf->gTC(bt, FaceDirection::YInc);
-					vertex[v++] = {x,     y + 1,     z, w, tc->u, tc->v, .8f, .8f, .8f};
-					vertex[v++] = {x,     y + 1, z + 1, w, tc->u, tc->y, .8f, .8f, .8f};
-					vertex[v++] = {x + 1, y + 1,     z, w, tc->x, tc->v, .8f, .8f, .8f};
-					vertex[v++] = {x + 1, y + 1, z + 1, w, tc->x, tc->y, .8f, .8f, .8f};
+					index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
+					tc = B.gTC(bt, FaceDirection::YInc);
+					vertex[v++] = {x,     y + 1,     z, w, tc->x, tc->v, .8f, .8f, .8f};
+					vertex[v++] = {x,     y + 1, z + 1, w, tc->u, tc->v, .8f, .8f, .8f};
+					vertex[v++] = {x + 1, y + 1,     z, w, tc->x, tc->y, .8f, .8f, .8f};
+					vertex[v++] = {x + 1, y + 1, z + 1, w, tc->u, tc->y, .8f, .8f, .8f};
 				}
 
 				// Negative Z
@@ -280,8 +279,8 @@ void Chunk::updateClient() {
 				if ((mayDisp && bn == BlockType::Lava && get(x, y+1, z-1) != BlockType::Lava)
 					|| Blocks::isFaceVisible(bt, bn)) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
-					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
-					tc = BlkInf->gTC(bt, FaceDirection::ZDec);
+					index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
+					tc = B.gTC(bt, FaceDirection::ZDec);
 					vertex[v++] = {x,     y,     z, 0, tc->u, tc->v, .4f, .4f, .4f};
 					vertex[v++] = {x,     y + 1, z, w, tc->u, tc->y, .4f, .4f, .4f};
 					vertex[v++] = {x + 1, y,     z, 0, tc->x, tc->v, .4f, .4f, .4f};
@@ -293,8 +292,8 @@ void Chunk::updateClient() {
 				if ((mayDisp && bn == BlockType::Lava && get(x, y+1, z+1) != BlockType::Lava)
 					|| Blocks::isFaceVisible(bt, bn)) {
 					index[i++] = v; index[i++] = v+1; index[i++] = v+2;
-					index[i++] = v+3; index[i++] = v+2; index[i++] = v+1;
-					tc = BlkInf->gTC(bt, FaceDirection::ZInc);
+					index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
+					tc = B.gTC(bt, FaceDirection::ZInc);
 					vertex[v++] = {x,     y,     z + 1, 0, tc->x, tc->v, .4f, .4f, .4f};
 					vertex[v++] = {x + 1, y,     z + 1, 0, tc->u, tc->v, .4f, .4f, .4f};
 					vertex[v++] = {x,     y + 1, z + 1, w, tc->x, tc->y, .4f, .4f, .4f};

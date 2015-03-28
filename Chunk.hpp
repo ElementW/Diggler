@@ -44,7 +44,6 @@ public:
 			  uni_time;
 	} R;
 	static Texture *TextureAtlas;
-	static Blocks *BlkInf;
 	BlockType *blk;
 	int scx, scy, scz;
 	Game *G;

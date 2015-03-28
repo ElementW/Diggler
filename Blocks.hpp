@@ -9,8 +9,8 @@ namespace Diggler {
 enum class BlockType : uint8_t {
 	Air = 0,
 	Dirt = 1,
-	Ore = 2,
-	Gold = 3,
+	Ore,
+	Gold,
 	Diamond,
 	Rock,
 	Ladder,
@@ -43,9 +43,9 @@ enum class FaceDirection : uint8_t {
 
 enum class BlockTex : uint8_t {
 	None = 0,
-	Dirt = 1,
-	Ore = 2,
-	Gold = 3,
+	Dirt,
+	Ore,
+	Gold,
 	Diamond,
 	Rock,
 	Jump,
@@ -100,6 +100,16 @@ private:
 	Blocks& operator=(const Blocks&) = delete;
 
 public:
+	constexpr static int TeamRed  = 0x1,
+						 TeamBlue = 0x2;
+	const static struct TypeInfo {
+		BlockType type;
+		const char *name;
+		int cashWorth, oreWorth, buildCost;
+		int teamCanBuild;
+		const char *icon;
+	} TypeInfos[(int)BlockType::LAST];
+
 	Blocks();
 	~Blocks();
 	static bool isTransparent(BlockType t);

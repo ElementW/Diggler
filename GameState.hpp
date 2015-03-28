@@ -73,14 +73,15 @@ private:
 	} m_highlightBox;
 
 	struct BuilderGun {
+		glm::mat4 matGun, matIcon;
 		Texture *tex;
-		std::map<BlockType, Texture*> blockTexs;
+		std::vector<std::tuple<BlockType, Texture*>> blockTexs;
 		int index;
-		bool deconstruct;
 		BlockType currentBlock;
 		Texture  *currentBlockTex;
 		BuilderGun();
 		~BuilderGun();
+		void select(int idx);
 	} m_builderGun;
 
 	KeyBindings *m_keybinds;

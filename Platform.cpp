@@ -214,7 +214,7 @@ std::ostream& Diggler::getDebugStreamRaw() {
 	return std::cout;
 }
 
-std::ostream &Diggler::getOutputStreamRaw() {
+std::ostream& Diggler::getOutputStreamRaw() {
 	return std::cout;
 }
 

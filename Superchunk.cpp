@@ -1,6 +1,7 @@
 #include "Superchunk.hpp"
-#include "Game.hpp"
+#include <cstring>
 #include <glm/gtc/matrix_transform.hpp>
+#include "Game.hpp"
 #include "lzfx/lzfx.h"
 #include "network/Network.hpp"
 
@@ -37,6 +38,7 @@ void Superchunk::setSize(int x, int y, int z) {
 		c[x] = new Chunk**[chunksY];
 		for (int y = 0; y < chunksY; y++) {
 			c[x][y] = new Chunk*[chunksZ];
+			//memset(c[x][y], chunksZ*sizeof(Chunk*), 0);
 			for (int z = 0; z < chunksZ; z++) {
 				c[x][y][z] = nullptr;
 			}
@@ -144,7 +146,7 @@ void Superchunk::render(const glm::mat4& transform) {
 						c[x][y][z]->renderBatched(chunkTransform);
 					}
 				}
-	
+
 	glDisableVertexAttribArray(Chunk::R.att_wave);
 	glDisableVertexAttribArray(Chunk::R.att_color);
 	glDisableVertexAttribArray(Chunk::R.att_texcoord);
@@ -192,19 +194,22 @@ void Superchunk::write(OutStream &msg) const {
 	};
 	msg.writeData(&mth, sizeof(MapTransferHeader));
 	const BlockType *chunkData = nullptr;
-	uint compressedSize = CX * CY * CZ;
-	byte *compressed = new byte[compressedSize];
+	uint initCompressedSize = CX*CY*CZ*sizeof(BlockType);
+	uint compressedSize;
+	byte *compressed = new byte[initCompressedSize];
 	for (int sx=0; sx < getChunksX(); sx++) {
 		for (int sy=0; sy < getChunksY(); sy++) {
 			for (int sz=0; sz < getChunksZ(); sz++) {
-				// Chunk may be uninitialized
 				if (c[sx][sy][sz] == nullptr) {
 					// Chunk is empty (not initialized), mark as missing
 					msg.writeI16(-1);
 				} else {
 					chunkData = c[sx][sy][sz]->blk;
-					compressedSize = CX * CY * CZ;
-					lzfx_compress(chunkData, CX*CY*CZ, compressed, &compressedSize);
+					compressedSize = initCompressedSize;
+					int rz = lzfx_compress(chunkData, CX*CY*CZ*sizeof(BlockType), compressed, &compressedSize);
+					if (rz < 0)
+						getErrorStream() << "Failed compressing Chunk[" << sx << ',' << sy <<
+							' ' << sz << ']' << std::endl;
 					msg.writeI16(compressedSize);
 					msg.writeData(compressed, compressedSize);
 				}
@@ -219,15 +224,12 @@ void Superchunk::read(InStream &M) {
 	M.readData(&mth, sizeof(mth));
 	setSize(mth.Chunks.x, mth.Chunks.y, mth.Chunks.z);
 	int bytesRead = 0;
-	uint uncompressedDataSize = CX * CY * CZ; // Should not change
-	BlockType *uncompressedData = new BlockType[uncompressedDataSize/sizeof(BlockType)];
+	uint uncDataSizeMust = CX*CY*CZ*sizeof(BlockType), uncDataSize = 0;
 	for (int sx=0; sx < mth.Chunks.x; sx++) {
 		for (int sy=0; sy < mth.Chunks.y; sy++) {
 			for (int sz=0; sz < mth.Chunks.z; sz++) {
 				int16 size = M.readI16();
-				if (c[sx][sy][sz] != nullptr) {
-					delete c[sx][sy][sz]; // Bash out the old chunk
-				}
+				delete c[sx][sy][sz]; // Bash out the old chunk
 				if (size == -1) { // Chunk is empty
 					c[sx][sy][sz] = nullptr; // Keep out
 				} else {
@@ -235,17 +237,24 @@ void Superchunk::read(InStream &M) {
 					byte *compressedData = new byte[size];
 					M.readData(compressedData, size);
 					bytesRead += size;
-					uncompressedDataSize = CX * CY * CZ;
-					lzfx_decompress(compressedData, size, uncompressedData, &uncompressedDataSize);
-					for (int i=0; i < CX*CY*CZ; ++i) {
-						c[sx][sy][sz]->blk[i] = uncompressedData[i];
+					uncDataSize = uncDataSizeMust;
+					int rz = lzfx_decompress(compressedData, size, c[sx][sy][sz]->blk, &uncDataSize);
+					if (rz < 0 || uncDataSize != uncDataSizeMust) {
+						if (rz < 0) {
+							getErrorStream() << "Chunk[" << sx << ',' << sy << ' ' << sz <<
+								"] LZFX decompression failed" << std::endl;
+						} else {
+							getErrorStream() << "Chunk[" << sx << ',' << sy << ' ' << sz <<
+								"] has bad size " << uncDataSize << '/' << uncDataSizeMust << std::endl;
+						}
+						delete c[sx][sy][sz];
+						c[sx][sy][sz] = nullptr;
 					}
 					delete[] compressedData;
 				}
 			}
 		}
 	}
-	delete[] uncompressedData;
 	getDebugStream() << "MapRead: read " << bytesRead << std::endl;
 }
 

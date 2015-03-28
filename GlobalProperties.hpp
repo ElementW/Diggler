@@ -13,8 +13,6 @@ namespace GlobalProperties {
 	extern const unsigned int PlayerNameMaxLen;
 	extern char *PlayerName;
 
-	extern bool UseProceduralTextures;
-
 	extern bool IsSoundEnabled;
 
 	extern int UIScale;

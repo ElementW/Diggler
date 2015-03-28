@@ -13,7 +13,7 @@ class Game;
 class Texture;
 
 class Player {
-private:
+protected:
 	static struct TexInfo {
 		Texture *tex;
 		union VBOs {
@@ -23,8 +23,15 @@ private:
 			VBO *vbos[4];
 		} side[4];
 	} ***TexInfos;
-	static const Program *RenderProgram;
-	static GLint RenderProgram_attrib_coord, RenderProgram_attrib_texcoord, RenderProgram_uni_mvp;
+	static struct Renderer {
+		const Program *prog;
+		GLint att_coord,
+			  att_texcoord,
+			  uni_mvp,
+			  uni_unicolor,
+			  uni_fogStart,
+			  uni_fogEnd;
+	} R;
 	glm::vec3 m_predictPos;
 	
 	Player(const Player&) = delete;
@@ -82,12 +89,12 @@ public:
 	Player(Game *G = nullptr);
 	Player(Player&&);
 	Player& operator=(Player&&);
-	virtual ~Player();
+	~Player();
 
-	virtual void setPosVel(const glm::vec3 &pos, const glm::vec3 &vel, const glm::vec3 &acc = glm::vec3());
-	virtual void update(const float &delta);
-	virtual void render(const glm::mat4 &transform) const;
-	virtual void setDead(bool, DeathReason = DeathReason::None, bool send = false);
+	void setPosVel(const glm::vec3 &pos, const glm::vec3 &vel, const glm::vec3 &acc = glm::vec3());
+	void update(const float &delta);
+	void render(const glm::mat4 &transform) const;
+	void setDead(bool, DeathReason = DeathReason::None, bool send = false);
 };
 
 }

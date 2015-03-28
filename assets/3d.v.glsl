@@ -26,9 +26,11 @@ void main(void) {
 #endif
 	vec3 coord = coord.xyz;
 #ifdef WAVE
-	float yShift = sin(time+(coord.x+coord.z)/16.0*6*PI)*(wave) - wave;
-	coord.y += yShift;
-	//v_texcoord.y -= yShift/8.0;
+	if (wave != 0) {
+		float yShift = sin(time+(coord.x+coord.z)/16.0*6*PI)*(wave) - wave;
+		coord.y += yShift;
+		//v_texcoord.y -= yShift/8.0;
+	}
 #endif
 	gl_Position = mvp * vec4(coord, 1);
 }

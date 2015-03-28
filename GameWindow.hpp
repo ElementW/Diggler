@@ -38,6 +38,7 @@ public:
 	
 	inline int getW() const { return m_w; }
 	inline int getH() const { return m_h; }
+	bool shouldClose() const;
 	
 	void cbMouseButton(int key, int action, int mods);
 	void cbCursorPos(double x, double y);

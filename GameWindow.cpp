@@ -111,6 +111,10 @@ GameWindow::~GameWindow() {
 	}
 }
 
+bool GameWindow::shouldClose() const {
+	return glfwWindowShouldClose(m_window);
+}
+
 void GameWindow::cbChar(char32 unichar) {
 	m_currentState->onChar(unichar);
 }

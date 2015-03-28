@@ -31,15 +31,6 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, id);
 		glBufferData(GL_ARRAY_BUFFER, data.size()*sizeof(T), data.data(), usage);
 		glBindBuffer(GL_ARRAY_BUFFER, currentBoundArray);
-		//getDebugStream() << "Set buffer " << typeid(T).name() << ' ' << data.size() << std::endl;
-	}
-	template <typename T> void setData(const std::initializer_list<T>& data, GLenum usage = GL_STATIC_DRAW) {
-		// TODO: Fix this, it's not working: data seems to always be empty
-		GLint currentBoundArray; glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentBoundArray);
-		glBindBuffer(GL_ARRAY_BUFFER, id);
-		glBufferData(GL_ARRAY_BUFFER, data.size()*sizeof(T), data.begin(), usage);
-		glBindBuffer(GL_ARRAY_BUFFER, currentBoundArray);
-		//getDebugStream() << "Set buffer " << typeid(T).name() << ' ' << data.size() << std::endl;
 	}
 	template <typename T> void setData(const T *data, uint count, GLenum usage = GL_STATIC_DRAW) {
 		GLint currentBoundArray; glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentBoundArray);

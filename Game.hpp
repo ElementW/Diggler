@@ -27,6 +27,7 @@ public:
 	class ChunkChangeHelper *CCH;
 	
 	// Client
+	Blocks *B;
 	class Config *C;
 	class GameWindow *GW;
 	UI::Manager *UIM;

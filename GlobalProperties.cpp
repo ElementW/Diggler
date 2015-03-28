@@ -11,8 +11,6 @@ const int   GlobalProperties::DefaultServerPort = 17425;
 const unsigned int GlobalProperties::PlayerNameMaxLen = 30;
 char *GlobalProperties::PlayerName = nullptr;
 
-bool GlobalProperties::UseProceduralTextures = false;
-
 bool GlobalProperties::IsSoundEnabled = true;
 
 int GlobalProperties::UIScale = 2;

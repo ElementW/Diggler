@@ -138,17 +138,30 @@ GameState::Bloom::~Bloom() {
 
 GameState::BuilderGun::BuilderGun() {
 	tex = new Texture(getAssetPath("tools", "tex_tool_build.png"), Texture::PixelFormat::RGBA);
-	blockTexs.emplace(BlockType::Metal, new Texture(getAssetPath("icons", "tex_icon_metal.png")));
-	currentBlock = BlockType::Metal;
-	currentBlockTex = blockTexs.at(BlockType::Metal);
-	index = 0;
-	deconstruct = false;
+	for (uint i=0; i < sizeof(Blocks::TypeInfos)/sizeof(*Blocks::TypeInfos); ++i) {
+		const Blocks::TypeInfo &inf = Blocks::TypeInfos[i];
+		// TODO change to player's team
+		if (inf.teamCanBuild & Blocks::TeamRed) {
+			blockTexs.emplace_back(inf.type, new Texture(getAssetPath("icons", inf.icon), Texture::PixelFormat::RGB));
+		}
+	}
+	select(1);
 }
 
 GameState::BuilderGun::~BuilderGun() {
 	delete tex;
-	for (auto it : blockTexs)
-		delete it.second;
+	for (auto tuple : blockTexs)
+		delete std::get<1>(tuple);
+}
+
+void GameState::BuilderGun::select(int idx) {
+	int max = blockTexs.size();
+	if (idx < 0)
+		idx = max-1;
+	index = idx % max;
+	auto tuple = blockTexs.at(index);
+	currentBlock = std::get<0>(tuple);
+	currentBlockTex = std::get<1>(tuple);
 }
 
 void GameState::setupUI() {
@@ -300,7 +313,7 @@ void GameState::onMouseButton(int key, int action, int mods) {
 				msg.writeU16(face.x);
 				msg.writeU16(face.y);
 				msg.writeU16(face.z);
-				msg.writeU8((uint8)BlockType::Dirt);
+				msg.writeU8((uint8)m_builderGun.currentBlock);
 			}
 			sendMsg(msg, Net::Tfer::Rel, Net::Channels::MapUpdate);
 		}
@@ -341,7 +354,10 @@ void GameState::onResize(int w, int h) {
 }
 
 void GameState::onMouseScroll(double x, double y) {
-
+	if (y < 0)
+		m_builderGun.select(m_builderGun.index-1);
+	if (y > 0)
+		m_builderGun.select(m_builderGun.index+1);
 }
 
 void GameState::updateViewport() {
@@ -355,9 +371,21 @@ void GameState::updateViewport() {
 	bloom.renderer.fbo->resize(w/bloom.scale, h/bloom.scale);
 	//bloom.renderer.fb->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
 
-	m_crossHair.mat = glm::scale(glm::translate(*UIM.PM,
-		glm::vec3(w/2-5, h/2-5, 0)),
-		glm::vec3(5*UIM.Scale, 5*UIM.Scale, 0));
+	{ int tw = 5*UIM.Scale, th = 5*UIM.Scale;
+		m_crossHair.mat = glm::scale(glm::translate(*UIM.PM,
+			glm::vec3((w-tw)/2, (h-th)/2, 0)),
+			glm::vec3(tw, tw, 0));
+	}
+
+	{ int scale = 3, tw = 120*scale, th = 126*scale;
+		m_builderGun.matGun = glm::scale(glm::translate(*UIM.PM,
+			glm::vec3((w-tw)/2, -46*scale, 0)),
+			glm::vec3(tw, th, 0));
+		int iw = 39*scale, ih = 21*scale;
+		m_builderGun.matIcon = glm::scale(glm::translate(*UIM.PM,
+			glm::vec3((w-iw)/2-3*scale, 9*scale, 0)),
+			glm::vec3(iw, ih, 0));
+	}
 
 	int lineHeight = G->F->getHeight()*UIM.Scale;
 	char str[15]; std::snprintf(str, 15, "Loot: %d/%d", G->LP->ore, Player::getMaxOre(G->LP->playerclass));
@@ -386,7 +414,7 @@ void GameState::updateViewport() {
 
 	UI.headerBg.mat = glm::scale(glm::translate(*UIM.PM,
 		glm::vec3(0, h-lineHeight, 0)),
-		glm::vec3(2*w, lineHeight, 0));
+		glm::vec3(w, lineHeight, 0));
 
 	UI.DebugInfo->setPos(0, h-(lineHeight+UI.DebugInfo->getSize().y));
 
@@ -502,13 +530,13 @@ void GameState::gameLoop() {
 	LP->forceCameraUpdate();
 	G->A->update();
 	LP->setHasNoclip(true);
-	while (!glfwWindowShouldClose(*W)) {
+	while (!W->shouldClose()) {
 		if (!processNetwork()) return;
 
 		T = glfwGetTime(); deltaT = T - lastT;
 		G->Time = T;
 		if (T > fpsT) {
-			char str[8]; std::sprintf(str, "FPS: %d", frames); //\f
+			char str[10]; std::sprintf(str, "FPS: %d", frames);
 			UI.FPS->setText(std::string(str));
 			fpsT = T+1;
 			frames = 0;
@@ -527,16 +555,15 @@ void GameState::gameLoop() {
 			glClearColor(0.0, 0.0, 0.0, 1.0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			m_3dFbo->bind();
-			glClearColor(0.0, 0.0, 0.0, 1.0);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			if (bloom.enable) {
+				m_3dFbo->bind();
+				glClearColor(0.0, 0.0, 0.0, 1.0);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			}
 
 			LP->update(deltaT);
-			// TODO: disable teleport and kill player
 			if (LP->position.y < -32) {
 				LP->setDead(true, Player::DeathReason::Void, true);
-				// TODO: remove, TP player
-				LP->position.y = 10;
 			}
 
 			glm::mat4 m_transform = LP->getPVMatrix();
@@ -564,28 +591,27 @@ void GameState::gameLoop() {
 				m_highlightBox.vbo.bind();
 				glVertexAttribPointer(m_highlightBox.att_coord, 3, GL_FLOAT, GL_FALSE, 0, 0);
 				
-				glUniform4f(m_highlightBox.uni_unicolor, 1.f, 0.f, 0.f, .3f);
+				glUniform4f(m_highlightBox.uni_unicolor, 1.f, 1.f, 1.f, .1f);
 				glUniformMatrix4fv(m_highlightBox.uni_mvp, 1, GL_FALSE, glm::value_ptr(
-					glm::scale(glm::translate(m_transform, glm::vec3(pointed)+glm::vec3(.5f)), glm::vec3(0.5*1.1))));
+					glm::scale(glm::translate(m_transform, glm::vec3(pointed)+glm::vec3(.5f)), glm::vec3(0.5f*1.03f))));
 				glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
 				
-				glUniform4f(m_highlightBox.uni_unicolor, 0.f, 0.f, 1.f, .2f);
+				/*glUniform4f(m_highlightBox.uni_unicolor, 0.f, 0.f, 1.f, .2f);
 				glUniformMatrix4fv(m_highlightBox.uni_mvp, 1, GL_FALSE, glm::value_ptr(
 					glm::scale(glm::translate(m_transform, glm::vec3(face)+glm::vec3(.5f)), glm::vec3(0.40f+ sin(G->Time*4)*0.01f ))));
-				glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
+				glDrawArrays(GL_TRIANGLES, 0, 6*2*3);*/
 				
 				glDisableVertexAttribArray(m_highlightBox.att_coord);
 			}
 
 			glDisable(GL_CULL_FACE);
-
 			glDisable(GL_DEPTH_TEST);
-
-			m_3dFbo->unbind();
-			G->UIM->drawFullTexV(*m_3dFbo->tex);
-			//G->UIM->drawFullRect(glm::vec4(1.f, 0.f, 0.f, 1-G->LP->health));
+			LP->render(m_transform);
 
 			if (bloom.enable) {
+				m_3dFbo->unbind();
+				G->UIM->drawFullTexV(*m_3dFbo->tex);
+
 				m_3dFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
 				bloom.extractor.fbo->bind();
 				glViewport(0, 0, W->getW()/bloom.scale, W->getH()/bloom.scale);
@@ -640,6 +666,7 @@ void GameState::gameLoop() {
 			}
 
 			/*** 2D PART ***/
+			G->UIM->drawFullRect(glm::vec4(1.f, 0.f, 0.f, 1-G->LP->health));
 			updateUI();
 			drawUI();
 		} else {
@@ -684,6 +711,16 @@ void GameState::updateUI() {
 		UI.Altitude->setText(std::string(str));
 	}
 	if (showDebugInfo) {
+		int verts = 0;
+		const static glm::vec3 cShift(Chunk::MidX, Chunk::MidY, Chunk::MidZ);
+		for (int x = 0; x < G->SC->getChunksX(); x++)
+			for (int y = 0; y < G->SC->getChunksY(); y++)
+				for (int z = 0; z < G->SC->getChunksZ(); z++)
+					if (G->SC->getChunk(x, y, z))
+						if (G->LP->camera.frustum.sphereInFrustum(glm::vec3(x * CX, y * CY, z * CZ) + cShift, Chunk::CullSphereRadius)) {
+							verts += G->SC->getChunk(x, y, z)->vertices;
+						}
+		verts /= 3;
 		std::ostringstream oss;
 		oss << std::setprecision(3) <<
 			"HP: " << LP.health << std::endl <<
@@ -691,7 +728,8 @@ void GameState::updateUI() {
 			"y: " << LP.position.y << std::endl <<
 			"z: " << LP.position.z << std::endl <<
 			"vy: " << LP.velocity.y << std::endl <<
-			"rx: " << LP.angle << std::endl;
+			"rx: " << LP.angle << std::endl <<
+			"chunk tris: " << verts;
 		UI.DebugInfo->setText(oss.str());
 	}
 }
@@ -703,8 +741,8 @@ void GameState::drawUI() {
 
 	G->UIM->drawTex(m_crossHair.mat, *m_crossHair.tex);
 	// TODO render weapon
-	//G->UIM->drawTexRect(UI::Element::Area {20, -20*3, 120*3, 126*3}, *m_builderGun.tex);
-	//G->UIM->drawTexRect(UI::Element::Area {20+37*3, 35*3, 117, 63}, *m_builderGun.currentBlockTex);
+	G->UIM->drawTex(m_builderGun.matGun, *m_builderGun.tex);
+	G->UIM->drawTex(m_builderGun.matIcon, *m_builderGun.currentBlockTex);
 }
 
 bool GameState::processNetwork() {

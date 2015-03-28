@@ -23,25 +23,25 @@ public:
 	void stop();
 	bool isPlaying() const;
 	inline ALuint getId() const { return id; }
-	
+
 	float getGain() const;
 	void setGain(float value);
-	
+
 	bool getLooping() const;
 	void setLooping(bool value);
-	
+
 	float getPitch() const;
 	void setPitch(float value);
-	
+
 	bool getRelative() const;
 	void setRelative(bool value);
-	
+
 	glm::vec3 getPosition() const;
 	void setPosition(const glm::vec3 &value);
-	
+
 	glm::vec3 getVelocity() const;
 	void setVelocity(const glm::vec3 &value);
-	
+
 	glm::vec3 getDirection() const;
 	void setDirection(const glm::vec3 &value);
 };

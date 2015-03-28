@@ -10,11 +10,8 @@
 
 namespace Diggler {
 
-const Program *Font::RenderProgram = nullptr;
-GLint Font::RenderProgram_uni_mvp = -1;
-GLint Font::RenderProgram_att_coord = -1;
-GLint Font::RenderProgram_att_texcoord = -1;
-GLint Font::RenderProgram_att_color = -1;
+Font::Renderer Font::R = {0};
+
 static const struct { float r, g, b; } ColorTable[16] = {
 	{1.0f, 1.0f, 1.0f},
 	{0.66f, 0.66f, 0.66f},
@@ -35,12 +32,12 @@ static const struct { float r, g, b; } ColorTable[16] = {
 };
 
 Font::Font(Game *G, const std::string& path) : G(G) {
-	if (!RenderProgram) {
-		RenderProgram = G->PM->getProgram(PM_2D | PM_TEXTURED | PM_COLORED);
-		RenderProgram_att_coord = RenderProgram->att("coord");
-		RenderProgram_att_texcoord = RenderProgram->att("texcoord");
-		RenderProgram_att_color = RenderProgram->att("color");
-		RenderProgram_uni_mvp = RenderProgram->uni("mvp");
+	if (!R.prog) {
+		R.prog = G->PM->getProgram(PM_2D | PM_TEXTURED | PM_COLORED);
+		R.att_coord = R.prog->att("coord");
+		R.att_texcoord = R.prog->att("texcoord");
+		R.att_color = R.prog->att("color");
+		R.uni_mvp = R.prog->uni("mvp");
 	}
 	m_texture = new Texture(path, Texture::PixelFormat::RGBA);
 	std::ifstream source(path + ".fdf", std::ios_base::binary);
@@ -68,7 +65,7 @@ struct Vertex { int x, y; float tx, ty; float r, g, b ,a; };
 
 #define eraseCurChar() elements -= 6;
 
-int Font::updateVBO(VBO &vbo, const std::string &text) const {
+int Font::updateVBO(VBO &vbo, const std::string &text, GLenum usage) const {
 	int elements = text.size()*6;
 	Vertex *verts = new Vertex[elements];
 	uint8 c, w; int line = 0, cx = 0, v = 0; float l, r;
@@ -116,28 +113,28 @@ int Font::updateVBO(VBO &vbo, const std::string &text) const {
 		v += 6;
 		cx += w;
 	}
-	vbo.setData(verts, elements, GL_STATIC_DRAW);
+	vbo.setData(verts, elements, usage);
 	delete[] verts;
 	return elements;
 }
 
-void Font::draw(const Diggler::VBO &vbo, int count, const glm::mat4& matrix) const {
-	glEnableVertexAttribArray(RenderProgram_att_coord);
-	glEnableVertexAttribArray(RenderProgram_att_texcoord);
-	glEnableVertexAttribArray(RenderProgram_att_color);
-	
-	RenderProgram->bind();
+void Font::draw(const VBO &vbo, int count, const glm::mat4& matrix) const {
+	glEnableVertexAttribArray(R.att_coord);
+	glEnableVertexAttribArray(R.att_texcoord);
+	glEnableVertexAttribArray(R.att_color);
+
+	R.prog->bind();
 	m_texture->bind();
 	vbo.bind();
-	glUniformMatrix4fv(RenderProgram_uni_mvp, 1, GL_FALSE, glm::value_ptr(matrix));
-	glVertexAttribPointer(RenderProgram_att_coord, 2, GL_INT, GL_FALSE, sizeof(Vertex), 0);
-	glVertexAttribPointer(RenderProgram_att_texcoord, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, tx));
-	glVertexAttribPointer(RenderProgram_att_color, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, r));
+	glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(matrix));
+	glVertexAttribPointer(R.att_coord, 2, GL_INT, GL_FALSE, sizeof(Vertex), 0);
+	glVertexAttribPointer(R.att_texcoord, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, tx));
+	glVertexAttribPointer(R.att_color, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, r));
 	glDrawArrays(GL_TRIANGLES, 0, count);
-	
-	glDisableVertexAttribArray(RenderProgram_att_color);
-	glDisableVertexAttribArray(RenderProgram_att_texcoord);
-	glDisableVertexAttribArray(RenderProgram_att_coord);
+
+	glDisableVertexAttribArray(R.att_color);
+	glDisableVertexAttribArray(R.att_texcoord);
+	glDisableVertexAttribArray(R.att_coord);
 }
 
 Font::Size Font::getSize(const std::string &text) const {

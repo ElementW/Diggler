@@ -1,31 +1,64 @@
 #include "Blocks.hpp"
 #include "GlobalProperties.hpp"
+#include "stb_perlin.h"
+
+#define NON 0x0
+#define RED Blocks::TeamRed
+#define BLU Blocks::TeamBlue
+#define ANY (RED | BLU)
 
 namespace Diggler {
 
-BlockTex sideTextures[(int)BlockType::LAST][6] = {
-	/* Air */	{BlockTex::None, BlockTex::None, BlockTex::None, BlockTex::None, BlockTex::None, BlockTex::None},
-	/* Dirt */	{BlockTex::Dirt, BlockTex::Dirt, BlockTex::Dirt, BlockTex::Dirt, BlockTex::Dirt, BlockTex::Dirt},
-	/* Ore */	{BlockTex::Ore, BlockTex::Ore, BlockTex::Ore, BlockTex::Ore, BlockTex::Ore, BlockTex::Ore},
-	/* Gold */	{BlockTex::Gold, BlockTex::Gold, BlockTex::Gold, BlockTex::Gold, BlockTex::Gold, BlockTex::Gold},
-	/*Diamond*/	{BlockTex::Diamond, BlockTex::Diamond, BlockTex::Diamond, BlockTex::Diamond, BlockTex::Diamond, BlockTex::Diamond},
-	/* Rock */	{BlockTex::Rock, BlockTex::Rock, BlockTex::Rock, BlockTex::Rock, BlockTex::Rock, BlockTex::Rock},
-	/* Ladder */{BlockTex::Ladder, BlockTex::Ladder, BlockTex::LadderTop, BlockTex::LadderTop, BlockTex::Ladder, BlockTex::Ladder},
-	/* TNT*/	{BlockTex::Explosive, BlockTex::Explosive, BlockTex::Explosive, BlockTex::Explosive, BlockTex::Explosive, BlockTex::Explosive},
-	/* Jump */	{BlockTex::Jump, BlockTex::Jump, BlockTex::JumpTop, BlockTex::TeleBottom, BlockTex::Jump, BlockTex::Jump},
-	/* Shock */	{BlockTex::TeleSideA, BlockTex::TeleSideA, BlockTex::TeleBottom, BlockTex::Spikes, BlockTex::TeleSideB, BlockTex::TeleSideB},
-	/*BankRed*/	{BlockTex::BankFrontRed, BlockTex::BankBackRed, BlockTex::BankTopRed, BlockTex::BankTopRed, BlockTex::BankLeftRed, BlockTex::BankRightRed},
-	/*BankBlue*/{BlockTex::BankFrontBlue, BlockTex::BankBackBlue, BlockTex::BankTopBlue, BlockTex::BankTopBlue, BlockTex::BankLeftBlue, BlockTex::BankRightBlue},
-	/*BeaconR*/	{BlockTex::TeleSideA, BlockTex::TeleSideA, BlockTex::BeaconRed, BlockTex::LadderTop, BlockTex::TeleSideB, BlockTex::TeleSideB},
-	/*BeaconB*/	{BlockTex::TeleSideA, BlockTex::TeleSideA, BlockTex::BeaconBlue, BlockTex::LadderTop, BlockTex::TeleSideB, BlockTex::TeleSideB},
-	/* Road */	{BlockTex::Road, BlockTex::Road, BlockTex::Road, BlockTex::Road, BlockTex::Road, BlockTex::Road},
-	/* SolidR */{BlockTex::SolidRed, BlockTex::SolidRed, BlockTex::SolidRed, BlockTex::SolidRed, BlockTex::SolidRed, BlockTex::SolidRed},
-	/* SolidB */{BlockTex::SolidBlue, BlockTex::SolidBlue, BlockTex::SolidBlue, BlockTex::SolidBlue, BlockTex::SolidBlue, BlockTex::SolidBlue},
-	/* Metal */	{BlockTex::Metal, BlockTex::Metal, BlockTex::Metal, BlockTex::Metal, BlockTex::Metal, BlockTex::Metal},
-	/*DirtSign*/{BlockTex::DirtSign, BlockTex::DirtSign, BlockTex::DirtSign, BlockTex::DirtSign, BlockTex::DirtSign, BlockTex::DirtSign},
-	/* Lava */	{BlockTex::Lava, BlockTex::Lava, BlockTex::Lava, BlockTex::Lava, BlockTex::Lava, BlockTex::Lava},
-	/* TransR */{BlockTex::TransRed, BlockTex::TransRed, BlockTex::TransRed, BlockTex::TransRed, BlockTex::TransRed, BlockTex::TransRed},
-	/* TransB */{BlockTex::TransBlue, BlockTex::TransBlue, BlockTex::TransBlue, BlockTex::TransBlue, BlockTex::TransBlue, BlockTex::TransBlue},
+typedef BlockType Type;
+const Blocks::TypeInfo Blocks::TypeInfos[(int)Type::LAST] = {
+	{Type::Air, "Air",					0,		0,	0,		NON, "deconstruction.png"},
+	{Type::Dirt, "Dirt",				0,		0,	0,		NON, nullptr},
+	{Type::Ore, "Ore",					0,		25,	0,		NON, nullptr},
+	{Type::Gold, "Gold",				100,	0,	0,		NON, nullptr},
+	{Type::Diamond, "Diamond",			1000,	25,	0,		NON, nullptr},
+	{Type::Rock, "Rock",				0,		0,	0,		NON, nullptr},
+	{Type::Ladder, "Ladder",			0,		0,	25,		ANY, "ladder.png"},
+	{Type::Explosive, "Explosives",		0,		0,	100,	ANY, "explosive.png"},
+	{Type::Jump, "Jump pad",			0,		0,	25,		ANY, "jump.png"},
+	{Type::Shock, "Shock Block",		0,		0,	50,		ANY, "spikes.png"},
+	{Type::BankRed, "Bank",				0,		0,	50,		RED, "bank_red.png"},
+	{Type::BankBlue, "Bank",			0,		0,	50,		BLU, "bank_blue.png"},
+	{Type::BeaconRed, "Beacon",			0,		0,	50,		RED, "beacon.png"},
+	{Type::BeaconBlue, "Beacon",		0,		0,	50,		BLU, "beacon.png"},
+	{Type::Road, "Road",				0,		0,	10,		ANY, "road.png"},
+	{Type::SolidRed, "Solid Block",		0,		0,	10,		RED, "solid_red.png"},
+	{Type::SolidBlue, "Solid Block",	0,		0,	10,		BLU, "solid_blue.png"},
+	{Type::Metal, "Metal Block",		0,		0,	0,		NON, "metal.png"},
+	{Type::DirtSign, "Dirt",			0,		0,	0,		NON, nullptr},
+	{Type::Lava, "Lava",				0,		0,	0,		NON, nullptr},
+	{Type::TransRed, "Force Field",		0,		0,	25,		ANY, "translucent_red.png"},
+	{Type::TransBlue, "Force Field",	0,		0,	25,		ANY, "translucent_blue.png"}
+};
+
+typedef BlockTex Tex;
+const Tex sideTextures[(int)Type::LAST][6] = {
+	/* Air */	{Tex::None, Tex::None, Tex::None, Tex::None, Tex::None, Tex::None},
+	/* Dirt */	{Tex::Dirt, Tex::Dirt, Tex::Dirt, Tex::Dirt, Tex::Dirt, Tex::Dirt},
+	/* Ore */	{Tex::Ore, Tex::Ore, Tex::Ore, Tex::Ore, Tex::Ore, Tex::Ore},
+	/* Gold */	{Tex::Gold, Tex::Gold, Tex::Gold, Tex::Gold, Tex::Gold, Tex::Gold},
+	/*Diamond*/	{Tex::Diamond, Tex::Diamond, Tex::Diamond, Tex::Diamond, Tex::Diamond, Tex::Diamond},
+	/* Rock */	{Tex::Rock, Tex::Rock, Tex::Rock, Tex::Rock, Tex::Rock, Tex::Rock},
+	/* Ladder */{Tex::Ladder, Tex::Ladder, Tex::LadderTop, Tex::LadderTop, Tex::Ladder, Tex::Ladder},
+	/* TNT*/	{Tex::Explosive, Tex::Explosive, Tex::Explosive, Tex::Explosive, Tex::Explosive, Tex::Explosive},
+	/* Jump */	{Tex::Jump, Tex::Jump, Tex::JumpTop, Tex::TeleBottom, Tex::Jump, Tex::Jump},
+	/* Shock */	{Tex::TeleSideA, Tex::TeleSideA, Tex::TeleBottom, Tex::Spikes, Tex::TeleSideB, Tex::TeleSideB},
+	/*BankRed*/	{Tex::BankFrontRed, Tex::BankBackRed, Tex::BankTopRed, Tex::BankTopRed, Tex::BankLeftRed, Tex::BankRightRed},
+	/*BankBlue*/{Tex::BankFrontBlue, Tex::BankBackBlue, Tex::BankTopBlue, Tex::BankTopBlue, Tex::BankLeftBlue, Tex::BankRightBlue},
+	/*BeaconR*/	{Tex::TeleSideA, Tex::TeleSideA, Tex::BeaconRed, Tex::LadderTop, Tex::TeleSideB, Tex::TeleSideB},
+	/*BeaconB*/	{Tex::TeleSideA, Tex::TeleSideA, Tex::BeaconBlue, Tex::LadderTop, Tex::TeleSideB, Tex::TeleSideB},
+	/* Road */	{Tex::Road, Tex::Road, Tex::Road, Tex::Road, Tex::Road, Tex::Road},
+	/* SolidR */{Tex::SolidRed, Tex::SolidRed, Tex::SolidRed, Tex::SolidRed, Tex::SolidRed, Tex::SolidRed},
+	/* SolidB */{Tex::SolidBlue, Tex::SolidBlue, Tex::SolidBlue, Tex::SolidBlue, Tex::SolidBlue, Tex::SolidBlue},
+	/* Metal */	{Tex::Metal, Tex::Metal, Tex::Metal, Tex::Metal, Tex::Metal, Tex::Metal},
+	/*DirtSign*/{Tex::DirtSign, Tex::DirtSign, Tex::DirtSign, Tex::DirtSign, Tex::DirtSign, Tex::DirtSign},
+	/* Lava */	{Tex::Lava, Tex::Lava, Tex::Lava, Tex::Lava, Tex::Lava, Tex::Lava},
+	/* TransR */{Tex::TransRed, Tex::TransRed, Tex::TransRed, Tex::TransRed, Tex::TransRed, Tex::TransRed},
+	/* TransB */{Tex::TransBlue, Tex::TransBlue, Tex::TransBlue, Tex::TransBlue, Tex::TransBlue, Tex::TransBlue},
 };
 
 bool Blocks::isTransparent(BlockType t) {
@@ -50,123 +83,55 @@ bool Blocks::isFaceVisible(BlockType t, BlockType other) {
 bool Blocks::canGoThrough(BlockType t, Player::Team team) {
 	if (t == BlockType::Air)
 		return true;
-	if (t != BlockType::TransRed && t != BlockType::TransBlue)
-		return false;
 	return (t == BlockType::TransRed && team == Player::Team::Red) ||
 		   (t == BlockType::TransBlue && team == Player::Team::Blue);
 }
 
-int32 blend(int32 c1, int32 c2, uint8 val) {
-	uint ival = 256 - val;
-	uint v1_1 = c1 & 0xFF00FF;
-	uint v1_2 = c1 & 0x00FF00;
-	uint v2_1 = c2 & 0xFF00FF;
-	uint v2_2 = c2 & 0x00FF00;
-	uint res = 
-	( ( ( ( v1_1 * ival ) + ( v2_1 * val ) ) >> 8 ) & 0xFF00FF ) |
-	( ( ( ( v1_2 * ival ) + ( v2_2 * val ) ) >> 8 ) & 0x00FF00 );
-    return res;
-}
-
-int lerp(int a, int b, float x) {
-	return a*(1-x) + b*x;
-}
-void makePerlin(int w, int h, uint8 *buf) {
-	uint8 noise[(h/4)*(w/4)];
-	for (int i=0; i < (h/4)*(w/4); i++)
-		noise[i] = FastRand(255);
-	for (int x=0; x < w; x++) {
-		for (int y=0; y < h; y++) {
-			int target = (x/4) + (y/4)*(w/4);
-			buf[x+y*h] = sqrt(lerp(noise[target], noise[target+1], x%4/4.f) *
-			lerp(noise[target], noise[target+(w/4)], y%4/4.f));
-		}
-	}
-}
-
-#define AddTex(x, y) m_coords[(int)x] = m_atlasCreator->add(getAssetPath("blocks", y))
-#define AddTexP(i, x, y, z, d) m_coords[(int)i] = m_atlasCreator->add(x, y, z, d)
+#define AddTex(b, t) m_coords[(int)b] = m_atlasCreator->add(getAssetPath("blocks", t)); 
 Blocks::Blocks() : m_atlas(nullptr) {
-	m_atlasCreator = new AtlasCreator(64*8, 64*8); //64*((int)BlockTex::LAST/8));
-	m_coords = new AtlasCreator::Coord[BlockTex::LAST];
-	
-	if (GlobalProperties::UseProceduralTextures) {
-		uint8 *data = new uint8[64*64*4];
-		uint8 *perlin = new uint8[64*64*4];
-		makePerlin(64, 64, perlin);
-		for (int x=0; x < 64; x++) {
-			for (int y=0; y < 64; y++) {
-				int32 noise; // = blend(0x292018, 0xBF9860, FastRand(0, 255));
-				if (x == 0 || x == 63 || y == 0 || y == 63) {
-					noise = 0x1B120B;
-				} else {
-					/*switch (FastRand(0, 4)) {
-						case 0: noise = 0x292018; break;
-						case 1: noise = 0x593F28; break;
-						case 2: noise = 0x87633E; break;
-						case 3: noise = 0xBF9860; break;
-					}*/
-					/*if (perlin[x+y*64] < 64)
-						noise = 0x292018;
-					else if (perlin[x+y*64] < 128)
-						noise = 0x593F28;
-					else if (perlin[x+y*64] < 192)
-						noise = 0x87633E;
-					else
-						noise = 0xBF9860;*/
-					noise = ((int)perlin[x+y*64] << 16) + ((int)perlin[x+y*64] << 8) + (int)perlin[x+y*64];
-				}
-				data[0 + x*4 + y*64*4] = noise >> 16 & 0xFF;
-				data[1 + x*4 + y*64*4] = noise >> 8 & 0xFF;
-				data[2 + x*4 + y*64*4] = noise & 0xFF;
-				data[3 + x*4 + y*64*4] = 255;
-			}
-		}
-		AddTexP(BlockTex::Dirt, 64, 64, 4, data);
-		delete[] data;
-		delete[] perlin;
-	} else {
-		AddTex(BlockTex::Dirt, "tex_block_dirt.png");}
-		AddTex(BlockTex::DirtSign, "tex_block_dirt_sign.png");
-		AddTex(BlockTex::Rock, "tex_block_rock.png");
-		AddTex(BlockTex::Ore, "tex_block_ore.png");
-		AddTex(BlockTex::Gold, "tex_block_silver.png");
-		AddTex(BlockTex::Diamond, "tex_block_diamond.png");
-		AddTex(BlockTex::HomeRed, "tex_block_home_red.png");
-		AddTex(BlockTex::HomeBlue, "tex_block_home_blue.png");
-		AddTex(BlockTex::SolidRed, "tex_block_red.png");
-		AddTex(BlockTex::SolidBlue, "tex_block_blue.png");
-		AddTex(BlockTex::Ladder, "tex_block_ladder.png");
-		AddTex(BlockTex::LadderTop, "tex_block_ladder_top.png");
-		AddTex(BlockTex::Spikes, "tex_block_spikes.png");
-		AddTex(BlockTex::Jump, "tex_block_jump.png");
-		AddTex(BlockTex::JumpTop, "tex_block_jump_top.png");
-		AddTex(BlockTex::Explosive, "tex_block_explosive.png");
-		AddTex(BlockTex::Metal, "tex_block_metal.png");
-		AddTex(BlockTex::BankTopRed, "tex_block_bank_top_red.png");
-		AddTex(BlockTex::BankLeftRed, "tex_block_bank_left_red.png");
-		AddTex(BlockTex::BankFrontRed, "tex_block_bank_front_red.png");
-		AddTex(BlockTex::BankRightRed, "tex_block_bank_right_red.png");
-		AddTex(BlockTex::BankBackRed, "tex_block_bank_back_red.png");
-		AddTex(BlockTex::BankTopBlue, "tex_block_bank_top_blue.png");
-		AddTex(BlockTex::BankLeftBlue, "tex_block_bank_left_blue.png");
-		AddTex(BlockTex::BankFrontBlue, "tex_block_bank_front_blue.png");
-		AddTex(BlockTex::BankRightBlue, "tex_block_bank_right_blue.png");
-		AddTex(BlockTex::BankBackBlue, "tex_block_bank_back_blue.png");
-		AddTex(BlockTex::TeleSideA, "tex_block_teleporter_a.png");
-		AddTex(BlockTex::TeleSideB, "tex_block_teleporter_b.png");
-		AddTex(BlockTex::TeleTop, "tex_block_teleporter_top.png");
-		AddTex(BlockTex::TeleBottom, "tex_block_teleporter_bottom.png");
-		AddTex(BlockTex::Lava, "tex_block_lava.png");
-		AddTex(BlockTex::Road, "tex_block_road_orig.png");
-		AddTex(BlockTex::RoadTop, "tex_block_road_top.png");
-		AddTex(BlockTex::RoadBottom, "tex_block_road_bottom.png");
-		AddTex(BlockTex::BeaconRed, "tex_block_beacon_top_red.png");
-		AddTex(BlockTex::BeaconBlue, "tex_block_beacon_top_blue.png");
-		AddTex(BlockTex::TransRed, "tex_block_trans_red.png");
-		AddTex(BlockTex::TransBlue, "tex_block_trans_blue.png");
-	
-	
+	m_atlasCreator = new AtlasCreator(64*8, 64*8); //64*((int)Tex::LAST/8));
+	m_coords = new AtlasCreator::Coord[Tex::LAST];
+
+	AddTex(Tex::Dirt,			"tex_block_dirt.png");
+	AddTex(Tex::DirtSign,		"tex_block_dirt_sign.png");
+	AddTex(Tex::Rock,			"tex_block_rock.png");
+	AddTex(Tex::Ore,			"tex_block_ore.png");
+	AddTex(Tex::Gold,			"tex_block_silver.png");
+	AddTex(Tex::Diamond,		"tex_block_diamond.png");
+	AddTex(Tex::HomeRed,		"tex_block_home_red.png");
+	AddTex(Tex::HomeBlue,		"tex_block_home_blue.png");
+	AddTex(Tex::SolidRed,		"tex_block_red.png");
+	AddTex(Tex::SolidBlue,		"tex_block_blue.png");
+	AddTex(Tex::Ladder,		"tex_block_ladder.png");
+	AddTex(Tex::LadderTop,		"tex_block_ladder_top.png");
+	AddTex(Tex::Spikes,		"tex_block_spikes.png");
+	AddTex(Tex::Jump,			"tex_block_jump.png");
+	AddTex(Tex::JumpTop,		"tex_block_jump_top.png");
+	AddTex(Tex::Explosive,		"tex_block_explosive.png");
+	AddTex(Tex::Metal,			"tex_block_metal.png");
+	AddTex(Tex::BankTopRed,	"tex_block_bank_top_red.png");
+	AddTex(Tex::BankLeftRed,	"tex_block_bank_left_red.png");
+	AddTex(Tex::BankFrontRed,	"tex_block_bank_front_red.png");
+	AddTex(Tex::BankRightRed,	"tex_block_bank_right_red.png");
+	AddTex(Tex::BankBackRed,	"tex_block_bank_back_red.png");
+	AddTex(Tex::BankTopBlue,	"tex_block_bank_top_blue.png");
+	AddTex(Tex::BankLeftBlue,	"tex_block_bank_left_blue.png");
+	AddTex(Tex::BankFrontBlue,	"tex_block_bank_front_blue.png");
+	AddTex(Tex::BankRightBlue,	"tex_block_bank_right_blue.png");
+	AddTex(Tex::BankBackBlue,	"tex_block_bank_back_blue.png");
+	AddTex(Tex::TeleSideA,		"tex_block_teleporter_a.png");
+	AddTex(Tex::TeleSideB,		"tex_block_teleporter_b.png");
+	AddTex(Tex::TeleTop,		"tex_block_teleporter_top.png");
+	AddTex(Tex::TeleBottom,	"tex_block_teleporter_bottom.png");
+	AddTex(Tex::Lava,			"tex_block_lava.png");
+	AddTex(Tex::Road,			"tex_block_road_orig.png");
+	AddTex(Tex::RoadTop,		"tex_block_road_top.png");
+	AddTex(Tex::RoadBottom,	"tex_block_road_bottom.png");
+	AddTex(Tex::BeaconRed,		"tex_block_beacon_top_red.png");
+	AddTex(Tex::BeaconBlue,	"tex_block_beacon_top_blue.png");
+	AddTex(Tex::TransRed,		"tex_block_trans_red.png");
+	AddTex(Tex::TransBlue,		"tex_block_trans_blue.png");
+
 	m_atlas = m_atlasCreator->getAtlas();
 	delete m_atlasCreator;
 }

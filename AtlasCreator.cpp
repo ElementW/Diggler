@@ -1,8 +1,13 @@
 #include "AtlasCreator.hpp"
 #include "stb_image.h"
-//#include <chrono>
 #include <cmath>
 #include <stdexcept>
+#include <cstring>
+
+#define ENABLE_TIMING 0
+#if ENABLE_TIMING
+	#include <chrono>
+#endif
 
 namespace Diggler {
 
@@ -14,7 +19,7 @@ AtlasCreator::AtlasCreator(int w, int h, int uw, int uh) : atlasWidth(w), atlasH
 		throw std::invalid_argument("Atlas W/H is not divisor of Coord's type");
 
 	atlasData = new uint8[w * h * 4];
-	std::fill_n(atlasData, w * h * 4, static_cast<uint8>(0));
+	memset(atlasData, w * h * 4, 0);
 }
 
 AtlasCreator::Coord AtlasCreator::add(const std::string& path) {
@@ -62,16 +67,18 @@ AtlasCreator::Coord AtlasCreator::add(int width, int height, int channels, const
 		targetY = lastY;
 	}
 
-	//auto t1 = std::chrono::high_resolution_clock::now();
+#if ENABLE_TIMING
+	auto t1 = std::chrono::high_resolution_clock::now();
+#endif
 	// Blit the texture onto the atlas
 	for(int sourceY = 0; sourceY < height; ++sourceY) {
 		int fromPad = sourceY * width;
 		int toPad = (targetY + sourceY) * atlasWidth;
+		memcpy(&atlasData[(toPad+targetX)*4], &data[fromPad*4], width*4);
+#if 0 // For platforms where memcpy would be slow
 		for(int sourceX = 0; sourceX < width; sourceX += 2) {
 			int from = (fromPad + sourceX) * 4;
 			int to = (toPad + (targetX + sourceX)) * 4;
-			
-			// MMX-like copy, fast (actual MMX/SSE would be f'kin fast)
 #if HAS_NATIVE_64BIT
 			*((int64*)(&atlasData[to])) = *((int64*)(&data[from]));
 #else
@@ -79,9 +86,12 @@ AtlasCreator::Coord AtlasCreator::add(int width, int height, int channels, const
 			*((int32*)(&atlasData[to + 4])) = *((int32*)(&data[from + 4]));
 #endif
 		}
+#endif
 	}
-	//auto t2 = std::chrono::high_resolution_clock::now();
-	//getDebugStream() << std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count() << std::endl;
+#if ENABLE_TIMING
+	auto t2 = std::chrono::high_resolution_clock::now();
+	getDebugStream() << std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count() << std::endl;
+#endif
 
 	lastX = targetX + unitWidth;
 	lastY = targetY;

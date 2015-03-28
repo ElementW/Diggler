@@ -1,10 +1,11 @@
 #include "LocalPlayer.hpp"
-#include "Game.hpp"
 #include <cstdio>
 #include <limits>
 #include <sstream>
 #include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "Audio.hpp"
+#include "Game.hpp"
 #include "network/NetHelper.hpp"
 
 namespace Diggler {
@@ -16,13 +17,14 @@ static float MvmtDamping = 1/(Acceleration*2.f);
 static float Gravity = 18.0f; // -Y acceleration (blocks/sec/sec)
 
 static float JumpForce = Gravity/2.7f;
+static float LadderClimbSpeed = 3.f;
 
 static float MaxSpeed = 5.f;
 static float RoadMaxSpeed = MaxSpeed*2;
 
 static float MinYVelocity = -80.f;
 
-static float HurtYVelocity = -10.5f;
+static float HurtYVelocity = -12.f;
 static float LethalYVelocity = -16.f;
 
 static int i(const float &f) {
@@ -33,7 +35,7 @@ static int i(const float &f) {
 
 LocalPlayer::LocalPlayer(Game *G) : Player(G), goingForward(false), goingBackward(false), goingLeft(false), goingRight(false),
 	hasGravity(true), hasNoclip(false), health(1) {
-	size = glm::vec3(0.3f, 1.9f, 0.3f);
+	size = glm::vec3(0.3f, 1.5f, 0.3f);
 	eyesPos = glm::vec3(0.f, 1.3f, 0.f);
 }
 
@@ -54,8 +56,8 @@ void LocalPlayer::lookAt(const glm::vec3& at) {
 	G->A->updateAngle();
 }
 
-void LocalPlayer::update(const float &delta) {
-	health += delta/10;
+void LocalPlayer::update(float delta) {
+	health += delta/5;
 	if (health >= 1)
 		health = 1;
 
@@ -93,17 +95,27 @@ void LocalPlayer::update(const float &delta) {
 			if (onGround) {
 				if (velocity.y <= LethalYVelocity) {
 					setDead(true, DeathReason::Fall, true);
+					position.y = (int)(position.y);
 					velocity = glm::vec3(0);
+					camera.setPosition(position + eyesPos);
+					G->A->updatePos();
+					health = 0;
 					return;
 				}
 				G->A->playSound("hitground");
 				health -= (velocity.y-HurtYVelocity)/(LethalYVelocity-HurtYVelocity);
+				if (health < 0)
+					setDead(true, DeathReason::Fall, true);
 			}
 		}
 		if (onGround) {
 			BlockType b = G->SC->get(position.x, position.y-1, position.z);
 			onGround = !Blocks::canGoThrough(b, team);
-			onRoad = (b == BlockType::Road);
+			if (onRoad) {
+				onRoad = (!onGround || b == BlockType::Road || b == BlockType::Jump);
+			} else {
+				onRoad = (b == BlockType::Road);
+			}
 		}
 		if (!onGround)
 			velocity.y -= Gravity * delta;
@@ -165,6 +177,10 @@ void LocalPlayer::update(const float &delta) {
 						setDead(true, DeathReason::Lava, true);
 						return;
 					}
+					if (bNTop == BlockType::Ladder || bNBottom == BlockType::Ladder) {
+						velocity.y = LadderClimbSpeed;
+						velocity.z *= 0.75f;
+					}
 					velocity.x = 0.f;
 				}
 			if (velocity.x < 0.f)
@@ -172,6 +188,10 @@ void LocalPlayer::update(const float &delta) {
 					if (bSTop == BlockType::Lava || bSBottom == BlockType::Lava) {
 						setDead(true, DeathReason::Lava, true);
 						return;
+					}
+					if (bSTop == BlockType::Ladder || bSBottom == BlockType::Ladder) {
+						velocity.y = LadderClimbSpeed;
+						velocity.z *= 0.75f;
 					}
 					velocity.x = 0.f;
 				}
@@ -181,6 +201,10 @@ void LocalPlayer::update(const float &delta) {
 						setDead(true, DeathReason::Lava, true);
 						return;
 					}
+					if (bETop == BlockType::Ladder || bEBottom == BlockType::Ladder) {
+						velocity.y = LadderClimbSpeed;
+						velocity.x *= 0.75f;
+					}
 					velocity.z = 0.f;
 				}
 			if (velocity.z < 0.f)
@@ -188,6 +212,10 @@ void LocalPlayer::update(const float &delta) {
 					if (bWTop == BlockType::Lava || bWBottom == BlockType::Lava) {
 						setDead(true, DeathReason::Lava, true);
 						return;
+					}
+					if (bWTop == BlockType::Ladder || bWBottom == BlockType::Ladder) {
+						velocity.y = LadderClimbSpeed;
+						velocity.x *= 0.75f;
 					}
 					velocity.z = 0.f;
 				}
@@ -222,6 +250,29 @@ void LocalPlayer::update(const float &delta) {
 		camera.setPosition(position + eyesPos);
 		G->A->updatePos();
 	}
+}
+
+void LocalPlayer::render(const glm::mat4 &transform) const {
+#if 0
+	const Program *P = G->PM->getProgram(PM_3D | PM_COLORED);
+	P->bind();
+	glEnableVertexAttribArray(P->att("coord"));
+	glEnableVertexAttribArray(P->att("color"));
+	glUniformMatrix4fv(P->uni("mvp"), 1, GL_FALSE, glm::value_ptr(transform));
+	static VBO vbo;
+	struct { float x, y, z, r, g, b; } pts[] = {
+		(int)position.x+.5f, (int)(position.y+size.y)+.5f, (int)(position.z+size.z)+.5f, 1.f, 0.f, 0.f,
+		(int)position.x+.5f, (int)(position.y+size.y)+.5f, (int)position.z+.5f, 0.f, 1.f, 0.f
+	};
+	vbo.setData(pts, 2, GL_STREAM_DRAW);
+	vbo.bind();
+	glPointSize(4.f);
+	glVertexAttribPointer(P->att("coord"), 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), 0);
+	glVertexAttribPointer(P->att("color"), 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (GLvoid*)(3*sizeof(float)));
+	glDrawArrays(GL_POINTS, 0, 2);
+	glDisableVertexAttribArray(P->att("color"));
+	glDisableVertexAttribArray(P->att("coord"));
+#endif
 }
 
 void LocalPlayer::forceCameraUpdate() {
