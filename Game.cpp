@@ -23,6 +23,7 @@ void Game::init() {
 		}
 		A = new Audio(*this);
 		KB = new KeyBinds;
+		PlayerPosUpdateFreq = 4;
 	}
 	if (GlobalProperties::IsServer) {
 		CCH = new ChunkChangeHelper();

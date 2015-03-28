@@ -561,7 +561,7 @@ void GameState::gameLoop() {
 				msg.writeVec3(LP->accel);
 				msg.writeFloat(LP->angle);
 				sendMsg(msg, Net::Tfer::Unrel, Net::Channels::Movement);
-				nextNetUpdate = T+0.25;
+				nextNetUpdate = T+1.0/G->PlayerPosUpdateFreq;
 			}
 			glClearColor(0.0, 0.0, 0.0, 1.0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

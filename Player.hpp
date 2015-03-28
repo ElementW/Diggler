@@ -32,7 +32,8 @@ protected:
 			  uni_fogStart,
 			  uni_fogEnd;
 	} R;
-	glm::vec3 m_predictPos;
+	double m_lastPosTime;
+	glm::vec3 m_predictPos, m_lastPos;
 	
 	Player(const Player&) = delete;
 	Player& operator=(const Player&) = delete;

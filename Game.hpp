@@ -41,6 +41,7 @@ public:
 	class Audio *A;
 	Net::Peer NS;
 	class KeyBinds *KB;
+	int PlayerPosUpdateFreq;
 	
 	Game();
 	void init();
