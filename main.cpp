@@ -16,7 +16,6 @@
 
 #include "UITestState.hpp"
 
-
 namespace Diggler {
 
 using std::string;

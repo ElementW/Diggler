@@ -1,30 +1,39 @@
 #ifndef CHUNK_HPP
 #define CHUNK_HPP
+#include <mutex>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include "VBO.hpp"
 #include "Program.hpp"
 #include "Texture.hpp"
 #include "Blocks.hpp"
-#include "Mutex.hpp"
 
 #define CX 16
 #define CY 16
 #define CZ 16
+
+#define CHUNK_INMEM_COMPRESS 1
+#define CHUNK_INMEM_COMPRESS_DELAY 2000 /* ms */
 
 namespace Diggler {
 
 class Blocks;
 class Game;
 
-class Chunk /*: Renderable*/ {
+class Chunk {
 private:
 	friend class Superchunk;
 	
 	BlockType *blk2;
-	Mutex mut;
+	std::mutex mut;
 	void loadShader();
 	void set2(int x, int y, int z, BlockType type);
+
+	void calcMemUsage();
+#if CHUNK_INMEM_COMPRESS
+	void imcCompress();
+	void imcUncompress();
+#endif
 
 public:
 	constexpr static float CullSphereRadius =
@@ -45,14 +54,21 @@ public:
 	} R;
 	static Texture *TextureAtlas;
 	BlockType *blk;
+#if CHUNK_INMEM_COMPRESS
+	union {
+		int imcSize;
+		int imcUnusedSince;
+	};
+	uint8 *imcData;
+#endif
 	int scx, scy, scz;
+	int blkMem;
 	Game *G;
 	VBO *vbo, *ibo;
-	int vertices, indices;
+	int vertices, indicesOpq, indicesTpt;
 	bool dirty;
 	int lavaCount;
 
-	/// @param buffer Wether the chunk is just a buffer chunk
 	Chunk(int scx = -1, int scy = -1, int scz = -1, Game *G = nullptr);
 	~Chunk();
 	void onRenderPropertiesChanged();
@@ -62,8 +78,9 @@ public:
 	void updateServerPrepare();
 	void updateServer();
 	void updateServerSwap();
-	void render(const glm::mat4 &transform);
-	void renderBatched(const glm::mat4 &transform);
+
+	void render(const glm::mat4 &trasnsform);
+	void renderTransparent(const glm::mat4 &transform);
 };
 
 }

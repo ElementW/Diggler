@@ -138,7 +138,7 @@ Player::~Player() {
 }
 
 void Player::setPosVel(const glm::vec3 &pos, const glm::vec3 &vel, const glm::vec3 &acc) {
-	m_lastPos = m_predictPos;
+	lastPosition = m_predictPos;
 	position = m_predictPos = pos;
 	velocity = vel;
 	accel = acc;
@@ -147,7 +147,7 @@ void Player::setPosVel(const glm::vec3 &pos, const glm::vec3 &vel, const glm::ve
 
 void Player::update(const float &delta) {
 	velocity += accel * delta;
-	m_predictPos = glm::mix(m_lastPos, position, std::min((G->Time-m_lastPosTime)*G->PlayerPosUpdateFreq, 1.0));
+	m_predictPos = glm::mix(lastPosition, position, std::min((G->Time-m_lastPosTime)*G->PlayerPosUpdateFreq, 1.0));
 }
 
 static inline int getSide(float angle) {

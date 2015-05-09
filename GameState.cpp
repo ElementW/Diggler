@@ -18,6 +18,7 @@
 #include "EscMenu.hpp"
 #include "Audio.hpp"
 #include "network/NetHelper.hpp"
+#include "Particles.hpp"
 
 using std::unique_ptr;
 
@@ -106,6 +107,8 @@ GameState::GameState(GameWindow *W, const std::string &servHost, int servPort)
 	UI.headerBg.color = glm::vec4(0, 0, 0, .5f);
 
 	//"\f0H\f1e\f2l\f3l\f4l\f5o \f6d\f7e\f8m\f9b\faa\fbz\fcz\fde\fes\ff,\n\f0ye see,it werks purrfektly :D\n(and also; it's optimized)"
+
+	debugInfo.show = false;
 
 	m_mouseLocked = false;
 	nextNetUpdate = 0;
@@ -214,8 +217,8 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 		break;
 	case GLFW_KEY_F5:
 		if (action == GLFW_PRESS) {
-			showDebugInfo = !showDebugInfo;
-			UI.DebugInfo->setVisible(showDebugInfo);
+			debugInfo.show = !debugInfo.show;
+			UI.DebugInfo->setVisible(debugInfo.show);
 		}
 		break;
 	case GLFW_KEY_F6:
@@ -468,6 +471,7 @@ bool GameState::connectLoop() {
 
 	while (!finished && !glfwWindowShouldClose(*W)) { // Infinite loop \o/
 		T = glfwGetTime();
+		G->updateTime(T);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		UI::Text::Size sz = cUI.Connecting->getSize();
@@ -541,11 +545,12 @@ void GameState::gameLoop() {
 	LP->forceCameraUpdate();
 	G->A->update();
 	LP->setHasNoclip(true);
+
 	while (!W->shouldClose()) {
 		if (!processNetwork()) return;
 
 		T = glfwGetTime(); deltaT = T - lastT;
-		G->Time = T;
+		G->updateTime(T);
 		if (T > fpsT) {
 			char str[10]; std::sprintf(str, "FPS: %d", frames);
 			UI.FPS->setText(std::string(str));
@@ -592,26 +597,29 @@ void GameState::gameLoop() {
 				if (G->LP->camera.frustum.sphereInFrustum(p.position, 2))
 					p.render(m_transform);
 			}
+			G->SC->renderTransparent(m_transform);
 
-			// TODO: move
-			glm::ivec3 pointed, face;
+			static ParticleEmitter pe(G);
+			//pe.posAmpl = glm::vec3(1, 1, 1);
+			pe.pTemplate.color = glm::vec4(0, 1, 0, 1);
+			pe.pTemplate.size = 1;
+			//pe.pTemplate.accel = glm::vec3(0, -.4, 0);
+			pe.pTemplate.decay = 1;
+			pe.update(deltaT);
+			pe.render(m_transform);
+
 			// TODO: replace harcoded 32 viewdistance
-			if (G->LP->raytracePointed(32, &pointed, &face, .05f)) {
+			if (G->LP->raytracePointed(32, &m_pointedBlock, &m_pointedFacing, .07f)) {
 				m_highlightBox.program->bind();
 				glEnableVertexAttribArray(m_highlightBox.att_coord);
 				m_highlightBox.vbo.bind();
 				glVertexAttribPointer(m_highlightBox.att_coord, 3, GL_FLOAT, GL_FALSE, 0, 0);
-				
+
 				glUniform4f(m_highlightBox.uni_unicolor, 1.f, 1.f, 1.f, .1f);
 				glUniformMatrix4fv(m_highlightBox.uni_mvp, 1, GL_FALSE, glm::value_ptr(
-					glm::scale(glm::translate(m_transform, glm::vec3(pointed)+glm::vec3(.5f)), glm::vec3(0.5f*1.03f))));
+					glm::scale(glm::translate(m_transform, glm::vec3(m_pointedBlock)+glm::vec3(.5f)), glm::vec3(0.5f*1.03f))));
 				glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
-				
-				/*glUniform4f(m_highlightBox.uni_unicolor, 0.f, 0.f, 1.f, .2f);
-				glUniformMatrix4fv(m_highlightBox.uni_mvp, 1, GL_FALSE, glm::value_ptr(
-					glm::scale(glm::translate(m_transform, glm::vec3(face)+glm::vec3(.5f)), glm::vec3(0.40f+ sin(G->Time*4)*0.01f ))));
-				glDrawArrays(GL_TRIANGLES, 0, 6*2*3);*/
-				
+
 				glDisableVertexAttribArray(m_highlightBox.att_coord);
 			}
 
@@ -721,16 +729,15 @@ void GameState::updateUI() {
 		UI.lastAltitude = altitude;
 		UI.Altitude->setText(std::string(str));
 	}
-	if (showDebugInfo) {
-		int verts = 0;
+	if (debugInfo.show) {
+		Chunk *c;
+		int verts = 0, chunkMem = 0;
 		const static glm::vec3 cShift(Chunk::MidX, Chunk::MidY, Chunk::MidZ);
 		for (int x = 0; x < G->SC->getChunksX(); x++)
 			for (int y = 0; y < G->SC->getChunksY(); y++)
 				for (int z = 0; z < G->SC->getChunksZ(); z++)
-					if (G->SC->getChunk(x, y, z))
-						if (G->LP->camera.frustum.sphereInFrustum(glm::vec3(x * CX, y * CY, z * CZ) + cShift, Chunk::CullSphereRadius)) {
-							verts += G->SC->getChunk(x, y, z)->vertices;
-						}
+					if ((c = G->SC->getChunk(x, y, z)))
+						chunkMem += c->blkMem;
 		verts /= 3;
 		std::ostringstream oss;
 		oss << std::setprecision(3) <<
@@ -740,7 +747,8 @@ void GameState::updateUI() {
 			"z: " << LP.position.z << std::endl <<
 			"vy: " << LP.velocity.y << std::endl <<
 			"rx: " << LP.angle << std::endl <<
-			"chunk tris: " << verts;
+			"chunk tris: " << G->SC->lastVertCount / 3 << std::endl <<
+			"chunk mem: " << chunkMem / 1024 << " kib";
 		UI.DebugInfo->setText(oss.str());
 	}
 }

@@ -33,7 +33,7 @@ protected:
 			  uni_fogEnd;
 	} R;
 	double m_lastPosTime;
-	glm::vec3 m_predictPos, m_lastPos;
+	glm::vec3 m_predictPos;
 	
 	Player(const Player&) = delete;
 	Player& operator=(const Player&) = delete;
@@ -73,7 +73,7 @@ public:
 		Void
 	} deathReason;
 	Game *G;
-	glm::vec3 position, velocity, accel;
+	glm::vec3 position, lastPosition, velocity, accel;
 	float angle; double toolUseTime;
 	std::string name;
 	uint32 id;

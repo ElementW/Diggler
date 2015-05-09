@@ -92,6 +92,8 @@ private:
 	bool m_mouseLocked; int cX, cY;
 	glm::vec3 angles, lookat;
 
+	glm::ivec3 m_pointedBlock, m_pointedFacing;
+
 	std::thread m_networkThread;
 
 	Net::InMessage m_msg;
@@ -102,8 +104,12 @@ private:
 		UI::Text *Dot;
 	};
 
-	bool isEscapeToggled = false,
-		 showDebugInfo = false;
+	bool isEscapeToggled = false;
+
+	struct {
+		bool show;
+	} debugInfo;
+
 	struct {
 		struct {
 			glm::mat4 mat;

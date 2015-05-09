@@ -9,6 +9,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#if CHUNK_INMEM_COMPRESS
+	#include <cstdlib>
+	#include "lzfx/lzfx.h"
+#endif
+
 #define CXY (CX*CY)
 #define I(x,y,z) (x+y*CX+z*CXY)
 
@@ -48,6 +53,11 @@ Chunk::Chunk(int scx, int scy, int scz, Game *G) : blk2(nullptr), blk(nullptr),
 		blk2 = new BlockType[CX*CY*CZ];
 		memset(blk, (int)BlockType::Air, CX*CY*CZ*sizeof(BlockType));
 	}
+#if CHUNK_INMEM_COMPRESS
+	imcUnusedSince = 0;
+	imcData = nullptr;
+#endif
+	calcMemUsage();
 }
 
 void Chunk::loadShader() {
@@ -67,6 +77,53 @@ void Chunk::loadShader() {
 	R.uni_time = w ? R.prog->uni("time") : -1;
 }
 
+void Chunk::calcMemUsage() {
+	blkMem = 0;
+#if CHUNK_INMEM_COMPRESS
+	if (imcData) {
+		blkMem = imcSize;
+		return;
+	}
+#endif
+	if (blk)
+		blkMem += sizeof(BlockType)*CX*CY*CZ;
+	if (blk2)
+		blkMem += sizeof(BlockType)*CX*CY*CZ;
+}
+
+#if CHUNK_INMEM_COMPRESS
+void Chunk::imcCompress() {
+	if (mut.try_lock()) {
+		//getDebugStream() << "Chunk[" << scx << ',' << scy << ',' << scz << "] compress" << std::endl;
+		uint isize = sizeof(BlockType)*CX*CY*CZ, osize = isize;
+		imcData = (uint8*)std::malloc(osize);
+		lzfx_compress(blk, isize, imcData, &osize);
+		imcData = (uint8*)std::realloc(imcData, osize);
+		imcSize = osize;
+		delete blk;
+		blk = nullptr;
+		calcMemUsage();
+		mut.unlock();
+	}
+}
+
+void Chunk::imcUncompress() {
+	if (!imcData) {
+		imcUnusedSince = G->TimeMs;
+		return;
+	}
+	mut.lock();
+	uint isize = imcSize, osize = sizeof(BlockType)*CX*CY*CZ;
+	imcUnusedSince = G->TimeMs;
+	blk = new BlockType[CX*CY*CZ];
+	lzfx_decompress(imcData, isize, blk, &osize);
+	std::free(imcData);
+	imcData = nullptr;
+	calcMemUsage();
+	mut.unlock();
+}
+#endif
+
 void Chunk::onRenderPropertiesChanged() {
 	loadShader();
 }
@@ -75,9 +132,15 @@ Chunk::~Chunk() {
 	delete[] blk;
 	delete[] blk2;
 	delete vbo; delete ibo;
+#if CHUNK_INMEM_COMPRESS
+	delete imcData;
+#endif
 }
  
 BlockType Chunk::get(int x, int y, int z) {
+#if CHUNK_INMEM_COMPRESS
+	imcUncompress();
+#endif
 	if ((x < 0 || y < 0 || z < 0 || x >= CX || y >= CY || z >= CZ) && G) {
 		return G->SC->get(scx * CX + x, scy * CY + y, scz * CZ + z);
 	}
@@ -87,6 +150,9 @@ BlockType Chunk::get(int x, int y, int z) {
 void Chunk::set2(int x, int y, int z, BlockType type) {
 	if ((x < 0 || y < 0 || z < 0 || x >= CX || y >= CY || z >= CZ) && G)
 		return G->SC->set2(scx * CX + x, scy * CY + y, scz * CZ + z, type);
+#if CHUNK_INMEM_COMPRESS
+	imcUncompress();
+#endif
 	register BlockType *b = &(blk2[I(x,y,z)]);
 	if (*b == BlockType::Lava)
 		lavaCount--;
@@ -98,9 +164,12 @@ void Chunk::set2(int x, int y, int z, BlockType type) {
 }
 
 void Chunk::set(int x, int y, int z, BlockType type) {
-	mut.lock();
 	if ((x < 0 || y < 0 || z < 0 || x >= CX || y >= CY || z >= CZ) && G)
 		return G->SC->set(scx * CX + x, scy * CY + y, scz * CZ + z, type);
+#if CHUNK_INMEM_COMPRESS
+	imcUncompress();
+#endif
+	mut.lock();
 	register BlockType *b = &(blk[I(x,y,z)]);
 	if (*b == BlockType::Lava)
 		lavaCount--;
@@ -163,6 +232,9 @@ void Chunk::updateServerSwap() {
 
 struct RGB { float r, g, b; };
 void Chunk::updateClient() {
+#if CHUNK_INMEM_COMPRESS
+	imcUncompress();
+#endif
 	mut.lock();
 	Blocks &B = *G->B;
 	GLCoord		vertex[CX * CY * CZ * 6 /* faces */ * 4 /* vertices */ / 2 /* face removing (HSR) makes a lower vert max */];
@@ -321,53 +393,22 @@ void Chunk::updateClient() {
 
 	vertices = v;
 	vbo->setData(vertex, v);
-	indices = io + it;
-	ibo->setSize(indices * sizeof(*idxOpaque));
+	ibo->setSize((io+it) * sizeof(*idxOpaque));
 	ibo->setSubData(idxOpaque, 0, io);
 	ibo->setSubData(idxTransp, io, it);
+	indicesOpq = io;
+	indicesTpt = it;
 	dirty = false;
 	mut.unlock();
 }
 
-void Chunk::render(const glm::mat4 &transform) {
-	if (dirty)
-		updateClient();
-	if (!indices)
-		return;
-	
-	R.prog->bind();
-	
-	glEnableVertexAttribArray(R.att_coord);
-	glEnableVertexAttribArray(R.att_texcoord);
-	glEnableVertexAttribArray(R.att_color);
-	glEnableVertexAttribArray(R.att_wave);
-	glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(transform));
-	glUniform1f(R.uni_fogStart, G->RP->fogStart);
-	glUniform1f(R.uni_fogEnd, G->RP->fogEnd);
-	glUniform1f(R.uni_time, G->Time);
-
-	TextureAtlas->bind();
-	vbo->bind();
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo->id);
-	glVertexAttribPointer(R.att_coord, 3, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(GLCoord), 0);
-	glVertexAttribPointer(R.att_wave, 1, GL_BYTE, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, w));
-	glVertexAttribPointer(R.att_texcoord, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, tx));
-	glVertexAttribPointer(R.att_color, 3, GL_FLOAT, GL_FALSE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, r));
-	glDrawElements(GL_TRIANGLES, indices, GL_UNSIGNED_SHORT, nullptr);
-
-	glDisableVertexAttribArray(R.att_wave);
-	glDisableVertexAttribArray(R.att_color);
-	glDisableVertexAttribArray(R.att_texcoord);
-	glDisableVertexAttribArray(R.att_coord);
-}
-
-void Chunk::renderBatched(const glm::mat4& transform) {
+void Chunk::render(const glm::mat4& transform) {
 #if SHOW_CHUNK_UPDATES
 	glUniform4f(R.uni_unicolor, 1.f, changed ? 0.f : 1.f, changed ? 0.f : 1.f, 1.f);
 #endif
 	if (dirty)
 		updateClient();
-	if (!indices)
+	if (!indicesOpq)
 		return;
 
 	glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(transform));
@@ -377,7 +418,22 @@ void Chunk::renderBatched(const glm::mat4& transform) {
 	glVertexAttribPointer(R.att_wave, 1, GL_BYTE, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, w));
 	glVertexAttribPointer(R.att_texcoord, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, tx));
 	glVertexAttribPointer(R.att_color, 3, GL_FLOAT, GL_FALSE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, r));
-	glDrawElements(GL_TRIANGLES, indices, GL_UNSIGNED_SHORT, nullptr);
+	glDrawElements(GL_TRIANGLES, indicesOpq, GL_UNSIGNED_SHORT, nullptr);
 }
+
+void Chunk::renderTransparent(const glm::mat4 &transform) {
+	if (!indicesTpt)
+		return;
+
+	glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(transform));
+	vbo->bind();
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo->id);
+	glVertexAttribPointer(R.att_coord, 3, GL_BYTE, GL_FALSE, sizeof(GLCoord), 0);
+	glVertexAttribPointer(R.att_wave, 1, GL_BYTE, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, w));
+	glVertexAttribPointer(R.att_texcoord, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, tx));
+	glVertexAttribPointer(R.att_color, 3, GL_FLOAT, GL_FALSE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, r));
+	glDrawElements(GL_TRIANGLES, indicesTpt, GL_UNSIGNED_SHORT, (GLvoid*)(indicesOpq*sizeof(GLshort)));
+}
+
 
 }

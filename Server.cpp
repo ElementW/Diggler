@@ -222,13 +222,11 @@ void Server::handlePlayerDeath(InMessage &msg, Player &plr) {
 	// Respawn player later
 	Game *G = &this->G; uint32 id = plr.id;
 	std::thread respawn([G, id] {
-		getDebugStream() << "Respawn " << id << " in 2 secs " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() << std::endl;
 		std::this_thread::sleep_for(std::chrono::seconds(2));
-		getDebugStream() << "Respawn " << id << " in 2 secs " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() << std::endl;
 		Player *plr = G->S->getPlayerById(id);
 		if (plr) {
 			plr->setDead(false);
-			OutMessage out(MessageType::PlayerUpdate, PlayerUpdateType::Die);
+			OutMessage out(MessageType::PlayerUpdate, PlayerUpdateType::Respawn);
 			out.writeU32(id);
 			NetHelper::Broadcast(G, out, Tfer::Rel, Channels::Life);
 		}
@@ -256,14 +254,16 @@ Server::Server(Game &G, uint16 port) : G(G) {
 		throw "Server init failed";
 	}
 
-	setup();
+	startInternals();
+	start();
 }
 
-void Server::setupInternals() {
-
+void Server::startInternals() {
+	LS = luaL_newstate();
+	luaL_openlibs(LS);
 }
 
-void Server::setup() {
+void Server::start() {
 	G.CCH->enabled = false;
 	G.SC->setSize(4, 4, 4);
 	auto genStart = std::chrono::high_resolution_clock::now();
@@ -276,17 +276,18 @@ void Server::setup() {
 
 	//G.SC->save("/tmp/a");
 	//G.SC->load("/tmp/a");
-	
-	/*{
-		Game *G = this->G;
-		std::thread make([G]{CaveGenerator::GenerateCaveSystem(*(G.SC), true, 15);});
-		make.detach();
-	}*/
 }
 
+void Server::stop() {
+	
+}
 
-void chunk_updater(Game *G, Superchunk *sc, Host &H) {
-	while (true) {
+void Server::stopInternals() {
+	lua_close(LS);
+}
+
+void chunk_updater(Game *G, Superchunk *sc, Host &H, bool &continueUpdate) {
+	while (continueUpdate) {
 		for (int x=0; x < CX; x++)
 			for (int y=0; y < CY; y++)
 				for (int z=0; z < CZ; z++) {
@@ -321,7 +322,8 @@ void chunk_updater(Game *G, Superchunk *sc, Host &H) {
 void Server::run() {
 	InMessage msg;
 	Peer peer;
-	std::thread upd(chunk_updater, &G, G.SC.get(), std::ref(H));
+	bool continueUpdate = true;
+	std::thread upd(chunk_updater, &G, G.SC.get(), std::ref(H), std::ref(continueUpdate));
 	while (true) {
 		if (H.recv(msg, peer, 100)) {
 			switch (msg.getType()) {
@@ -357,6 +359,9 @@ void Server::run() {
 			}
 		}
 	}
+	continueUpdate = false;
+	upd.join();
+	getDebugStream() << "chunk updater thread joined" << std::endl;
 }
 
 bool Server::isPlayerOnline(const std::string &playername) const {

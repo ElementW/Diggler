@@ -14,7 +14,7 @@
 
 const char *Diggler::UserdataDirsName = "Diggler";
 
-struct {
+struct PathCache {
 	std::string
 		executableBin,
 		executableDir,

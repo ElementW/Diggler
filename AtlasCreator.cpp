@@ -3,6 +3,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <cstring>
+#include <thread>
 
 #define ENABLE_TIMING 0
 #if ENABLE_TIMING
@@ -67,6 +68,9 @@ AtlasCreator::Coord AtlasCreator::add(int width, int height, int channels, const
 		targetY = lastY;
 	}
 
+	lastX = targetX + unitWidth;
+	lastY = targetY;
+
 #if ENABLE_TIMING
 	auto t1 = std::chrono::high_resolution_clock::now();
 #endif
@@ -93,22 +97,22 @@ AtlasCreator::Coord AtlasCreator::add(int width, int height, int channels, const
 	getDebugStream() << std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count() << std::endl;
 #endif
 
-	lastX = targetX + unitWidth;
-	lastY = targetY;
 	uint glScaleX = (1 << (sizeof(Coord::x)*8))/atlasWidth,
-		 glScaleY = (1 << (sizeof(Coord::y)*8))/atlasHeight;
+		glScaleY = (1 << (sizeof(Coord::y)*8))/atlasHeight;
 
-	Coord c = {
+	return Coord {
 		targetX*glScaleX,
 		targetY*glScaleY,
 		(targetX + width)*glScaleX-1,
 		(targetY + height)*glScaleY-1,
 	};
-	return c;
 }
 
 Texture* AtlasCreator::getAtlas() {
-	return new Texture(atlasWidth, atlasHeight, atlasData, Texture::PixelFormat::RGBA);
+	mLocationMtx.lock();
+		Texture *tex = new Texture(atlasWidth, atlasHeight, atlasData, Texture::PixelFormat::RGBA);
+	mLocationMtx.unlock();
+	return tex;
 }
 
 AtlasCreator::~AtlasCreator() {

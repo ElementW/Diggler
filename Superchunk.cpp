@@ -124,6 +124,45 @@ Chunk* Superchunk::getChunk(int cx, int cy, int cz) {
 void Superchunk::render(const glm::mat4& transform) {
 	if (Chunk::R.prog == nullptr)
 		return;
+	lastVertCount = 0;
+	Chunk::R.prog->bind();
+	glUniform1f(Chunk::R.uni_fogStart, G->RP->fogStart);
+	glUniform1f(Chunk::R.uni_fogEnd, G->RP->fogEnd);
+	glUniform1f(Chunk::R.uni_time, G->Time);
+	glEnableVertexAttribArray(Chunk::R.att_coord);
+	glEnableVertexAttribArray(Chunk::R.att_texcoord);
+	glEnableVertexAttribArray(Chunk::R.att_color);
+	glEnableVertexAttribArray(Chunk::R.att_wave);
+	Chunk::TextureAtlas->bind();
+
+	const static glm::vec3 cShift(Chunk::MidX, Chunk::MidY, Chunk::MidZ);
+	glm::mat4 chunkTransform;
+	Chunk *cc;
+	for (int x = 0; x < chunksX; x++)
+		for (int y = 0; y < chunksY; y++)
+			for (int z = 0; z < chunksZ; z++)
+				if ((cc = c[x][y][z])) {
+#if CHUNK_INMEM_COMPRESS
+					if (!cc->imcData && (G->TimeMs - cc->imcUnusedSince) > CHUNK_INMEM_COMPRESS_DELAY)
+						cc->imcCompress();
+#endif
+					glm::vec3 translate = glm::vec3(x * CX, y * CY, z * CZ);
+					if (G->LP->camera.frustum.sphereInFrustum(translate + cShift, Chunk::CullSphereRadius)) {
+						chunkTransform = glm::translate(transform, translate);
+						cc->render(chunkTransform);
+						lastVertCount += cc->vertices;
+					}
+				}
+
+	glDisableVertexAttribArray(Chunk::R.att_wave);
+	glDisableVertexAttribArray(Chunk::R.att_color);
+	glDisableVertexAttribArray(Chunk::R.att_texcoord);
+	glDisableVertexAttribArray(Chunk::R.att_coord);
+}
+
+void Superchunk::renderTransparent(const glm::mat4 &transform) {
+	if (Chunk::R.prog == nullptr)
+		return;
 	Chunk::R.prog->bind();
 	glUniform1f(Chunk::R.uni_fogStart, G->RP->fogStart);
 	glUniform1f(Chunk::R.uni_fogEnd, G->RP->fogEnd);
@@ -143,7 +182,7 @@ void Superchunk::render(const glm::mat4& transform) {
 					glm::vec3 translate = glm::vec3(x * CX, y * CY, z * CZ);
 					if (G->LP->camera.frustum.sphereInFrustum(translate + cShift, Chunk::CullSphereRadius)) {
 						chunkTransform = glm::translate(transform, translate);
-						c[x][y][z]->renderBatched(chunkTransform);
+						c[x][y][z]->renderTransparent(chunkTransform);
 					}
 				}
 

@@ -42,4 +42,9 @@ Game::~Game() {
 	}
 }
 
+void Game::updateTime(double time) {
+	Time = time;
+	TimeMs = (int64)(time * 1000);
+}
+
 }

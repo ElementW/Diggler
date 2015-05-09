@@ -30,6 +30,8 @@ void ProgramManager::getDefines(FlagsT flags, std::vector<std::string> &defs) {
 		defs.push_back("TIME");
 	if (flags & PM_WAVE)
 		defs.push_back("WAVE");
+	if (flags & PM_POINTSIZE)
+		defs.push_back("POINTSIZE");
 }
 
 ProgramManager::ProgramManager(Game &G) : G(G) {

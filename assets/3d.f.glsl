@@ -14,6 +14,7 @@ uniform float fogEnd = 32.0;
 uniform float fogStart = 16.0;
 #endif
 
+
 void main(void) {
 	gl_FragColor = unicolor;
 #ifdef TEXTURED

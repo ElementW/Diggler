@@ -31,6 +31,8 @@
 #include <string>
 #include <iostream>
 
+namespace Diggler {
+
 typedef int32_t int32;
 typedef uint32_t uint;
 typedef uint32_t uint32;
@@ -44,7 +46,7 @@ typedef uint8_t byte;
 typedef char32_t char32;
 typedef char16_t char16;
 
-namespace Diggler {
+typedef std::string String;
 
 /// @returns The executable's absolute path
 std::string getExecutablePath();
@@ -102,7 +104,7 @@ extern uint FastRand_Seed;
 /// @returns a random number between 0 and 2^31
 ///
 inline int FastRand() {
-	FastRand_Seed = (208413*((FastRand_Seed+4631018)>>1))^(0b01010001110101110101000101101001);
+	FastRand_Seed = (514229*((FastRand_Seed+4631018)>>1))^(0b01010001110101110101000101101001);
 	return FastRand_Seed & 0x7FFFFFFF;
 }
 ///

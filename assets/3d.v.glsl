@@ -1,6 +1,6 @@
 #define PI 3.1415926535897932384626433832795
 uniform mat4 mvp;
-attribute vec4 coord;
+attribute vec3 coord;
 
 #ifdef COLORED
 attribute vec4 color;
@@ -16,6 +16,9 @@ uniform float time;
 #ifdef WAVE
 attribute float wave;
 #endif
+#ifdef POINTSIZE
+attribute float pointSize;
+#endif
 
 void main(void) {
 #ifdef COLORED
@@ -27,10 +30,14 @@ void main(void) {
 	vec3 coord = coord.xyz;
 #ifdef WAVE
 	if (wave != 0) {
-		float yShift = sin(time+(coord.x+coord.z)/16.0*6*PI)*(wave) - wave;
+		float yShift = sin(time+(coord.x+coord.z)/16.0*6*PI)*wave - wave;
 		coord.y += yShift;
 		//v_texcoord.y -= yShift/8.0;
 	}
 #endif
 	gl_Position = mvp * vec4(coord, 1);
+#ifdef POINTSIZE
+	float zDist = 1.0-(gl_Position.z / gl_Position.w); // 1=close 0=far
+	gl_PointSize = pointSize*2048*zDist;
+#endif
 }

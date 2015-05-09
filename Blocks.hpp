@@ -91,9 +91,13 @@ inline bool operator!(BlockType& t) {
 
 class Blocks {
 private:
+	// Client
 	AtlasCreator *m_atlasCreator;
 	Texture *m_atlas;
 	AtlasCreator::Coord *m_coords;
+
+	// Shared
+	;
 
 	// No copy
 	Blocks(const Blocks&) = delete;

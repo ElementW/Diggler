@@ -19,7 +19,7 @@ public:
 	// Shared
 	shared_ptr<Superchunk> SC;
 	PlayerList players;
-	double Time;
+	double Time; uint64 TimeMs;
 	Net::Host H;
 	
 	// Server
@@ -45,6 +45,7 @@ public:
 	
 	Game();
 	void init();
+	void updateTime(double time);
 	~Game();
 };
 

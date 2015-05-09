@@ -1,8 +1,9 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
+#include <memory>
+#include "lua/lua.hpp"
 #include "network/Network.hpp"
 #include "Player.hpp"
-#include <memory>
 
 using std::unique_ptr;
 
@@ -13,6 +14,7 @@ class Game;
 class Server {
 private:
 	Game &G;
+	lua_State *LS;
 
 	void handleCommand(Player *, const std::string &command, const std::vector<std::string> &args);
 
@@ -31,10 +33,12 @@ public:
 
 	Server(Game &G, uint16 port);
 	~Server();
-	void setupInternals();
-	void setup();
-
+	void startInternals();
+	void start();
 	void run();
+	void stop();
+	void stopInternals();
+
 	bool isPlayerOnline(const std::string &playername) const;
 	bool isIPOnline(const std::string &ip) const;
 	Player* getPlayerById(uint32 id);

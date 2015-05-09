@@ -13,6 +13,7 @@
 #define PM_DISCARD		0x20
 #define PM_TIME			0x40
 #define PM_WAVE			(0x80 | PM_TIME)
+#define PM_POINTSIZE	0x100
 
 namespace Diggler {
 

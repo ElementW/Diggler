@@ -23,6 +23,8 @@ private:
 	void free();
 
 public:
+	int lastVertCount;
+
 	Superchunk(Game *G = nullptr);
 	~Superchunk();
 
@@ -42,6 +44,7 @@ public:
 	void refresh();
 
 	void render(const glm::mat4 &transform);
+	void renderTransparent(const glm::mat4 &transform);
 };
 
 }

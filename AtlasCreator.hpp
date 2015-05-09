@@ -1,6 +1,8 @@
 #ifndef ATLAS_CREATOR_HPP
 #define ATLAS_CREATOR_HPP
 #include "Platform.hpp"
+#include <future>
+#include <mutex>
 #include "Texture.hpp"
 
 namespace Diggler {
@@ -16,6 +18,8 @@ public:
 
 private:
 	uint8 *atlasData;
+	
+	std::mutex mLocationMtx;
 	
 	// No copy
 	AtlasCreator(const AtlasCreator&) = delete;
