@@ -33,15 +33,20 @@ class ParticleEmitter {
 	Game *G;
 	void init();
 	
-	int count;
+	int count, maxCount;
 	std::vector<Particle> particles;
 	VBO vbo;
 public:
 	Particle pTemplate;
-	glm::vec3 pos, posAmpl;
-	int maxCount;
+	glm::vec3 pos;
+
+	glm::vec3 posAmpl, velAmpl;
+	float decayAmpl;
 
 	ParticleEmitter(Game*);
+
+	void setMaxCount(uint);
+	uint getMaxCount() const;
 
 	void emit(Particle&);
 	void update(double delta);

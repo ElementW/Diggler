@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 
 project(diggler)
 
+### Checks
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+	message(FATAL_ERROR "Using retard compiler, aborting.")
+endif()
+
 ### Find path to source dir, relative if possible
 file(RELATIVE_PATH REL_BUILD_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_BINARY_DIR})
 string(FIND ${REL_BUILD_PATH} ".." RBP_2DOTPOS)
@@ -50,7 +55,7 @@ include_directories(${GLFW_INCLUDE_DIRS} ${OPENAL_INCLUDE_DIR} ${ENET_INCLUDE_DI
 
 add_executable(diggler Particles.cpp stb_perlin.c io/FileStream.cpp io/Stream.cpp Config.cpp Audio.cpp ui/Element.cpp ui/Manager.cpp UITestState.cpp ChunkChangeHelper.cpp PlayerList.cpp network/NetHelper.cpp network/Network.cpp Skybox.cpp Frustum.cpp CaveGenerator.cpp MessageState.cpp GameState.cpp network/Network.cpp Server.cpp Chatbox.cpp GlUtils.cpp ui/Button.cpp KeyBinds.cpp GameWindow.cpp GLFWHandler.cpp Player.cpp Clouds.cpp Game.cpp ProgramManager.cpp LocalPlayer.cpp AABB.cpp SoundBuffer.cpp Sound.cpp stb_vorbis.c Camera.cpp EscMenu.cpp ui/Text.cpp Font.cpp AtlasCreator.cpp Blocks.cpp GlobalProperties.cpp Superchunk.cpp Chunk.cpp FBO.cpp Texture.cpp stb_image.c Program.cpp VBO.cpp Shader.cpp Platform.cpp main.cpp)
 
-target_link_libraries(diggler GLEW GL enet lzfx lua ${GLFW_STATIC_LIBRARIES} ${OPENAL_LIBRARY})
+target_link_libraries(diggler GLEW GL enet lzfx lua ${GLFW_LIBRARIES} ${OPENAL_LIBRARY})
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${PATH_TO_BUILD_DIR}/assets" "${PROJECT_BINARY_DIR}/assets")
 

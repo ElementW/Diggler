@@ -37,7 +37,7 @@ Chunk::Chunk(int scx, int scy, int scz, Game *G) : blk2(nullptr), blk(nullptr),
 	scx(scx), scy(scy), scz(scz), G(G), vbo(nullptr), lavaCount(0) {
 	dirty = true;
 	blk = new BlockType[CX*CY*CZ];
-	memset(blk, (int)BlockType::Air, CX*CY*CZ*sizeof(BlockType));
+	memset(blk, (int)BlockType::Air, AllocaSize);
 	//for (int i=0; i < CX*CY*CZ; ++i)
 	//	blk[i] = BlockType::Air;
 	
@@ -51,7 +51,7 @@ Chunk::Chunk(int scx, int scy, int scz, Game *G) : blk2(nullptr), blk(nullptr),
 	}
 	if (GlobalProperties::IsServer) {
 		blk2 = new BlockType[CX*CY*CZ];
-		memset(blk, (int)BlockType::Air, CX*CY*CZ*sizeof(BlockType));
+		memset(blk, (int)BlockType::Air, AllocaSize);
 	}
 #if CHUNK_INMEM_COMPRESS
 	imcUnusedSince = 0;
@@ -86,16 +86,16 @@ void Chunk::calcMemUsage() {
 	}
 #endif
 	if (blk)
-		blkMem += sizeof(BlockType)*CX*CY*CZ;
+		blkMem += AllocaSize;
 	if (blk2)
-		blkMem += sizeof(BlockType)*CX*CY*CZ;
+		blkMem += AllocaSize;
 }
 
 #if CHUNK_INMEM_COMPRESS
 void Chunk::imcCompress() {
 	if (mut.try_lock()) {
 		//getDebugStream() << "Chunk[" << scx << ',' << scy << ',' << scz << "] compress" << std::endl;
-		uint isize = sizeof(BlockType)*CX*CY*CZ, osize = isize;
+		uint isize = AllocaSize, osize = isize;
 		imcData = (uint8*)std::malloc(osize);
 		lzfx_compress(blk, isize, imcData, &osize);
 		imcData = (uint8*)std::realloc(imcData, osize);
@@ -113,7 +113,7 @@ void Chunk::imcUncompress() {
 		return;
 	}
 	mut.lock();
-	uint isize = imcSize, osize = sizeof(BlockType)*CX*CY*CZ;
+	uint isize = imcSize, osize = AllocaSize;
 	imcUnusedSince = G->TimeMs;
 	blk = new BlockType[CX*CY*CZ];
 	lzfx_decompress(imcData, isize, blk, &osize);

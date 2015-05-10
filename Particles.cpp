@@ -27,21 +27,29 @@ void ParticleEmitter::init() {
 		R.uni_fogStart = R.prog->uni("fogStart");
 		R.uni_fogEnd = R.prog->uni("fogEnd");
 	}
-	maxCount = 100;
-	vbo.setSize(sizeof(GLParticle)*maxCount, GL_DYNAMIC_DRAW);
-	particles.reserve(maxCount);
-	for (int i=0; i < maxCount; ++i) {
+	maxCount = 0;
+}
+
+void ParticleEmitter::setMaxCount(uint count) {
+	vbo.setSize(sizeof(GLParticle)*count, GL_DYNAMIC_DRAW);
+	particles.reserve(count);
+	for (uint i=maxCount; i < count; ++i) {
 		particles[i].decay = -1;
 	}
+	maxCount = count;
+}
+
+uint ParticleEmitter::getMaxCount() const {
+	return maxCount;
 }
 
 void ParticleEmitter::emit(Particle &p) {
 	p.pos = this->pos + glm::vec3(posAmpl.x*(FastRandF()*2-1), posAmpl.y*(FastRandF()*2-1), posAmpl.z*(FastRandF()*2-1));
-	p.vel = pTemplate.vel;
+	p.vel = pTemplate.vel + glm::vec3(velAmpl.x*(FastRandF()*2-1), velAmpl.y*(FastRandF()*2-1), velAmpl.z*(FastRandF()*2-1));
 	p.accel = pTemplate.accel;
 	p.color = pTemplate.color;
 	p.size = pTemplate.size;
-	p.decay = pTemplate.decay;
+	p.decay = pTemplate.decay + (FastRandF()*2-1)*decayAmpl;
 }
 
 void ParticleEmitter::update(double delta) {

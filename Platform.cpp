@@ -13,8 +13,9 @@
 #include <GLFW/glfw3.h>
 
 const char *Diggler::UserdataDirsName = "Diggler";
+uint Diggler::FastRand_Seed = 0;
 
-struct PathCache {
+static struct PathCache {
 	std::string
 		executableBin,
 		executableDir,
@@ -49,7 +50,7 @@ std::string do_readlink(const std::string &path) throw(int) {
 	return do_readlink(path.c_str());
 }
 
-std::string Diggler::getExecutablePath() {
+std::string Diggler::proc::getExecutablePath() {
 	if (pathCache.executableBin.length() == 0) {
 		pid_t pid = getpid();
 		// Assuming 32-bit pid -> max of 10 digits, we need only "/proc/xxxxxxxxxx/exe" space
@@ -60,7 +61,7 @@ std::string Diggler::getExecutablePath() {
 	return pathCache.executableBin;
 }
 
-std::string Diggler::getExecutableDirectory() {
+std::string Diggler::proc::getExecutableDirectory() {
 	if (pathCache.executableDir.length() == 0) {
 		std::string filename(getExecutablePath());
 		const size_t last_slash_idx = filename.rfind('/');
@@ -176,7 +177,9 @@ inline bool Diggler::fs::isDir(const std::string &path) {
 
 #endif
 
-std::string Diggler::fs::readFile(const std::string &path) {
+namespace Diggler {
+
+std::string fs::readFile(const std::string &path) {
 	std::ifstream in(path, std::ios::in | std::ios::binary);
 	if (in) {
 		std::string contents;
@@ -190,39 +193,39 @@ std::string Diggler::fs::readFile(const std::string &path) {
 	return "";
 }
 
-std::string Diggler::getAssetsDirectory() {
-	return Diggler::getExecutableDirectory() + "/assets";
+std::string getAssetsDirectory() {
+	return proc::getExecutableDirectory() + "/assets";
 }
 
-std::string Diggler::getAssetsDirectory(const std::string &type) {
-	return Diggler::getExecutableDirectory() + "/assets/" + type + '/';
+std::string getAssetsDirectory(const std::string &type) {
+	return proc::getExecutableDirectory() + "/assets/" + type + '/';
 }
 
-std::string Diggler::getAssetPath(const std::string &name) {
-	return Diggler::getExecutableDirectory() + "/assets/" + name;
+std::string getAssetPath(const std::string &name) {
+	return proc::getExecutableDirectory() + "/assets/" + name;
 }
 
-std::string Diggler::getAssetPath(const std::string &type, const std::string &name) {
-	return Diggler::getExecutableDirectory() + "/assets/" + type + '/' + name;
+std::string getAssetPath(const std::string &type, const std::string &name) {
+	return proc::getExecutableDirectory() + "/assets/" + type + '/' + name;
 }
 
-std::ostream& Diggler::getErrorStreamRaw() {
+std::ostream& getErrorStreamRaw() {
 	return std::cerr;
 }
 
-std::ostream& Diggler::getDebugStreamRaw() {
+std::ostream& getDebugStreamRaw() {
 	return std::cout;
 }
 
-std::ostream& Diggler::getOutputStreamRaw() {
+std::ostream& getOutputStreamRaw() {
 	return std::cout;
 }
 
-float Diggler::rmod(float x, float y) {
+float rmod(float x, float y) {
 	float ret = fmod(x, y);
 	if (ret < 0)
 		return y+ret;
 	return ret;
 }
 
-uint Diggler::FastRand_Seed = 0;
+}

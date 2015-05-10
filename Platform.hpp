@@ -48,11 +48,13 @@ typedef char16_t char16;
 
 typedef std::string String;
 
-/// @returns The executable's absolute path
-std::string getExecutablePath();
+namespace proc {
+	/// @returns The executable's absolute path
+	std::string getExecutablePath();
 
-/// @returns The executable's absolute path directory, including the end slash (/)
-std::string getExecutableDirectory();
+	/// @returns The executable's absolute path directory, including the end slash (/)
+	std::string getExecutableDirectory();
+}
 
 /// @returns The system's error output stream
 std::ostream& getErrorStreamRaw();

@@ -600,11 +600,20 @@ void GameState::gameLoop() {
 			G->SC->renderTransparent(m_transform);
 
 			static ParticleEmitter pe(G);
-			//pe.posAmpl = glm::vec3(1, 1, 1);
-			pe.pTemplate.color = glm::vec4(0, 1, 0, 1);
-			pe.pTemplate.size = 1;
-			//pe.pTemplate.accel = glm::vec3(0, -.4, 0);
-			pe.pTemplate.decay = 1;
+			pe.posAmpl = glm::vec3(1, 1, 1);
+			pe.pTemplate.color = glm::vec4(0, 0.4, 0.9, 1);
+			pe.pTemplate.size = 0.07;
+			pe.velAmpl = glm::vec3(0, 1, 0);
+			pe.pTemplate.accel = glm::vec3(0, -.7, 0);
+			pe.pTemplate.decay = 4;
+			pe.decayAmpl = 2;
+			
+			/*pe.setMaxCount(4*4*800);
+			pe.posAmpl = glm::vec3(2*16, 1, 2*16);
+			pe.pos = glm::vec3(2*16, 4*16+4, 2*16);
+			pe.pTemplate.vel = glm::vec3(0, -4, 0);
+			pe.velAmpl = glm::vec3(0, 2, 0); rain*/
+			
 			pe.update(deltaT);
 			pe.render(m_transform);
 
@@ -733,9 +742,10 @@ void GameState::updateUI() {
 		Chunk *c;
 		int verts = 0, chunkMem = 0;
 		const static glm::vec3 cShift(Chunk::MidX, Chunk::MidY, Chunk::MidZ);
-		for (int x = 0; x < G->SC->getChunksX(); x++)
-			for (int y = 0; y < G->SC->getChunksY(); y++)
-				for (int z = 0; z < G->SC->getChunksZ(); z++)
+		int scx = G->SC->getChunksX(), scy = G->SC->getChunksY(), scz = G->SC->getChunksZ();
+		for (int x = 0; x < scx; x++)
+			for (int y = 0; y < scy; y++)
+				for (int z = 0; z < scz; z++)
 					if ((c = G->SC->getChunk(x, y, z)))
 						chunkMem += c->blkMem;
 		verts /= 3;
@@ -748,7 +758,7 @@ void GameState::updateUI() {
 			"vy: " << LP.velocity.y << std::endl <<
 			"rx: " << LP.angle << std::endl <<
 			"chunk tris: " << G->SC->lastVertCount / 3 << std::endl <<
-			"chunk mem: " << chunkMem / 1024 << " kib";
+			"chunk mem: " << chunkMem / 1024 << " kib / " << (chunkMem*100/(scx*scy*scz*Chunk::AllocaSize)) << '%';
 		UI.DebugInfo->setText(oss.str());
 	}
 }

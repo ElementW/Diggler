@@ -36,6 +36,7 @@ private:
 #endif
 
 public:
+	constexpr static int AllocaSize = CX*CY*CZ*sizeof(BlockType);
 	constexpr static float CullSphereRadius =
 		(CZ > (CX > CY ? CX : CY) ? CZ : (CX > CY ? CX : CY));
 		// * 1.4142135623f; but we're already at 2x the radius (i.e. diameter)
