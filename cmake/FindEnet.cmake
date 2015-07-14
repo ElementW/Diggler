@@ -1,0 +1,4 @@
+set(ENET_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/json)
+	SET(JSON_LIBRARY jsoncpp)
+	MESSAGE(STATUS "Using project jsoncpp library")
+#ENDIF(JSON_FOUND)

@@ -1,0 +1,73 @@
+# "If anything happens to my  ̶l̶a̶p̶t̶o̶p̶  UTF-8..."  --Hōka Inumuta
+# "You are BANISHED FROM SPACE AND TIME!"  --Eric Cartman
+# http://utf8everywhere.org/
+DOXYFILE_ENCODING       = UTF-8
+
+PROJECT_NAME           = "Diggler"
+PROJECT_NUMBER         = 1
+PROJECT_BRIEF          = "Game of blocks and things"
+# Max 55x200 px
+PROJECT_LOGO           =
+OUTPUT_DIRECTORY       =
+# If needs be to set the following to NO, your filesystem/OS is utter shit.
+ALLOW_UNICODE_NAMES    = YES
+OUTPUT_LANGUAGE        = English
+# 8.3 is dead, don't touch this option.
+SHORT_NAMES            = NO
+TAB_SIZE               = 4
+# Just in case you didn't get .h IS FOR C FILES!
+EXTENSION_MAPPING      = hpp=C++
+
+MARKDOWN_SUPPORT       = YES
+AUTOLINK_SUPPORT       = YES
+
+BUILTIN_STL_SUPPORT    = YES
+
+INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/src
+
+DOCSET_FEEDNAME        = "Doxygen generated docs"
+
+#---------------------------------------------------------------------------
+# Configuration options related to the dot tool
+#---------------------------------------------------------------------------
+CLASS_DIAGRAMS         = YES
+HIDE_UNDOC_RELATIONS   = YES
+
+HAVE_DOT               = YES
+DOT_NUM_THREADS        = 0
+# No proprietary fonts.
+DOT_FONTNAME           = DejaVu Sans
+DOT_FONTSIZE           = 10
+DOT_FONTPATH           =
+
+CLASS_GRAPH            = YES
+COLLABORATION_GRAPH    = YES
+GROUP_GRAPHS           = YES
+TEMPLATE_RELATIONS     = NO
+
+INCLUDE_GRAPH          = YES
+INCLUDED_BY_GRAPH      = YES
+
+# Interesting but heavy.
+CALL_GRAPH             = NO
+CALLER_GRAPH           = NO
+
+GRAPHICAL_HIERARCHY    = YES
+DIRECTORY_GRAPH        = YES
+# Get a real browser you sick duck.
+DOT_IMAGE_FORMAT       = svg
+INTERACTIVE_SVG        = YES
+
+DOT_GRAPH_MAX_NODES    = 50
+MAX_DOT_GRAPH_DEPTH    = 0
+
+# Doxygen doc says this causes problems on some platform (window$). Get a real OS.
+DOT_TRANSPARENT        = YES
+# Get up-to date dot tool. If unhappy, install Arch.
+DOT_MULTI_TARGETS      = YES
+
+# "Who says sketch/diagram says legend!"  --My life science teatcher
+GENERATE_LEGEND        = YES
+
+# I ain't dirty.
+DOT_CLEANUP            = YES

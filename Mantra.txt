@@ -1,0 +1,13 @@
+1. Quality over quantity
+   OPTIMIZE!!!
+2. Backward compatibility is for the weak
+   (i.e. If mod shit breaks, that's none of the engine developers' problems.)
+   - There's a sight chance it breaks
+   - I can break
+   - Expect it to break
+   - It will likely break
+   - It WILL break
+   - EVERYTHING WILL be broken
+3. Have something solid (for the current version only). Exception handling is mandatory. Every corner case
+   is an important case.
+   Also, save files should be unbreakable.
