@@ -52,14 +52,14 @@ find_package(GLM)
 find_package(OpenAL REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(PkgConfig REQUIRED)
+pkg_search_module(EPOXY REQUIRED epoxy)
 pkg_search_module(GLFW REQUIRED glfw3)
-find_package(GLEW REQUIRED)
 include_directories(
 	${ETC_INCLUDE_DIRS}
 	${LUA_INCLUDE_DIRS}
 	${LZFX_INCLUDE_DIRS}
 	${ENET_INCLUDE_DIRS}
-	${GLEW_INCLUDE_DIRS}
+	${EPOXY_INCLUDE_DIRS}
 	${GLFW_INCLUDE_DIRS}
 	${OPENAL_INCLUDE_DIR}
 )
@@ -73,10 +73,9 @@ target_link_libraries(diggler
 	${LUA_LIBRARIES}
 	${LZFX_LIBRARIES}
 	${ENET_LIBRARIES}
-	${GLEW_LIBRARIES}
+	${EPOXY_LIBRARIES}
 	${GLFW_LIBRARIES} 
 	${OPENAL_LIBRARY}
-	GL
 	pthread)
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${PATH_TO_TOPDIR}/assets" "${PROJECT_BINARY_DIR}/assets")

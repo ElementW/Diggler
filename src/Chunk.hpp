@@ -2,7 +2,7 @@
 #define CHUNK_HPP
 #include <memory>
 #include <mutex>
-#include <GL/glew.h>
+#include <epoxy/gl.h>
 #include <glm/glm.hpp>
 #include "VBO.hpp"
 #include "Program.hpp"

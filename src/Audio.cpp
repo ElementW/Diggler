@@ -16,7 +16,7 @@ Audio::Audio(Game &G) : G(G), sounds(m_sounds) {
 	int alMajor, alMinor;
 	alcGetIntegerv(nullptr, ALC_MAJOR_VERSION, 1, &alMajor);
 	alcGetIntegerv(nullptr, ALC_MINOR_VERSION, 1, &alMinor);
-	getDebugStream() << "OpenAL v" << alMajor << '.' << alMinor << std::endl;
+	getDebugStreamRaw() << "OpenAL " << alMajor << '.' << alMinor;
 	
 	ALboolean enumeration = alcIsExtensionPresent(nullptr, "ALC_ENUMERATION_EXT");
 	if (enumeration == AL_FALSE)
@@ -38,7 +38,7 @@ Audio::Audio(Game &G) : G(G), sounds(m_sounds) {
 		GlobalProperties::IsSoundEnabled = false;
 	}
 	deviceName = alcGetString(m_audioDevice, ALC_DEVICE_SPECIFIER);
-	getDebugStream() << "Using device '" << deviceName << '\'' << std::endl;
+	getDebugStreamRaw() << " -- Device '" << deviceName << '\'' << std::endl;
 	
 	ALCint attrs[] = {
 		0, 0

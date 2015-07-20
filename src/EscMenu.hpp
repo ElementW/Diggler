@@ -1,6 +1,5 @@
 #ifndef ESC_MENU_HPP
 #define ESC_MENU_HPP
-#include <GL/glew.h>
 #include <glm/glm.hpp>
 #include "VBO.hpp"
 #include "Program.hpp"

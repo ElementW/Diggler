@@ -13,7 +13,7 @@ typedef uint16 LightData;
 namespace Content {
 	const BlockId BlockAirId = 0;
 	const BlockId BlockIgnoreId = ~BlockAirId;
-	const BlockId BlockDefaultId = 1;
+	const BlockId BlockUnknownId = 1;
 }
 }
 

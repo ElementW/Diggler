@@ -6,6 +6,8 @@
 
 namespace Diggler {
 
+class BlockDef;
+
 enum class FaceDirection : uint8_t {
 	XInc = 0,
 	XDec = 1,
@@ -51,6 +53,8 @@ public:
 	void registerItem(/* TODO */);
 	void registerFluid(/* TODO */);
 	void registerMapgen(/* TODO */);
+
+	const BlockDef& getBlockDef(BlockId);
 };
 
 }

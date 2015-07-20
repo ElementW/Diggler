@@ -3,13 +3,20 @@
 
 namespace Diggler {
 
-UITestState::UITestState(GameWindow *W) : W(W) {
+UITestState::UITestState(GameWindow *W) : GW(W) {
 }
 
 UITestState::~UITestState() {
 }
 
 void UITestState::run() {
+	while (!glfwWindowShouldClose(*GW)) { // Infinite loop \o/
+		glClearColor(sin(glfwGetTime()*4)*0.5+0.5, 0, 0, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glfwSwapBuffers(*GW);
+		glfwPollEvents();
+	}
 }
 
 void UITestState::updateViewport() {

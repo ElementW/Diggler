@@ -143,15 +143,15 @@ double rmod(double x, double y);
 /// Divide rounding down / Modulo quotient
 /// @returns x/y rounded down / Q in modulus' A=B*Q+R equation
 ///
-inline int divrd(int x, uint y) {
-	return x/y - (x < 0 ? 1 : 0);
+/*[[gnu::always_inline]]*/ inline int divrd(int x, uint y) {
+	return x/(int)y - (x < 0 ? 1 : 0);
 }
 
 ///
 /// @return Floored value of f, as an integer
 /// @see ::std::floor For results as float or double
 ///
-inline int floor(const float f) {
+/*[[gnu::always_inline]]*/ inline int floor(const float f) {
 	if (f >= 0)
 		return (int)f;
 	return ((int)f)-1;

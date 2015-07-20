@@ -1,6 +1,6 @@
 #ifndef TEXTURE_HPP
 #define TEXTURE_HPP
-#include <GL/glew.h>
+#include <epoxy/gl.h>
 #include <string>
 
 namespace Diggler {

@@ -27,12 +27,6 @@ static float MinYVelocity = -80.f;
 static float HurtYVelocity = -12.f;
 static float LethalYVelocity = -16.f;
 
-static int i(const float &f) {
-	if (f >= 0)
-		return (int)f;
-	return ((int)f)-1;
-}
-
 LocalPlayer::LocalPlayer(Game *G) : Player(G), goingForward(false), goingBackward(false), goingLeft(false), goingRight(false),
 	hasGravity(true), hasNoclip(false), health(1) {
 	size = glm::vec3(0.3f, 1.5f, 0.3f);
@@ -339,11 +333,12 @@ bool LocalPlayer::raytracePointed(int maxDist, glm::ivec3 *pointed, glm::ivec3 *
 	glm::vec3 rayDir = camera.m_lookAt;
 	glm::vec3 delta = rayDir * granularity;
 	int x, y, z;
-	glm::ivec3 lastTested(pos);
+	// TODO: make a floor function for vectors
+	glm::ivec3 lastTested(floor(pos.x), floor(pos.y), floor(pos.z));
 	int cnt = ceil(maxDist / glm::length(delta));
 	for (int n = 0; n < cnt; n++) {
 		pos += delta;
-		x = i(pos.x); y = i(pos.y); z = i(pos.z);
+		x = floor(pos.x); y = floor(pos.y); z = floor(pos.z);
 		if (lastTested.x != x || lastTested.y != y || lastTested.z != z) {
 			// TODO: AABBs and non-colliding
 			BlockId testBlock = W->getBlockId(x, y, z);

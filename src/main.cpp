@@ -1,7 +1,5 @@
 #include <iostream>
 #include <memory>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #include <thread>
 #include <chrono>
 #include <sys/signal.h>
@@ -128,6 +126,7 @@ int main(int argc, char **argv) {
 			GW.setNextState(std::make_shared<GameState>(&GW, host, port));
 		else
 			GW.setNextState(std::make_shared<MessageState>(&GW, "Network init failed!"));
+		GW.setNextState(std::make_shared<UITestState>(&GW));
 		GW.run();
 	}
 	if (GlobalProperties::IsServer) {

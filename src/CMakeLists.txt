@@ -51,5 +51,6 @@ set(SRCS
 	${CSD}/Platform.cpp
 	${CSD}/Datree.cpp
 	${CSD}/main.cpp
+	${CSD}/UITestState.cpp
 	PARENT_SCOPE
 )

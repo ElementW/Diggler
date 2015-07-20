@@ -4,13 +4,14 @@
 
 namespace Diggler {
 
+class GameWindow;
 namespace UI {
 class Text;
 }
 
 class UITestState : public State {
 private:
-	class GameWindow *W;
+	GameWindow *GW;
 	UI::Text *txt;
 
 public:

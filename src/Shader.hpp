@@ -2,7 +2,7 @@
 #define SHADER_HPP
 #include <string>
 #include <vector>
-#include <GL/glew.h>
+#include <epoxy/gl.h>
 
 namespace Diggler {
 

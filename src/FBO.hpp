@@ -1,8 +1,7 @@
 #ifndef FBO_HPP
 #define FBO_HPP
 #include <vector>
-#include <GL/glew.h>
-#include <typeinfo>
+#include <epoxy/gl.h>
 #include "Platform.hpp"
 #include "Texture.hpp"
 

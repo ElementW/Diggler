@@ -3,7 +3,7 @@
 #include "Platform.hpp"
 #include <list>
 #include <glm/glm.hpp>
-#include <GL/glew.h>
+#include <epoxy/gl.h>
 #include "network/Network.hpp"
 #include "World.hpp"
 

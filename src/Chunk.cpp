@@ -50,9 +50,9 @@ void Chunk::ChangeHelper::add(int x, int y, int z) {
 void Chunk::ChangeHelper::flush(Net::OutMessage &msg) {
 	msg.writeU8(m_changes.size());
 	for (glm::ivec3 &c : m_changes) {
-		msg.writeU16(c.x);
-		msg.writeU16(c.y);
-		msg.writeU16(c.z);
+		msg.writeU8(c.x);
+		msg.writeU8(c.y);
+		msg.writeU8(c.z);
 		msg.writeU16(C.data->id[I(c.x, c.y, c.z)]);
 		msg.writeU16(C.data->data[I(c.x, c.y, c.z)]);
 		msg.writeU16(C.data->light[I(c.x, c.y, c.z)]);
@@ -308,8 +308,6 @@ void Chunk::updateClient() {
 #if CHUNK_INMEM_COMPRESS
 	imcUncompress();
 #endif
-	getErrorStream() << "Chunk[" << scx << ',' << scy << ' ' << scz <<
-				"] visual update" << std::endl;
 	mut.lock();
 	ContentRegistry &CR = *G->CR;
 	GLCoord		vertex[CX * CY * CZ * 6 /* faces */ * 4 /* vertices */ / 2 /* face removing (HSR) makes a lower vert max */];
@@ -505,6 +503,7 @@ void Chunk::renderTransparent(const glm::mat4 &transform) {
 	if (!indicesTpt)
 		return;
 
+	// Here we really need to pass the matrix again since the call is made in a second render pass
 	glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(transform));
 	vbo->bind();
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo->id);
@@ -554,6 +553,15 @@ void Chunk::read(InStream &is) {
 
 	delete[] compressedData;
 	markAsDirty();
+
+	{ ChunkRef nc;
+		nc = W->getChunk(scx+1, scy, scz); if (nc) nc->markAsDirty();
+		nc = W->getChunk(scx-1, scy, scz); if (nc) nc->markAsDirty();
+		nc = W->getChunk(scx, scy+1, scz); if (nc) nc->markAsDirty();
+		nc = W->getChunk(scx, scy-1, scz); if (nc) nc->markAsDirty();
+		nc = W->getChunk(scx, scy, scz+1); if (nc) nc->markAsDirty();
+		nc = W->getChunk(scx, scy, scz-1); if (nc) nc->markAsDirty();
+	}
 }
 
 void Chunk::recv(Net::InMessage &M) {

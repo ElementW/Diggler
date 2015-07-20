@@ -33,4 +33,26 @@ bool AABB::intersects(const AABB &other) const {
 	return xOverlap && yOverlap && zOverlap;
 }
 
+bool AABBVector::intersects(const glm::vec3 &point) const {
+	for (const AABB &box : *this)
+		if (box.intersects(point))
+			return true;
+	return false;
+}
+
+bool AABBVector::intersects(const AABB &other) const {
+	for (const AABB &box : *this)
+		if (box.intersects(other))
+			return true;
+	return false;
+}
+
+bool AABBVector::intersects(const AABBVector &other) const {
+	for (const AABB &obox : other)
+		for (const AABB &box : *this)
+			if (box.intersects(obox))
+				return true;
+	return false;
+}
+
 }

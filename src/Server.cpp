@@ -85,7 +85,10 @@ void Server::handlePlayerJoin(InMessage &msg, Peer &peer) {
 		H.send(p.P, broadcast, Tfer::Rel);
 	}
 	getOutputStream() << plr.name << " joined from " << peer.getHost() << endl;
-	schedSendChunk(G.U->getWorld(0)->getChunkEx(0, 0, 0), plr);
+	for (int x = -8; x < 0; ++x)
+		for (int y = -1; y < 0; ++y)
+			for (int z = -8; z < 0; ++z)
+				schedSendChunk(G.U->getWorld(0)->getChunkEx(x, y, z), plr);
 }
 
 void Server::handlePlayerQuit(Peer &peer, QuitReason reason) {
@@ -216,9 +219,8 @@ void Server::handlePlayerMapUpdate(InMessage &msg, Player &plr) {
 	if (c) {
 		c->setBlock(x, y, z, id, data);
 		// TODO: block datrees
-		// FIXME: v This might interfere with the ticker
 		if (!c->CH.empty()) {
-			OutMessage msg(MessageType::ChunkUpdate, c->CH.count());
+			OutMessage msg(MessageType::ChunkUpdate, 1);
 			c->CH.flush(msg);
 			NetHelper::Broadcast(G, msg, Tfer::Rel, Channels::MapUpdate);
 		}
@@ -329,14 +331,14 @@ void Server::chunkUpdater(WorldRef WR, bool &continueUpdate) {
 			for (auto it = p.pendingChunks.begin(); it != p.pendingChunks.end(); ++it) {
 				if ((*it)->state == Chunk::State::Ready) {
 					glm::ivec3 pos = (*it)->getWorldChunkPos();
-					getDebugStream() << "Send pent Chunk[" << pos.x << ',' << pos.y << ' ' << pos.z <<
+					getDebugStream() << "Send pent Chunk[" << pos.x << ',' << pos.y << ',' << pos.z <<
 						"] send to " << p.name << std::endl;
 					sendChunk(**it, p);
 					it = p.pendingChunks.erase(it)--;
 				}
 			}
 		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 }
 

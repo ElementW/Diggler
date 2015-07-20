@@ -1,7 +1,7 @@
 #ifndef GL_UTILS_HPP
 #define GL_UTILS_HPP
-#include <GL/glew.h>
 #include <string>
+#include <epoxy/gl.h>
 
 namespace Diggler {
 

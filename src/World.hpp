@@ -19,8 +19,17 @@ class OutMessage;
 
 typedef int WorldId;
 struct WorldChunkMapSorter {
-	constexpr bool operator()(const glm::ivec3& lhs, const glm::ivec3& rhs) const {
-		return false;
+	/*constexpr*/ bool operator()(const glm::ivec3& lhs, const glm::ivec3& rhs) const {
+		if (lhs.x == rhs.x)
+			if (lhs.y == rhs.y)
+				if (lhs.z == rhs.z)
+					return false; // lhs == rhs isn't lhs < rhs
+				else
+					return (lhs.z < rhs.z);
+			else
+				return (lhs.y < rhs.y);
+		else
+			return (lhs.x < rhs.x);
 	}
 };
 typedef std::map<glm::ivec3, ChunkWeakRef, WorldChunkMapSorter> WorldChunkMap;
@@ -37,7 +46,7 @@ private:
 	void addToEmergeQueue(ChunkRef&);
 	void addToEmergeQueue(ChunkWeakRef&);
 	bool emergerRun;
-	std::thread emergerThread;
+	std::vector<std::thread> emergerThreads;
 	std::condition_variable emergerCondVar;
 	void emergerProc();
 

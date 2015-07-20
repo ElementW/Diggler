@@ -13,7 +13,6 @@
 namespace Diggler {
 
 int GameWindow::InstanceCount = 0;
-bool GameWindow::IsGlewInited = false;
 
 GameWindow::GameWindow(Game *G) : G(G) {
 	if (InstanceCount++ == 0) {
@@ -32,6 +31,7 @@ GameWindow::GameWindow(Game *G) : G(G) {
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	//glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 	glfwWindowHint(GLFW_SAMPLES, 0); // Gimme aliasing everywhere
 	//glfwWindowHint(GLFW_STENCIL_BITS, 8);
 	m_window = glfwCreateWindow(m_w, m_h, "Diggler", nullptr, nullptr);
@@ -69,16 +69,7 @@ GameWindow::GameWindow(Game *G) : G(G) {
 #endif
 	;
 
-	if (!IsGlewInited) {
-		GLenum glewStatus = glewInit();
-		if (glewStatus != GLEW_OK) {
-			std::string err("GLEW init failed: ");
-			err += glewStatus;
-			throw std::runtime_error(err);
-		}
-		IsGlewInited = true;
-		getOutputStreamRaw() << " -- GLEW " << glewGetString(GLEW_VERSION) << std::endl;
-	}
+	getOutputStreamRaw() << " -- Epoxy GL" << (epoxy_is_desktop_gl() ? "" : "ES") << epoxy_gl_version() << std::endl;
 
 	if (InstanceCount == 1) { // If we're the first instance
 		const uint8 *GL_version = glGetString(GL_VERSION);

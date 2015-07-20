@@ -1,10 +1,10 @@
 #ifndef VBO_HPP
 #define VBO_HPP
 #include <vector>
-#include <GL/glew.h>
 #include <typeinfo>
-#include "Platform.hpp"
 #include <cstring>
+#include <epoxy/gl.h>
+#include "Platform.hpp"
 
 namespace Diggler {
 

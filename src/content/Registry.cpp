@@ -157,7 +157,7 @@ ContentRegistry::~ContentRegistry() {
 }
 
 const AtlasCreator::Coord* ContentRegistry::gTC(BlockId t, FaceDirection d) const {
-	if (t == Content::BlockDefaultId) {
+	if (t == Content::BlockUnknownId) {
 		return &m_unknownBlockTex;
 	}
 	return &(m_coords[(int)t].coords[(int)d]);

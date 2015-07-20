@@ -333,7 +333,7 @@ void GameState::onMouseButton(int key, int action, int mods) {
 				msg.writeI32(face.x);
 				msg.writeI32(face.y);
 				msg.writeI32(face.z);
-				msg.writeU8((uint8)m_builderGun.currentBlock);
+				msg.writeU16(Content::BlockUnknownId);//m_builderGun.currentBlock);
 				msg.writeU16(0);
 			}
 			sendMsg(msg, Net::Tfer::Rel, Net::Channels::MapUpdate);
@@ -797,13 +797,10 @@ bool GameState::processNetwork() {
 				return false;
 
 			case Net::MessageType::ChunkTransfer: {
-				getDebugStream() << "ChunkTransfer packet" << std::endl;
 				uint8 count = m_msg.readU8();
 				for (int i=0; i < count; ++i) {
 					WorldId wid = m_msg.readI16();
 					glm::ivec3 pos(m_msg.readI16(), m_msg.readI16(), m_msg.readI16());
-					getDebugStream() << "Recving Chunk[" << pos.x << ',' << pos.y << ' ' << pos.z <<
-						"]" << std::endl;
 					// TODO handle this somewhere else?
 					ChunkRef c = G->U->getWorldEx(wid)->getNewEmptyChunk(pos.x, pos.y, pos.z);
 					c->recv(m_msg);

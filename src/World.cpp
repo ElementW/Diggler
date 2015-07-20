@@ -10,12 +10,16 @@ namespace Diggler {
 
 World::World(Game *G, WorldId id) :
 	G(G), id(id) {
-	emergerThread = std::thread(&World::emergerProc, this);
+	emergerThreads.emplace_back(&World::emergerProc, this);
 }
 
 World::~World() {
 	emergerRun = false;
 	emergerCondVar.notify_all();
+	for (std::thread &t : emergerThreads) {
+		if (t.joinable())
+			t.join();
+	}
 	std::unique_lock<std::mutex> lk(emergeQueueMutex);
 }
 
@@ -23,13 +27,13 @@ void World::addToEmergeQueue(ChunkRef &cr) {
 	{ std::unique_lock<std::mutex> lk(emergeQueueMutex);
 		emergeQueue.emplace(cr);
 	}
-	emergerCondVar.notify_all();
+	emergerCondVar.notify_one();
 }
 void World::addToEmergeQueue(ChunkWeakRef &cwr) {
 	{ std::unique_lock<std::mutex> lk(emergeQueueMutex);
 		emergeQueue.emplace(cwr);
 	}
-	emergerCondVar.notify_all();
+	emergerCondVar.notify_one();
 }
 
 void World::emergerProc() {
@@ -83,12 +87,8 @@ ChunkRef World::getChunkAtCoords(int x, int y, int z) {
 ChunkRef World::getChunkEx(int cx, int cy, int cz) {
 	iterator it = find(glm::ivec3(cx, cy, cz));
 	if (it != end()) {
-		if (it->second.expired()) {
-			ChunkRef c = getNewEmptyChunk(cx, cy, cz);
-			addToEmergeQueue(c);
-			return c;
-		}
-		return it->second.lock();
+		if (!it->second.expired())
+			return it->second.lock();
 	}
 	ChunkRef c = getNewEmptyChunk(cx, cy, cz);
 	addToEmergeQueue(c);

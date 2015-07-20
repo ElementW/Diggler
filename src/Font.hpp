@@ -1,6 +1,6 @@
 #ifndef FONT_HPP
 #define FONT_HPP
-#include <GL/glew.h>
+#include <epoxy/gl.h>
 #include <glm/glm.hpp>
 #include "Platform.hpp"
 #include "VBO.hpp"

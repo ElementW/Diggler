@@ -1,9 +1,9 @@
 #ifndef GAME_WINDOW_HPP
 #define GAME_WINDOW_HPP
-#include <alc.h>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #include <memory>
+#include <alc.h>
+#include <epoxy/gl.h>
+#include <GLFW/glfw3.h>
 #include <glm/detail/type_mat.hpp>
 #include "Platform.hpp"
 #include "ui/Manager.hpp"
@@ -18,7 +18,6 @@ class State;
 class GameWindow {
 private:
 	static int InstanceCount;
-	static bool IsGlewInited;
 	
 	GLFWwindow *m_window;
 	int m_w, m_h;

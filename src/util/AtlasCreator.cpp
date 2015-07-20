@@ -22,7 +22,7 @@ AtlasCreator::AtlasCreator(uint w, uint h) :
 		throw std::invalid_argument("Bad dimensions");
 
 	atlasData = new uint8[w * h * 4];
-	memset(atlasData, w * h * 4, 0);
+	memset(atlasData, 0, w * h * 4);
 	atlasTex = new Texture(w, h, Texture::PixelFormat::RGBA);
 	updateTex();
 }
@@ -84,7 +84,7 @@ static Coord findCoordinates(const std::vector<Coord> &cs, int w, int h, int mx,
 		if (c.u < mx && c.v < my && !coordCollides(c, cs))
 			return c;
 	}
-	//throw std::runtime_error("No more space found on atlas");
+	throw std::runtime_error("No more space found on atlas");
 }
 
 AtlasCreator::Coord AtlasCreator::add(int width, int height, int channels, const uint8 *data) {
@@ -136,8 +136,8 @@ AtlasCreator::Coord AtlasCreator::add(int width, int height, int channels, const
 void AtlasCreator::updateTex() {
 	if (m_freezeTexUpdate)
 		return;
-	getDebugStream() << "upd atlas" << std::endl;
 	atlasTex->setTexture(atlasData, Texture::PixelFormat::RGBA);
+	/*
 	FILE *fpr = fopen("/tmp/diggler_atlas.ppm", "wb");
 	if (fpr != nullptr) {
 		fprintf(fpr, "P6\n%d %d\n255\n", atlasWidth, atlasHeight);
@@ -149,6 +149,7 @@ void AtlasCreator::updateTex() {
 		}
 		fclose(fpr);
 	}
+	*/
 }
 
 void AtlasCreator::freezeTexUpdate(bool f) {
