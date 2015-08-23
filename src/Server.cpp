@@ -191,15 +191,21 @@ void Server::schedSendChunk(ChunkRef C, Player &P) {
 	P.pendingChunks.emplace_back(C);
 }
 
-void Server::sendChunk(Chunk &C, Player &P) {
+void Server::sendChunks(const std::list<ChunkRef> &cs, Player &P) {
 	OutMessage msg(MessageType::ChunkTransfer);
-	msg.writeU8(1); // Nbr of sent chunks
-	msg.writeI16(C.getWorld()->id);
-	glm::ivec3 pos = C.getWorldChunkPos();
-	msg.writeI16(pos.x);
-	msg.writeI16(pos.y);
-	msg.writeI16(pos.z);
-	C.send(msg);
+	msg.writeU8(cs.size()); // Nbr of sent chunks
+	for (const ChunkRef &cr : cs) {
+		Chunk &c = *cr;
+		msg.writeI16(c.getWorld()->id);
+		glm::ivec3 pos = c.getWorldChunkPos();
+		msg.writeI16(pos.x);
+		msg.writeI16(pos.y);
+		msg.writeI16(pos.z);
+		c.send(msg);
+
+		getDebugStream() << "C[" << pos.x << ',' << pos.y << ',' << pos.z <<
+			"] sent to " << P.name << std::endl;
+	}
 	H.send(P.P, msg, Tfer::Rel, Channels::MapUpdate);
 }
 
@@ -327,16 +333,17 @@ void Server::chunkUpdater(WorldRef WR, bool &continueUpdate) {
 				NetHelper::Broadcast(G, msg, Tfer::Rel, Channels::MapUpdate);
 			}
 		}
+		std::list<ChunkRef> chunksToSend;
 		for (Player &p : G.players) {
-			for (auto it = p.pendingChunks.begin(); it != p.pendingChunks.end(); ++it) {
+			chunksToSend.clear();
+			for (auto it = p.pendingChunks.begin();
+			     it != p.pendingChunks.end() && chunksToSend.size() < 32; ++it) {
 				if ((*it)->state == Chunk::State::Ready) {
-					glm::ivec3 pos = (*it)->getWorldChunkPos();
-					getDebugStream() << "Send pent Chunk[" << pos.x << ',' << pos.y << ',' << pos.z <<
-						"] send to " << p.name << std::endl;
-					sendChunk(**it, p);
-					it = p.pendingChunks.erase(it)--;
+					chunksToSend.push_back(std::move(*it));
+					it = --p.pendingChunks.erase(it);
 				}
 			}
+			sendChunks(chunksToSend, p);
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}

@@ -34,11 +34,16 @@ void Game::init() {
 	}
 }
 
+void Game::uninitGL() {
+	delete PM;
+	delete RP;
+}
+
 Game::~Game() {
 	if (GlobalProperties::IsClient) {
+		delete A;
 		delete CR;
-		delete PM; delete LP;
-		delete RP; delete A;
+		delete LP;
 		delete KB;
 	}
 	if (GlobalProperties::IsServer) {

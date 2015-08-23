@@ -1,4 +1,6 @@
-uniform vec4 unicolor = vec4(1.0, 1.0, 1.0, 1.0);
+precision lowp float;
+
+uniform vec4 unicolor;
 #ifdef COLORED
 varying vec4 v_color;
 #endif
@@ -10,8 +12,8 @@ uniform vec2 texshift;
  #endif
 #endif
 #ifdef FOG
-uniform float fogEnd = 32.0;
-uniform float fogStart = 16.0;
+uniform float fogEnd;
+uniform float fogStart;
 #endif
 
 

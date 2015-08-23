@@ -107,7 +107,7 @@ private:
 		UI::Text *Dot;
 	};
 
-	bool isEscapeToggled = false;
+	bool isMenuToggled = false;
 
 	struct {
 		bool show;

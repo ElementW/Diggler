@@ -38,6 +38,6 @@ void main(void) {
 	gl_Position = mvp * vec4(coord, 1);
 #ifdef POINTSIZE
 	float zDist = 1.0-(gl_Position.z / gl_Position.w); // 1=close 0=far
-	gl_PointSize = pointSize*2048*zDist;
+	gl_PointSize = pointSize*2048.0*zDist;
 #endif
 }

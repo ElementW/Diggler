@@ -64,6 +64,7 @@ include_directories(
 	${OPENAL_INCLUDE_DIR}
 )
 
+set(SRCS ";")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 add_executable(diggler ${SRCS})
@@ -80,7 +81,7 @@ target_link_libraries(diggler
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${PATH_TO_TOPDIR}/assets" "${PROJECT_BINARY_DIR}/assets")
 
-install(TARGETS diggler RUNTIME DESTINATION bin)
+#install(TARGETS digglerz RUNTIME DESTINATION bin)
 
 find_package(Doxygen)
 if (DOXYGEN_FOUND)

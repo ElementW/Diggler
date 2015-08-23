@@ -35,6 +35,34 @@ bool Program::link() {
 		getErrorStream() << id << ':' << getError() << std::endl;
 		return false;
 	}
+
+	// Default values
+	GLint loc = glGetUniformLocation(id, "unicolor");
+	if (loc != -1) {
+		GLint prevId; glGetIntegerv(GL_CURRENT_PROGRAM, &prevId);
+		glUseProgram(id);
+		glUniform4f(loc, 1.f, 1.f, 1.f, 1.f);
+		glUseProgram(prevId);
+	}
+	
+	loc = glGetUniformLocation(id, "bloomThreshold");
+	if (loc != -1) {
+		GLint prevId; glGetIntegerv(GL_CURRENT_PROGRAM, &prevId);
+		glUseProgram(id);
+		glUniform1f(loc, .4f);
+		glUseProgram(prevId);
+	}
+
+	// FIXME: remove this, fog needs to be dynamic
+	loc = glGetUniformLocation(id, "fogStart");
+	if (loc != -1) {
+		GLint prevId; glGetIntegerv(GL_CURRENT_PROGRAM, &prevId);
+		glUseProgram(id);
+		glUniform1f(loc, 16.f);
+		glUniform1f(glGetUniformLocation(id, "fogEnd"), 32.f);
+		glUseProgram(prevId);
+	}
+
 	return true;
 }
 

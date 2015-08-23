@@ -1,4 +1,6 @@
-uniform vec4 unicolor = vec4(1.0, 1.0, 1.0, 1.0);
+precision lowp float;
+
+uniform vec4 unicolor;
 #ifdef COLORED
 varying vec4 v_color;
 #endif

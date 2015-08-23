@@ -58,7 +58,7 @@ SoundBuffer::~SoundBuffer() {
 
 void SoundBuffer::loadOgg(const std::string &path) {
 	int error = 0;
-	stb_vorbis* stream = stb_vorbis_open_filename(const_cast<char*>(path.c_str()), &error, nullptr);
+	stb_vorbis *stream = stb_vorbis_open_filename(const_cast<char*>(path.c_str()), &error, nullptr);
 	if (stream == nullptr) {
 		getDebugStream() << "Could not load " << path << " : " << error << std::endl;
 		return;

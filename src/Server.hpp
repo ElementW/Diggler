@@ -31,7 +31,7 @@ private:
 	void handlePlayerMapUpdate(Net::InMessage&, Player&);
 
 	void schedSendChunk(ChunkRef, Player&);
-	void sendChunk(Chunk&, Player&);
+	void sendChunks(const std::list<ChunkRef>&, Player&);
 
 	void chunkUpdater(WorldRef WR, bool &continueUpdate);
 

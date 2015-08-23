@@ -40,9 +40,10 @@ bool Shader::compileFromString(const std::string &source, const std::string &pat
 	if (source.size() == 0)
 		return false;
 	std::ostringstream oss;
-	oss << "#version 120\n";
+	oss << "#version 100\n";
 	if (srcDefines)
 		oss << srcDefines;
+	oss << "#line 1\n";
 	oss << source;
 	// Beware of the lifetime, we use c_str() afterwards!
 	std::string srcStr = oss.str();

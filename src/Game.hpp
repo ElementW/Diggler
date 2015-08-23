@@ -51,6 +51,7 @@ public:
 	
 	Game();
 	void init();
+	void uninitGL();
 	void updateTime(double time);
 	~Game();
 };

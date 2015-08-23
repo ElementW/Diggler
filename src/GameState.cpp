@@ -261,9 +261,9 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 		}
 	} else {
 		if (key == G->KB->gameMenu && action == GLFW_PRESS) {
-			isEscapeToggled = !isEscapeToggled;
-			UI.EM->setVisible(isEscapeToggled);
-			if (isEscapeToggled) {
+			isMenuToggled = !isMenuToggled;
+			UI.EM->setVisible(isMenuToggled);
+			if (isMenuToggled) {
 				unlockMouse();
 				G->LP->goForward(false);
 				G->LP->goBackward(false);
@@ -273,7 +273,7 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 				lockMouse();
 			}
 		}
-		if (!isEscapeToggled) {
+		if (!isMenuToggled) {
 			if (key == G->KB->forward) {
 				G->LP->goForward(action == GLFW_PRESS);
 			} else if (key == G->KB->backward) {
@@ -314,7 +314,7 @@ void GameState::unlockMouse() {
 
 
 void GameState::onMouseButton(int key, int action, int mods) {
-	if (!m_mouseLocked && action == GLFW_PRESS && !isEscapeToggled) {
+	if (!m_mouseLocked && action == GLFW_PRESS && !isMenuToggled) {
 		lockMouse();
 	}
 	
@@ -476,7 +476,7 @@ bool GameState::connectLoop() {
 	};
 	double T; glm::mat4 mat;
 
-	while (!finished && !glfwWindowShouldClose(*GW)) { // Infinite loop \o/
+	while (!finished && !GW->shouldClose()) { // Infinite loop \o/
 		T = glfwGetTime();
 		G->updateTime(T);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -495,12 +495,12 @@ bool GameState::connectLoop() {
 		glfwSwapBuffers(*GW);
 		glfwPollEvents();
 	}
-	if (glfwWindowShouldClose(*GW))
-		glfwHideWindow(*GW);
+	if (GW->shouldClose())
+		GW->setVisible(false);
 	m_networkThread.join();
 	delete cUI.Connecting; delete cUI.Dot;
 
-	if (glfwWindowShouldClose(*GW))
+	if (GW->shouldClose())
 		return true;
 	if (!success) {
 		std::ostringstream oss;
@@ -723,7 +723,7 @@ void GameState::gameLoop() {
 			renderDeathScreen();
 		}
 
-		if (isEscapeToggled)
+		if (isMenuToggled)
 			UI.EM->render();
 
 		glfwSwapBuffers(*GW);

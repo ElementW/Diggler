@@ -1,6 +1,8 @@
+precision lowp float;
+
 varying vec2 v_texcoord;
 uniform sampler2D mytexture;
-uniform float bloomThreshold = 0.4;
+uniform float bloomThreshold; // = 0.4;
 
 vec3 cap(vec3 val) {
 	float highest = val.x;

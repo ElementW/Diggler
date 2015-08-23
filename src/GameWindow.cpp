@@ -31,7 +31,7 @@ GameWindow::GameWindow(Game *G) : G(G) {
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-	//glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 	glfwWindowHint(GLFW_SAMPLES, 0); // Gimme aliasing everywhere
 	//glfwWindowHint(GLFW_STENCIL_BITS, 8);
 	m_window = glfwCreateWindow(m_w, m_h, "Diggler", nullptr, nullptr);
@@ -77,9 +77,7 @@ GameWindow::GameWindow(Game *G) : G(G) {
 		const uint8 *GL_renderer = glGetString(GL_RENDERER);
 		getOutputStreamRaw() << "GL " << GL_version << " / " << GL_renderer << std::endl;
 	}
-	
-	
-	
+
 	UIM.setProjMat(glm::ortho(0.0f, (float)m_w, 0.0f, (float)m_h));
 
 	G->init();
@@ -107,6 +105,14 @@ GameWindow::~GameWindow() {
 
 bool GameWindow::shouldClose() const {
 	return glfwWindowShouldClose(m_window);
+}
+
+void GameWindow::setVisible(bool visible) {
+	return visible ? glfwShowWindow(m_window) : glfwHideWindow(m_window);
+}
+
+bool GameWindow::isVisible() const {
+	return glfwGetWindowAttrib(m_window, GLFW_VISIBLE);
 }
 
 void GameWindow::cbChar(char32 unichar) {

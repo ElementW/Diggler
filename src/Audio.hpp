@@ -31,7 +31,7 @@ public:
 	void addSound(const std::string &name, const std::string &path);
 	void updatePos();
 	void updateAngle();
-	// Runs UpdatePos and UpdateAngle
+	// Runs updatePos and updateAngle
 	void update();
 	void playSound(const std::string &name);
 	void playSound(const SoundBuffer &buf);

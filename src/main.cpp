@@ -125,9 +125,9 @@ int main(int argc, char **argv) {
 		if (networkSuccess)
 			GW.setNextState(std::make_shared<GameState>(&GW, host, port));
 		else
-			GW.setNextState(std::make_shared<MessageState>(&GW, "Network init failed!"));
-		GW.setNextState(std::make_shared<UITestState>(&GW));
+			GW.showMessage("Network init failed!");
 		GW.run();
+		G.uninitGL();
 	}
 	if (GlobalProperties::IsServer) {
 		if (!networkSuccess) {
