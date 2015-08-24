@@ -227,16 +227,12 @@ void CaveGenerator::Generate(WorldRef wr, const GenConf &gc, ChunkRef cr) {
 			c.setBlock(x, y, 0, Content::BlockUnknownId);
 			c.setBlock(x, y, CZ-1, Content::BlockUnknownId);
 		}*/
-	/*glm::ivec3 cp = c.getWorldChunkPos() * glm::ivec3(CX, CY, CZ);
+
+	glm::ivec3 cp = c.getWorldChunkPos() * glm::ivec3(CX, CY, CZ);
 	for (int y = 0; y < CY; ++y)
 		for (int x = 0; x < CX; ++x)
 			for (int z = 0; z < CZ; ++z)
 				c.setBlock(x, y, z, stb_perlin_noise3((cp.x + x)/8.f, (cp.y + y)/8.f, (cp.z + z)/8.f) > 0 ? Content::BlockUnknownId : Content::BlockAirId);
-*/
-	for (int y = 0; y < CY; ++y)
-		for (int x = 0; x < CX; ++x)
-			for (int z = 0; z < CZ; ++z)
-				c.setBlock(x, y, z, !(x==0||x==15||y==0||y==15||z==0||z==15) ? Content::BlockUnknownId : Content::BlockAirId);
 
 #if 0
 	if (gc.ore.enabled)

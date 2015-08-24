@@ -1,10 +1,10 @@
-Diggler save/network format spec
+Hexedryne save/network format spec
 
 [TOC]
 
-## Binary format details
+# Binary format details
 
-### Numbers
+## Numbers
 Number types are denoted by the following table:
 Symbol      | C(++) type
 ------------|--------------
@@ -20,7 +20,7 @@ Symbol      | C(++) type
 `d`         | `double` (64-bit)
 All specified formats are little-endian, and floats/doubles are IEEE 754.
 
-### Varints
+## Varints
 (`u`)`varint`s are variable-length integers, stored in a big-endian fashion, each byte's most significant bit indicating continuation, and the actual binary data in the lower 7 bits.
 `uvarint`s are, are their name implies, unsigned. Their signed counterpart (`varint`s) are encoded using a zigzag encoding, that is, `n` is encoded as `(n << 1) ^ (n >> B-1)` where `B` is the original integer's bit length.
 Their max bit length are specified by a suffix, e.g. `varint64` -- note therefore (`u`)`varint8` would be pointless.
@@ -33,11 +33,11 @@ Their names are shortened to, respectively
 
 They come from [Google's Protobuf](https://developers.google.com/protocol-buffers/docs/encoding) library.
 
-### Vectors
+## Vectors
 Vectors can be of dimensions 2 to 4. They are simply stored member-by-member, in `<x><y>[z][w]` order, with the type determined by the prefix.
 E.g. `fvec3` is a 3-dimensional vector stored as 3 consecutive 32-bit IEEE754 floating-point numbers.
 
-### Strings
+## Strings
 Strings are arrays of arbitrary binary data -- usually text, in which case the UTF-8 enoding is used.
 
 * `string` = `uv32 length; byte data[length];`
@@ -45,36 +45,30 @@ Strings are arrays of arbitrary binary data -- usually text, in which case the U
 * `mstring` (medium string) = `u16 length; byte data[length];`
 * `lstring` (long string) = `u32 length; byte data[length];`
 
-### Arrays
+## Arrays
 Arrays are sequences of tightly-packed data of an unique type.
 
-#### Static arrays
-Their length is either hard-coded or determined from another variable, and their type is fixed and must be known in advance.
-They are denoted by *`type`*`[SIZE]`, e.g. `int[42]`.
+Their length as well as their type can be either hard-coded or determined from another variable.
+They are denoted by:
 
-#### Variable arrays
-```
-u8 type;
-v32 length;
-@type data[length];
-```
+*  *`type`*`[SIZE]`, e.g. `int[42]`
+* *`type name`*`[SIZE]` when named
+
 Where `type` is the `TypeID` (see below) of the data elements.
 
-Denoted by *`type`*`[]`, e.g. `byte[]`. Can be nested, too, i.e. it is possible to have *`type`*`[][]`.
-
-### Datrees
+## Datrees
 Datrees (*Data Trees*) are key/value maps able to hold a variety of data types bound to a `string` key.
 ```
-v64 nElements;
-nElements times {
+uv32 entryCount;
+struct DatreeEntry {
   string key;
   TypeID type;
   @type data;
-}
+} entries[entryCount];
 ```
 Type is represented by `datree`, and a hint about a sole data type is given by writing `datree<type>` (this does not, however, replace each entry's `type` field, and any badly-formatted data encountered should be discarded/ignored).
 
-### TypeIDs
+## TypeIDs
 A `TypeID` is a `uv16` defining a type, of all presented above. It is made of two parts (bitwise diagram):
 ```
 15 14         7 6          0
@@ -113,8 +107,8 @@ XType  | Modifier
 3      | `vec3`
 4      | `vec4`
 
-### Other ID/status tables
-#### Compression
+## Other ID/status tables
+### Compression
 ID | Compression algorithm
 ---|----------------------
 0  | None
@@ -125,7 +119,7 @@ ID | Compression algorithm
 *: Unimplemented
 °: Have a dictionary that can be relocated/shared
 
-#### Chunk status
+### Chunk status
 ID | Status
 ---|-------
 0  | Unemerged
@@ -135,6 +129,8 @@ ID | Status
 4  | Emerged, modified by non-player action (mobs, map update...)
 5  | Emerged, modified by player action
 
+
+
 # Save files
 ## Overall structure
 Universes are stored in folders containing the worlds it is made of as well as other (meta)data files.
@@ -142,13 +138,13 @@ Universes are stored in folders containing the worlds it is made of as well as o
 ### Header
 Type      | Name  | Value
 ---------:|:------|-----------------
-`byte[8]` | `HDs` | `\x01\xD1GLRusv`
+`byte[8]` | `HDs` | `\x01HX\xEDNusv`
 `u32`     | `Hui` | Universe ID
 `u8`      | `Hst` | Save file type
 `u64`     | `HTs` | [UNIX Timestamp](https://en.wikipedia.org/wiki/Unix_time) of last edit
-`uv32`    | `Hfv` | Save format version
+`u32`     | `Hfv` | Save format version
 `v`       | `Hfl` | Flags
-`u8`      | `HDc` | XOR checksum of previous bytes
+`u8`      | `HDc` | XOR checksum of previous bytes, `0xAA` as starting byte
 `u8`      | `HDe` | `\x02`
 
 ### Footer
@@ -156,7 +152,7 @@ Type      | Name  | Value
 Type      | Name  | Value
 ---------:|:------|-----------------
 `uint64`  | `Fcs` | 64-bit FastHash checksum of all previous bytes
-`byte[8]` | `FTs` | `eu\xD1GLR\x04\x1C`
+`byte[8]` | `FTs` | `euHX\xEDN\x04\x1C`
 
 ## Save file types
 ### Universe Root (`Hst = 0x00`)
@@ -177,7 +173,7 @@ uint16 areasIDs[];
 ```
 
 ### World Area (`Hst = 0x02`)
-An Area equates to 8×8×8 = 512 Chunks, themselves storing 16×16×16 blocks each, resulting in a maximum of 2 097 152 blocks stored, 8 MB of raw data if no extra buffers are added.
+An Area equates to 8×8×8 = 512 Chunks, themselves storing 16×16×16 blocks each, resulting in a maximum of 2 097 152 blocks stored, 8 MB of (uncompressed) raw data if no extra buffers are added.
 
 #### Chunk
 ```c++
@@ -190,20 +186,22 @@ struct Chunk {
     compressed using @compID {
       uint16 ids[16*16*16]; // Block IDs
       uint16 data[16*16*16]; // Block data
-      datree<?[16*16*16]> extraBuffers;
-      datree metadata[];
+      datree<?[16*16*16]> buffers; // See Bufferspecs section
+      uint16 metadataCount;
+      datree metadata[metadataCount];
     }
   } 
   // Entity data
+  uv32 entityCount;
   struct Entity {
     uint64 id;
     fvec3 position; // Relative to the current Chunk's origin
     fvec3 velocity;
     datree properties;
-  } entities[];
+  } entities[entityCount];
 };
 ```
-Block IDs are indexed in the flat array by `index = x + y*16 + z*16*16`.
+Block IDs and data are indexed in the flat array by `index = x + y*16 + z*16*16`.
 
 Block data (let's call it `bdata`) matching the bitmask `0x8000`indicate a metadata pointer -- that is, said block has a metadata Datree stored in `metadata` at index `bdata & 0x7FFFF`. This Datree can contain arbitrarily-defined data (as mods please) about the block. It has a special entry called `__data` containing the block's actual `bdata` if it wasn't a metadata pointer and isn't zero, and is the value returned by functions getting the block's data.
 
@@ -234,3 +232,17 @@ Registered by mods upon their load. Like block names, they are prefixed with the
   * TBD (2nd light computation)
 * `equilibrium`
   * Params TBD (conductivity, ...)
+
+# Network
+## Messages
+All network communication in Diggler is done via sequential messages, delivered by the [ENet library](http://enet.bespin.org) on multiple ENet channels.
+### Message channels
+Channel | Usage
+--------|------
+0       | Base
+1       | Chat
+2       | Life (player/entity spawn/death)
+3       | Movement (player/entity movement)
+4       | Metadata (Universe/World/entity metadata transfer)
+5       | ChunkTransfer
+6       | ChunkUpdate

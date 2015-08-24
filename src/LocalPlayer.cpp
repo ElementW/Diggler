@@ -86,8 +86,8 @@ void LocalPlayer::update(float delta) {
 	// Apply gravity
 	if (hasGravity) {
 		if (!onGround && velocity.y <= HurtYVelocity) {
-			BlockId b = W->get(position.x, position.y-1, position.z);
-			onGround = !Blocks::canGoThrough(b, team) && (b != BlockType::Jump);
+			BlockId b = W->getBlockId(position.x, position.y-1, position.z);
+			onGround = !b; //!Blocks::canGoThrough(b, team) && (b != BlockType::Jump);
 			if (onGround) {
 				if (velocity.y <= LethalYVelocity) {
 					setDead(true, DeathReason::Fall, true);
@@ -105,13 +105,13 @@ void LocalPlayer::update(float delta) {
 			}
 		}
 		if (onGround) {
-			BlockType b = G->SC->get(position.x, position.y-1, position.z);
-			onGround = !Blocks::canGoThrough(b, team);
-			if (onRoad) {
+			BlockId b = W->getBlockId(position.x, position.y-1, position.z);
+			onGround = !b; //!Blocks::canGoThrough(b, team);
+			/*if (onRoad) {
 				onRoad = (!onGround || b == BlockType::Road || b == BlockType::Jump);
 			} else {
 				onRoad = (b == BlockType::Road);
-			}
+			}*/
 		}
 		if (!onGround)
 			velocity.y -= Gravity * delta;
@@ -143,8 +143,8 @@ void LocalPlayer::update(float delta) {
 #if 0
 		else {
 			float x = destPos.x, y = destPos.y, z = destPos.z;
-			BlockType bTop = G->SC->get(x, y+size.y, z),
-					bBottom = G->SC->get(x, y, z);
+			BlockId bTop = W->getBlockId(x, floor(y+size.y), z),
+			        bBottom = W->getBlockId(x, y, z);
 			if (velocity.y > 0.f)
 				if (!Blocks::canGoThrough(bTop, team)) {
 					velocity.y = 0.f;

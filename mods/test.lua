@@ -1,16 +1,16 @@
 require('io')
 
-local Diggler = {
+local hexedryne = {
 	mods = {},
 
 	exportedFuncs = {}
 }
 
-function Diggler.export(name, func)
-	Diggler.exportedFuncs[name] = func
+function hexedryne.export(name, func)
+	hexedryne.exportedFuncs[name] = func
 end
 
-package.loaded['Diggler'] = Diggler
+package.loaded['hexedryne'] = hexedryne
 
 local function setoverlay(tab, orig)
 	local mt = getmetatable(tab) or {}
@@ -24,7 +24,7 @@ local function setoverlay(tab, orig)
 	setmetatable(tab, mt)
 end
 
-Diggler.MODSTATUS = {
+hexedryne.MODSTATUS = {
 	UNAVAILABLE = 0,
 	DISABLED = 1,
 	ERRORED = 2,
@@ -34,9 +34,9 @@ Diggler.MODSTATUS = {
 	UNLOADED = 100
 }
 
-function Diggler.loadModLua(path)
+function hexedryne.loadModLua(path)
 	local digglerOverlay = {}
-	local packageOverlay = { ['path'] = path .. '/?.lua;' .. package.path, ['loaded'] = packageLoadedOverlay }
+	local packageOverlay = { ['path'] = path .. '/?.lua;' .. package.path }
 	setoverlay(packageOverlay, package)
 	local env = {
 		['package'] = packageOverlay,
@@ -44,7 +44,7 @@ function Diggler.loadModLua(path)
 			print("<init>", ...)
 		end,
 		['require'] = function (module)
-			if module == 'Diggler' then
+			if module == 'hexedryne' then
 				return digglerOverlay
 			end
 			return require(module)
@@ -70,7 +70,7 @@ function Diggler.loadModLua(path)
 	env.print = function (...)
 		print(env.CurrentMod.id..":", ...)
 	end
-	for name, func in pairs(Diggler.exportedFuncs) do
+	for name, func in pairs(hexedryne.exportedFuncs) do
 		digglerOverlay[name] = function (...)
 			func(env.CurrentMod, ...)
 		end
@@ -82,14 +82,14 @@ function Diggler.loadModLua(path)
 	return r1, r2
 end
 
-function Diggler.loadMod(path)
-	local mod, err = Diggler.loadModLua(path)
+function hexedryne.loadMod(path)
+	local mod, err = hexedryne.loadModLua(path)
 	if mod then
-		if Diggler.mods[mod.id] then
+		if hexedryne.mods[mod.id] then
 			error("Mod already loaded")
 		end
-		mod.status = Diggler.MODSTATUS.LOADED
-		Diggler.mods[mod.id] = mod
+		mod.status = hexedryne.MODSTATUS.LOADED
+		hexedryne.mods[mod.id] = mod
 		print("Loaded mod '" .. mod.name .. "' <" .. mod.id .. "> v" .. mod.versionStr .. " (" .. mod.version .. ")")
 		return mod
 	else
@@ -98,21 +98,20 @@ function Diggler.loadMod(path)
 	return nil
 end
 
-function Diggler.initMod(id)
-	local mod = Diggler.mods[id]
+function hexedryne.initMod(mod)
 	mod.init()
-	mod.status = Diggler.MODSTATUS.INITIALIZED
+	mod.status = hexedryne.MODSTATUS.INITIALIZED
 end
 
-function Diggler.getMod(mod, id)
-	return Diggler.mods[id]
+function hexedryne.getMod(mod, id)
+	return hexedryne.mods[id]
 end
-Diggler.export("getMod", Diggler.getMod)
+hexedryne.export("getMod", hexedryne.getMod)
 
-function Diggler.registerBlock(mod, name, block)
+function hexedryne.registerBlock(mod, name, block)
 	print("Calling registerBlock from mod " .. (mod and mod.id or "<none>"))
 end
-Diggler.export("registerBlock", Diggler.registerBlock)
+hexedryne.export("registerBlock", hexedryne.registerBlock)
 
-Diggler.loadMod('TestMod')
-Diggler.initMod('TestMod')
+local m = hexedryne.loadMod('TestMod')
+hexedryne.initMod(m)

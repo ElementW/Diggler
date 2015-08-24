@@ -19,7 +19,7 @@ class OutMessage;
 
 typedef int WorldId;
 struct WorldChunkMapSorter {
-	/*constexpr*/ bool operator()(const glm::ivec3& lhs, const glm::ivec3& rhs) const {
+	/*constexpr*/ bool operator()(const glm::ivec3 &lhs, const glm::ivec3 &rhs) const {
 		if (lhs.x == rhs.x)
 			if (lhs.y == rhs.y)
 				if (lhs.z == rhs.z)

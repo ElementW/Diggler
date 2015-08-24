@@ -236,6 +236,11 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
 			G->U->getWorld(0)->onRenderPropertiesChanged();
 		}
 		break;
+	case GLFW_KEY_F8:
+		if (action == GLFW_PRESS) {
+			G->U->getWorld(0)->refresh();
+		}
+		break;
 	default:
 		break;
 	}
@@ -771,7 +776,10 @@ void GameState::updateUI() {
 			"vy: " << LP.velocity.y << std::endl <<
 			"rx: " << LP.angle << std::endl <<
 			// TODO reintroduce "chunk tris: " << lastVertCount / 3 << std::endl <<
-			"chunk mem: " << chunkMem / 1024 << " kib / " << (chunkMem*100/maxChunkMem) << '%';
+			"chunk mem: " << chunkMem / 1024 << " kib / " << (chunkMem*100/maxChunkMem) << '%' << std::endl <<
+			"Pointing at: " << LP.W->getBlockId(m_pointedBlock.x, m_pointedBlock.y, m_pointedBlock.z) << " @ " <<
+			m_pointedBlock.x << ' ' << m_pointedBlock.y << ' ' << m_pointedBlock.z <<
+			" C: " << divrd(m_pointedBlock.x, CX) << ' ' << divrd(m_pointedBlock.y, CZ) << ' ' << divrd(m_pointedBlock.z, CZ);
 		UI.DebugInfo->setText(oss.str());
 	}
 }

@@ -1,5 +1,4 @@
 #include "MessageState.hpp"
-#include "_.hpp"
 #include "ui/Text.hpp"
 #include "Game.hpp"
 #include "GlobalProperties.hpp"

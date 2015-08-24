@@ -1,4 +1,4 @@
-local D = require('Diggler')
+local H = require('hexedryne')
 
 local TestMod = {
 	id = "TestMod",
@@ -6,18 +6,24 @@ local TestMod = {
 	version = 1,
 	versionStr = "1.0.0",
 	description = "A mod to test Lua scripting ability",
+	tags = {"test"},
 	authors = {"gravgun"},
 	license = "GPLv3",
 	deps = {},
 	optdeps = {},
-	
+
 	clientside = true,
-	serverside = true
+	serverside = true,
+
+	providesInterfaces = {
+		"diggler.isBlockUseless",
+		
+	}
 }
 
 function TestMod.init() 
 	print("Hey i'm " .. CurrentMod.id)
-	D.registerBlock('test', {
+	H.registerBlock('test', {
 		dispname = 'block.test.name',
 		sandboxTab = 'blocks',
 		harvest = { pickaxe = 0, shovel = 10000 },
@@ -30,6 +36,6 @@ function TestMod.deinit()
 	print("Bye")
 end
 
-print(D.mods)
+print(H.mods)
 
 return TestMod

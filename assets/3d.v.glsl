@@ -29,8 +29,8 @@ void main(void) {
 #endif
 	vec3 coord = coord.xyz;
 #ifdef WAVE
-	if (wave != 0) {
-		float yShift = sin(time+(coord.x+coord.z)/16.0*6*PI)*wave - wave;
+	if (wave != 0.0) {
+		float yShift = sin(time+(coord.x+coord.z)/16.0*6.0*PI)*wave - wave;
 		coord.y += yShift;
 		//v_texcoord.y -= yShift/8.0;
 	}

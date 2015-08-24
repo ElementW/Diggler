@@ -85,9 +85,9 @@ void Server::handlePlayerJoin(InMessage &msg, Peer &peer) {
 		H.send(p.P, broadcast, Tfer::Rel);
 	}
 	getOutputStream() << plr.name << " joined from " << peer.getHost() << endl;
-	for (int x = -8; x < 0; ++x)
-		for (int y = -1; y < 0; ++y)
-			for (int z = -8; z < 0; ++z)
+	for (int x = -2; x < 2; ++x)
+		for (int y = -2; y < 2; ++y)
+			for (int z = -2; z < 2; ++z)
 				schedSendChunk(G.U->getWorld(0)->getChunkEx(x, y, z), plr);
 }
 

@@ -16,7 +16,7 @@
 #define CXY (CX*CY)
 #define I(x,y,z) (x+y*CX+z*CXY)
 
-#define SHOW_CHUNK_UPDATES 0
+#define SHOW_CHUNK_UPDATES 1
 
 namespace Diggler {
 
@@ -73,8 +73,9 @@ void Chunk::ChangeHelper::discard(){
 }
 
 Chunk::Chunk(Game *G, WorldRef W, int X, int Y, int Z) : scx(X), scy(Y), scz(Z),
-	data(nullptr), data2(nullptr), G(G), W(W), vbo(nullptr), CH(*this),
-	state(State::Unavailable) {
+	G(G), W(W), vbo(nullptr), data(nullptr), data2(nullptr),
+	state(State::Unavailable),
+	CH(*this) {
 	dirty = true;
 	data = new Data;
 	data->clear();
@@ -319,9 +320,9 @@ void Chunk::updateClient() {
 	BlockId bt, bu /*BlockUp*/, bn /*BlockNear*/;
 	bool mayDisp;
 	const AtlasCreator::Coord *tc;
-	for(uint8 x = 0; x < CX; x++) {
-		for(uint8 y = 0; y < CY; y++) {
-			for(uint8 z = 0; z < CZ; z++) {
+	for(int8 x = 0; x < CX; x++) {
+		for(int8 y = 0; y < CY; y++) {
+			for(int8 z = 0; z < CZ; z++) {
 				bt = data->id[I(x,y,z)];
 
 				// Empty block?
@@ -482,7 +483,7 @@ void Chunk::updateClient() {
 
 void Chunk::render(const glm::mat4& transform) {
 #if SHOW_CHUNK_UPDATES
-	glUniform4f(R.uni_unicolor, 1.f, changed ? 0.f : 1.f, changed ? 0.f : 1.f, 1.f);
+	glUniform4f(R.uni_unicolor, 1.f, dirty ? 0.f : 1.f, dirty ? 0.f : 1.f, 1.f);
 #endif
 	if (dirty)
 		updateClient();

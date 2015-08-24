@@ -1,8 +1,8 @@
 #ifndef UI_MANAGER_HPP
 #define UI_MANAGER_HPP
 #include <list>
+#include <memory>
 #include "Element.hpp"
-#include "../_.hpp"
 
 namespace Diggler {
 
@@ -14,8 +14,8 @@ namespace UI {
 
 class Manager {
 private:
-	_<VBO> m_rectVbo;
-	std::list<_<Element>> m_elements;
+	std::unique_ptr<VBO> m_rectVbo;
+	std::list<std::unique_ptr<Element>> m_elements;
 	glm::mat4 m_projMatrix, m_projMat1, m_projMat1V;
 	
 	friend GameWindow;

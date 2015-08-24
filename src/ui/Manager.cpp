@@ -36,7 +36,7 @@ void Manager::setup(Game *G) {
 		RR.uni_mvp = RR.prog->uni("mvp");
 		RR.uni_unicolor = RR.prog->uni("unicolor");
 	}
-	m_rectVbo = new VBO();
+	m_rectVbo.reset(new VBO);
 	uint8 verts[6*4] = {
 		0, 0, 0, 1,
 		1, 0, 1, 1,
@@ -59,11 +59,11 @@ void Manager::add(Element *e) {
 
 
 void Manager::remove(Element *e) {
-	m_elements.remove_if([&e](_<Element> &l) -> bool { return l == e; });
+	m_elements.remove_if([&e](std::unique_ptr<Element> &l) -> bool { return l.get() == e; });
 }
 
 void Manager::render() {
-	for (_<Element>& e : m_elements) {
+	for (std::unique_ptr<Element> &e : m_elements) {
 		if (e->m_isVisible)
 			e->render();
 	}
