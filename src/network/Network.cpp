@@ -106,6 +106,12 @@ void InMessage::readData(void *data, int len) {
 	m_cursor += len;
 }
 
+void* InMessage::getCursorPtr (uint advanceCursor) {
+	m_cursor += advanceCursor;
+	return &(m_data[m_cursor-advanceCursor]);
+}
+
+
 void OutMessage::writeVec3(const glm::vec3 &vec) {
 	writeFloat(vec.x);
 	writeFloat(vec.y);

@@ -10,7 +10,10 @@ namespace Diggler {
 
 World::World(Game *G, WorldId id) :
 	G(G), id(id) {
-	emergerThreads.emplace_back(&World::emergerProc, this);
+	// TODO: emerger thread setting, default to std::thread::hardware_concurrency()
+	for (int i=0; i < 2; ++i) {
+		emergerThreads.emplace_back(&World::emergerProc, this, i);
+	}
 }
 
 World::~World() {
@@ -36,14 +39,16 @@ void World::addToEmergeQueue(ChunkWeakRef &cwr) {
 	emergerCondVar.notify_one();
 }
 
-void World::emergerProc() {
+void World::emergerProc(int emergerId) {
 	ChunkRef c;
 	emergerRun = true;
 	while (emergerRun) {
 		{ std::unique_lock<std::mutex> lk(emergeQueueMutex);
-			if (emergeQueue.size() <= 0) {
+			if (emergeQueue.size() == 0) {
 				// No more chunks to emerge, wait for more
 				emergerCondVar.wait(lk);
+				if (emergeQueue.size() == 0) // Weird threading shenanigans
+					continue;
 				if (!emergerRun)
 					break;
 			}
@@ -57,10 +62,12 @@ void World::emergerProc() {
 		// TODO: loading
 		auto genStart = std::chrono::high_resolution_clock::now();
 		CaveGenerator::GenConf gc;
-		CaveGenerator::Generate(G->U->getWorld(id), gc, c);
+		CaveGenerator::Generate(c->getWorld(), gc, c);
 		auto genEnd = std::chrono::high_resolution_clock::now();
 		auto genDelta = std::chrono::duration_cast<std::chrono::milliseconds>(genEnd - genStart);
-		getOutputStream() << "Map gen took " << genDelta.count() << "ms" << std::endl;
+		glm::ivec3 cp = c->getWorldChunkPos();
+		getOutputStream() << "Map gen for " << id << '.' << cp.x << ',' << cp.y << ',' << cp.z <<
+		  " took " << genDelta.count() << "ms, thread #" << emergerId << std::endl;
 
 		c.reset(); // Release ref ownership
 	}

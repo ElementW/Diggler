@@ -43,8 +43,7 @@ private:
 			  uni_time;
 	} R;
 	static const Texture *TextureAtlas;
-	// TODO: rename "sc" is superchunk; maybe make glm::ivec3
-	int scx, scy, scz;
+	int wcx, wcy, wcz;
 
 	struct Data {
 		// Keep me Plain Old Data!
@@ -123,7 +122,7 @@ public:
 	}
 
 	inline glm::ivec3 getWorldChunkPos() const {
-		return glm::ivec3(scx, scy, scz);
+		return glm::ivec3(wcx, wcy, wcz);
 	}
 
 	///

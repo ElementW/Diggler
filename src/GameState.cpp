@@ -808,9 +808,11 @@ bool GameState::processNetwork() {
 				uint8 count = m_msg.readU8();
 				for (int i=0; i < count; ++i) {
 					WorldId wid = m_msg.readI16();
-					glm::ivec3 pos(m_msg.readI16(), m_msg.readI16(), m_msg.readI16());
+					int x = m_msg.readI16(),
+					    y = m_msg.readI16(),
+					    z = m_msg.readI16();
 					// TODO handle this somewhere else?
-					ChunkRef c = G->U->getWorldEx(wid)->getNewEmptyChunk(pos.x, pos.y, pos.z);
+					ChunkRef c = G->U->getWorldEx(wid)->getNewEmptyChunk(x, y, z);
 					c->recv(m_msg);
 					holdChunksInMem.push_back(c);
 				}

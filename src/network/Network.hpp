@@ -105,6 +105,8 @@ public:
 	~InMessage();
 
 	void readData(void *data, int len);
+	void* getCursorPtr(uint advanceCursor = 0);
+
 	glm::vec3 readVec3();
 	glm::ivec3 readIVec3();
 

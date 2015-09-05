@@ -7,10 +7,11 @@
 #include <cstddef>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <lzfx.h>
+#include <fasthash.h>
 
 #if CHUNK_INMEM_COMPRESS
 	#include <cstdlib>
-	#include <lzfx.h>
 #endif
 
 #define CXY (CX*CY)
@@ -68,11 +69,12 @@ bool Chunk::ChangeHelper::empty() const {
 	return m_changes.empty();
 }
 
-void Chunk::ChangeHelper::discard(){
+void Chunk::ChangeHelper::discard() {
 	m_changes.clear();
 }
 
-Chunk::Chunk(Game *G, WorldRef W, int X, int Y, int Z) : scx(X), scy(Y), scz(Z),
+Chunk::Chunk(Game *G, WorldRef W, int X, int Y, int Z) :
+	wcx(X), wcy(Y), wcz(Z),
 	G(G), W(W), vbo(nullptr), data(nullptr), data2(nullptr),
 	state(State::Unavailable),
 	CH(*this) {
@@ -133,7 +135,6 @@ void Chunk::calcMemUsage() {
 #if CHUNK_INMEM_COMPRESS
 void Chunk::imcCompress() {
 	if (mut.try_lock()) {
-		//getDebugStream() << "Chunk[" << scx << ',' << scy << ',' << scz << "] compress" << std::endl;
 		uint isize = AllocaSize, osize = isize;
 		imcData = std::malloc(osize);
 		lzfx_compress(data, isize, imcData, &osize);
@@ -187,18 +188,18 @@ void Chunk::notifyChange(int x, int y, int z) {
 			v = y==CY-1?1:(y==0)?-1:0,
 			w = z==CZ-1?1:(z==0)?-1:0;
 		ChunkRef nc;
-		if (u && (nc = W->getChunk(scx+u, scy, scz)))
+		if (u && (nc = W->getChunk(wcx+u, wcy, wcz)))
 			nc->markAsDirty();
-		if (v && (nc = W->getChunk(scx, scy+v, scz)))
+		if (v && (nc = W->getChunk(wcx, wcy+v, wcz)))
 			nc->markAsDirty();
-		if (w && (nc = W->getChunk(scx, scy, scz+w)))
+		if (w && (nc = W->getChunk(wcx, wcy, wcz+w)))
 			nc->markAsDirty();
 	}
 }
 
 void Chunk::setBlock(int x, int y, int z, BlockId id, BlockData data, bool buf2) {
 	if ((x < 0 || y < 0 || z < 0 || x >= CX || y >= CY || z >= CZ) && G)
-		return (void)W->setBlock(scx * CX + x, scy * CY + y, scz * CZ + z, id, data, buf2);
+		return (void)W->setBlock(wcx * CX + x, wcy * CY + y, wcz * CZ + z, id, data, buf2);
 #if CHUNK_INMEM_COMPRESS
 	imcUncompress();
 #endif
@@ -210,7 +211,7 @@ void Chunk::setBlock(int x, int y, int z, BlockId id, BlockData data, bool buf2)
 
 void Chunk::setBlockId(int x, int y, int z, BlockId id, bool buf2) {
 	if ((x < 0 || y < 0 || z < 0 || x >= CX || y >= CY || z >= CZ) && W)
-		return (void)W->setBlockId(scx * CX + x, scy * CY + y, scz * CZ + z, id, buf2);
+		return (void)W->setBlockId(wcx * CX + x, wcy * CY + y, wcz * CZ + z, id, buf2);
 #if CHUNK_INMEM_COMPRESS
 	imcUncompress();
 #endif
@@ -221,7 +222,7 @@ void Chunk::setBlockId(int x, int y, int z, BlockId id, bool buf2) {
 
 void Chunk::setBlockData(int x, int y, int z, BlockData data, bool buf2) {
 	if ((x < 0 || y < 0 || z < 0 || x >= CX || y >= CY || z >= CZ) && W)
-		return (void)W->setBlockData(scx * CX + x, scy * CY + y, scz * CZ + z, data, buf2);
+		return (void)W->setBlockData(wcx * CX + x, wcy * CY + y, wcz * CZ + z, data, buf2);
 #if CHUNK_INMEM_COMPRESS
 	imcUncompress();
 #endif
@@ -232,7 +233,7 @@ void Chunk::setBlockData(int x, int y, int z, BlockData data, bool buf2) {
  
 BlockId Chunk::getBlockId(int x, int y, int z, bool buf2) {
 	if ((x < 0 || y < 0 || z < 0 || x >= CX || y >= CY || z >= CZ) && W)
-		return W->getBlockId(scx * CX + x, scy * CY + y, scz * CZ + z, buf2);
+		return W->getBlockId(wcx * CX + x, wcy * CY + y, wcz * CZ + z, buf2);
 #if CHUNK_INMEM_COMPRESS
 	imcUncompress();
 #endif
@@ -242,7 +243,7 @@ BlockId Chunk::getBlockId(int x, int y, int z, bool buf2) {
 
 BlockData Chunk::getBlockData(int x, int y, int z, bool buf2) {
 	if ((x < 0 || y < 0 || z < 0 || x >= CX || y >= CY || z >= CZ) && W)
-		return W->getBlockData(scx * CX + x, scy * CY + y, scz * CZ + z, buf2);
+		return W->getBlockData(wcx * CX + x, wcy * CY + y, wcz * CZ + z, buf2);
 #if CHUNK_INMEM_COMPRESS
 	imcUncompress();
 #endif
@@ -257,7 +258,7 @@ BlockData Chunk::getBlockData(int x, int y, int z, bool buf2) {
 
 bool Chunk::blockHasMetadata(int x, int y, int z, bool buf2) {
 	if ((x < 0 || y < 0 || z < 0 || x >= CX || y >= CY || z >= CZ) && W)
-		return W->blockHasMetadata(scx * CX + x, scy * CY + y, scz * CZ + z, buf2);
+		return W->blockHasMetadata(wcx * CX + x, wcy * CY + y, wcz * CZ + z, buf2);
 #if CHUNK_INMEM_COMPRESS
 	imcUncompress();
 #endif
@@ -481,7 +482,7 @@ void Chunk::updateClient() {
 	mut.unlock();
 }
 
-void Chunk::render(const glm::mat4& transform) {
+void Chunk::render(const glm::mat4 &transform) {
 #if SHOW_CHUNK_UPDATES
 	glUniform4f(R.uni_unicolor, 1.f, dirty ? 0.f : 1.f, dirty ? 0.f : 1.f, 1.f);
 #endif
@@ -524,12 +525,13 @@ void Chunk::write(OutStream &os) const {
 	compressedSize = dataSize;
 	int rz = lzfx_compress(chunkData, dataSize, compressed, &compressedSize);
 	if (rz < 0) {
-		getErrorStream() << "Failed compressing Chunk[" << scx << ',' << scy <<
-			' ' << scz << ']' << std::endl;
+		getErrorStream() << "Failed compressing Chunk[" << wcx << ',' << wcy <<
+			' ' << wcz << ']' << std::endl;
 	} else {
 		os.writeU16(compressedSize);
 		os.writeData(compressed, compressedSize);
 	}
+	os.writeU32(fasthash32(chunkData, dataSize, 0xFA0C778C));
 
 	delete[] compressed;
 }
@@ -544,24 +546,28 @@ void Chunk::read(InStream &is) {
 	int rz = lzfx_decompress(compressedData, compressedSize, data, &outLen);
 	if (rz < 0 || outLen != targetDataSize) {
 		if (rz < 0) {
-			getErrorStream() << "Chunk[" << scx << ',' << scy << ' ' << scz <<
+			getErrorStream() << "Chunk[" << wcx << ',' << wcy << ' ' << wcz <<
 				"] LZFX decompression failed" << std::endl;
 		} else {
-			getErrorStream() << "Chunk[" << scx << ',' << scy << ' ' << scz <<
+			getErrorStream() << "Chunk[" << wcx << ',' << wcy << ' ' << wcz <<
 				"] has bad size " << outLen << '/' << targetDataSize << std::endl;
 		}
+	}
+	if (is.readU32() != fasthash32(data, outLen, 0xFA0C778C)) {
+		getErrorStream() << "Chunk[" << wcx << ',' << wcy << ' ' << wcz <<
+				"] decompression gave bad chunk content" << std::endl;
 	}
 
 	delete[] compressedData;
 	markAsDirty();
 
 	{ ChunkRef nc;
-		nc = W->getChunk(scx+1, scy, scz); if (nc) nc->markAsDirty();
-		nc = W->getChunk(scx-1, scy, scz); if (nc) nc->markAsDirty();
-		nc = W->getChunk(scx, scy+1, scz); if (nc) nc->markAsDirty();
-		nc = W->getChunk(scx, scy-1, scz); if (nc) nc->markAsDirty();
-		nc = W->getChunk(scx, scy, scz+1); if (nc) nc->markAsDirty();
-		nc = W->getChunk(scx, scy, scz-1); if (nc) nc->markAsDirty();
+		nc = W->getChunk(wcx+1, wcy, wcz); if (nc) nc->markAsDirty();
+		nc = W->getChunk(wcx-1, wcy, wcz); if (nc) nc->markAsDirty();
+		nc = W->getChunk(wcx, wcy+1, wcz); if (nc) nc->markAsDirty();
+		nc = W->getChunk(wcx, wcy-1, wcz); if (nc) nc->markAsDirty();
+		nc = W->getChunk(wcx, wcy, wcz+1); if (nc) nc->markAsDirty();
+		nc = W->getChunk(wcx, wcy, wcz-1); if (nc) nc->markAsDirty();
 	}
 }
 

@@ -4,7 +4,7 @@
 #include "content/Registry.hpp"
 #include "Chunk.hpp"
 #include "Platform.hpp"
-#include <stb_perlin.h>
+#include <simplexnoise.h>
 
 namespace Diggler {
 
@@ -228,12 +228,21 @@ void CaveGenerator::Generate(WorldRef wr, const GenConf &gc, ChunkRef cr) {
 			c.setBlock(x, y, CZ-1, Content::BlockUnknownId);
 		}*/
 
-	glm::ivec3 cp = c.getWorldChunkPos() * glm::ivec3(CX, CY, CZ);
-	for (int y = 0; y < CY; ++y)
-		for (int x = 0; x < CX; ++x)
-			for (int z = 0; z < CZ; ++z)
-				c.setBlock(x, y, z, stb_perlin_noise3((cp.x + x)/8.f, (cp.y + y)/8.f, (cp.z + z)/8.f) > 0 ? Content::BlockUnknownId : Content::BlockAirId);
-
+	const glm::ivec3 cp = c.getWorldChunkPos() * glm::ivec3(CX, CY, CZ);
+	for (int ly = 0; ly < CY; ++ly) {
+		int y = cp.y + ly;
+		for (int lx = 0; lx < CX; ++lx) {
+			int x = cp.x + lx;
+			for (int lz = 0; lz < CZ; ++lz) {
+				int z = cp.z + lz;
+				if (y >= -8) {
+					c.setBlock(lx, ly, lz, y < raw_noise_3d(x/16.f, 0, z/16.f)*8 ? Content::BlockUnknownId : Content::BlockAirId);
+				} else {
+					c.setBlock(lx, ly, lz, raw_noise_3d(x/16.f, y/16.f, z/16.f) > 0.7 ? Content::BlockAirId : Content::BlockUnknownId);
+				}
+			}
+		}
+	}
 #if 0
 	if (gc.ore.enabled)
 		AddOre(*c, gc);

@@ -48,7 +48,7 @@ private:
 	bool emergerRun;
 	std::vector<std::thread> emergerThreads;
 	std::condition_variable emergerCondVar;
-	void emergerProc();
+	void emergerProc(int);
 
 public:
 	using WorldChunkMap::size;

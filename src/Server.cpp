@@ -186,8 +186,6 @@ void Server::handlePlayerUpdate(InMessage &msg, Player &plr) {
 
 void Server::schedSendChunk(ChunkRef C, Player &P) {
 	glm::ivec3 pos = C->getWorldChunkPos();
-	getDebugStream() << "Pend Chunk[" << pos.x << ',' << pos.y << ' ' << pos.z <<
-		"] send to " << P.name << std::endl;
 	P.pendingChunks.emplace_back(C);
 }
 
@@ -202,11 +200,8 @@ void Server::sendChunks(const std::list<ChunkRef> &cs, Player &P) {
 		msg.writeI16(pos.y);
 		msg.writeI16(pos.z);
 		c.send(msg);
-
-		getDebugStream() << "C[" << pos.x << ',' << pos.y << ',' << pos.z <<
-			"] sent to " << P.name << std::endl;
 	}
-	H.send(P.P, msg, Tfer::Rel, Channels::MapUpdate);
+	H.send(P.P, msg, Tfer::Rel, Channels::MapTransfer);
 }
 
 void Server::handlePlayerChunkRequest(InMessage &msg, Player &plr) {
