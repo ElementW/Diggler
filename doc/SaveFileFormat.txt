@@ -38,7 +38,13 @@ Vectors can be of dimensions 2 to 4. They are simply stored member-by-member, in
 E.g. `fvec3` is a 3-dimensional vector stored as 3 consecutive 32-bit IEEE754 floating-point numbers.
 
 ## Strings
+<<<<<<< Updated upstream
 Strings are arrays of arbitrary binary data -- usually text, in which case the UTF-8 enoding is used.
+=======
+Strings are arrays of arbitrary binary data -- usually text, in which case the UTF-8 encoding is used.
+In cases where textual data is expected, UTF-8 Byte Order Markers are useless and must render all the rest of the string invalid, essentially considering it empty.
+Implementations may replace invalid UTF-8-encoded characters by  replacement character "�" (U+FFFD).
+>>>>>>> Stashed changes
 
 * `string` = `uv32 length; byte data[length];`
 * `sstring` (short string) = `u8 length; byte data[length];`
@@ -51,11 +57,21 @@ Arrays are sequences of tightly-packed data of an unique type.
 Their length as well as their type can be either hard-coded or determined from another variable.
 They are denoted by:
 
+<<<<<<< Updated upstream
 *  *`type`*`[SIZE]`, e.g. `int[42]`
 * *`type name`*`[SIZE]` when named
 
 Where `type` is the `TypeID` (see below) of the data elements.
 
+=======
+*  *`type`*`[SIZE]`, `SIZE` being empty or a positive integer, e.g. `int[42]` or `float[]`
+* *`type name`*`[SIZE]` when named
+
+Where `type` is the type of the data elements (see `TypeID` table below).
+
+When size isn't specified, their length is stored as an `uv32` before the array's tightly packed data in the byte stream.
+
+>>>>>>> Stashed changes
 ## Datrees
 Datrees (*Data Trees*) are key/value maps able to hold a variety of data types bound to a `string` key.
 ```
@@ -101,11 +117,12 @@ DType  | Type
 
 XType  | Modifier
 -------|---------
-0      | None (impossible in the byte stream since we use an `uv16`)
+0      | None
 1      | Array
 2      | `vec2`
 3      | `vec3`
 4      | `vec4`
+Note the `None` modifier is impossible to have in the byte stream since we use an `uv16`.
 
 ## Other ID/status tables
 ### Compression
@@ -116,18 +133,44 @@ ID | Compression algorithm
 2  | LZO*
 3  | zlib (DEFLATE)
 4  | LZMA°
-*: Unimplemented
-°: Have a dictionary that can be relocated/shared
+\* Listed for potential future use
+° Has a dictionary that can be relocated/shared
+
+# General data structures, details and vocabulary
 
 ### Chunk status
+
+* "emerged" means a chunk is fully ready to be read, modified, as well as written or read from/to persistent storage.
+* "emerging" is the process of bringing a chunk to the emerged state.
+* "generating" is a part of the emerging procedure, where chunk data is being created, implying said chunk wasn't already available from any available source. Unsaved chunks must go (once again) through this process if need be.
+
+<<<<<<< Updated upstream
+### Chunk status
+=======
+>>>>>>> Stashed changes
 ID | Status
----|-------
+--:|:------
 0  | Unemerged
 1  | Needs re-emerging
 2  | Emerged, unmodified
 3  | Emerged, modified only by map updates
 4  | Emerged, modified by non-player action (mobs, map update...)
 5  | Emerged, modified by player action
+6  | Emerged, empty
+
+The existence of multiple "emerged" states is explained by the potential need to reduce the universe save file size, for example in case of a backup, or the whole universe being distributed online. This allows for safe save file trimming without loosing important parts of the map.
+
+## Assets
+Assets are just, conceptually, files. They can be transferred, compressed, be in a text or binary format, functional or non-functional, etc...
+
+* AHash: SHA-256 hash of the asset's content.
+  Text form: hexadecimal representation (a.k.a. [RFC4648](https://tools.ietf.org/html/rfc4648)§8).
+* ABind: a triple consisting of an AHash, a mod name, and a (string) path, relative to the root of the aforementioned mod.
+  Ideally a `std::tuple<AHash, std::string, std::string>` or the like, and represented as `<AHash>:<modname>:<path/file.ext>`.
+* AGroup: array of ABinds.
+  Text form: ABinds separated by newlines.
+* AMeta: metadata about the asset, such as asset type and size. Additional info like author/contributors, license and related links may be added too. Only fetched once, additional info only being symbolic.
+* ASourceList: array of sources from where a specific asset can be fetched. 
 
 
 
@@ -160,7 +203,7 @@ Type      | Name  | Value
 mstring universeName;
 mstring universeSubtitle;
 datree<uint16> idMapping;
-datree universeProps;
+datree universeProperties;
 uint16 worldIDs[];
 ```
 
@@ -168,12 +211,16 @@ uint16 worldIDs[];
 ```c++
 mstring worldName;
 mstring worldSubtitle;
-datree worldProps;
+datree worldProperties;
 uint16 areasIDs[];
 ```
 
 ### World Area (`Hst = 0x02`)
+<<<<<<< Updated upstream
 An Area equates to 8×8×8 = 512 Chunks, themselves storing 16×16×16 blocks each, resulting in a maximum of 2 097 152 blocks stored, 8 MB of (uncompressed) raw data if no extra buffers are added.
+=======
+An Area equates to 8×8×8 = 512 Chunks, themselves storing 16×16×16 blocks each, resulting in a maximum of 2 097 152 blocks stored which in turn equatest 8 MB of (uncompressed) raw data if no extra buffers are added.
+>>>>>>> Stashed changes
 
 #### Chunk
 ```c++
@@ -202,8 +249,13 @@ struct Chunk {
 };
 ```
 Block IDs and data are indexed in the flat array by `index = x + y*16 + z*16*16`.
+<<<<<<< Updated upstream
 
 Block data (let's call it `bdata`) matching the bitmask `0x8000`indicate a metadata pointer -- that is, said block has a metadata Datree stored in `metadata` at index `bdata & 0x7FFFF`. This Datree can contain arbitrarily-defined data (as mods please) about the block. It has a special entry called `__data` containing the block's actual `bdata` if it wasn't a metadata pointer and isn't zero, and is the value returned by functions getting the block's data.
+=======
+ 
+Block data (let's call it `bdata`) matching the bitmask `0x8000`indicate a metadata pointer -- that is, said block has a metadata Datree stored in `metadata` at index `bdata & 0x7FFFF`. This Datree can contain arbitrarily-defined data (as mods please) about the block. It has a special entry called `__data` containing the block's actual `bdata` if it wasn't a metadata pointer and isn't zero, and is the value returned by functions getting the block's data (directly writing to this field should **fail**).
+>>>>>>> Stashed changes
 
 #### Areas
 ```c++
@@ -220,13 +272,12 @@ Chunks are indexed in the flat array by `index = x + y*8 + z*8*8`.
 * `light555_555` -> `u16` + `u16`
 * `temperature` -> `f`
 * `humidity` -> `f`
-* `radiation` -> `f`
 * `electricity` -> `f` (U, voltage) + `f` (I, electric current)
 
 ## Mod-defined bufferspecs
 Registered by mods upon their load. Like block names, they are prefixed with the mod identifier, e.g. `gases:entropy`.
 
-##Bufferspec Processors
+## Bufferspec Processors
 * `lightspread`
   * `falloff`
   * TBD (2nd light computation)
@@ -234,9 +285,16 @@ Registered by mods upon their load. Like block names, they are prefixed with the
   * Params TBD (conductivity, ...)
 
 # Network
+<<<<<<< Updated upstream
 ## Messages
 All network communication in Diggler is done via sequential messages, delivered by the [ENet library](http://enet.bespin.org) on multiple ENet channels.
 ### Message channels
+=======
+All network communication in Diggler is done via sequential messages, delivered by the [ENet library](http://enet.bespin.org) on multiple ENet channels.
+
+## Message channels
+Channels are merely used to provide traffic analysis and avoid blocking other messages in the message queue. They shouldn't be checked upon message arrival and processing.
+>>>>>>> Stashed changes
 Channel | Usage
 --------|------
 0       | Base
@@ -246,3 +304,79 @@ Channel | Usage
 4       | Metadata (Universe/World/entity metadata transfer)
 5       | ChunkTransfer
 6       | ChunkUpdate
+<<<<<<< Updated upstream
+=======
+
+## Message structure
+```
+enum MessageType : uint8 {
+  Null = 0,
+  Connect = 1,
+  Disconnect = 2,
+  ServerInfo = 3,
+  PlayerJoin = 4,
+  PlayerUpdate = 5,
+  PlayerQuit = 6,
+  Event = 7,
+  ChunkTransfer = 8,
+  ChunkUpdate = 9,
+  StatsUpdate = 10,
+  Chat = 11,
+
+  ServerStatus = 250
+}
+struct Message {
+  MessageType type;
+  uint8 subtype;
+  byte data[];
+}
+```
+`data`'s length is determined by the reported ENet packet's size, minus two for the header.
+
+## Message types and meaning
+### ServerStatus
+Can be sent while not yet connected. Used to retrieve info about a server, such as the player count, the gamemode being played, the server's icon/banner, etc...
+```
+subtype enum ServerStatusSubtype : uint8 {
+  Request = 0,
+  Response = 1
+}
+
+messagedata struct ServerStatusRequest {
+  sstring infos[];
+}
+
+messagedata struct ServerStatusResponse {
+  datree infos;
+}
+```
+The client asks for a list of information, and the server simply replies. Different infos are identified by a short string describing both what it is and optional parameters, separated by dot characters (`.`, U+002E).
+The server may reply to the client with only some of the requested information, and/or information with different parameters, but is expected to do its best effort to send back the most appropriate information. It is up to the client to choose what to do with this data and put it to best use.
+
+Parameters that expresses languages are substituted by `XXX` in the following table, and are expected to be ISO 639-3 alpha-3-*type* codes. Language codes that are not part of ISO 639-3 are considered **valid** and may very well be used for alternative languages, such as `zls` for 1337$P34|< ([leetspeak](https://en.wikipedia.org/wiki/Leet)).
+When that language specification is shown between parentheses, it is optional and the server is free to return said information in any language, whichever is the most appropriate (e.g. according to the server's homeland or client location guessed from its IP address).
+
+Info name       | Reply type | Reply data
+----------------|------------|-----------
+`name`(`.XXX`)  | `string`   | Server name (in locale `XXX`)
+`desc`(`.XXX`)  | `string`   | Description/subtitle (in locale `XXX`)
+`web`(`.XXX`)   | `string`   | Server website (for locale `XXX`)
+`icon`(`.X.Y`)  | `string`   | Server icon (pixel size `X`×`Y` pixels)
+`banner`(`.X.Y`)| `string`   | Server banner (pixel size `X`×`Y` pixels)
+`uptime`        | `uint64`   | Server uptime in seconds
+`playerCount`   | `uint32`   | Number of online players
+`playerNames`(`.N`) | `string[]` | Connected players' names (all by default, up to `N` if specified, in no specific order)
+
+Additional information types may be created and used, but to avoid any conflicts with future official types they should be prefixed with `x-`.
+
+#### Examples
+Please note server behaviour is only *suggested*.
+##### Example 1
+Client with an IP bound to France in GeoIP database requests `name`, `desc` and `icon.32.32`.
+Server has its `name` and `desc` in English and French, and only has its icon on 16×16 and 48×48 px form.
+Given it is not specifically branded (nor configured) as being French or English, it'll send back `name.fra` and `desc.fra` because the client is French and did not specify a preference, and will also send `icon.48.48`, since sending the 16×16 px icon would be less than asked for but it has more.
+##### Example 2 (server has less info than requested)
+Client asks for `name.jpn` and `icon.48.48`.
+Server only has its name in Turkish and its icon in 32×32 px format.
+It will send back `name.tur` and `icon.32.32` since it's the only data it has, even if it's less than requested.
+>>>>>>> Stashed changes

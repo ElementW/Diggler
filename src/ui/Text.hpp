@@ -1,7 +1,8 @@
 #ifndef TEXT_HPP
 #define TEXT_HPP
+#include <memory>
 #include <string>
-#include "../Font.hpp"
+#include "Font.hpp"
 #include "Element.hpp"
 
 namespace Diggler {
@@ -11,7 +12,7 @@ class Text : public Element {
 private:
 	int m_scaleX, m_scaleY, m_elementCount;
 	VBO m_vbo;
-	Font *m_font;
+	std::string m_fontName;
 	glm::mat4 m_matrix;
 	std::string m_text;
 	
@@ -21,13 +22,13 @@ private:
 public:
 	struct Size { int x, y; };
 	
-	Text(Manager*, Font *font, const std::string &text = "", int scaleX = 1, int scaleY = 1);
+	Text(Manager*, const std::string &text = "", int scaleX = 1, int scaleY = 1);
 	Text(Text&&) = default;
 	Text& operator=(Text&&) = default;
 	
 	void setText(const std::string &text);
 	std::string getText() const;
-	void setFont(Font *font);
+	void setFont(const std::string &name);
 	void setPos(int x, int y);
 	void setScale(int scaleX, int scaleY);
 	Size getSize() const;

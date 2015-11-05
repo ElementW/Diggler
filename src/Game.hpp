@@ -1,6 +1,7 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 #include <memory>
+#include "ui/FontManager.hpp"
 #include "Universe.hpp"
 #include "PlayerList.hpp"
 #include "LocalPlayer.hpp"
@@ -39,7 +40,7 @@ public:
 	UI::Manager *UIM;
 	LocalPlayer *LP;
 	ProgramManager *PM;
-	Font *F;
+	UI::FontManager FM;
 	struct RenderProperties {
 		bool bloom, wavingLiquids;
 		float fogStart, fogEnd;

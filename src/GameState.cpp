@@ -26,11 +26,11 @@ using std::unique_ptr;
 
 namespace Diggler {
 
-GameState::GameState(GameWindow *W, const std::string &servHost, int servPort)
-	: GW(W), m_serverHost(servHost), m_serverPort(servPort), bloom(*W->G) {
-	G = W->G;
-	int w = W->getW(),
-		h = W->getH();
+GameState::GameState(GameWindow *GW, const std::string &servHost, int servPort)
+	: GW(GW), m_serverHost(servHost), m_serverPort(servPort), bloom(*GW->G) {
+	G = GW->G;
+	int w = GW->getW(),
+	    h = GW->getH();
 
 	// Initialized in setupUI
 	UI.EM = nullptr;
@@ -171,15 +171,15 @@ void GameState::BuilderGun::select(int idx) {
 }
 
 void GameState::setupUI() {
-	UI.Ore = G->UIM->add<UI::Text>(G->F); UI.Ore->setScale(2, 2);
-	UI.Loot = G->UIM->add<UI::Text>(G->F); UI.Loot->setScale(2, 2);
-	UI.Weight = G->UIM->add<UI::Text>(G->F); UI.Weight->setScale(2, 2);
-	UI.TeamOre = G->UIM->add<UI::Text>(G->F); UI.TeamOre->setScale(2, 2);
-	UI.RedCash = G->UIM->add<UI::Text>(G->F); UI.RedCash->setScale(2, 2);
-	UI.BlueCash = G->UIM->add<UI::Text>(G->F); UI.BlueCash->setScale(2, 2);
-	UI.FPS = G->UIM->add<UI::Text>(G->F); UI.FPS->setScale(2, 2);
-	UI.Altitude = G->UIM->add<UI::Text>(G->F); UI.Altitude->setScale(2, 2);
-	UI.DebugInfo = G->UIM->add<UI::Text>(G->F); UI.DebugInfo->setVisible(false);
+	UI.Ore = G->UIM->add<UI::Text>(); UI.Ore->setScale(2, 2);
+	UI.Loot = G->UIM->add<UI::Text>(); UI.Loot->setScale(2, 2);
+	UI.Weight = G->UIM->add<UI::Text>(); UI.Weight->setScale(2, 2);
+	UI.TeamOre = G->UIM->add<UI::Text>(); UI.TeamOre->setScale(2, 2);
+	UI.RedCash = G->UIM->add<UI::Text>(); UI.RedCash->setScale(2, 2);
+	UI.BlueCash = G->UIM->add<UI::Text>(); UI.BlueCash->setScale(2, 2);
+	UI.FPS = G->UIM->add<UI::Text>(); UI.FPS->setScale(2, 2);
+	UI.Altitude = G->UIM->add<UI::Text>(); UI.Altitude->setScale(2, 2);
+	UI.DebugInfo = G->UIM->add<UI::Text>(); UI.DebugInfo->setVisible(false);
 	UI.EM = new EscMenu(G);
 
 	m_chatBox = new Chatbox(G);
@@ -388,8 +388,7 @@ void GameState::onMouseScroll(double x, double y) {
 
 void GameState::updateViewport() {
 	int w = GW->getW(), h = GW->getH();
-	Diggler::UI::Manager &UIM = *G->UIM;
-	glViewport(0, 0, w, h);
+	UI::Manager &UIM = *G->UIM;
 	G->LP->camera.setPersp((float)M_PI/180*75.0f, (float)w / h, 0.1f, 32.0f);
 	m_3dFbo->resize(w, h);
 	bloom.extractor.fbo->resize(w/bloom.scale, h/bloom.scale);
@@ -397,7 +396,7 @@ void GameState::updateViewport() {
 	bloom.renderer.fbo->resize(w/bloom.scale, h/bloom.scale);
 	//bloom.renderer.fb->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
 
-	{ int tw = 5*UIM.Scale, th = 5*UIM.Scale;
+	{ int tw = 5*UIM.scale, th = 5*UIM.scale;
 		m_crossHair.mat = glm::scale(glm::translate(*UIM.PM,
 			glm::vec3((w-tw)/2, (h-th)/2, 0)),
 			glm::vec3(tw, tw, 0));
@@ -413,10 +412,10 @@ void GameState::updateViewport() {
 			glm::vec3(iw, ih, 0));
 	}
 
-	int lineHeight = G->F->getHeight()*UIM.Scale;
+	int lineHeight = G->FM.getDefaultFont()->getHeight()*UIM.scale;
 	char str[15]; std::snprintf(str, 15, "Loot: %d/%d", G->LP->ore, Player::getMaxOre(G->LP->playerclass));
 	UI.Ore->setText(std::string(str));
-	UI.Ore->setPos(2*UIM.Scale, h-lineHeight);
+	UI.Ore->setPos(2*UIM.scale, h-lineHeight);
 
 	UI.Loot->setText("Loot: $0");
 	UI.Loot->setPos(w/6, h-lineHeight);
@@ -476,8 +475,8 @@ bool GameState::connectLoop() {
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 	ConnectingUI cUI {
-		G->UIM->create<UI::Text>(G->F, "Connecting"),
-		G->UIM->create<UI::Text>(G->F, ".")
+		G->UIM->create<UI::Text>("Connecting"),
+		G->UIM->create<UI::Text>(".")
 	};
 	double T; glm::mat4 mat;
 

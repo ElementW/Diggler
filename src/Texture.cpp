@@ -126,14 +126,8 @@ void Texture::setPlaceholder() {
 			pxLength = 1;
 		break;
 	}
-	unsigned char* white = new unsigned char[w * h * pxLength];
-	for(int x = 0; x < w; x++) // XOR texture
-		for(int y = 0; y < h; y++) 
-			for(int i = 0; i < pxLength; i++)
-				if (i == 3)
-					white[i+x*pxLength+y*w*pxLength] = 255;
-				else
-					white[i+x*pxLength+y*w*pxLength] = x ^ y;
+	unsigned char *white = new unsigned char[w * h * pxLength];
+	memset(white, 255, w * h * pxLength);
 	setTexture(w, h, white, m_format);
 	delete[] white;
 }

@@ -16,6 +16,8 @@ class Manager {
 private:
 	std::unique_ptr<VBO> m_rectVbo;
 	std::list<std::unique_ptr<Element>> m_elements;
+	Element *m_hoveredElement;
+	Element *m_focusedElement;
 	glm::mat4 m_projMatrix, m_projMat1, m_projMat1V;
 	
 	friend GameWindow;
@@ -24,13 +26,13 @@ private:
 public:
 	const glm::mat4 *PM, *PM1;
 	Game *G;
-	int Scale;
+	int scale;
 
 	Manager();
 	void setup(Game*);
 
-	void onMouseButton(int key, int action, int mods);
 	void onCursorPos(double x, double y);
+	void onMouseButton(int key, int action, int mods);
 	void onMouseScroll(double x, double y);
 	void onKey(int key, int scancode, int action, int mods);
 	void onChar(char32 unichar);
@@ -47,9 +49,12 @@ public:
 	}
 	void remove(Element*);
 	void clear();
-	
+
+	Element* getFocused() const;
+	void setFocused(Element*);
+
 	// Utility
-	
+
 	void drawRect(const Element::Area&, const glm::vec4 &color) const;
 	void drawRect(const glm::mat4&, const glm::vec4 &color) const;
 	void drawFullRect(const glm::vec4 &color) const;
@@ -58,9 +63,9 @@ public:
 	void drawTex(const glm::mat4&, const Texture&, const glm::vec4 &color) const;
 	void drawFullTexV(const Texture&) const;
 	void drawFullTexV(const Texture&, const glm::vec4 &color) const;
-	
+
 	// Render
-	
+
 	void render();
 };
 

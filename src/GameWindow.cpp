@@ -78,7 +78,7 @@ GameWindow::GameWindow(Game *G) : G(G) {
 		getOutputStreamRaw() << "GL " << GL_version << " / " << GL_renderer << std::endl;
 	}
 
-	UIM.setProjMat(glm::ortho(0.0f, (float)m_w, 0.0f, (float)m_h));
+	UIM.onResize(m_w, m_h);
 
 	G->init();
 	UIM.setup(G);
@@ -86,7 +86,8 @@ GameWindow::GameWindow(Game *G) : G(G) {
 	G->UIM = &UIM;
 	G->A->loadSoundAssets();
 
-	G->F = new Font(G, getAssetPath("04b08.png"));
+	G->FM.loadFont(getAssetPath("04b08.png"), "04b08");
+	G->FM.setDefaultFont("04b08");
 
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 	glEnable(GL_BLEND);
@@ -94,8 +95,6 @@ GameWindow::GameWindow(Game *G) : G(G) {
 }
 
 GameWindow::~GameWindow() {
-	delete G->F;
-	
 	glfwDestroyWindow(m_window);
 	
 	if (--InstanceCount == 0) {
@@ -116,28 +115,34 @@ bool GameWindow::isVisible() const {
 }
 
 void GameWindow::cbChar(char32 unichar) {
+	UIM.onChar(unichar);
 	m_currentState->onChar(unichar);
 }
 
 void GameWindow::cbKey(int key, int scancode, int action, int mods) {
+	UIM.onKey(key, scancode, action, mods);
 	m_currentState->onKey(key, scancode, action, mods);
 }
 
 void GameWindow::cbMouseButton(int key, int action, int mods) {
+	UIM.onMouseButton(key, action, mods);
 	m_currentState->onMouseButton(key, action, mods);
 }
 
 void GameWindow::cbCursorPos(double x, double y) {
+	UIM.onCursorPos(x, y);
 	m_currentState->onCursorPos(x, y);
 }
 
 void GameWindow::cbMouseScroll(double x, double y) {
+	UIM.onMouseScroll(x, y);
 	m_currentState->onMouseScroll(x, y);
 }
 
 void GameWindow::cbResize(int w, int h) {
 	m_w = w; m_h = h;
-	UIM.setProjMat(glm::ortho(0.0f, (float)w, 0.0f, (float)h));
+	glViewport(0, 0, w, h);
+	UIM.onResize(w, h);
 	m_currentState->onResize(w, h);
 }
 

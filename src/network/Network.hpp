@@ -32,18 +32,20 @@ enum class Channels : uint8 {
 
 enum class MessageType : uint8 {
 	Null = 0,
-	Connect,
-	Disconnect,
-	
-	ServerInfo,
-	PlayerJoin,
+
+	ServerInfo = 220,
+
+	PlayerJoin = 1,
 	PlayerUpdate,
 	PlayerQuit,
-	Event,
 	ChunkTransfer,
 	ChunkUpdate,
 	StatsUpdate,
+	Event,
 	Chat,
+  
+	Connect = 240,
+	Disconnect
 };
 
 enum PlayerUpdateType : uint8 {

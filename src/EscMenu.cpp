@@ -10,7 +10,7 @@
 namespace Diggler {
 
 EscMenu::EscMenu(Game *G) : G(G) {
-	txt_quit = G->UIM->add<UI::Text>(G->F, " Menu", 3, 3);
+	txt_quit = G->UIM->add<UI::Text>(" Menu", 3, 3);
 	txt_quit->setVisible(false);
 	//m_button = new UIButton(G, glm::mat);
 }
@@ -45,7 +45,7 @@ void EscMenu::render() {
 		scroll = 0.5;
 	}
 
-	int width = G->UIM->Scale*256;
+	int width = G->UIM->scale*256;
 	int pxScroll = G->GW->getW()-scroll*width;
 	matrix = glm::scale(glm::translate(*G->GW->UIM.PM, glm::vec3(pxScroll, 0, 0)), glm::vec3(width, G->GW->getH(), 0));
 	G->UIM->drawRect(matrix, glm::vec4(0.f, 0.f, 0.f, 0.8f));

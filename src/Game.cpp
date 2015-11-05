@@ -11,7 +11,8 @@ Game::Game() :
 	players(this),
 	GW(nullptr),
 	LP(nullptr),
-	PM(nullptr) {
+	PM(nullptr),
+	FM(*this) {
 }
 
 void Game::init() {

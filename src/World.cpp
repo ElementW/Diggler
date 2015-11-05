@@ -75,7 +75,7 @@ void World::emergerProc(int emergerId) {
 
 ChunkRef World::getNewEmptyChunk(int cx, int cy, int cz) {
 	ChunkRef c = std::make_shared<Chunk>(G, G->U->getWorld(id), cx, cy, cz);
-	iterator it = emplace(std::piecewise_construct, std::tuple<int, int, int>(cx, cy, cz), std::tuple<ChunkRef>(c)).first;
+	iterator it = emplace(std::piecewise_construct, std::tuple<int, int, int>(cx, cy, cz), std::forward_as_tuple(c)).first;
 	return c;
 }
 

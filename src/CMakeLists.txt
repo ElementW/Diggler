@@ -8,7 +8,6 @@ set(SRCS
 	${CSD}/Audio.cpp
 	${CSD}/ui/Element.cpp
 	${CSD}/ui/Manager.cpp
-	#${CSD}/UITestState.cpp
 	${CSD}/PlayerList.cpp
 	${CSD}/network/NetHelper.cpp
 	${CSD}/network/Network.cpp
@@ -36,7 +35,8 @@ set(SRCS
 	${CSD}/Camera.cpp
 	${CSD}/EscMenu.cpp
 	${CSD}/ui/Text.cpp
-	${CSD}/Font.cpp
+	${CSD}/ui/Font.cpp
+	${CSD}/ui/FontManager.cpp
 	${CSD}/util/AtlasCreator.cpp
 	${CSD}/content/Registry.cpp
 	${CSD}/GlobalProperties.cpp

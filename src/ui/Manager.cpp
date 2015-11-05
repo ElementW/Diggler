@@ -1,10 +1,11 @@
 #include "Manager.hpp"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "../VBO.hpp"
 #include "../Texture.hpp"
 #include "../Program.hpp"
 #include "../Game.hpp"
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "../GameWindow.hpp"
 
 namespace Diggler {
 namespace UI {
@@ -14,7 +15,10 @@ struct Renderer {
 	GLint att_texcoord, att_coord, uni_mvp, uni_unicolor;
 } R{}, RR{};
 
-Manager::Manager() : Scale(2) {
+Manager::Manager() :
+	m_hoveredElement(nullptr),
+	m_focusedElement(nullptr),
+	scale(2) {
 	PM = &m_projMatrix;
 	m_projMat1 = glm::ortho(0.f, 1.f, 0.f, 1.f);
 	m_projMat1V = glm::ortho(0.f, 1.f, 1.f, 0.f);
@@ -37,7 +41,7 @@ void Manager::setup(Game *G) {
 		RR.uni_unicolor = RR.prog->uni("unicolor");
 	}
 	m_rectVbo.reset(new VBO);
-	uint8 verts[6*4] = {
+	const uint8 verts[6*4] = {
 		0, 0, 0, 1,
 		1, 0, 1, 1,
 		0, 1, 0, 0,
@@ -49,7 +53,83 @@ void Manager::setup(Game *G) {
 	m_rectVbo->setData(verts, 6*4);
 }
 
+
+void Manager::onCursorPos(double x, double y) {
+	Element *hovered = nullptr;
+	for (std::unique_ptr<Element> &e : m_elements) {
+		if (!e->cursorPassesThrough() && e->m_isVisible && e->m_area.isIn(x, G->GW->getH()-y)) {
+			hovered = e.get();
+			break;
+		}
+	}
+	if (hovered != m_hoveredElement) {
+		if (m_hoveredElement) {
+			m_hoveredElement->m_isCursorOver = false;
+			m_hoveredElement->onCursorLeave(x, y);
+		}
+		if (hovered) {
+			hovered->m_isCursorOver = true;
+			hovered->onCursorEnter(x, y);
+		}
+		m_hoveredElement = hovered;
+	}
+	if (m_hoveredElement) {
+		m_hoveredElement->onCursorMove(x, y);
+	}
+}
+
+void Manager::onMouseButton(int key, int action, int mods) {
+	if (m_hoveredElement) {
+		double x, y;
+		glfwGetCursorPos(*G->GW, &x, &y);
+		Element::MouseButton btn;
+		if (key == GLFW_MOUSE_BUTTON_LEFT) {
+			btn = Element::MouseButton::Left;
+		} else if (key == GLFW_MOUSE_BUTTON_MIDDLE) {
+			btn = Element::MouseButton::Middle;
+		} else if (key == GLFW_MOUSE_BUTTON_RIGHT) {
+			btn = Element::MouseButton::Right;
+		}
+		if (action == GLFW_PRESS) {
+			m_hoveredElement->onMouseDown(x, y, btn);
+			setFocused(m_hoveredElement);
+		} else if (action == GLFW_RELEASE) {
+			m_hoveredElement->onMouseUp(x, y, btn);
+			setFocused(m_hoveredElement);
+		}
+	}
+}
+
+void Manager::onMouseScroll(double x, double y) {
+	if (m_hoveredElement) {
+		setFocused(m_hoveredElement);
+		m_focusedElement->onMouseScroll(x, y);
+	}
+}
+
+void Manager::onKey(int key, int scancode, int action, int mods) {
+	if (m_focusedElement) {
+		//TODO
+	}
+}
+
+void Manager::onChar(char32 unichar) {
+	if (m_focusedElement) {
+		//TODO
+	}
+}
+
+void Manager::onResize(int w, int h) {
+	setProjMat(glm::ortho(0.0f, (float)w, 0.0f, (float)h));
+	for (std::unique_ptr<Element> &e : m_elements) {
+		e->onMatrixChange();
+	}
+}
+
+
 void Manager::clear() {
+	m_hoveredElement = nullptr;
+	m_focusedElement = nullptr;
 	m_elements.clear();
 }
 
@@ -57,9 +137,32 @@ void Manager::add(Element *e) {
 	m_elements.emplace_back(e);
 }
 
-
 void Manager::remove(Element *e) {
+	if (e == m_hoveredElement) {
+		m_hoveredElement = nullptr;
+	}
+	if (e == m_focusedElement) {
+		m_focusedElement = nullptr;
+	}
 	m_elements.remove_if([&e](std::unique_ptr<Element> &l) -> bool { return l.get() == e; });
+}
+
+Element* Manager::getFocused() const {
+	return m_focusedElement;
+}
+
+void Manager::setFocused(Element *e) {
+	if (e != m_hoveredElement) {
+		if (m_hoveredElement) {
+			m_hoveredElement->m_hasFocus = false;
+			m_hoveredElement->onFocusLost();
+		}
+		if (e) {
+			e->m_hasFocus = true;
+			e->onFocus();
+		}
+		m_focusedElement = e;
+	}
 }
 
 void Manager::render() {
@@ -88,6 +191,10 @@ void Manager::drawRect(const glm::mat4 &mat, const glm::vec4 &color) const {
 	glUniform4f(RR.uni_unicolor, 1.f, 1.f, 1.f, 1.f);
 
 	glDisableVertexAttribArray(RR.att_coord);
+}
+
+void Manager::drawRect(const Element::Area &a, const glm::vec4 &color) const {
+	return drawRect(glm::scale(glm::translate(m_projMatrix, glm::vec3(a.x, a.y, 0)), glm::vec3(a.w, a.h, 0)), color);
 }
 
 void Manager::drawFullRect(const glm::vec4 &color) const {

@@ -15,7 +15,7 @@ GLint Chatbox::RenderProgram_mvp = -1;
 
 Chatbox::Chatbox(Game *G) : m_isChatting(false), G(G),
 	m_posX(0), m_posY(0) {
-	m_chatText = G->UIM->create<UI::Text>(G->F, "", 2, 2);
+	m_chatText = G->UIM->create<UI::Text>("", 2, 2);
 	if (RenderProgram == nullptr) {
 		RenderProgram = G->PM->getProgram(PM_2D | PM_COLORED);
 		RenderProgram_coord = RenderProgram->att("coord");
@@ -56,7 +56,7 @@ void Chatbox::addChatEntry(const std::string &text) {
 	m_chatEntries.emplace_back();
 	ChatEntry &entry = m_chatEntries.back();
 	entry.date = system_clock::now();
-	entry.text = G->UIM->create<UI::Text>(G->F, text);
+	entry.text = G->UIM->create<UI::Text>(text);
 	entry.height = entry.text->getSize().y;
 }
 

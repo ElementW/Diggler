@@ -20,7 +20,7 @@ WorldRef Universe::getWorldEx(WorldId id) {
 	iterator it = find(id);
 	if (it == end()) {
 		WorldRef w = std::make_shared<World>(G, id);
-		emplace(std::piecewise_construct, std::tuple<WorldId>(id), std::tuple<WorldRef>(w));
+		emplace(std::piecewise_construct, std::forward_as_tuple(id), std::forward_as_tuple(w));
 		return w;
 	}
 	return it->second.lock();
@@ -28,7 +28,7 @@ WorldRef Universe::getWorldEx(WorldId id) {
 
 WorldRef Universe::createWorld(WorldId id) {
 	WorldRef w = std::make_shared<World>(G, id);
-	emplace(std::piecewise_construct, std::tuple<WorldId>(id), std::tuple<WorldRef>(w));
+	emplace(std::piecewise_construct, std::forward_as_tuple(id), std::forward_as_tuple(w));
 	return w;
 }
 

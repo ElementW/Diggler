@@ -102,7 +102,7 @@ void Audio::loadSoundAssets() {
 	}
 }
 
-void Audio::addSound(const std::string& name, const std::string& path) {
+void Audio::addSound(const std::string &name, const std::string &path) {
 	m_sounds.emplace(std::piecewise_construct,
 			std::forward_as_tuple(name), std::forward_as_tuple()).first->second.loadOgg(path);
 }

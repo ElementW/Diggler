@@ -17,14 +17,12 @@ MessageState::~MessageState() {
 }
 
 void MessageState::setupUI() {
-	txtMsg = W->G->UIM->add<UI::Text>(W->G->F, msg, 2, 2);
-	txtSubMsg = W->G->UIM->add<UI::Text>(W->G->F, subMsg);
+	txtMsg = W->G->UIM->add<UI::Text>(msg, 2, 2);
+	txtSubMsg = W->G->UIM->add<UI::Text>(subMsg);
 	updateViewport();
 }
 
 void MessageState::updateViewport() {
-	glViewport(0, 0, W->getW(), W->getH());
-	
 	UI::Text::Size txtMsgSize = txtMsg->getSize();
 	txtMsg->setPos(W->getW()/2 - txtMsgSize.x/2, W->getH()/2);
 	

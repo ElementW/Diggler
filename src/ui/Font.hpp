@@ -2,14 +2,16 @@
 #define FONT_HPP
 #include <epoxy/gl.h>
 #include <glm/glm.hpp>
-#include "Platform.hpp"
-#include "VBO.hpp"
+#include "../Platform.hpp"
+#include "../VBO.hpp"
 
 namespace Diggler {
 
 class Texture;
 class Program;
 class Game;
+
+namespace UI {
 
 class Font {
 private:
@@ -47,6 +49,7 @@ public:
 	int getHeight() const;
 };
 
+}
 }
 
 #endif

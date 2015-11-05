@@ -2,13 +2,14 @@
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "Texture.hpp"
-#include "Program.hpp"
-#include "VBO.hpp"
-#include "Game.hpp"
-#include "GlUtils.hpp"
+#include "../Texture.hpp"
+#include "../Program.hpp"
+#include "../VBO.hpp"
+#include "../Game.hpp"
+#include "../GlUtils.hpp"
 
 namespace Diggler {
+namespace UI {
 
 Font::Renderer Font::R = {0};
 
@@ -170,4 +171,5 @@ Font::~Font() {
 		delete[] texPos;
 }
 
+}
 }

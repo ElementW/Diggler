@@ -121,11 +121,13 @@ int main(int argc, char **argv) {
 
 		GameWindow GW(&G);
 		
-		/*GW.setNextState(std::make_shared<UITestState>(&GW));*/
+		/**/GW.setNextState(std::make_shared<UITestState>(&GW));/*/
 		if (networkSuccess)
 			GW.setNextState(std::make_shared<GameState>(&GW, host, port));
 		else
 			GW.showMessage("Network init failed!");
+		/**/
+
 		GW.run();
 		G.uninitGL();
 	}
