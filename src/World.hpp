@@ -1,10 +1,11 @@
 #ifndef SUPERCHUNK_HPP
 #define SUPERCHUNK_HPP
 #include "Chunk.hpp"
+#include <condition_variable>
+#include <map>
+#include <mutex>
 #include <queue>
 #include <thread>
-#include <mutex>
-#include <condition_variable>
 #include <glm/detail/type_vec3.hpp>
 #include "io/Stream.hpp"
 #include "network/Network.hpp"

@@ -176,6 +176,7 @@ Chunk::~Chunk() {
 #if CHUNK_INMEM_COMPRESS
 	std::free(imcData);
 #endif
+	// getDebugStream() << W->id << '.' << wcx << ',' << wcy << ',' << wcz << " destruct" << std::endl;
 }
 
 void Chunk::notifyChange(int x, int y, int z) {

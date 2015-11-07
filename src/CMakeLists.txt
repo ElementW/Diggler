@@ -49,7 +49,6 @@ set(SRCS
 	${CSD}/VBO.cpp
 	${CSD}/Shader.cpp
 	${CSD}/Platform.cpp
-	${CSD}/Datree.cpp
 	${CSD}/main.cpp
 	${CSD}/UITestState.cpp
 	PARENT_SCOPE

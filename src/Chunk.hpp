@@ -8,7 +8,6 @@
 #include "Program.hpp"
 #include "Texture.hpp"
 #include "content/Content.hpp"
-#include "Datree.hpp"
 #include "network/Network.hpp"
 
 #define CX 16
@@ -62,7 +61,7 @@ private:
 	int vertices, indicesOpq, indicesTpt;
 
 	Data *data, *data2;
-	std::map<int, Datree> metaStore;
+	//std::map<int, Datree> metaStore;
 
 	bool dirty;
 	std::mutex mut;
