@@ -811,6 +811,9 @@ bool GameState::processNetwork() {
 					    y = m_msg.readI16(),
 					    z = m_msg.readI16();
 					// TODO handle this somewhere else?
+					// Against all common sense, arguments in constructors are evaluated BACKWARDS
+					//   ChunkRef c = G->U->getWorldEx(wid)->getNewEmptyChunk(m_msg.readI16(), m_msg.readI16(), m_msg.readI16());
+					// Effectively swapping X and Z
 					ChunkRef c = G->U->getWorldEx(wid)->getNewEmptyChunk(x, y, z);
 					c->recv(m_msg);
 					holdChunksInMem.push_back(c);
