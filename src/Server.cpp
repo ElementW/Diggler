@@ -185,7 +185,6 @@ void Server::handlePlayerUpdate(InMessage &msg, Player &plr) {
 }
 
 void Server::schedSendChunk(ChunkRef C, Player &P) {
-	glm::ivec3 pos = C->getWorldChunkPos();
 	P.pendingChunks.emplace_back(C);
 }
 
