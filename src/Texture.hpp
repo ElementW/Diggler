@@ -32,8 +32,8 @@ public:
 	Texture(const std::string& path, PixelFormat format = PixelFormat::RGB);
 	static void unbind();
 
-	GLuint getId() const;
-	operator GLuint() const { return getId(); }
+	inline GLuint getId() const { return id; }
+	inline operator GLuint() const { return getId(); }
 	void resize(int w, int h);
 	int getW();
 	int getH();

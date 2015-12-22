@@ -78,12 +78,12 @@ void Texture::create() {
 
 GLenum getFilterGlConstant(Texture::Filter filter) {
 	switch (filter) {
-		case Texture::Filter::Linear:
-			return GL_LINEAR;
-		case Texture::Filter::Nearest:
-			return GL_NEAREST;
-		default:
-			return 0;
+	case Texture::Filter::Linear:
+		return GL_LINEAR;
+	case Texture::Filter::Nearest:
+		return GL_NEAREST;
+	default:
+		return 0;
 	}
 }
 
@@ -97,12 +97,12 @@ void Texture::setFiltering(Filter min, Filter mag) {
 
 static GLenum getWrapGlConstant(Texture::Wrapping wrap) {
 	switch (wrap) {
-		case Texture::Wrapping::Clamp:
-			return GL_CLAMP;
-		case Texture::Wrapping::Repeat:
-			return GL_REPEAT;
-		default:
-			return 0;
+	case Texture::Wrapping::Clamp:
+		return GL_CLAMP;
+	case Texture::Wrapping::Repeat:
+		return GL_REPEAT;
+	default:
+		return 0;
 	}
 }
 
@@ -116,14 +116,14 @@ void Texture::setWrapping(Wrapping s, Wrapping t) {
 void Texture::setPlaceholder() {
 	int pxLength;
 	switch (m_format) {
-		case PixelFormat::RGB:
-			pxLength = 3;
+	case PixelFormat::RGB:
+		pxLength = 3;
 		break;
-		case PixelFormat::RGBA:
-			pxLength = 4;
+	case PixelFormat::RGBA:
+		pxLength = 4;
 		break;
-		case PixelFormat::Monochrome8:
-			pxLength = 1;
+	case PixelFormat::Monochrome8:
+		pxLength = 1;
 		break;
 	}
 	unsigned char *white = new unsigned char[w * h * pxLength];
@@ -134,14 +134,14 @@ void Texture::setPlaceholder() {
 
 static GLenum getGlTexFormat(Texture::PixelFormat fmt) {
 	switch (fmt) {
-		case Texture::PixelFormat::RGB:
-			return GL_RGB;
+	case Texture::PixelFormat::RGB:
+		return GL_RGB;
 		break;
-		case Texture::PixelFormat::RGBA:
-			return  GL_RGBA;
+	case Texture::PixelFormat::RGBA:
+		return  GL_RGBA;
 		break;
-		case Texture::PixelFormat::Monochrome8:
-			return GL_R8;
+	case Texture::PixelFormat::Monochrome8:
+		return GL_R8;
 		break;
 	}
 	return 0;
@@ -182,10 +182,6 @@ void Texture::setSubTexture(int x, int y, int w, int h, const uint8_t *data, Pix
 	PopBoundTex();
 }
 
-GLuint Texture::getId() const {
-	return id;
-}
-
 void Texture::resize(int w, int h) {
 	if (this->w == w && this->h == h)
 		return;
@@ -221,14 +217,14 @@ Texture::PixelFormat Texture::getPixelFormat() {
 int Texture::getRequiredBufferSize() {
 	int texelSize;
 	switch (m_format) {
-		case PixelFormat::RGB:
-			texelSize = 3;
+	case PixelFormat::RGB:
+		texelSize = 3;
 		break;
-		case PixelFormat::RGBA:
-			texelSize = 4;
+	case PixelFormat::RGBA:
+		texelSize = 4;
 		break;
-		case PixelFormat::Monochrome8:
-			texelSize = 1;
+	case PixelFormat::Monochrome8:
+		texelSize = 1;
 		break;
 	}
 	return w * h * texelSize;
@@ -253,7 +249,7 @@ void Texture::bind(int number) const {
 
 Texture::~Texture() {
 	GLint currentBoundTex; glGetIntegerv(GL_TEXTURE_BINDING_2D, &currentBoundTex);
-	if (currentBoundTex == id)
+	if (currentBoundTex == (GLint)id)
 		glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteTextures(1, &id);
 }
