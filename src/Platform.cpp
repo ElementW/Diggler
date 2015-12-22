@@ -221,25 +221,4 @@ std::ostream& getOutputStreamRaw() {
 	return std::cout;
 }
 
-int rmod(int x, int y) {
-	int ret = x % y;
-	if (ret < 0)
-		return y+ret;
-	return ret;
-}
-
-float rmod(float x, float y) {
-	float ret = fmod(x, y);
-	if (ret < 0)
-		return y+ret;
-	return ret;
-}
-
-double rmod(double x, double y) {
-	double ret = fmod(x, y);
-	if (ret < 0)
-		return y+ret;
-	return ret;
-}
-
 }

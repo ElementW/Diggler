@@ -30,6 +30,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <cmath>
 
 namespace Diggler {
 
@@ -135,9 +136,10 @@ inline float FastRandF() {
 /// Real Modulus
 /// @returns Real modulus operation result, as such mod(x,y) is always positive
 ///
-int rmod(int x, int y);
-float rmod(float x, float y);
-double rmod(double x, double y);
+template<typename T>
+inline T rmod(T x, T y) {
+	return std::remainder(x, y);
+}
 
 ///
 /// Divide rounding down / Modulo quotient
