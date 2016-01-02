@@ -1,3 +1,4 @@
+# This spec is unfinished.
 
 [TOC]
 
@@ -20,7 +21,7 @@ If something can be done better, make it better. Break it. Break everything if y
 
 Any "Don't break it if it works" mindset is **banned**. This is not how you get nice things -- not here at least.
 
-## Features
+## (planned) Features
 
 * Cross-platform compatibility
   * Use OpenGL ES 2.0 to have maximum reach
