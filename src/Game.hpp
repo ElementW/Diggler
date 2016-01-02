@@ -25,10 +25,10 @@ class Server;
 class Game {
 public:
 	// Shared
-	PlayerList players;
 	double Time; uint64 TimeMs;
 	Net::Host H;
 	Universe *U;
+	PlayerList players;
 	ContentRegistry *CR;
 	
 	// Server
