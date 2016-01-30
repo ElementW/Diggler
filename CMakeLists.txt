@@ -9,7 +9,7 @@ endif()
 
 ### Find path to build dir, relative if possible, to symlink resources directories
 file(RELATIVE_PATH REL_BUILD_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_BINARY_DIR})
-string(FIND ${REL_BUILD_PATH} ".." RBP_2DOTPOS)
+string(FIND "${REL_BUILD_PATH}" ".." RBP_2DOTPOS)
 # If we're going up, use absolute path
 if(${RBP_2DOTPOS} EQUAL 0)
 	set(PATH_TO_TOPDIR ${CMAKE_CURRENT_SOURCE_DIR})
