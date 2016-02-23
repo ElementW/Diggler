@@ -14,7 +14,9 @@ varying vec2 v_texcoord;
 uniform float time;
 #endif
 #ifdef WAVE
-attribute float wave;
+attribute vec3 wavedir;
+attribute float waveperiod;
+attribute float waveperiodoffset;
 #endif
 #ifdef POINTSIZE
 attribute float pointSize;

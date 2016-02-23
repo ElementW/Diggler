@@ -14,9 +14,6 @@
 	#include <cstdlib>
 #endif
 
-#define CXY (CX*CY)
-#define I(x,y,z) (x+y*CX+z*CXY)
-
 #define SHOW_CHUNK_UPDATES 1
 
 namespace Diggler {
@@ -32,6 +29,11 @@ struct GLCoord {
 
 constexpr float Chunk::CullSphereRadius;
 constexpr float Chunk::MidX, Chunk::MidY, Chunk::MidZ;
+
+static constexpr int CXY = CX*CY;
+static constexpr int I(int x, int y, int z) {
+  return x + y*CX + z*CXY;
+}
 
 void Chunk::Data::clear() {
 	memset(this, 0, AllocaSize);

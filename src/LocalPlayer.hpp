@@ -24,8 +24,8 @@ public:
 
 public:
 	Camera camera;
-	AABB bounds;
-	glm::vec3 size, eyesPos;
+	glm::vec3 extents, eyesPos;
+	glm::ivec3 aabbmin, aabbmax;
 
 	LocalPlayer(Game *G);
 
@@ -43,8 +43,8 @@ public:
 	void setHasNoclip(bool fly);
 	void jump();
 	void setDead(bool, DeathReason = DeathReason::None, bool send = false);
-	bool raytracePointed(glm::ivec3 *pointed, glm::ivec3 *face);
-	bool raytracePointed(int maxDist, glm::ivec3 *pointed, glm::ivec3 *face, float granularity = .2f);
+	bool raytracePointed(glm::ivec3 *pointed, glm::ivec3 *facing);
+	bool raytracePointed(float range, glm::ivec3 *pointed, glm::ivec3 *facing);
 };
 
 }

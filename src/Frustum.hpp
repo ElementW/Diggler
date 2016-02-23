@@ -1,7 +1,7 @@
 #ifndef FRUSTUM_HPP
 #define FRUSTUM_HPP
+
 #include <glm/glm.hpp>
-#include "AABB.hpp"
 
 namespace Diggler {
 

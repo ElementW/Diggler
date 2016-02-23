@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(DIGGLER C CXX)
+project(Diggler C CXX)
 
 ### Checks
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")

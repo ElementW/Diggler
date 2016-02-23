@@ -1,7 +1,8 @@
 # "If anything happens to my  ̶l̶a̶p̶t̶o̶p̶  UTF-8..."  --Hōka Inumuta
 # "You are BANISHED FROM SPACE AND TIME!"  --Eric Cartman
 # http://utf8everywhere.org/
-DOXYFILE_ENCODING       = UTF-8
+DOXYFILE_ENCODING      = UTF-8
+INPUT_ENCODING         = UTF-8
 
 PROJECT_NAME           = "Diggler"
 PROJECT_NUMBER         = 1
@@ -66,7 +67,7 @@ DOT_TRANSPARENT        = YES
 # Get up-to date dot tool. If unhappy, install Arch.
 DOT_MULTI_TARGETS      = YES
 
-# "Who says sketch/diagram says legend!"  --My life science teatcher
+# "Who says sketch/diagram says legend!"  --My life science teacher
 GENERATE_LEGEND        = YES
 
 # I ain't dirty.

@@ -10,10 +10,6 @@
 #include "content/Content.hpp"
 #include "network/Network.hpp"
 
-#define CX 16
-#define CY 16
-#define CZ 16
-
 #define CHUNK_INMEM_COMPRESS 1
 #define CHUNK_INMEM_COMPRESS_DELAY 2000 /* ms */
 
@@ -23,6 +19,8 @@ class CaveGenerator;
 class Game;
 class World;
 typedef std::shared_ptr<World> WorldRef;
+
+constexpr int CX = 16, CY = 16, CZ = 16;
 
 class Chunk {
 private:

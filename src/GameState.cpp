@@ -325,7 +325,7 @@ void GameState::onMouseButton(int key, int action, int mods) {
 	
 	if (action == GLFW_PRESS) {
 		glm::ivec3 pointed, face;
-		if (G->LP->raytracePointed(32, &pointed, &face, .1f)) {
+		if (G->LP->raytracePointed(32, &pointed, &face)) {
 			Net::OutMessage msg(Net::MessageType::ChunkUpdate);
 			msg.writeI16(G->LP->W->id);
 			if (key == GLFW_MOUSE_BUTTON_LEFT) {
@@ -634,7 +634,7 @@ void GameState::gameLoop() {
 			pe.render(m_transform);
 
 			// TODO: replace harcoded 32 viewdistance
-			if (G->LP->raytracePointed(32, &m_pointedBlock, &m_pointedFacing, .07f)) {
+			if (G->LP->raytracePointed(32, &m_pointedBlock, &m_pointedFacing)) {
 				m_highlightBox.program->bind();
 				glEnableVertexAttribArray(m_highlightBox.att_coord);
 				m_highlightBox.vbo.bind();

@@ -48,6 +48,17 @@ Any "Don't break it if it works" mindset is **banned**. This is not how you get 
 * On-disk and over-the-network compression support
   * Multiple algorithms depending on needs
 
+## Games to take features from
+
+* Minecraft
+* Minetest (and FreeMiner)
+* Terasology
+* Cube World
+* Infinifactory
+* Infiniminer
+* Galaxy55
+* Trove
+
 # Binary format details
 
 ## Numbers

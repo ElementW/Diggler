@@ -174,6 +174,125 @@ bool World::blockHasMetadata(int x, int y, int z, bool buf2) {
 	return getBlockData(x, y, z, buf2) & BlockMetadataBit;
 }
 
+
+bool World::raytrace(glm::vec3 pos, glm::vec3 dir, float range, glm::ivec3 *pointed,
+	glm::ivec3 *facing) {
+	float xPos = floor(pos.x);
+	float yPos = floor(pos.y);
+	float zPos = floor(pos.z);
+	int stepX = signum(dir.x);
+	int stepY = signum(dir.y);
+	int stepZ = signum(dir.z);
+	glm::vec3 ray(dir);
+	glm::vec3 tMax(intbound(pos.x, ray.x), intbound(pos.y, ray.y), intbound(pos.z, ray.z));
+	glm::vec3 tDelta((float)stepX / ray.x, (float)stepY / ray.y, (float)stepZ / ray.z);
+	glm::ivec3 faceDir;
+	do {
+		BlockId testBlock = getBlockId(xPos, yPos, zPos);
+		/// @todo Actual block non-solidity (cursorwise) check
+		if (testBlock != Content::BlockAirId) {
+			if (pointed)
+				*pointed = glm::ivec3(xPos, yPos, zPos);
+			if (facing)
+				*facing = faceDir + glm::ivec3(xPos, yPos, zPos);
+			return true;
+		}
+		if (tMax.x < tMax.y) {
+			if (tMax.x < tMax.z) {
+				if (tMax.x > range) break;
+
+				xPos += stepX;
+				tMax.x += tDelta.x;
+
+				faceDir.x = -stepX;
+				faceDir.y = faceDir.z = 0;
+			} else {
+				if (tMax.z > range) break;
+				zPos += stepZ;
+				tMax.z += tDelta.z;
+
+				faceDir.x = faceDir.y = 0;
+				faceDir.z = -stepZ;
+			}
+		} else {
+			if (tMax.y < tMax.z) {
+				if (tMax.y > range) break;
+				yPos += stepY;
+				tMax.y += tDelta.y;
+
+				faceDir.x = faceDir.z = 0;
+				faceDir.y = -stepY;
+			} else {
+				if (tMax.z > range) break;
+				zPos += stepZ;
+				tMax.z += tDelta.z;
+
+				faceDir.x = faceDir.y = 0;
+				faceDir.z = -stepZ;
+			}
+		}
+	} while (true);
+	return false;
+}
+
+bool World::raytrace(glm::vec3 pos, glm::vec3 dir, float range, const RayCallback &callback) {
+/// @todo Add param to have the callback triggered on either all blocks' traversal OR only on actual hit
+	float xPos = floor(pos.x);
+	float yPos = floor(pos.y);
+	float zPos = floor(pos.z);
+	int stepX = signum(dir.x);
+	int stepY = signum(dir.y);
+	int stepZ = signum(dir.z);
+	glm::vec3 ray(dir);
+	glm::vec3 tMax(intbound(pos.x, ray.x), intbound(pos.y, ray.y), intbound(pos.z, ray.z));
+	glm::vec3 tDelta((float)stepX / ray.x, (float)stepY / ray.y, (float)stepZ / ray.z);
+	glm::ivec3 faceDir;
+	do {
+		BlockId testBlock = getBlockId(xPos, yPos, zPos);
+		/// @todo Check for partial blocks
+		if (!callback(glm::ivec3(floor(xPos), floor(yPos), floor(zPos)), testBlock,
+		     glm::vec3(xPos, yPos, zPos), faceDir)) {
+			return true;
+		}
+		if (tMax.x < tMax.y) {
+			if (tMax.x < tMax.z) {
+				if (tMax.x > range) break;
+
+				xPos += stepX;
+				tMax.x += tDelta.x;
+
+				faceDir.x = -stepX;
+				faceDir.y = faceDir.z = 0;
+			} else {
+				if (tMax.z > range) break;
+				zPos += stepZ;
+				tMax.z += tDelta.z;
+
+				faceDir.x = faceDir.y = 0;
+				faceDir.z = -stepZ;
+			}
+		} else {
+			if (tMax.y < tMax.z) {
+				if (tMax.y > range) break;
+				yPos += stepY;
+				tMax.y += tDelta.y;
+
+				faceDir.x = faceDir.z = 0;
+				faceDir.y = -stepY;
+			} else {
+				if (tMax.z > range) break;
+				zPos += stepZ;
+				tMax.z += tDelta.z;
+
+				faceDir.x = faceDir.y = 0;
+				faceDir.z = -stepZ;
+			}
+		}
+	} while (true);
+	return false;
+}
+
+
 void World::render(const glm::mat4& transform) {
 	if (Chunk::R.prog == nullptr)
 		return;

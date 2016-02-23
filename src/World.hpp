@@ -130,6 +130,28 @@ public:
 	void onRenderPropertiesChanged();
 	void refresh();
 
+	/* ============ Ray tracing ============ */
+
+	using RayCallback = std::function<bool /*continue*/ (
+		glm::ivec3 blockPos,
+		BlockId blockId,
+		glm::vec3 hitPoint,
+		glm::vec3 hitNormal)>;
+
+	///
+	/// @brief Fires a ray through the voxels and determines what block and facing block is hit.
+	/// @todo Documentation
+	///
+	bool raytrace(glm::vec3 pos, glm::vec3 dir, float range, glm::ivec3 *pointed, glm::ivec3 *norm);
+	bool raytrace(glm::vec3 from, glm::vec3 to, glm::ivec3 *pointed, glm::ivec3 *facing) {
+		return raytrace(from, to-from, glm::length(to-from), pointed, facing);
+	}
+
+	bool raytrace(glm::vec3 pos, glm::vec3 dir, float range, const RayCallback &callback);
+	bool raytrace(glm::vec3 from, glm::vec3 to, const RayCallback &callback) {
+		return raytrace(from, to-from, glm::length(to-from), callback);
+	}
+
 	/* ============ Serialization ============ */
 
 	void write(OutStream&) const;
