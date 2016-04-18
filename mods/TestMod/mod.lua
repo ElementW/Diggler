@@ -1,7 +1,8 @@
-local H = require('hexedryne')
+local D = require('diggler')
 
 local TestMod = {
-	id = "TestMod",
+	uuid = "BWtAgKUjcW+H+CUQcOW3/Q",
+	id = "TestMod:",
 	name = "Test Mod",
 	version = 1,
 	versionStr = "1.0.0",
@@ -15,15 +16,19 @@ local TestMod = {
 	clientside = true,
 	serverside = true,
 
-	providesInterfaces = {
-		"diggler.isBlockUseless",
-		
+	interfaces = {
+		provides = {
+			"diggler.isBlockUseless"
+		},
+		uses = {
+			
+		}
 	}
 }
 
 function TestMod.init() 
 	print("Hey i'm " .. CurrentMod.id)
-	H.registerBlock('test', {
+	D.registerBlock('test', {
 		dispname = 'block.test.name',
 		sandboxTab = 'blocks',
 		harvest = { pickaxe = 0, shovel = 10000 },
@@ -36,6 +41,6 @@ function TestMod.deinit()
 	print("Bye")
 end
 
-print(H.mods)
+print(D.mods)
 
 return TestMod
