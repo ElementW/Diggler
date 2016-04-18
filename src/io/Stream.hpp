@@ -8,7 +8,7 @@ class Stream {};
 
 class SeekableStream : public Stream {
 public:
-	typedef uint64 PosT;
+	using PosT = uint64;
 	enum Whence {
 		Begin,
 		Set,

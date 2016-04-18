@@ -19,7 +19,7 @@ namespace Diggler {
 
 class ProgramManager {
 public:
-	typedef uint32_t FlagsT;
+	using FlagsT = uint32_t;
 
 private:
 	class Game &G;

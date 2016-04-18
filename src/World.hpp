@@ -18,22 +18,24 @@ class InMessage;
 class OutMessage;
 }
 
-typedef int WorldId;
+using WorldId = int;
 struct WorldChunkMapSorter {
-	/*constexpr*/ bool operator()(const glm::ivec3 &lhs, const glm::ivec3 &rhs) const {
-		if (lhs.x == rhs.x)
-			if (lhs.y == rhs.y)
-				if (lhs.z == rhs.z)
+	constexpr bool operator()(const glm::ivec3 &lhs, const glm::ivec3 &rhs) const {
+		if (lhs.x == rhs.x) {
+			if (lhs.y == rhs.y) {
+				if (lhs.z == rhs.z) {
 					return false; // lhs == rhs isn't lhs < rhs
-				else
+				} else {
 					return (lhs.z < rhs.z);
-			else
+				}
+			} else {
 				return (lhs.y < rhs.y);
-		else
-			return (lhs.x < rhs.x);
+			}
+		}
+		return (lhs.x < rhs.x);
 	}
 };
-typedef std::map<glm::ivec3, ChunkWeakRef, WorldChunkMapSorter> WorldChunkMap;
+using WorldChunkMap = std::map<glm::ivec3, ChunkWeakRef, WorldChunkMapSorter>;
 
 class World : private WorldChunkMap {
 private:
@@ -165,8 +167,8 @@ public:
 	void renderTransparent(const glm::mat4 &transform);
 };
 
-typedef std::shared_ptr<World> WorldRef;
-typedef std::weak_ptr<World> WorldWeakRef;
+using WorldRef = std::shared_ptr<World>;
+using WorldWeakRef = std::weak_ptr<World>;
 
 }
 

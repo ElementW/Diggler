@@ -18,7 +18,7 @@ namespace Diggler {
 class CaveGenerator;
 class Game;
 class World;
-typedef std::shared_ptr<World> WorldRef;
+using WorldRef = std::shared_ptr<World>;
 
 constexpr int CX = 16, CY = 16, CZ = 16;
 
@@ -193,8 +193,8 @@ public:
 	void recv(Net::InMessage&);
 };
 
-typedef std::shared_ptr<Chunk> ChunkRef;
-typedef std::weak_ptr<Chunk> ChunkWeakRef;
+using ChunkRef = std::shared_ptr<Chunk>;
+using ChunkWeakRef = std::weak_ptr<Chunk>;
 
 }
 

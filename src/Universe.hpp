@@ -5,7 +5,7 @@
 
 namespace Diggler {
 
-typedef std::map<WorldId, WorldWeakRef> UniverseWorldMap;
+using UniverseWorldMap = std::map<WorldId, WorldWeakRef>;
 
 class Universe : private UniverseWorldMap {
 private:

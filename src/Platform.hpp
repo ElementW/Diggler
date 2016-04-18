@@ -7,17 +7,33 @@
 #if defined(WINDOWS) || defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64) // Windows
 	#define BUILDINFO_PLATFORM "Windows"
 	#define BUILDINFO_PLATFORM_WINDOWS
+	#if defined(__CYGWIN__)
+		#define BUILDINFO_PLATFORM_CYGWIN
+	#endif
 #elif defined(__ANDROID_API__) // Android
 	#define BUILDINFO_PLATFORM "Android"
 	#define BUILDINFO_PLATFORM_ANDROID
 	#define BUILDINFO_PLATFORM_PTHREAD
-#elif defined(__linux__) || defined(linux) || defined(_linux) // Linux
+	#define BUILDINFO_PLATFORM_MMAP
+	#define BUILDINFO_PLATFORM_UNIXLIKE
+#elif defined(__linux__) || defined(linux) || defined(__linux) // Linux
 	#define BUILDINFO_PLATFORM "Linux"
 	#define BUILDINFO_PLATFORM_LINUX
 	#define BUILDINFO_PLATFORM_PTHREAD
-#elif defined(__APPLE__) // Mac
+	#define BUILDINFO_PLATFORM_MMAP
+	#define BUILDINFO_PLATFORM_UNIXLIKE
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || \
+      defined(__bsdi__) || defined(__DragonFly__) || defined(BSD) // BSD
+	#define BUILDINFO_PLATFORM "BSD"
+	#define BUILDINFO_PLATFORM_BSD
+	#define BUILDINFO_PLATFORM_PTHREAD
+	#define BUILDINFO_PLATFORM_MMAP
+	#define BUILDINFO_PLATFORM_UNIXLIKE
+#elif (defined(__APPLE__) && defined(__MACH__)) // Mac
 	#define BUILDINFO_PLATFORM "Mac"
 	#define BUILDINFO_PLATFORM_MAC
+	#define BUILDINFO_PLATFORM_MMAP
+	#define BUILDINFO_PLATFORM_UNIXLIKE
 #else // Any other
 	#define BUILDINFO_PLATFORM "Unknown"
 	#define BUILDINFO_PLATFORM_UNKNOWN
@@ -33,20 +49,20 @@
 
 namespace Diggler {
 
-typedef int32_t int32;
-typedef uint32_t uint;
-typedef uint32_t uint32;
-typedef uint64_t uint64;
-typedef uint16_t uint16;
-typedef uint8_t uint8;
-typedef int64_t int64;
-typedef int16_t int16;
-typedef int8_t int8;
-typedef uint8_t byte;
-typedef char32_t char32;
-typedef char16_t char16;
+using int32  = int32_t;
+using uint   = uint32_t;
+using uint32 = uint32_t;
+using uint64 = uint64_t;
+using uint16 = uint16_t;
+using uint8  = uint8_t;
+using int64  = int64_t;
+using int16  = int16_t;
+using int8   = int8_t;
+using byte   = uint8_t;
+using char32 = char32_t;
+using char16 = char16_t;
 
-typedef std::string String;
+using String = std::string;
 
 namespace proc {
 	/// @returns The executable's absolute path
@@ -135,13 +151,16 @@ inline float FastRandF() {
 /// Real Modulus
 /// @returns Real modulus operation result, as such mod(x,y) is always positive
 ///
-int rmod(int x, int y);
+constexpr int rmod(int x, int y) {
+	const int ret = x % y;
+	return (ret < 0) ? y+ret : ret;
+}
 float rmod(float x, float y);
 double rmod(double x, double y);
 
 ///
 /// Divide rounding down / Modulo quotient
-/// @returns x/y rounded down / Q in modulus' A=B*Q+R equation
+/// @returns x/y rounded down / Q in modulus' A=B×Q+R equation
 ///
 constexpr inline int divrd(int x, uint y) {
 	return (x < 0) ? (x+1)/(int)y-1 : x/(int)y;

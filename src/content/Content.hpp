@@ -4,11 +4,11 @@
 
 namespace Diggler {
 
-typedef uint16 BlockId;
-typedef uint16 BlockData;
+using BlockId = uint16;
+using BlockData = uint16;
 const uint16 BlockMetadataBit  = 0x8000;
-const uint16 BlockMetadataMask = ~BlockMetadataMask;
-typedef uint16 LightData;
+const uint16 BlockMetadataMask = 0x7fff; //~BlockMetadataBit;
+using LightData = uint16;
 
 namespace Content {
 	const BlockId BlockAirId = 0;

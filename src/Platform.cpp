@@ -27,7 +27,7 @@ static struct PathCache {
 
 // Put windows crap here
 
-#elif defined(BUILDINFO_PLATFORM_LINUX) || defined(BUILDINFO_PLATFORM_ANDROID) // Linux
+#elif defined(BUILDINFO_PLATFORM_UNIXLIKE) // Linux and UNIX alike
 
 #include <sstream>
 #include <unistd.h>
@@ -50,16 +50,20 @@ std::string do_readlink(const std::string &path) throw(int) {
 	return do_readlink(path.c_str());
 }
 
+#if defined(BUILDINFO_PLATFORM_LINUX)
 std::string Diggler::proc::getExecutablePath() {
 	if (pathCache.executableBin.length() == 0) {
 		pid_t pid = getpid();
 		// Assuming 32-bit pid -> max of 10 digits, we need only "/proc/xxxxxxxxxx/exe" space
-		char path[22];
-		std::sprintf(path, "/proc/%d/exe", pid);
+		char path[21];
+		std::snprintf(path, 21, "/proc/%d/exe", pid);
 		pathCache.executableBin = do_readlink(path);
 	}
 	return pathCache.executableBin;
 }
+#else
+// TODO: getExecutablePath for those without procfs
+#endif
 
 std::string Diggler::proc::getExecutableDirectory() {
 	if (pathCache.executableDir.length() == 0) {
@@ -169,11 +173,11 @@ inline bool Diggler::fs::isDir(const std::string &path) {
 
 #elif defined(BUILDINFO_PLATFORM_MAC) // Mac
 
-// Put Mac crap here
+// Put Mac code here
 
 #else // Any other
 
-//Put other craps here
+// Stub?
 
 #endif
 
@@ -219,13 +223,6 @@ std::ostream& getDebugStreamRaw() {
 
 std::ostream& getOutputStreamRaw() {
 	return std::cout;
-}
-
-int rmod(int x, int y) {
-	int ret = x % y;
-	if (ret < 0)
-		return y+ret;
-	return ret;
 }
 
 float rmod(float x, float y) {

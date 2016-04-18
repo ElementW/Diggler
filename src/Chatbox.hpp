@@ -14,8 +14,8 @@ class Game;
 
 class Chatbox {
 public:
-	typedef std::chrono::system_clock system_clock;
-	typedef std::chrono::time_point<system_clock> time_point;
+	using system_clock = std::chrono::system_clock;
+	using time_point = std::chrono::time_point<system_clock>;
 
 private:
 	static const Program *RenderProgram;
