@@ -43,6 +43,8 @@ private:
 	int wcx, wcy, wcz;
 
 	struct Data {
+		static constexpr FourCC MagicMarker = MakeFourCC("CKDT");
+		FourCC magic;
 		// Keep me Plain Old Data!
 		BlockId id[CX*CY*CZ];
 		BlockData data[CX*CY*CZ];

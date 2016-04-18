@@ -37,6 +37,7 @@ static constexpr int I(int x, int y, int z) {
 
 void Chunk::Data::clear() {
 	memset(this, 0, AllocaSize);
+	magic = MagicMarker;
 }
 
 Chunk::ChangeHelper::ChangeHelper(Chunk &C) :

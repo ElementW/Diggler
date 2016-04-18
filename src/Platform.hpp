@@ -4,6 +4,12 @@
 #define BUILDINFO_TIME __TIME__
 #define BUILDINFO_DATE __DATE__
 
+#if defined(__LITTLE_ENDIAN__)
+	#define BUILDINFO_LITTLE_ENDIAN
+#else
+	#define BUILDINFO_BIG_ENDIAN
+#endif
+
 #if defined(WINDOWS) || defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64) // Windows
 	#define BUILDINFO_PLATFORM "Windows"
 	#define BUILDINFO_PLATFORM_WINDOWS
@@ -185,7 +191,7 @@ constexpr inline int ceil(const float f) {
 ///
 /// @returns 1×[sign of v]. 0 if v == 0.
 ///
-constexpr int signum(float v) {
+constexpr inline int signum(float v) {
 	return (v > 0) ? 1 : (v < 0) ? -1 : 0;
 }
 
@@ -196,6 +202,20 @@ constexpr int signum(float v) {
 constexpr float intbound(float s, float ds) {
 	return (ds < 0) ? intbound(-s, -ds) : (1-rmod(s, 1.f))/ds;
 }
+
+
+using FourCC = uint32;
+constexpr inline FourCC MakeFourCC(char a, char b, char c, char d) {
+#if defined(BUILDINFO_LITTLE_ENDIAN)
+	return d | c >> 8 | b >> 16 | a >> 24;
+#else
+	return a | b >> 8 | c >> 16 | d >> 24;
+#endif
+}
+constexpr inline FourCC MakeFourCC(const char *s) {
+	return MakeFourCC(s[0], s[1], s[2], s[3]);
+}
+
 
 namespace fs {
 
