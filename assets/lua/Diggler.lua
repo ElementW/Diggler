@@ -13,6 +13,7 @@ function diggler.export(name, func)
 end
 
 package.loaded['diggler'] = diggler
+package.loaded['lds'] = require('lds/lds')
 
 local function setoverlay(tab, orig)
 	local mt = getmetatable(tab) or {}

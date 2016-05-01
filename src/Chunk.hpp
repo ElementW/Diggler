@@ -55,6 +55,14 @@ private:
 public:
 	constexpr static int AllocaSize = sizeof(Data);
 
+	enum class State : uint8 {
+		Unavailable,
+		Generating,
+		Loading,
+		Ready,
+		Evicted
+	};
+
 private:
 	Game *G; WorldRef W;
 	VBO *vbo, *ibo;
@@ -63,6 +71,7 @@ private:
 	Data *data, *data2;
 	//std::map<int, Datree> metaStore;
 
+	State state;
 	bool dirty;
 	std::mutex mut;
 	void loadShader();
@@ -84,12 +93,7 @@ public:
 		// * 1.4142135623f; but we're already at 2x the radius (i.e. diameter)
 	constexpr static float MidX = CX/2.f, MidY = CY/2.f, MidZ = CZ/2.f;
 	int blkMem;
-	enum class State : uint8 {
-		Unavailable,
-		Generating,
-		Loading,
-		Ready
-	} state;
+	State getState();
 
 	class ChangeHelper {
 	private:

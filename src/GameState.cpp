@@ -528,6 +528,7 @@ bool GameState::connectLoop() {
 	}
 	switch (m_msg.getType()) {
 		case Net::MessageType::PlayerJoin: {
+			G->U = new Universe(G, true);
 			LP.id = m_msg.readU32();
 			LP.W = G->U->createWorld(m_msg.readI16());
 		} break;
@@ -601,8 +602,8 @@ void GameState::gameLoop() {
 			// TODO: multiworld
 			WorldRef WR = G->U->getWorld(0);
 			World &W = *WR;
-			glm::mat4 cloudmat = glm::scale(glm::translate(m_transform, glm::vec3(0.f, W.cloudsHeight, 0.f)), glm::vec3(4*CX, 1, 4*CZ));
-			m_clouds->render(cloudmat);
+			/*glm::mat4 cloudmat = glm::scale(glm::translate(m_transform, glm::vec3(0.f, W.cloudsHeight, 0.f)), glm::vec3(4*CX, 1, 4*CZ));
+			m_clouds->render(cloudmat);*/
 
 			glEnable(GL_DEPTH_TEST);
 			glEnable(GL_CULL_FACE);

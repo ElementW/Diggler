@@ -8,8 +8,8 @@
 
 namespace Diggler {
 
-World::World(Game *G, WorldId id) :
-	G(G), id(id) {
+World::World(Game *G, WorldId id, bool remote) :
+	G(G), id(id), isRemote(remote) {
 	// TODO: emerger thread setting, default to std::thread::hardware_concurrency()
 	for (int i=0; i < 2; ++i) {
 		emergerThreads.emplace_back(&World::emergerProc, this, i);
@@ -75,7 +75,7 @@ void World::emergerProc(int emergerId) {
 
 ChunkRef World::getNewEmptyChunk(int cx, int cy, int cz) {
 	ChunkRef c = std::make_shared<Chunk>(G, G->U->getWorld(id), cx, cy, cz);
-	iterator it = emplace(std::piecewise_construct, std::tuple<int, int, int>(cx, cy, cz), std::forward_as_tuple(c)).first;
+	emplace(std::piecewise_construct, std::tuple<int, int, int>(cx, cy, cz), std::forward_as_tuple(c));
 	return c;
 }
 
@@ -87,10 +87,6 @@ ChunkRef World::getChunk(int cx, int cy, int cz) {
 	return ChunkRef();
 }
 
-ChunkRef World::getChunkAtCoords(int x, int y, int z) {
-	return getChunk(divrd(x, CX), divrd(y, CY), divrd(z, CZ));
-}
-
 ChunkRef World::getChunkEx(int cx, int cy, int cz) {
 	iterator it = find(glm::ivec3(cx, cy, cz));
 	if (it != end()) {
@@ -100,10 +96,6 @@ ChunkRef World::getChunkEx(int cx, int cy, int cz) {
 	ChunkRef c = getNewEmptyChunk(cx, cy, cz);
 	addToEmergeQueue(c);
 	return c;
-}
-
-ChunkRef World::getChunkExAtCoords(int x, int y, int z) {
-	return getChunkEx(divrd(x, CX), divrd(y, CY), divrd(z, CZ));
 }
 
 

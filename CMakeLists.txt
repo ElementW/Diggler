@@ -44,24 +44,28 @@ if(USE_GCC_LTO)
 endif()
 
 ### Packages
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/enet")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/lzfx")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/lua")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/etc")
 find_package(GLM)
 find_package(OpenAL REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(LuaJIT REQUIRED)
+find_package(msgpack REQUIRED)
 pkg_search_module(EPOXY REQUIRED epoxy)
 pkg_search_module(GLFW REQUIRED glfw3)
 include_directories(
 	${ETC_INCLUDE_DIRS}
-	${LUA_INCLUDE_DIRS}
+	${LUA_INCLUDE_DIR}
 	${LZFX_INCLUDE_DIRS}
 	${ENET_INCLUDE_DIRS}
 	${EPOXY_INCLUDE_DIRS}
 	${GLFW_INCLUDE_DIRS}
 	${OPENAL_INCLUDE_DIR}
+	${MSGPACK_INCLUDE_DIR}
 )
 
 set(SRCS ";")
@@ -71,7 +75,7 @@ add_executable(diggler ${SRCS})
 
 target_link_libraries(diggler
 	${ETC_LIBRARIES}
-	${LUA_LIBRARIES}
+	${LUA_LIBRARY}
 	${LZFX_LIBRARIES}
 	${ENET_LIBRARIES}
 	${EPOXY_LIBRARIES}

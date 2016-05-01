@@ -2,7 +2,8 @@
 
 namespace Diggler {
 
-Universe::Universe(Game *G) : G(G) {
+Universe::Universe(Game *G, bool remote) :
+	G(G), isRemote(remote) {
 }
 
 Universe::~Universe() {
@@ -19,7 +20,7 @@ WorldRef Universe::getWorldEx(WorldId id) {
 	// TODO World loading
 	iterator it = find(id);
 	if (it == end()) {
-		WorldRef w = std::make_shared<World>(G, id);
+		WorldRef w = std::make_shared<World>(G, id, isRemote);
 		emplace(std::piecewise_construct, std::forward_as_tuple(id), std::forward_as_tuple(w));
 		return w;
 	}
@@ -27,7 +28,7 @@ WorldRef Universe::getWorldEx(WorldId id) {
 }
 
 WorldRef Universe::createWorld(WorldId id) {
-	WorldRef w = std::make_shared<World>(G, id);
+	WorldRef w = std::make_shared<World>(G, id, isRemote);
 	emplace(std::piecewise_construct, std::forward_as_tuple(id), std::forward_as_tuple(w));
 	return w;
 }

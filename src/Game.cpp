@@ -16,7 +16,6 @@ Game::Game() :
 }
 
 void Game::init() {
-	U = new Universe(this);
 	if (GlobalProperties::IsClient) {
 		CR = new ContentRegistry;
 		PM = new ProgramManager(*this);

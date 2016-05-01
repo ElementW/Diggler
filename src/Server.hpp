@@ -14,7 +14,7 @@ class Game;
 class Server {
 private:
 	Game &G;
-	lua_State *LS;
+	lua_State *L;
 
 	void handleCommand(Player*, const std::string &command, const std::vector<std::string> &args);
 

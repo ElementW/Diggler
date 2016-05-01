@@ -58,10 +58,10 @@ public:
 	using WorldChunkMap::begin;
 	using WorldChunkMap::end;
 
-	int cloudsHeight;
-	WorldId id;
+	const WorldId id;
+	const bool isRemote;
 
-	World(Game *G, WorldId id);
+	World(Game *G, WorldId id, bool remote);
 	~World();
 
 	/* ============ Getters ============ */
@@ -75,7 +75,9 @@ public:
 	/// @returns `ChunkRef` to the chunk.
 	///
 	ChunkRef getChunk(int cx, int cy, int cz);
-	ChunkRef getChunkAtCoords(int x, int y, int z);
+	inline ChunkRef getChunkAtCoords(int x, int y, int z) {
+		return getChunk(divrd(x, CX), divrd(y, CY), divrd(z, CZ));
+	}
 
 	///
 	/// @brief Gets a chunk.
@@ -84,7 +86,9 @@ public:
 	/// @returns `ChunkRef` to the chunk.
 	///
 	ChunkRef getChunkEx(int cx, int cy, int cz);
-	ChunkRef getChunkExAtCoords(int x, int y, int z);
+	inline ChunkRef getChunkExAtCoords(int x, int y, int z) {
+		return getChunkEx(divrd(x, CX), divrd(y, CY), divrd(z, CZ));
+	}
 
 	///
 	/// @returns The block ID at specified location.

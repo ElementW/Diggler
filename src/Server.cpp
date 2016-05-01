@@ -279,19 +279,21 @@ Server::Server(Game &G, uint16 port) : G(G) {
 }
 
 void Server::startInternals() {
-	LS = luaL_newstate();
-	luaL_openlibs(LS);
+	L = luaL_newstate();
+	luaL_openlibs(L);
+	luaL_loadfile(L, "");
+	lua_pcall(L, 0, 0, 0);
 }
 
 // FIXME ugly ugly hack to keep it in mem
 static WorldRef World0Ref;
 
 void Server::start() {
+	// TODO: loading
+	G.U = new Universe(&G, false);
+
 	WorldRef wr = G.U->createWorld(0);
 	World0Ref = wr;
-
-	//G.SC->save("/tmp/a");
-	//G.SC->load("/tmp/a");
 }
 
 void Server::stop() {
@@ -299,7 +301,7 @@ void Server::stop() {
 }
 
 void Server::stopInternals() {
-	lua_close(LS);
+	lua_close(L);
 }
 
 void Server::chunkUpdater(WorldRef WR, bool &continueUpdate) {
@@ -332,7 +334,7 @@ void Server::chunkUpdater(WorldRef WR, bool &continueUpdate) {
 			chunksToSend.clear();
 			for (auto it = p.pendingChunks.begin();
 			     it != p.pendingChunks.end() && chunksToSend.size() < 32; ++it) {
-				if ((*it)->state == Chunk::State::Ready) {
+				if ((*it)->getState() == Chunk::State::Ready) {
 					chunksToSend.push_back(std::move(*it));
 					it = --p.pendingChunks.erase(it);
 				}

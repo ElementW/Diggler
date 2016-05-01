@@ -104,6 +104,11 @@ Chunk::Chunk(Game *G, WorldRef W, int X, int Y, int Z) :
 	calcMemUsage();
 }
 
+Chunk::State Chunk::getState() {
+	// TODO: check for CKDT magic marker presence when MADV_FREE gets implemented
+	return state;
+}
+
 void Chunk::loadShader() {
 	bool w = G->RP->wavingLiquids;
 	ProgramManager::FlagsT flags = PM_3D | PM_TEXTURED | PM_COLORED | PM_FOG;

@@ -16,7 +16,9 @@ public:
 	using UniverseWorldMap::begin;
 	using UniverseWorldMap::end;
 
-	Universe(Game *G);
+	const bool isRemote;
+
+	Universe(Game *G, bool remote);
 	~Universe();
 
 	///

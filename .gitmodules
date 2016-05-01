@@ -1,0 +1,6 @@
+[submodule "msgpack-c"]
+	path = ext/msgpack-c
+	url = https://github.com/msgpack/msgpack-c.git
+[submodule "ext/luajit-2.0"]
+	path = ext/lua
+	url = http://luajit.org/git/luajit-2.0.git

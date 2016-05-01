@@ -212,7 +212,7 @@ Universes are stored in folders containing the worlds it is made of as well as o
 ### Header
 Type      | Name  | Value
 ---------:|:------|-----------------
-`byte[8]` | `HDs` | `\x01HX\xEDNusv`
+`byte[8]` | `HDs` | `\x01\xD1GLRusv`
 `u32`     | `Hui` | Universe ID
 `u8`      | `Hst` | Save file type
 `u64`     | `HTs` | [UNIX Timestamp](https://en.wikipedia.org/wiki/Unix_time) of last edit
@@ -226,7 +226,7 @@ Type      | Name  | Value
 Type      | Name  | Value
 ---------:|:------|-----------------
 `uint64`  | `Fcs` | 64-bit FastHash checksum of all previous bytes
-`byte[8]` | `FTs` | `euHX\xEDN\x04\x1C`
+`byte[8]` | `FTs` | `eu\xD1GLR\x04\x1C`
 
 ## Save file types
 ### Universe Root (`Hst = 0x00`)
