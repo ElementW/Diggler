@@ -155,11 +155,11 @@ void OutMessage::writeVec3(const glm::vec3 &vec) {
 	writeFloat(vec.z);
 }
 glm::vec3 InMessage::readVec3() {
-	struct { float x, y, z; } data;
-	data.x = readFloat();
-	data.y = readFloat();
-	data.z = readFloat();
-	return glm::vec3(data.x, data.y, data.z);
+	float x, y, z;
+	x = readFloat();
+	y = readFloat();
+	z = readFloat();
+	return glm::vec3(x, y, z);
 }
 
 void OutMessage::writeIVec3(int x, int y, int z) {
