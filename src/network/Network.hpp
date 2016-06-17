@@ -126,9 +126,26 @@ public:
 	void setSubtype(uint8 t) { m_subtype = t; }
 
 	void writeData(const void *data, SizeT len) override;
-	void writeVec3(const glm::vec3 &vec);
-	void writeIVec3(const glm::ivec3 &vec);
-	void writeIVec3(int x, int y, int z);
+	inline void writeVec3(float x, float y, float z) {
+		writeFloat(x);
+		writeFloat(y);
+		writeFloat(z);
+	}
+	inline void writeVec3(const glm::vec3 &vec) {
+		writeFloat(vec.x);
+		writeFloat(vec.y);
+		writeFloat(vec.z);
+	}
+	inline void writeIVec3(int x, int y, int z) {
+		writeI32(x);
+		writeI32(y);
+		writeI32(z);
+	}
+	inline void writeIVec3(const glm::ivec3 &vec) {
+		writeI32(vec.x);
+		writeI32(vec.y);
+		writeI32(vec.z);
+	}
 };
 
 class Exception : public std::exception {

@@ -153,11 +153,6 @@ void* InMessage::getCursorPtr(uint advanceCursor) {
 }
 
 
-void OutMessage::writeVec3(const glm::vec3 &vec) {
-	writeFloat(vec.x);
-	writeFloat(vec.y);
-	writeFloat(vec.z);
-}
 glm::vec3 InMessage::readVec3() {
 	float x, y, z;
 	x = readFloat();
@@ -166,16 +161,6 @@ glm::vec3 InMessage::readVec3() {
 	return glm::vec3(x, y, z);
 }
 
-void OutMessage::writeIVec3(int x, int y, int z) {
-	writeI32(x);
-	writeI32(y);
-	writeI32(z);
-}
-void OutMessage::writeIVec3(const glm::ivec3 &vec) {
-	writeI32(vec.x);
-	writeI32(vec.y);
-	writeI32(vec.z);
-}
 glm::ivec3 InMessage::readIVec3() {
 	int32 x, y, z;
 	x = readI32();
