@@ -6,20 +6,22 @@ namespace Diggler {
 
 class Stream {};
 
-class SeekableStream : public Stream {
+class SeekableStream : public virtual Stream {
 public:
-	using PosT = uint64;
+	using SizeT = uint64;
+	using PosT = SizeT;
+	using OffT = int64;
 	enum Whence {
 		Begin,
 		Set,
-		End
+		// End
 	};
 
 	virtual PosT tell() = 0;
-	virtual void seek(PosT, Whence = Set) = 0;
+	virtual void seek(OffT, Whence = Set) = 0;
 };
 
-class InStream : public Stream {
+class InStream : public virtual Stream {
 public:
 	virtual std::string readString();
 	virtual std::u32string readString32();
@@ -37,7 +39,7 @@ public:
 	virtual void readData(void *data, int len) = 0;
 };
 
-class OutStream : public Stream {
+class OutStream : public virtual Stream {
 public:
 	virtual void writeString(const std::string &str);
 	virtual void writeString32(const std::u32string &str);

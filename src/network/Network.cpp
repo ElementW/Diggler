@@ -39,18 +39,50 @@ static enet_uint32 TferToFlags(Tfer mode) {
 		return ENET_PACKET_FLAG_RELIABLE;
 	case Tfer::Unseq:
 		return ENET_PACKET_FLAG_UNSEQUENCED;
-	//case Tfer::Unrel:
-		//return 0;
-	default:
+	case Tfer::Unrel:
 		break;
 	}
 	return 0;
 }
 
-InMessage::InMessage() {
-	m_type = MessageType::Null;
-	m_subtype = m_length = m_cursor = 0;
-	m_data = nullptr;
+Message::Message(MessageType t, uint8 s) :
+	m_type(t),
+	m_subtype(s),
+	m_length(0),
+	m_cursor(0),
+	m_data(nullptr) {
+}
+
+Message::PosT Message::tell() {
+	return m_cursor;
+}
+
+void Message::seek(OffT pos, Whence whence) {
+	switch (whence) {
+	case Begin:
+		if (pos < 0) {
+			m_cursor = 0;
+		} else if (pos >= static_cast<OffT>(m_length)) {
+			m_cursor = m_length - 1;
+		} else {
+			m_cursor = static_cast<PosT>(pos);
+		}
+		break;
+	case Set:
+		if (pos < -static_cast<OffT>(m_cursor)) {
+			m_cursor = 0;
+		} else if (pos >= static_cast<OffT>(m_length - m_cursor)) {
+			m_cursor = m_length - 1;
+		} else {
+			m_cursor += static_cast<PosT>(pos);
+		}
+		break;
+	}
+}
+
+
+InMessage::InMessage() :
+	Message(MessageType::Null, 0) {
 }
 
 void InMessage::setType(MessageType type) {
@@ -59,25 +91,24 @@ void InMessage::setType(MessageType type) {
 	m_subtype = m_length = m_cursor = 0;
 	m_data = nullptr;
 }
-void InMessage::fromData(int length, void* data) {
+void InMessage::fromData(int length, const void *data) {
+	const uint8 *const bytes = (uint8*)data;
 	std::free(m_data);
 	m_cursor = 0;
 	m_length = length;
-	m_type = (MessageType)((uint8*)data)[0];
-	m_subtype = ((uint8*)data)[1];
+	m_type = (MessageType)bytes[0];
+	m_subtype = bytes[1];
 	m_data = (uint8*)std::malloc(length-2);
-	std::memcpy(m_data, &(((uint8*)data)[2]), length-2);
+	std::memcpy(m_data, &(bytes[2]), length-2);
 }
 
 InMessage::~InMessage() {
 	std::free(m_data);
 }
 
-OutMessage::OutMessage(MessageType t, uint8 subtype) {
-	m_type = t;
-	m_subtype = subtype;
-	m_length = m_dataMemSize = 0;
-	m_data = nullptr;
+OutMessage::OutMessage(MessageType t, uint8 subtype) :
+	Message(t, subtype),
+	m_dataMemSize(0) {
 }
 
 OutMessage::~OutMessage() {
@@ -89,15 +120,20 @@ void OutMessage::fit(int len) {
 	if (len <= m_dataMemSize)
 		return;
 	int targetSize = ((len + OutMessage_AllocStep - 1) / OutMessage_AllocStep)*OutMessage_AllocStep; // Round up
-	m_data = (uint8*)std::realloc(m_data, targetSize);
-	// TODO: handle failure?
+	decltype(m_data) newData = (uint8*)std::realloc(m_data, targetSize);
+	if (newData == nullptr)
+		throw std::bad_alloc();
+	m_data = newData;
 	m_dataMemSize = targetSize;
 }
 
 void OutMessage::writeData(const void *data, int len) {
-	fit(m_length + len);
-	std::memcpy(&(m_data[m_length]), data, len);
-	m_length += len;
+	fit(m_cursor + len);
+	std::memcpy(&(m_data[m_cursor]), data, len);
+	if (m_cursor + len > m_length) {
+		m_length = m_cursor + len;
+	}
+	m_cursor += len;
 }
 void InMessage::readData(void *data, int len) {
 	if (m_cursor + len > m_length)
@@ -106,7 +142,7 @@ void InMessage::readData(void *data, int len) {
 	m_cursor += len;
 }
 
-void* InMessage::getCursorPtr (uint advanceCursor) {
+void* InMessage::getCursorPtr(uint advanceCursor) {
 	m_cursor += advanceCursor;
 	return &(m_data[m_cursor-advanceCursor]);
 }

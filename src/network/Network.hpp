@@ -67,29 +67,27 @@ enum QuitReason : uint8 {
 	UsernameAlreadyUsed
 };
 
-enum EventType : uint8 {
-	ExplosivesBlow,
-	PlayerJumpOnPad
-};
+using EventType = uint32;
 
-class Message {
+class Message : public SeekableStream {
 protected:
 	friend class Host;
 	MessageType m_type;
 	uint8 m_subtype;
-	int m_length;
-	union {
-		int m_cursor;
-		int m_dataMemSize;
-	};
+	SizeT m_length;
+	PosT m_cursor;
 	uint8 *m_data;
 	
 	Message() {}
+	Message(MessageType, uint8);
 	Message(const Message&) = delete;
 	Message& operator=(Message&) = delete;
 	Message& operator=(const Message&) = delete;
 
 public:
+	PosT tell() override;
+	void seek(OffT, Whence = Set) override;
+
 	MessageType getType() const { return m_type; }
 	uint8 getSubtype() const { return m_subtype; }
 	int getSize() const { return m_length; }
@@ -100,13 +98,13 @@ protected:
 	friend class Host;
 	Channels m_chan;
 	void setType(MessageType type);
-	void fromData(int length, void *data);
+	void fromData(int length, const void *data);
 
 public:
 	InMessage();
 	~InMessage();
 
-	void readData(void *data, int len);
+	void readData(void *data, int len) override;
 	void* getCursorPtr(uint advanceCursor = 0);
 
 	glm::vec3 readVec3();
@@ -117,6 +115,7 @@ public:
 
 class OutMessage : public Message, public OutStream {
 protected:
+	int m_dataMemSize;
 	void fit(int);
 
 public:
@@ -126,7 +125,7 @@ public:
 	void setType(MessageType t) { m_type = t; }
 	void setSubtype(uint8 t) { m_subtype = t; }
 
-	void writeData(const void *data, int len);
+	void writeData(const void *data, int len) override;
 	void writeVec3(const glm::vec3 &vec);
 	void writeIVec3(const glm::vec3 &vec);
 	void writeIVec3(int x, int y, int z);

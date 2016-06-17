@@ -879,21 +879,7 @@ bool GameState::processNetwork() {
 				}
 			} break;
 			case Net::MessageType::Event: {
-				switch (m_msg.getSubtype()) {
-					case Net::EventType::ExplosivesBlow: {
-						glm::vec3 pos = m_msg.readVec3();
-						G->A->playSound("explosion", pos);
-					} break;
-					case Net::PlayerJumpOnPad: {
-						uint32 id = m_msg.readU32();
-						if (id == G->LP->id) { // Is it a-me?
-							G->A->playSound("jumpblock");
-						} else {
-							Player &plr = G->players.getById(id);
-							G->A->playSound("jumpblock", plr.position);
-						}
-					} break;
-				}
+				// switch (m_msg.getSubtype())
 			} break;
 			default:
 				break;

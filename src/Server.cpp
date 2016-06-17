@@ -137,17 +137,9 @@ void Server::handleChat(InMessage &msg, Player *plr) {
 }
 
 void Server::handleEvent(InMessage &msg, Peer &peer) {
-	Player &plr = G.players.getByPeer(peer);
-	switch (msg.getSubtype()) {
-	case Net::EventType::PlayerJumpOnPad: {
-		OutMessage out;
-		NetHelper::MakeEvent(out, (Net::EventType)msg.getSubtype(), plr);
-		NetHelper::Broadcast(G, out);
-	} break;
-
-	default:
-		break;
-	}
+	(void) msg; (void) peer;
+	// Player &plr = G.players.getByPeer(peer);
+	// switch (msg.getSubtype())
 }
 
 void Server::handleCommand(Player *plr, const std::string &command, const std::vector<std::string> &args) {

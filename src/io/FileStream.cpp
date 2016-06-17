@@ -8,8 +8,8 @@ inline std::ios::seekdir getSeekDir(SeekableStream::Whence whence) {
 			return std::ios::beg;
 		case SeekableStream::Whence::Set:
 			return std::ios::cur;
-		case SeekableStream::Whence::End:
-			return std::ios::end;
+		// case SeekableStream::Whence::End:
+			// return std::ios::end;
 	}
 	return std::ios::cur;
 }
