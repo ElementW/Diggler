@@ -157,7 +157,7 @@ private:
 public:
 	Host();
 	void create(int port = -1, int maxconn = 64);
-	Peer connect(const std::string &host, int port, int timeout);
+	Peer connect(const std::string &hostAddr, int port, int timeout);
 	~Host();
 
 	void send(Peer &peer, const OutMessage &msg, Tfer mode = Tfer::Rel, Channels chan = Channels::Base);

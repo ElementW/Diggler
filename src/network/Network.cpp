@@ -198,29 +198,33 @@ bool Peer::operator!=(const Peer &other) const {
 }
 
 void Peer::disconnect() {
-	enet_peer_disconnect((ENetPeer*)peer, 0);
+	ENetPeer *const peer = static_cast<ENetPeer*>(this->peer);
+	enet_peer_disconnect(peer, 0);
 }
 
 std::string Peer::getHost() {
+	const ENetPeer *const peer = static_cast<const ENetPeer*>(this->peer);
 	std::ostringstream oss;
 	char *chars = new char[512];
-	enet_address_get_host_ip(&((ENetPeer*)peer)->host->address, chars, 512);
+	enet_address_get_host_ip(&peer->host->address, chars, 512);
 	oss << chars;
 	delete[] chars;
-	oss << ':' << ((ENetPeer*)peer)->host->address.port;
+	oss << ':' << peer->host->address.port;
 	return oss.str();
 }
 
 std::string Peer::getIp() {
+	const ENetPeer *const peer = static_cast<const ENetPeer*>(this->peer);
 	char *chars = new char[512];
-	enet_address_get_host_ip(&((ENetPeer*)peer)->host->address, chars, 512);
+	enet_address_get_host_ip(&peer->host->address, chars, 512);
 	std::string str(chars);
 	delete[] chars;
 	return str;
 }
 
 int Peer::getPort() {
-	return ((ENetPeer*)peer)->host->address.port;
+	const ENetPeer *const peer = static_cast<const ENetPeer*>(this->peer);
+	return peer->host->address.port;
 }
 
 
@@ -235,27 +239,28 @@ void Host::create(int port, int maxconn) {
 		ENetAddress address;
 		address.host = ENET_HOST_ANY;
 		address.port = port;
-		host = enet_host_create(&address, maxconn, (size_t)Channels::MAX, 0, 0);
+		host = enet_host_create(&address, maxconn, static_cast<size_t>(Channels::MAX), 0, 0);
 	}
 	if (host == nullptr) {
 		throw Exception();
 	}
 }
 
-Peer Host::connect(const std::string &host, int port, int timeout) {
+Peer Host::connect(const std::string &hostAddr, int port, int timeout) {
+	ENetHost *const host = static_cast<ENetHost*>(this->host);
 	ENetAddress address;
 	ENetEvent event;
 	ENetPeer *peer;
 	
-	enet_address_set_host(&address, host.c_str());
+	enet_address_set_host(&address, hostAddr.c_str());
 	address.port = port;
 	
-	peer = enet_host_connect((ENetHost*)this->host, &address, (size_t)Channels::MAX, 0);
+	peer = enet_host_connect(host, &address, static_cast<size_t>(Channels::MAX), 0);
 	if (peer == nullptr) {
 		throw Exception();
 	}
 	
-	if (enet_host_service((ENetHost*)this->host, &event, timeout) > 0 &&
+	if (enet_host_service(host, &event, timeout) > 0 &&
 		event.type == ENET_EVENT_TYPE_CONNECT) {
 		Peer p; p.peer = peer;
 		return p;
@@ -265,7 +270,8 @@ Peer Host::connect(const std::string &host, int port, int timeout) {
 }
 
 Host::~Host() {
-	enet_host_destroy((ENetHost*)host);
+	ENetHost *const host = static_cast<ENetHost*>(this->host);
+	enet_host_destroy(host);
 }
 
 /*static void hexDump(char in, uint8 *buf, int len) {
@@ -277,8 +283,9 @@ Host::~Host() {
 }*/
 
 bool Host::recv(InMessage &msg, Peer &peer, int timeout) {
+	ENetHost *const host = static_cast<ENetHost*>(this->host);
 	ENetEvent event;
-	if (enet_host_service((ENetHost*)host, &event, timeout) >= 0){
+	if (enet_host_service(host, &event, timeout) >= 0){
 		switch (event.type) {
 		case ENET_EVENT_TYPE_NONE:
 			return false;
@@ -290,7 +297,7 @@ bool Host::recv(InMessage &msg, Peer &peer, int timeout) {
 			peer.peer = event.peer;
 			//hexDump('R', event.packet->data, event.packet->dataLength);
 			msg.fromData(event.packet->data, event.packet->dataLength);
-			msg.m_chan = (Channels)event.channelID;
+			msg.m_chan = static_cast<Channels>(event.channelID);
 			enet_packet_destroy(event.packet);
 			break;
 		case ENET_EVENT_TYPE_DISCONNECT:
@@ -304,8 +311,9 @@ bool Host::recv(InMessage &msg, Peer &peer, int timeout) {
 }
 
 bool Host::recv(InMessage &msg, int timeout) {
+	ENetHost *const host = static_cast<ENetHost*>(this->host);
 	ENetEvent event;
-	if (enet_host_service((ENetHost*)host, &event, timeout) >= 0){
+	if (enet_host_service(host, &event, timeout) >= 0){
 		switch (event.type) {
 		case ENET_EVENT_TYPE_NONE:
 			return false;
@@ -315,7 +323,7 @@ bool Host::recv(InMessage &msg, int timeout) {
 		case ENET_EVENT_TYPE_RECEIVE:
 			//hexDump('R', event.packet->data, event.packet->dataLength);
 			msg.fromData(event.packet->data, event.packet->dataLength);
-			msg.m_chan = (Channels)event.channelID;
+			msg.m_chan = static_cast<Channels>(event.channelID);
 			enet_packet_destroy(event.packet);
 			break;
 		case ENET_EVENT_TYPE_DISCONNECT:
@@ -328,14 +336,19 @@ bool Host::recv(InMessage &msg, int timeout) {
 }
 
 void Host::send(Peer &peer, const OutMessage &msg, Tfer mode, Channels chan) {
-	uint8 header[2]; header[0] = (uint8)msg.m_type; header[1] = msg.m_subtype;
+	ENetHost *const host = static_cast<ENetHost*>(this->host);
+
+	uint8 header[2] = {
+		static_cast<uint8>(msg.m_type),
+		msg.m_subtype
+	};
 	ENetPacket *packet = enet_packet_create(header,
 		2, TferToFlags(mode));
 	enet_packet_resize(packet, 2+msg.m_length);
 	std::memcpy(&packet->data[2], msg.m_data, msg.m_length);
 	//hexDump('S', packet->data, 2+msg.m_length);
-	enet_peer_send((ENetPeer*)peer.peer, (uint8)chan, packet);
-	enet_host_flush((ENetHost*)host);
+	enet_peer_send(static_cast<ENetPeer*>(peer.peer), static_cast<uint8>(chan), packet);
+	enet_host_flush(host);
 }
 
 }
