@@ -222,7 +222,7 @@ std::string Peer::getIp() {
 	return str;
 }
 
-int Peer::getPort() {
+Port Peer::getPort() {
 	const ENetPeer *const peer = static_cast<const ENetPeer*>(this->peer);
 	return peer->host->address.port;
 }
@@ -232,9 +232,9 @@ int Peer::getPort() {
 Host::Host() : host(nullptr) {
 }
 
-void Host::create(int port, int maxconn) {
-	if (port == -1) { // Client
-		host = enet_host_create(nullptr, 1, (size_t)Channels::MAX, 0, 0);
+void Host::create(Port port, uint maxconn) {
+	if (port == 0) { // Client
+		host = enet_host_create(nullptr, 1, static_cast<size_t>(Channels::MAX), 0, 0);
 	} else { // Server
 		ENetAddress address;
 		address.host = ENET_HOST_ANY;
@@ -246,7 +246,7 @@ void Host::create(int port, int maxconn) {
 	}
 }
 
-Peer Host::connect(const std::string &hostAddr, int port, int timeout) {
+Peer Host::connect(const std::string &hostAddr, Port port, Timeout timeout) {
 	ENetHost *const host = static_cast<ENetHost*>(this->host);
 	ENetAddress address;
 	ENetEvent event;
@@ -282,7 +282,7 @@ Host::~Host() {
 	std::cout << std::dec << std::endl;
 }*/
 
-bool Host::recv(InMessage &msg, Peer &peer, int timeout) {
+bool Host::recv(InMessage &msg, Peer &peer, Timeout timeout) {
 	ENetHost *const host = static_cast<ENetHost*>(this->host);
 	ENetEvent event;
 	if (enet_host_service(host, &event, timeout) >= 0){
@@ -310,7 +310,7 @@ bool Host::recv(InMessage &msg, Peer &peer, int timeout) {
 	throw Exception();
 }
 
-bool Host::recv(InMessage &msg, int timeout) {
+bool Host::recv(InMessage &msg, Timeout timeout) {
 	ENetHost *const host = static_cast<ENetHost*>(this->host);
 	ENetEvent event;
 	if (enet_host_service(host, &event, timeout) >= 0){

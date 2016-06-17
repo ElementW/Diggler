@@ -134,6 +134,8 @@ public:
 class Exception : public std::exception {
 };
 
+using Port = uint16;
+
 struct Peer {
 	void *peer;
 
@@ -143,7 +145,7 @@ struct Peer {
 	void disconnect();
 	std::string getHost();
 	std::string getIp();
-	int getPort();
+	Port getPort();
 };
 
 class Host {
@@ -155,14 +157,16 @@ private:
 	Host& operator=(const Host&) = delete;
 
 public:
+	using Timeout = uint32;
+
 	Host();
-	void create(int port = -1, int maxconn = 64);
-	Peer connect(const std::string &hostAddr, int port, int timeout);
+	void create(Port port = 0, uint maxconn = 64);
+	Peer connect(const std::string &hostAddr, Port port, Timeout timeout);
 	~Host();
 
 	void send(Peer &peer, const OutMessage &msg, Tfer mode = Tfer::Rel, Channels chan = Channels::Base);
-	bool recv(InMessage &msg, Peer &peer, int timeout);
-	bool recv(InMessage &msg, int timeout = 0);
+	bool recv(InMessage &msg, Peer &peer, Timeout timeout);
+	bool recv(InMessage &msg, Timeout timeout = 0);
 };
 
 }
