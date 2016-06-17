@@ -137,19 +137,7 @@ void AtlasCreator::updateTex() {
 	if (m_freezeTexUpdate)
 		return;
 	atlasTex->setTexture(atlasData, Texture::PixelFormat::RGBA);
-	/*
-	FILE *fpr = fopen("/tmp/diggler_atlas.ppm", "wb");
-	if (fpr != nullptr) {
-		fprintf(fpr, "P6\n%d %d\n255\n", atlasWidth, atlasHeight);
-		for (int y=0; y < atlasWidth; y++) {
-			for (int x=0; x < atlasHeight; x++) {
-				int n = (x + y*atlasWidth)*4;
-				fwrite((const void*)&atlasData[n], 1, 3, fpr);
-			}
-		}
-		fclose(fpr);
-	}
-	*/
+	// BitmapDumper::dumpAsPpm(atlasWidth, atlasHeight, atlasData, "/tmp/diggler_atlas.ppm");
 }
 
 void AtlasCreator::freezeTexUpdate(bool f) {

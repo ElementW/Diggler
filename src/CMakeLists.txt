@@ -38,6 +38,7 @@ set(SRCS
 	${CSD}/ui/Font.cpp
 	${CSD}/ui/FontManager.cpp
 	${CSD}/util/AtlasCreator.cpp
+	${CSD}/util/BitmapDumper.cpp
 	${CSD}/content/Registry.cpp
 	${CSD}/GlobalProperties.cpp
 	${CSD}/World.cpp
