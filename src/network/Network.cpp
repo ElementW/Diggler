@@ -173,7 +173,11 @@ void OutMessage::writeIVec3(const glm::ivec3 &vec) {
 	writeI32(vec.z);
 }
 glm::ivec3 InMessage::readIVec3() {
-	return glm::ivec3(readI32(), readI32(), readI32());
+	int32 x, y, z;
+	x = readI32();
+	y = readI32();
+	z = readI32();
+	return glm::ivec3(x, y, z);
 }
 
 
