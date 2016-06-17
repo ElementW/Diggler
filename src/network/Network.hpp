@@ -127,7 +127,7 @@ public:
 
 	void writeData(const void *data, SizeT len) override;
 	void writeVec3(const glm::vec3 &vec);
-	void writeIVec3(const glm::vec3 &vec);
+	void writeIVec3(const glm::ivec3 &vec);
 	void writeIVec3(int x, int y, int z);
 };
 

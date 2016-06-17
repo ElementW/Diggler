@@ -167,7 +167,7 @@ void OutMessage::writeIVec3(int x, int y, int z) {
 	writeI32(y);
 	writeI32(z);
 }
-void OutMessage::writeIVec3(const glm::vec3 &vec) {
+void OutMessage::writeIVec3(const glm::ivec3 &vec) {
 	writeI32(vec.x);
 	writeI32(vec.y);
 	writeI32(vec.z);
