@@ -22,7 +22,7 @@ InFileStream::~InFileStream() {
 	strm.close();
 }
 
-void InFileStream::readData(void *data, int len) {
+void InFileStream::readData(void *data, SizeT len) {
 	strm.read(reinterpret_cast<char*>(data), len);
 }
 
@@ -30,8 +30,8 @@ SeekableStream::PosT InFileStream::tell() {
 	return strm.tellg();
 }
 
-void InFileStream::seek(SeekableStream::PosT pos, SeekableStream::Whence whence) {
-	strm.seekg(pos, getSeekDir(whence));
+void InFileStream::seek(OffT off, Whence whence) {
+	strm.seekg(off, getSeekDir(whence));
 }
 
 
@@ -43,7 +43,7 @@ OutFileStream::~OutFileStream() {
 	strm.close();
 }
 
-void OutFileStream::writeData(const void *data, int len) {
+void OutFileStream::writeData(const void *data, SizeT len) {
 	strm.write(reinterpret_cast<const char*>(data), len);
 }
 
@@ -51,8 +51,8 @@ SeekableStream::PosT OutFileStream::tell() {
 	return strm.tellp();
 }
 
-void OutFileStream::seek(SeekableStream::PosT pos, SeekableStream::Whence whence) {
-	strm.seekp(pos, getSeekDir(whence));
+void OutFileStream::seek(OffT off, Whence whence) {
+	strm.seekp(off, getSeekDir(whence));
 }
 
 }

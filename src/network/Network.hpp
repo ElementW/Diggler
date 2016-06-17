@@ -104,7 +104,7 @@ public:
 	InMessage();
 	~InMessage();
 
-	void readData(void *data, int len) override;
+	void readData(void *data, SizeT len) override;
 	void* getCursorPtr(uint advanceCursor = 0);
 
 	glm::vec3 readVec3();
@@ -115,8 +115,8 @@ public:
 
 class OutMessage : public Message, public OutStream {
 protected:
-	int m_dataMemSize;
-	void fit(int);
+	SizeT m_dataMemSize;
+	void fit(SizeT);
 
 public:
 	OutMessage(MessageType t = MessageType::Null, uint8 subtype = 0);
@@ -125,7 +125,7 @@ public:
 	void setType(MessageType t) { m_type = t; }
 	void setSubtype(uint8 t) { m_subtype = t; }
 
-	void writeData(const void *data, int len) override;
+	void writeData(const void *data, SizeT len) override;
 	void writeVec3(const glm::vec3 &vec);
 	void writeIVec3(const glm::vec3 &vec);
 	void writeIVec3(int x, int y, int z);

@@ -4,13 +4,15 @@
 
 namespace Diggler {
 
-class Stream {};
-
-class SeekableStream : public virtual Stream {
+class Stream {
 public:
 	using SizeT = uint64;
 	using PosT = SizeT;
 	using OffT = int64;
+};
+
+class SeekableStream : public virtual Stream {
+public:
 	enum Whence {
 		Begin,
 		Set,
@@ -36,7 +38,7 @@ public:
 	virtual uint8 readU8();
 	virtual float readFloat();
 	virtual double readDouble();
-	virtual void readData(void *data, int len) = 0;
+	virtual void readData(void *data, SizeT len) = 0;
 };
 
 class OutStream : public virtual Stream {
@@ -54,7 +56,7 @@ public:
 	virtual void writeU8(uint8 i);
 	virtual void writeFloat(float f);
 	virtual void writeDouble(double d);
-	virtual void writeData(const void *data, int len) = 0;
+	virtual void writeData(const void *data, SizeT len) = 0;
 };
 
 }

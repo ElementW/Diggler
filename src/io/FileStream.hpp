@@ -13,9 +13,9 @@ public:
 	InFileStream(const std::string &path);
 	~InFileStream();
 
-	void readData(void *data, int len);
-	PosT tell();
-	void seek(PosT, Whence = Set);
+	void readData(void *data, SizeT len) override;
+	PosT tell() override;
+	void seek(OffT, Whence = Set) override;
 };
 
 class OutFileStream : public OutStream, public SeekableStream {
@@ -26,9 +26,9 @@ public:
 	OutFileStream(const std::string &path);
 	~OutFileStream();
 
-	void writeData(const void *data, int len);
-	PosT tell();
-	void seek(PosT, Whence = Set);
+	void writeData(const void *data, SizeT len) override;
+	PosT tell() override;
+	void seek(OffT, Whence = Set) override;
 };
 
 }

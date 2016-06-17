@@ -116,18 +116,19 @@ OutMessage::~OutMessage() {
 }
 
 const static int OutMessage_AllocStep = 1024;
-void OutMessage::fit(int len) {
+void OutMessage::fit(SizeT len) {
 	if (len <= m_dataMemSize)
 		return;
-	int targetSize = ((len + OutMessage_AllocStep - 1) / OutMessage_AllocStep)*OutMessage_AllocStep; // Round up
-	decltype(m_data) newData = (uint8*)std::realloc(m_data, targetSize);
+	SizeT targetSize = ((len + OutMessage_AllocStep - 1) /
+		OutMessage_AllocStep)*OutMessage_AllocStep; // Round up
+	decltype(m_data) newData = static_cast<decltype(m_data)>(std::realloc(m_data, targetSize));
 	if (newData == nullptr)
 		throw std::bad_alloc();
 	m_data = newData;
 	m_dataMemSize = targetSize;
 }
 
-void OutMessage::writeData(const void *data, int len) {
+void OutMessage::writeData(const void *data, SizeT len) {
 	fit(m_cursor + len);
 	std::memcpy(&(m_data[m_cursor]), data, len);
 	if (m_cursor + len > m_length) {
@@ -135,7 +136,7 @@ void OutMessage::writeData(const void *data, int len) {
 	}
 	m_cursor += len;
 }
-void InMessage::readData(void *data, int len) {
+void InMessage::readData(void *data, SizeT len) {
 	if (m_cursor + len > m_length)
 		throw std::underflow_error("No more data to be read");
 	std::memcpy(data, &(m_data[m_cursor]), len);
