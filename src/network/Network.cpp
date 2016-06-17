@@ -91,15 +91,19 @@ void InMessage::setType(MessageType type) {
 	m_subtype = m_length = m_cursor = 0;
 	m_data = nullptr;
 }
-void InMessage::fromData(int length, const void *data) {
-	const uint8 *const bytes = (uint8*)data;
+void InMessage::fromData(const void *data, SizeT len) {
+	// TODO: do not hardcode header size
+	if (len < 2) {
+		throw std::invalid_argument("Message length is smaller than message header");
+	}
+	const uint8 *const bytes = static_cast<const uint8*>(data);
 	std::free(m_data);
 	m_cursor = 0;
-	m_length = length;
-	m_type = (MessageType)bytes[0];
+	m_length = len;
+	m_type = static_cast<MessageType>(bytes[0]);
 	m_subtype = bytes[1];
-	m_data = (uint8*)std::malloc(length-2);
-	std::memcpy(m_data, &(bytes[2]), length-2);
+	m_data = (uint8*)std::malloc(len-2);
+	std::memcpy(m_data, &(bytes[2]), len-2);
 }
 
 InMessage::~InMessage() {
@@ -285,7 +289,7 @@ bool Host::recv(InMessage &msg, Peer &peer, int timeout) {
 		case ENET_EVENT_TYPE_RECEIVE:
 			peer.peer = event.peer;
 			//hexDump('R', event.packet->data, event.packet->dataLength);
-			msg.fromData(event.packet->dataLength, event.packet->data);
+			msg.fromData(event.packet->data, event.packet->dataLength);
 			msg.m_chan = (Channels)event.channelID;
 			enet_packet_destroy(event.packet);
 			break;
@@ -310,7 +314,7 @@ bool Host::recv(InMessage &msg, int timeout) {
 			break;
 		case ENET_EVENT_TYPE_RECEIVE:
 			//hexDump('R', event.packet->data, event.packet->dataLength);
-			msg.fromData(event.packet->dataLength, event.packet->data);
+			msg.fromData(event.packet->data, event.packet->dataLength);
 			msg.m_chan = (Channels)event.channelID;
 			enet_packet_destroy(event.packet);
 			break;

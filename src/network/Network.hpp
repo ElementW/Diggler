@@ -98,7 +98,7 @@ protected:
 	friend class Host;
 	Channels m_chan;
 	void setType(MessageType type);
-	void fromData(int length, const void *data);
+	void fromData(const void *data, SizeT len);
 
 public:
 	InMessage();
