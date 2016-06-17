@@ -82,13 +82,17 @@ void Manager::onMouseButton(int key, int action, int mods) {
 	if (m_hoveredElement) {
 		double x, y;
 		glfwGetCursorPos(*G->GW, &x, &y);
-		Element::MouseButton btn;
-		if (key == GLFW_MOUSE_BUTTON_LEFT) {
+		Element::MouseButton btn = Element::MouseButton::Unknown;
+		switch (key) {
+		case GLFW_MOUSE_BUTTON_LEFT:
 			btn = Element::MouseButton::Left;
-		} else if (key == GLFW_MOUSE_BUTTON_MIDDLE) {
+			break;
+		case GLFW_MOUSE_BUTTON_MIDDLE:
 			btn = Element::MouseButton::Middle;
-		} else if (key == GLFW_MOUSE_BUTTON_RIGHT) {
+			break;
+		case GLFW_MOUSE_BUTTON_RIGHT:
 			btn = Element::MouseButton::Right;
+			break;
 		}
 		if (action == GLFW_PRESS) {
 			m_hoveredElement->onMouseDown(x, y, btn);

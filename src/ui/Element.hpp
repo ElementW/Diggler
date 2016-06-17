@@ -43,6 +43,7 @@ protected:
 
 public:
 	enum class MouseButton {
+		Unknown,
 		Left,
 		Middle,
 		Right
