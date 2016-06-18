@@ -329,7 +329,7 @@ void Chunk::updateClient() {
 	bool hasWaves = G->RP->wavingLiquids;
 	BlockId bt, bu /*BlockUp*/, bn /*BlockNear*/;
 	bool mayDisp;
-	const AtlasCreator::Coord *tc;
+	const TexturePacker::Coord *tc;
 	for(int8 x = 0; x < CX; x++) {
 		for(int8 y = 0; y < CY; y++) {
 			for(int8 z = 0; z < CZ; z++) {

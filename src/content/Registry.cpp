@@ -65,14 +65,14 @@ bool ContentRegistry::canEntityGoThrough(BlockId id/* , Entity& ent*/) {
 		   (t == BlockType::TransBlue && team == Player::Team::Blue);*/
 }
 
-using Coord = AtlasCreator::Coord;
-#define AddTex(b, t) Coord b = m_atlasCreator->add(getAssetPath("blocks", t));
+using Coord = TexturePacker::Coord;
+#define AddTex(b, t) Coord b = m_texturePacker->add(getAssetPath("blocks", t));
 ContentRegistry::ContentRegistry() : m_atlas(nullptr) {
-	m_atlasCreator = new AtlasCreator(64*8, 64*8);
-	m_atlasCreator->freezeTexUpdate(true);
+	m_texturePacker = new TexturePacker(64*8, 64*8);
+	m_texturePacker->freezeTexUpdate(true);
 
 	// Valve checkerboard! :)
-	m_unknownBlockTex = m_atlasCreator->add(2, 2, 3, (uint8*)"\x00\x00\x00\xFF\x00\xFF\xFF\x00\xFF\x00\x00\x00");
+	m_unknownBlockTex = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\xFF\x00\xFF\xFF\x00\xFF\x00\x00\x00");
 #if 1
 	AddTex(texDirt,				"tex_block_dirt.png");
 	AddTex(texDirtSign,			"tex_block_dirt_sign.png");
@@ -148,15 +148,15 @@ ContentRegistry::ContentRegistry() : m_atlas(nullptr) {
 	}
 #endif
 
-	m_atlasCreator->freezeTexUpdate(false);
-	m_atlas = m_atlasCreator->getAtlas();
+	m_texturePacker->freezeTexUpdate(false);
+	m_atlas = m_texturePacker->getAtlas();
 }
 
 ContentRegistry::~ContentRegistry() {
-	delete m_atlasCreator;
+	delete m_texturePacker;
 }
 
-const AtlasCreator::Coord* ContentRegistry::gTC(BlockId t, FaceDirection d) const {
+const TexturePacker::Coord* ContentRegistry::gTC(BlockId t, FaceDirection d) const {
 	if (t == Content::BlockUnknownId) {
 		return &m_unknownBlockTex;
 	}

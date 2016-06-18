@@ -37,8 +37,8 @@ set(SRCS
 	${CSD}/ui/Text.cpp
 	${CSD}/ui/Font.cpp
 	${CSD}/ui/FontManager.cpp
-	${CSD}/util/AtlasCreator.cpp
 	${CSD}/util/BitmapDumper.cpp
+	${CSD}/util/TexturePacker.cpp
 	${CSD}/content/Registry.cpp
 	${CSD}/GlobalProperties.cpp
 	${CSD}/World.cpp

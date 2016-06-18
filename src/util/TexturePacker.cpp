@@ -1,4 +1,4 @@
-#include "AtlasCreator.hpp"
+#include "TexturePacker.hpp"
 #include <stb_image.h>
 #include <cmath>
 #include <stdexcept>
@@ -16,7 +16,7 @@ using namespace std;
 
 namespace Diggler {
 
-AtlasCreator::AtlasCreator(uint w, uint h) :
+TexturePacker::TexturePacker(uint w, uint h) :
 	atlasWidth(w), atlasHeight(h), m_freezeTexUpdate(false) {
 	if (w <= 2 || h <= 2)
 		throw std::invalid_argument("Bad dimensions");
@@ -27,12 +27,12 @@ AtlasCreator::AtlasCreator(uint w, uint h) :
 	updateTex();
 }
 
-AtlasCreator::~AtlasCreator() {
+TexturePacker::~TexturePacker() {
 	delete atlasTex;
 	delete[] atlasData;
 }
 
-AtlasCreator::Coord AtlasCreator::add(const std::string& path) {
+TexturePacker::Coord TexturePacker::add(const std::string& path) {
 	// Load image
 	int width, height, channels;
 	unsigned char *ptr = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
@@ -52,7 +52,7 @@ AtlasCreator::Coord AtlasCreator::add(const std::string& path) {
 	return result;
 }
 
-using Coord = AtlasCreator::Coord;
+using Coord = TexturePacker::Coord;
 static bool coordCollides(const Coord &c, const std::vector<Coord> &cs) {
 	for (const Coord &tc : cs) {
 		bool xOverlap = (c.x >= tc.x && c.x <= tc.u) || (c.u >= tc.x && c.u <= tc.u);
@@ -87,7 +87,7 @@ static Coord findCoordinates(const std::vector<Coord> &cs, int w, int h, int mx,
 	throw std::runtime_error("No more space found on atlas");
 }
 
-AtlasCreator::Coord AtlasCreator::add(int width, int height, int channels, const uint8 *data) {
+TexturePacker::Coord TexturePacker::add(int width, int height, int channels, const uint8 *data) {
 	// Find a good coord
 	Coord c = findCoordinates(coords, width, height, atlasWidth, atlasHeight);
 	coords.push_back(c);
@@ -133,20 +133,20 @@ AtlasCreator::Coord AtlasCreator::add(int width, int height, int channels, const
 	};
 }
 
-void AtlasCreator::updateTex() {
+void TexturePacker::updateTex() {
 	if (m_freezeTexUpdate)
 		return;
 	atlasTex->setTexture(atlasData, Texture::PixelFormat::RGBA);
 	// BitmapDumper::dumpAsPpm(atlasWidth, atlasHeight, atlasData, "/tmp/diggler_atlas.ppm");
 }
 
-void AtlasCreator::freezeTexUpdate(bool f) {
+void TexturePacker::freezeTexUpdate(bool f) {
 	m_freezeTexUpdate = f;
 	if (!f)
 		updateTex();
 }
 
-const Texture* AtlasCreator::getAtlas() {
+const Texture* TexturePacker::getAtlas() {
 	return atlasTex;
 }
 

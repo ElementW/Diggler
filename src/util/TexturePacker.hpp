@@ -1,12 +1,13 @@
-#ifndef ATLAS_CREATOR_HPP
-#define ATLAS_CREATOR_HPP
+#ifndef DIGGLER_TEXTURE_PACKER_HPP
+#define DIGGLER_TEXTURE_PACKER_HPP
+
 #include "../Platform.hpp"
 
 namespace Diggler {
 
 class Texture;
 
-class AtlasCreator {
+class TexturePacker {
 public:
 	struct Coord {
 		uint16 x, y, u, v;
@@ -22,12 +23,12 @@ private:
 	void updateTex();
 
 	// No copy
-	AtlasCreator(const AtlasCreator&) = delete;
-	AtlasCreator& operator=(const AtlasCreator&) = delete;
+	TexturePacker(const TexturePacker&) = delete;
+	TexturePacker& operator=(const TexturePacker&) = delete;
 
 public:
-	AtlasCreator(uint w, uint h);
-	~AtlasCreator();
+	TexturePacker(uint w, uint h);
+	~TexturePacker();
 
 	Coord add(const std::string &path);
 	Coord add(int width, int height, int channels, const uint8* data);
@@ -38,4 +39,4 @@ public:
 
 }
 
-#endif
+#endif /* DIGGLER_TEXTURE_PACKER */
