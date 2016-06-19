@@ -92,8 +92,7 @@ void InMessage::setType(MessageType type) {
 	m_data = nullptr;
 }
 void InMessage::fromData(const void *data, SizeT len) {
-	// TODO: do not hardcode header size
-	if (len < 2) {
+	if (len < HeaderSize) {
 		throw std::invalid_argument("Message length is smaller than message header");
 	}
 	const uint8 *const bytes = static_cast<const uint8*>(data);
@@ -329,14 +328,14 @@ bool Host::recv(InMessage &msg, Timeout timeout) {
 void Host::send(Peer &peer, const OutMessage &msg, Tfer mode, Channels chan) {
 	ENetHost *const host = static_cast<ENetHost*>(this->host);
 
-	uint8 header[2] = {
+	uint8 header[Message::HeaderSize] = {
 		static_cast<uint8>(msg.m_type),
 		msg.m_subtype
 	};
 	ENetPacket *packet = enet_packet_create(header,
-		2, TferToFlags(mode));
-	enet_packet_resize(packet, 2+msg.m_length);
-	std::memcpy(&packet->data[2], msg.m_data, msg.m_length);
+		Message::HeaderSize, TferToFlags(mode));
+	enet_packet_resize(packet, Message::HeaderSize + msg.m_length);
+	std::memcpy(&packet->data[Message::HeaderSize], msg.m_data, msg.m_length);
 	txBytes += msg.m_length;
 	//hexDump('S', packet->data, 2+msg.m_length);
 	enet_peer_send(static_cast<ENetPeer*>(peer.peer), static_cast<uint8>(chan), packet);

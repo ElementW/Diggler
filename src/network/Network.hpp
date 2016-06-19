@@ -85,6 +85,8 @@ protected:
 	Message& operator=(const Message&) = delete;
 
 public:
+	static constexpr uint HeaderSize = 2;
+
 	PosT tell() override;
 	void seek(OffT, Whence = Set) override;
 
