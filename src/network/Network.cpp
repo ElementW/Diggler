@@ -53,10 +53,6 @@ Message::Message(MessageType t, uint8 s) :
 	m_data(nullptr) {
 }
 
-Message::PosT Message::tell() {
-	return m_cursor;
-}
-
 void Message::seek(OffT pos, Whence whence) {
 	switch (whence) {
 	case Begin:

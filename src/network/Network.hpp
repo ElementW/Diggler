@@ -87,12 +87,20 @@ protected:
 public:
 	static constexpr uint HeaderSize = 2;
 
-	PosT tell() override;
-	void seek(OffT, Whence = Set) override;
-
 	inline MessageType getType() const { return m_type; }
 	inline uint8 getSubtype() const { return m_subtype; }
 	inline SizeT getSize() const { return m_length; }
+
+	inline PosT tell() override {
+		return m_cursor;
+	}
+	inline PosT tell() const {
+		return m_cursor;
+	}
+	void seek(OffT, Whence = Set) override;
+	inline SizeT remaining() const {
+		return getSize() - tell();
+	}
 };
 
 class InMessage : public Message, public InStream {
