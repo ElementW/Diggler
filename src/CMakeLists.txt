@@ -1,56 +1,56 @@
 set(CSD ${CMAKE_CURRENT_SOURCE_DIR})
 set(SRCS
 	${SRCS}
-	${CSD}/Particles.cpp
-	${CSD}/io/FileStream.cpp
-	${CSD}/io/Stream.cpp
-	${CSD}/Config.cpp
+	${CSD}/AABB.cpp
 	${CSD}/Audio.cpp
-	${CSD}/ui/Element.cpp
-	${CSD}/ui/Manager.cpp
-	${CSD}/PlayerList.cpp
-	${CSD}/network/NetHelper.cpp
-	${CSD}/network/Network.cpp
-	${CSD}/Skybox.cpp
-	${CSD}/Frustum.cpp
+	${CSD}/Camera.cpp
 	${CSD}/CaveGenerator.cpp
-	${CSD}/MessageState.cpp
-	${CSD}/GameState.cpp
-	${CSD}/network/Network.cpp
-	${CSD}/Server.cpp
 	${CSD}/Chatbox.cpp
-	${CSD}/GlUtils.cpp
-	${CSD}/ui/Button.cpp
-	${CSD}/KeyBinds.cpp
+	${CSD}/Chunk.cpp
+	${CSD}/Clouds.cpp
+	${CSD}/Config.cpp
+	${CSD}/content/Registry.cpp
+	${CSD}/EscMenu.cpp
+	${CSD}/FBO.cpp
+	${CSD}/Frustum.cpp
+	${CSD}/Game.cpp
+	${CSD}/GameState.cpp
 	${CSD}/GameWindow.cpp
 	${CSD}/GLFWHandler.cpp
-	${CSD}/Player.cpp
-	${CSD}/Clouds.cpp
-	${CSD}/Game.cpp
-	${CSD}/ProgramManager.cpp
+	${CSD}/GlobalProperties.cpp
+	${CSD}/GlUtils.cpp
+	${CSD}/io/FileStream.cpp
+	${CSD}/io/Stream.cpp
+	${CSD}/KeyBinds.cpp
 	${CSD}/LocalPlayer.cpp
-	${CSD}/AABB.cpp
+	${CSD}/main.cpp
+	${CSD}/MessageState.cpp
+	${CSD}/network/NetHelper.cpp
+	${CSD}/network/Network.cpp
+	${CSD}/network/Network.cpp
+	${CSD}/Particles.cpp
+	${CSD}/Platform.cpp
+	${CSD}/Player.cpp
+	${CSD}/PlayerList.cpp
+	${CSD}/Program.cpp
+	${CSD}/ProgramManager.cpp
+	${CSD}/Server.cpp
+	${CSD}/Shader.cpp
+	${CSD}/Skybox.cpp
 	${CSD}/SoundBuffer.cpp
 	${CSD}/Sound.cpp
-	${CSD}/Camera.cpp
-	${CSD}/EscMenu.cpp
-	${CSD}/ui/Text.cpp
+	${CSD}/Texture.cpp
+	${CSD}/ui/Button.cpp
+	${CSD}/ui/Element.cpp
 	${CSD}/ui/Font.cpp
 	${CSD}/ui/FontManager.cpp
+	${CSD}/ui/Manager.cpp
+	${CSD}/UITestState.cpp
+	${CSD}/ui/Text.cpp
+	${CSD}/Universe.cpp
 	${CSD}/util/BitmapDumper.cpp
 	${CSD}/util/TexturePacker.cpp
-	${CSD}/content/Registry.cpp
-	${CSD}/GlobalProperties.cpp
-	${CSD}/World.cpp
-	${CSD}/Universe.cpp
-	${CSD}/Chunk.cpp
-	${CSD}/FBO.cpp
-	${CSD}/Texture.cpp
-	${CSD}/Program.cpp
 	${CSD}/VBO.cpp
-	${CSD}/Shader.cpp
-	${CSD}/Platform.cpp
-	${CSD}/main.cpp
-	${CSD}/UITestState.cpp
+	${CSD}/World.cpp
 	PARENT_SCOPE
 )
