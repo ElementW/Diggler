@@ -99,8 +99,11 @@ class InMessage : public Message, public InStream {
 protected:
 	friend class Host;
 	Channels m_chan;
+	void *m_packet;
 	void setType(MessageType type);
-	void fromData(const void *data, SizeT len);
+	void fromData(const void *data, SizeT len, Channels chan = Channels::Base);
+	void fromPacket(void *packet, Channels chan = Channels::Base);
+	void free();
 
 public:
 	InMessage();

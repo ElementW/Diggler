@@ -82,32 +82,65 @@ void Message::seek(OffT pos, Whence whence) {
 
 
 InMessage::InMessage() :
-	Message(MessageType::Null, 0) {
+	Message(MessageType::Null, 0),
+	m_chan(Channels::Base),
+	m_packet(nullptr) {
+}
+
+InMessage::~InMessage() {
+	free();
 }
 
 void InMessage::setType(MessageType type) {
-	std::free(m_data);
+	free();
 	m_type = type;
 	m_subtype = m_length = m_cursor = 0;
 	m_data = nullptr;
 }
-void InMessage::fromData(const void *data, SizeT len) {
+
+void InMessage::fromData(const void *data, SizeT len, Channels chan) {
 	if (len < HeaderSize) {
 		throw std::invalid_argument("Message length is smaller than message header");
 	}
 	const uint8 *const bytes = static_cast<const uint8*>(data);
-	std::free(m_data);
+	free();
+	m_chan = chan;
 	m_cursor = 0;
 	m_length = len;
 	m_type = static_cast<MessageType>(bytes[0]);
 	m_subtype = bytes[1];
-	m_data = (uint8*)std::malloc(len-2);
-	std::memcpy(m_data, &(bytes[2]), len-2);
+	m_data = static_cast<uint8*>(std::malloc(len-HeaderSize));
+	std::memcpy(m_data, &(bytes[HeaderSize]), len-HeaderSize);
 }
 
-InMessage::~InMessage() {
-	std::free(m_data);
+void InMessage::fromPacket(void *packet, Channels chan) {
+	ENetPacket *enpkt = static_cast<ENetPacket*>(packet);
+	SizeT len = enpkt->dataLength;
+	if (len < HeaderSize) {
+		throw std::invalid_argument("Message length is smaller than message header");
+	}
+	uint8 *const bytes = static_cast<uint8*>(enpkt->data);
+	free();
+	m_packet = packet;
+	m_chan = chan;
+	m_cursor = 0;
+	m_length = len;
+	m_type = static_cast<MessageType>(bytes[0]);
+	m_subtype = bytes[1];
+	m_data = &(bytes[HeaderSize]);
 }
+
+void InMessage::free() {
+	if (m_packet != nullptr) {
+		enet_packet_destroy(static_cast<ENetPacket*>(m_packet));
+	} else {
+		std::free(m_data);
+	}
+	m_type = MessageType::Null;
+	m_subtype = m_length = m_cursor = 0;
+	m_packet = m_data = nullptr;
+}
+
 
 OutMessage::OutMessage(MessageType t, uint8 subtype) :
 	Message(t, subtype),
@@ -284,10 +317,9 @@ bool Host::recv(InMessage &msg, Peer &peer, Timeout timeout) {
 		case ENET_EVENT_TYPE_RECEIVE:
 			peer.peer = event.peer;
 			//hexDump('R', event.packet->data, event.packet->dataLength);
-			msg.fromData(event.packet->data, event.packet->dataLength);
+			// Packet "ownership" is transferred to msg
+			msg.fromPacket(event.packet, static_cast<Channels>(event.channelID));
 			rxBytes += event.packet->dataLength;
-			msg.m_chan = static_cast<Channels>(event.channelID);
-			enet_packet_destroy(event.packet);
 			break;
 		case ENET_EVENT_TYPE_DISCONNECT:
 			peer.peer = event.peer;
@@ -311,10 +343,9 @@ bool Host::recv(InMessage &msg, Timeout timeout) {
 			break;
 		case ENET_EVENT_TYPE_RECEIVE:
 			//hexDump('R', event.packet->data, event.packet->dataLength);
-			msg.fromData(event.packet->data, event.packet->dataLength);
+			// Packet "ownership" is transferred to msg
+			msg.fromPacket(event.packet, static_cast<Channels>(event.channelID));
 			rxBytes += event.packet->dataLength;
-			msg.m_chan = static_cast<Channels>(event.channelID);
-			enet_packet_destroy(event.packet);
 			break;
 		case ENET_EVENT_TYPE_DISCONNECT:
 			msg.setType(MessageType::Disconnect);
