@@ -43,7 +43,7 @@ enum class MessageType : uint8 {
 	StatsUpdate,
 	Event,
 	Chat,
-  
+
 	Connect = 240,
 	Disconnect
 };
@@ -77,7 +77,7 @@ protected:
 	SizeT m_length;
 	PosT m_cursor;
 	uint8 *m_data;
-	
+
 	Message() {}
 	Message(MessageType, uint8);
 	Message(const Message&) = delete;
@@ -168,6 +168,7 @@ struct Peer {
 class Host {
 private:
 	void *host;
+	uint64 rxBytes, txBytes;
 
 	Host(const Host&) = delete;
 	Host& operator=(Host&) = delete;
@@ -177,13 +178,20 @@ public:
 	using Timeout = uint32;
 
 	Host();
+	~Host();
 	void create(Port port = 0, uint maxconn = 64);
 	Peer connect(const std::string &hostAddr, Port port, Timeout timeout);
-	~Host();
 
 	void send(Peer &peer, const OutMessage &msg, Tfer mode = Tfer::Rel, Channels chan = Channels::Base);
 	bool recv(InMessage &msg, Peer &peer, Timeout timeout);
 	bool recv(InMessage &msg, Timeout timeout = 0);
+
+	inline uint64 getRxBytes() const {
+		return rxBytes;
+	}
+	inline uint64 getTxBytes() const {
+		return txBytes;
+	}
 };
 
 }

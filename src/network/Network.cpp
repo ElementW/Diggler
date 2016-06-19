@@ -214,7 +214,10 @@ Port Peer::getPort() {
 
 
 
-Host::Host() : host(nullptr) {
+Host::Host() :
+	host(nullptr),
+	rxBytes(0),
+	txBytes(0) {
 }
 
 void Host::create(Port port, uint maxconn) {
@@ -236,20 +239,21 @@ Peer Host::connect(const std::string &hostAddr, Port port, Timeout timeout) {
 	ENetAddress address;
 	ENetEvent event;
 	ENetPeer *peer;
-	
+
 	enet_address_set_host(&address, hostAddr.c_str());
 	address.port = port;
-	
+
 	peer = enet_host_connect(host, &address, static_cast<size_t>(Channels::MAX), 0);
 	if (peer == nullptr) {
 		throw Exception();
 	}
-	
+
 	if (enet_host_service(host, &event, timeout) > 0 &&
 		event.type == ENET_EVENT_TYPE_CONNECT) {
 		Peer p; p.peer = peer;
 		return p;
 	}
+
 	enet_peer_reset(peer);
 	throw Exception();
 }
@@ -282,6 +286,7 @@ bool Host::recv(InMessage &msg, Peer &peer, Timeout timeout) {
 			peer.peer = event.peer;
 			//hexDump('R', event.packet->data, event.packet->dataLength);
 			msg.fromData(event.packet->data, event.packet->dataLength);
+			rxBytes += event.packet->dataLength;
 			msg.m_chan = static_cast<Channels>(event.channelID);
 			enet_packet_destroy(event.packet);
 			break;
@@ -308,6 +313,7 @@ bool Host::recv(InMessage &msg, Timeout timeout) {
 		case ENET_EVENT_TYPE_RECEIVE:
 			//hexDump('R', event.packet->data, event.packet->dataLength);
 			msg.fromData(event.packet->data, event.packet->dataLength);
+			rxBytes += event.packet->dataLength;
 			msg.m_chan = static_cast<Channels>(event.channelID);
 			enet_packet_destroy(event.packet);
 			break;
@@ -331,6 +337,7 @@ void Host::send(Peer &peer, const OutMessage &msg, Tfer mode, Channels chan) {
 		2, TferToFlags(mode));
 	enet_packet_resize(packet, 2+msg.m_length);
 	std::memcpy(&packet->data[2], msg.m_data, msg.m_length);
+	txBytes += msg.m_length;
 	//hexDump('S', packet->data, 2+msg.m_length);
 	enet_peer_send(static_cast<ENetPeer*>(peer.peer), static_cast<uint8>(chan), packet);
 	enet_host_flush(host);
