@@ -1,12 +1,16 @@
-#ifndef SUPERCHUNK_HPP
-#define SUPERCHUNK_HPP
+#ifndef DIGGLER_WORLD_HPP
+#define DIGGLER_WORLD_HPP
+
 #include "Chunk.hpp"
+
 #include <condition_variable>
 #include <map>
 #include <mutex>
 #include <queue>
 #include <thread>
+
 #include <glm/detail/type_vec3.hpp>
+
 #include "io/Stream.hpp"
 #include "network/Network.hpp"
 
@@ -176,4 +180,4 @@ using WorldWeakRef = std::weak_ptr<World>;
 
 }
 
-#endif
+#endif /* DIGGLER_WORLD_HPP */
