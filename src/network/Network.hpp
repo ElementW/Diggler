@@ -90,9 +90,9 @@ public:
 	PosT tell() override;
 	void seek(OffT, Whence = Set) override;
 
-	MessageType getType() const { return m_type; }
-	uint8 getSubtype() const { return m_subtype; }
-	int getSize() const { return m_length; }
+	inline MessageType getType() const { return m_type; }
+	inline uint8 getSubtype() const { return m_subtype; }
+	inline SizeT getSize() const { return m_length; }
 };
 
 class InMessage : public Message, public InStream {
@@ -110,7 +110,13 @@ public:
 	~InMessage();
 
 	void readData(void *data, SizeT len) override;
-	void* getCursorPtr(uint advanceCursor = 0);
+	inline void* getCursorPtr(uint advanceCursor = 0) {
+		m_cursor += advanceCursor;
+		return &(m_data[m_cursor-advanceCursor]);
+	}
+	inline const void* getCursorPtr() const {
+		return &(m_data[m_cursor]);
+	}
 
 	glm::vec3 readVec3();
 	glm::ivec3 readIVec3();
@@ -150,6 +156,11 @@ public:
 		writeI32(vec.x);
 		writeI32(vec.y);
 		writeI32(vec.z);
+	}
+
+	// msgpack::packer compatibility
+	inline void write(const char *buf, size_t len) {
+		writeData(buf, len);
 	}
 };
 

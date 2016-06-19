@@ -179,11 +179,6 @@ void InMessage::readData(void *data, SizeT len) {
 	m_cursor += len;
 }
 
-void* InMessage::getCursorPtr(uint advanceCursor) {
-	m_cursor += advanceCursor;
-	return &(m_data[m_cursor-advanceCursor]);
-}
-
 
 glm::vec3 InMessage::readVec3() {
 	float x, y, z;
