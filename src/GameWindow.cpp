@@ -27,7 +27,8 @@ GameWindow::GameWindow(Game *G) : G(G) {
 			throw std::runtime_error(err);
 		}
 		glfwSetErrorCallback(glfwErrorCallback);
-		getOutputStreamRaw() << "GLFW " << glfwGetVersionString() << std::endl;
+		getOutputStreamRaw() << "GLFW linked " << GLFW_VERSION_MAJOR << '.' << GLFW_VERSION_MINOR <<
+				'.' << GLFW_VERSION_REVISION << ", using " << glfwGetVersionString() << std::endl;
 	}
 
 	GLFWHandler::getInstance().setWindow(this, m_window);

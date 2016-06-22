@@ -26,10 +26,9 @@ void DeInit() {
 std::string GetNetworkLibVersion() {
 	ENetVersion ver = enet_linked_version();
 	std::ostringstream sstm;
-	sstm << "ENet v" << ENET_VERSION_MAJOR << '.' << ENET_VERSION_MINOR
-		<< '.' << ENET_VERSION_PATCH << '(' << ENET_VERSION_GET_MAJOR(ver)
-		<< '.' << ENET_VERSION_GET_MINOR(ver) << '.' << ENET_VERSION_GET_PATCH(ver)
-		<< ')';
+	sstm << "ENet linked " << ENET_VERSION_MAJOR << '.' << ENET_VERSION_MINOR
+		<< '.' << ENET_VERSION_PATCH << ", using " << ENET_VERSION_GET_MAJOR(ver)
+		<< '.' << ENET_VERSION_GET_MINOR(ver) << '.' << ENET_VERSION_GET_PATCH(ver);
 	return sstm.str();
 }
 
