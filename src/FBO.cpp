@@ -20,19 +20,20 @@ FBO::FBO(int w, int h, Texture::PixelFormat format, bool stencil) : m_hasStencil
 
 	glGetError(); // Flush previous errors
 
+	// Set up texture to render color to
 	tex = new Texture(w, h, format);
 	glGenFramebuffers(1, &id);
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *tex, 0);
-	GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-	glDrawBuffers(1, DrawBuffers);
 
+	// Set up renderbuffer to which depth/stencil will be written to
 	glGenRenderbuffers(1, &rboId);
 	glBindRenderbuffer(GL_RENDERBUFFER, rboId);
 	if (stencil)
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
 	else
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *tex, 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, stencil ? GL_DEPTH_STENCIL_ATTACHMENT : GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
 
 	glCheck();
