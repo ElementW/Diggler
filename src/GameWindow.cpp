@@ -14,6 +14,10 @@ namespace Diggler {
 
 int GameWindow::InstanceCount = 0;
 
+static void glfwErrorCallback(int error, const char *description) {
+	getErrorStream() << "GLFW Error " << error << ": " << description << std::endl;
+}
+
 GameWindow::GameWindow(Game *G) : G(G) {
 	if (InstanceCount++ == 0) {
 		int glfwStatus = glfwInit();
@@ -22,6 +26,7 @@ GameWindow::GameWindow(Game *G) : G(G) {
 			err += glfwStatus;
 			throw std::runtime_error(err);
 		}
+		glfwSetErrorCallback(glfwErrorCallback);
 		getOutputStreamRaw() << "GLFW " << glfwGetVersionString() << std::endl;
 	}
 
