@@ -139,11 +139,12 @@ void InMessage::free() {
 
 OutMessage::OutMessage(MessageType t, uint8 subtype) :
 	Message(t, subtype),
-	m_dataMemSize(0) {
+	m_dataMemSize(0),
+	m_actualData(nullptr) {
 }
 
 OutMessage::~OutMessage() {
-	std::free(m_data);
+	std::free(m_actualData);
 }
 
 const static int OutMessage_AllocStep = 1024;
@@ -152,10 +153,12 @@ void OutMessage::fit(SizeT len) {
 		return;
 	SizeT targetSize = ((len + OutMessage_AllocStep - 1) /
 		OutMessage_AllocStep)*OutMessage_AllocStep; // Round up
-	decltype(m_data) newData = static_cast<decltype(m_data)>(std::realloc(m_data, targetSize));
-	if (newData == nullptr)
+	decltype(m_actualData) newActualData = static_cast<decltype(m_actualData)>(
+		std::realloc(m_actualData, HeaderSize + targetSize));
+	if (newActualData == nullptr)
 		throw std::bad_alloc();
-	m_data = newData;
+	m_actualData = newActualData;
+	m_data = newActualData + HeaderSize;
 	m_dataMemSize = targetSize;
 }
 
@@ -349,15 +352,15 @@ bool Host::recv(InMessage &msg, Timeout timeout) {
 void Host::send(Peer &peer, const OutMessage &msg, Tfer mode, Channels chan) {
 	ENetHost *const host = static_cast<ENetHost*>(this->host);
 
-	uint8 header[Message::HeaderSize] = {
+	const uint8 header[Message::HeaderSize] = {
 		static_cast<uint8>(msg.m_type),
 		msg.m_subtype
 	};
-	ENetPacket *packet = enet_packet_create(header,
-		Message::HeaderSize, TferToFlags(mode));
-	enet_packet_resize(packet, Message::HeaderSize + msg.m_length);
-	std::memcpy(&packet->data[Message::HeaderSize], msg.m_data, msg.m_length);
-	txBytes += msg.m_length;
+	std::memcpy(msg.m_actualData, header, Message::HeaderSize);
+
+	ENetPacket *packet = enet_packet_create(msg.m_actualData,
+		Message::HeaderSize + msg.m_length, TferToFlags(mode));
+	txBytes += Message::HeaderSize + msg.m_length;
 	//hexDump('S', packet->data, 2+msg.m_length);
 	enet_peer_send(static_cast<ENetPeer*>(peer.peer), static_cast<uint8>(chan), packet);
 	enet_host_flush(host);

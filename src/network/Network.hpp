@@ -134,7 +134,9 @@ public:
 
 class OutMessage : public Message, public OutStream {
 protected:
+	friend class Host;
 	SizeT m_dataMemSize;
+	mutable uint8 *m_actualData;
 	void fit(SizeT);
 
 public:
