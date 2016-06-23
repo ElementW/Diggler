@@ -19,8 +19,11 @@ public:
 		// End
 	};
 
-	virtual PosT tell() = 0;
+	virtual PosT tell() const = 0;
 	virtual void seek(OffT, Whence = Set) = 0;
+	inline void seek(PosT pos, Whence whence = Set) {
+		seek(static_cast<OffT>(pos), whence);
+	}
 };
 
 class InStream : public virtual Stream {

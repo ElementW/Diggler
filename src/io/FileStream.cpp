@@ -26,7 +26,7 @@ void InFileStream::readData(void *data, SizeT len) {
 	strm.read(reinterpret_cast<char*>(data), len);
 }
 
-SeekableStream::PosT InFileStream::tell() {
+SeekableStream::PosT InFileStream::tell() const {
 	return strm.tellg();
 }
 
@@ -47,7 +47,7 @@ void OutFileStream::writeData(const void *data, SizeT len) {
 	strm.write(reinterpret_cast<const char*>(data), len);
 }
 
-SeekableStream::PosT OutFileStream::tell() {
+SeekableStream::PosT OutFileStream::tell() const {
 	return strm.tellp();
 }
 

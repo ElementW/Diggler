@@ -91,10 +91,7 @@ public:
 	inline uint8 getSubtype() const { return m_subtype; }
 	inline SizeT getSize() const { return m_length; }
 
-	inline PosT tell() override {
-		return m_cursor;
-	}
-	inline PosT tell() const {
+	inline PosT tell() const override {
 		return m_cursor;
 	}
 	void seek(OffT, Whence = Set) override;
@@ -118,12 +115,16 @@ public:
 	~InMessage();
 
 	void readData(void *data, SizeT len) override;
-	inline void* getCursorPtr(uint advanceCursor = 0) {
+	inline const void* getCursorPtr(uint advanceCursor = 0) {
 		m_cursor += advanceCursor;
 		return &(m_data[m_cursor-advanceCursor]);
 	}
 	inline const void* getCursorPtr() const {
 		return &(m_data[m_cursor]);
+	}
+
+	inline const void* data() const {
+		return m_data;
 	}
 
 	glm::vec3 readVec3();
