@@ -44,8 +44,8 @@ enum class MessageType : uint8 {
 	Event,
 	Chat,
 
-	Connect = 240,
-	Disconnect
+	NetConnect = 240,
+	NetDisconnect
 };
 
 enum PlayerUpdateType : uint8 {

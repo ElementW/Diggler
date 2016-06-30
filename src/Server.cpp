@@ -394,10 +394,10 @@ void Server::run() {
 				}
 			}
 			switch (msg.getType()) {
-			case MessageType::Connect:
+			case MessageType::NetConnect:
 				getOutputStream() << peer.getHost() << " NEWCONN" << std::endl;
 				break;
-			case MessageType::Disconnect:
+			case MessageType::NetDisconnect:
 				handleDisconnect(peer);
 				break;
 			

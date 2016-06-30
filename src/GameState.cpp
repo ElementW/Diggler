@@ -802,7 +802,7 @@ bool GameState::processNetwork() {
 	using namespace Net::MsgTypes;
 	while (G->H.recv(m_msg, 0)) {
 		switch (m_msg.getType()) {
-			case Net::MessageType::Disconnect:
+			case Net::MessageType::NetDisconnect:
 				GW->showMessage("Disconnected", "Timed out");
 				return false;
 

@@ -266,7 +266,7 @@ bool Host::recv(InMessage &msg, Peer &peer, Timeout timeout) {
 			return false;
 		case ENET_EVENT_TYPE_CONNECT:
 			peer.peer = event.peer;
-			msg.setType(MessageType::Connect);
+			msg.setType(MessageType::NetConnect);
 			break;
 		case ENET_EVENT_TYPE_RECEIVE:
 			peer.peer = event.peer;
@@ -277,7 +277,7 @@ bool Host::recv(InMessage &msg, Peer &peer, Timeout timeout) {
 			break;
 		case ENET_EVENT_TYPE_DISCONNECT:
 			peer.peer = event.peer;
-			msg.setType(MessageType::Disconnect);
+			msg.setType(MessageType::NetDisconnect);
 			enet_peer_reset(event.peer);
 		}
 		return true;
@@ -293,7 +293,7 @@ bool Host::recv(InMessage &msg, Timeout timeout) {
 		case ENET_EVENT_TYPE_NONE:
 			return false;
 		case ENET_EVENT_TYPE_CONNECT:
-			msg.setType(MessageType::Connect);
+			msg.setType(MessageType::NetConnect);
 			break;
 		case ENET_EVENT_TYPE_RECEIVE:
 			//hexDump('R', event.packet->data, event.packet->dataLength);
@@ -302,7 +302,7 @@ bool Host::recv(InMessage &msg, Timeout timeout) {
 			rxBytes += event.packet->dataLength;
 			break;
 		case ENET_EVENT_TYPE_DISCONNECT:
-			msg.setType(MessageType::Disconnect);
+			msg.setType(MessageType::NetDisconnect);
 			enet_peer_reset(event.peer);
 		}
 		return true;
