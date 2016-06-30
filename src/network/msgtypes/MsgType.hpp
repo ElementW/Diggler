@@ -8,8 +8,8 @@ namespace Net {
 namespace MsgTypes {
 
 struct MsgType {
-	virtual void writeToMsg(OutMessage&) const = 0;
-	virtual void readFromMsg(InMessage&) = 0;
+  virtual void writeToMsg(OutMessage&) const = 0;
+  virtual void readFromMsg(InMessage&) = 0;
 };
 
 }

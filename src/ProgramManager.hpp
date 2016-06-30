@@ -19,20 +19,20 @@ namespace Diggler {
 
 class ProgramManager {
 public:
-	using FlagsT = uint32_t;
+  using FlagsT = uint32_t;
 
 private:
-	class Game &G;
-	std::unordered_map<FlagsT, Program*> m_programs;
-	std::vector<Program*> m_specialPrograms;
-	static std::string getShadersName(FlagsT flags);
-	static void getDefines(FlagsT flags, std::vector<std::string> &defs);
+  class Game &G;
+  std::unordered_map<FlagsT, Program*> m_programs;
+  std::vector<Program*> m_specialPrograms;
+  static std::string getShadersName(FlagsT flags);
+  static void getDefines(FlagsT flags, std::vector<std::string> &defs);
 
 public:
-	ProgramManager(Game&);
-	~ProgramManager();
-	const Program* getProgram(FlagsT flags);
-	const Program* getSpecialProgram(const std::string &name);
+  ProgramManager(Game&);
+  ~ProgramManager();
+  const Program* getProgram(FlagsT flags);
+  const Program* getSpecialProgram(const std::string &name);
 };
 
 }

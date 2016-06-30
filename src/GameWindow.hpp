@@ -17,45 +17,45 @@ class State;
 
 class GameWindow {
 private:
-	static int InstanceCount;
+  static int InstanceCount;
 
-	GLFWwindow *m_window;
-	int m_w, m_h;
+  GLFWwindow *m_window;
+  int m_w, m_h;
 
-	shared_ptr<State> m_currentState, m_nextState;
+  shared_ptr<State> m_currentState, m_nextState;
 
 public:
-	UI::Manager UIM;
+  UI::Manager UIM;
 
-	Game *G;
+  Game *G;
 
-	GameWindow(Game*);
-	~GameWindow();
+  GameWindow(Game*);
+  ~GameWindow();
 
-	operator GLFWwindow&() const { return *m_window; }
-	operator GLFWwindow*() const { return m_window; }
+  operator GLFWwindow&() const { return *m_window; }
+  operator GLFWwindow*() const { return m_window; }
 
-	inline int getW() const { return m_w; }
-	inline int getH() const { return m_h; }
+  inline int getW() const { return m_w; }
+  inline int getH() const { return m_h; }
 
-	bool shouldClose() const;
+  bool shouldClose() const;
 
-	void setVisible(bool);
-	bool isVisible() const;
+  void setVisible(bool);
+  bool isVisible() const;
 
-	void cbMouseButton(int key, int action, int mods);
-	void cbCursorPos(double x, double y);
-	void cbMouseScroll(double x, double y);
-	void cbKey(int key, int scancode, int action, int mods);
-	void cbChar(char32 unichar);
-	void cbResize(int w, int h);
+  void cbMouseButton(int key, int action, int mods);
+  void cbCursorPos(double x, double y);
+  void cbMouseScroll(double x, double y);
+  void cbKey(int key, int scancode, int action, int mods);
+  void cbChar(char32 unichar);
+  void cbResize(int w, int h);
 
-	void updateViewport();
+  void updateViewport();
 
-	void setNextState(const shared_ptr<State> next);
-	void run();
+  void setNextState(const shared_ptr<State> next);
+  void run();
 
-	void showMessage(const std::string &msg, const std::string &submsg = "");
+  void showMessage(const std::string &msg, const std::string &submsg = "");
 };
 
 }

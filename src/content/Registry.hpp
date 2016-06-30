@@ -9,52 +9,52 @@ namespace Diggler {
 class BlockDef;
 
 enum class FaceDirection : uint8_t {
-	XInc = 0,
-	XDec = 1,
-	YInc = 2,
-	YDec = 3,
-	ZInc = 4,
-	ZDec = 5
+  XInc = 0,
+  XDec = 1,
+  YInc = 2,
+  YDec = 3,
+  ZInc = 4,
+  ZDec = 5
 };
 
 class ContentRegistry {
 private:
-	// Client
-	TexturePacker *m_texturePacker;
-	const Texture *m_atlas;
-	// TODO remove?
-	union BlockFaceTexCoords {
-		struct {
-			TexturePacker::Coord front, back, top, bottom, left, right;
-		};
-		TexturePacker::Coord coords[6];
-	};
-	std::vector<BlockFaceTexCoords> m_coords;
-	TexturePacker::Coord m_unknownBlockTex;
+  // Client
+  TexturePacker *m_texturePacker;
+  const Texture *m_atlas;
+  // TODO remove?
+  union BlockFaceTexCoords {
+    struct {
+      TexturePacker::Coord front, back, top, bottom, left, right;
+    };
+    TexturePacker::Coord coords[6];
+  };
+  std::vector<BlockFaceTexCoords> m_coords;
+  TexturePacker::Coord m_unknownBlockTex;
 
-	// Shared
-	;
+  // Shared
+  ;
 
-	// No copy
-	ContentRegistry(const ContentRegistry&) = delete;
-	ContentRegistry& operator=(const ContentRegistry&) = delete;
+  // No copy
+  ContentRegistry(const ContentRegistry&) = delete;
+  ContentRegistry& operator=(const ContentRegistry&) = delete;
 
 public:
-	ContentRegistry();
-	~ContentRegistry();
+  ContentRegistry();
+  ~ContentRegistry();
 
-	static bool isTransparent(BlockId id);
-	static bool isFaceVisible(BlockId id1, BlockId id2);
-	static bool canEntityGoThrough(BlockId id/* , Entity& ent*/);
-	const TexturePacker::Coord* gTC(BlockId, FaceDirection) const;
-	const Texture* getAtlas() const;
+  static bool isTransparent(BlockId id);
+  static bool isFaceVisible(BlockId id1, BlockId id2);
+  static bool canEntityGoThrough(BlockId id/* , Entity& ent*/);
+  const TexturePacker::Coord* gTC(BlockId, FaceDirection) const;
+  const Texture* getAtlas() const;
 
-	void registerBlock(/* TODO */);
-	void registerItem(/* TODO */);
-	void registerFluid(/* TODO */);
-	void registerMapgen(/* TODO */);
+  void registerBlock(/* TODO */);
+  void registerItem(/* TODO */);
+  void registerFluid(/* TODO */);
+  void registerMapgen(/* TODO */);
 
-	const BlockDef& getBlockDef(BlockId);
+  const BlockDef& getBlockDef(BlockId);
 };
 
 }

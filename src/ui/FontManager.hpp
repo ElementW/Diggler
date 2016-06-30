@@ -13,25 +13,25 @@ namespace UI {
 
 class FontManager {
 private:
-	Game &G;
+  Game &G;
 
-	std::map<std::string, std::shared_ptr<Font>> m_fonts;
-	std::string m_defaultFontName;
-	std::shared_ptr<Font> m_defaultFont;
+  std::map<std::string, std::shared_ptr<Font>> m_fonts;
+  std::string m_defaultFontName;
+  std::shared_ptr<Font> m_defaultFont;
 
 public:
-	FontManager(Game &G);
+  FontManager(Game &G);
 
-	void loadFont(const std::string &path, const std::string &name);
-	/**
-	 * @brief Gets a font using its name.
-	 * If `name` is an empty string, returns the default font
-	 * (effectively `getDefaultFont's return)
-	 */
-	std::shared_ptr<Font> getFont(const std::string &name);
+  void loadFont(const std::string &path, const std::string &name);
+  /**
+   * @brief Gets a font using its name.
+   * If `name` is an empty string, returns the default font
+   * (effectively `getDefaultFont's return)
+   */
+  std::shared_ptr<Font> getFont(const std::string &name);
 
-	void setDefaultFont(const std::string &name);
-	std::shared_ptr<Font> getDefaultFont() const;
+  void setDefaultFont(const std::string &name);
+  std::shared_ptr<Font> getDefaultFont() const;
 };
 
 }

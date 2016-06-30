@@ -3,12 +3,12 @@
 namespace Diggler {
 
 Config::Config() {
-	
+  
 }
 
 void Config::loadDefaults() {
-	loadDefaults();
-	bloom = true;
+  loadDefaults();
+  bloom = true;
 }
 
 void Config::save(const std::string &path) const {

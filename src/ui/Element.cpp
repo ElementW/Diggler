@@ -5,18 +5,18 @@ namespace Diggler {
 namespace UI {
 
 bool Element::Area::isIn(int x, int y) {
-	return x >= this->x && x <= (this->x + this->w) &&
-	       y >= this->y && y <= (this->y + this->h);
+  return x >= this->x && x <= (this->x + this->w) &&
+         y >= this->y && y <= (this->y + this->h);
 }
 
 
 Element::Element(Manager *M) :
-	m_isCursorOver(false),
-	m_hasFocus(false),
-	m_isVisible(true),
-	m_area({0, 0, 0, 0}), M(M) {
-	PM = M->PM;
-	G = M->G;
+  m_isCursorOver(false),
+  m_hasFocus(false),
+  m_isVisible(true),
+  m_area({0, 0, 0, 0}), M(M) {
+  PM = M->PM;
+  G = M->G;
 }
 
 Element::~Element() {
@@ -56,8 +56,8 @@ void Element::onMatrixChange() {
 }
 
 void Element::setMatrix(const glm::mat4 *m) {
-	PM = m ? m : M->PM;
-	onMatrixChange();
+  PM = m ? m : M->PM;
+  onMatrixChange();
 }
 
 }

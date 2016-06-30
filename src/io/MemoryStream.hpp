@@ -7,48 +7,48 @@ namespace Diggler {
 
 class MemoryStream : public virtual SeekableStream {
 protected:
-	uint8 *m_data;
-	SizeT m_length;
-	PosT m_cursor;
+  uint8 *m_data;
+  SizeT m_length;
+  PosT m_cursor;
 
-	MemoryStream(void*, SizeT);
-	MemoryStream() : MemoryStream(nullptr, 0) {}
+  MemoryStream(void*, SizeT);
+  MemoryStream() : MemoryStream(nullptr, 0) {}
 
 public:
-	virtual PosT tell() const override {
-		return m_cursor;
-	}
-	virtual void seek(OffT, Whence = Set) override;
+  virtual PosT tell() const override {
+    return m_cursor;
+  }
+  virtual void seek(OffT, Whence = Set) override;
 
-	virtual SizeT length() const {
-		return m_length;
-	}
-	virtual const void* data() const {
-		return m_data;
-	}
+  virtual SizeT length() const {
+    return m_length;
+  }
+  virtual const void* data() const {
+    return m_data;
+  }
 };
 
 class InMemoryStream : public virtual MemoryStream, public virtual InStream {
 protected:
-	InMemoryStream() {}
+  InMemoryStream() {}
 
 public:
-	InMemoryStream(const void *data, SizeT len);
-	virtual ~InMemoryStream() {}
+  InMemoryStream(const void *data, SizeT len);
+  virtual ~InMemoryStream() {}
 
-	virtual void readData(void *data, SizeT len) override;
+  virtual void readData(void *data, SizeT len) override;
 };
 
 class OutMemoryStream : public virtual MemoryStream, public virtual OutStream {
 protected:
-	SizeT m_allocated;
-	virtual void fit(SizeT);
+  SizeT m_allocated;
+  virtual void fit(SizeT);
 
 public:
-	OutMemoryStream(SizeT prealloc = 0);
-	virtual ~OutMemoryStream();
+  OutMemoryStream(SizeT prealloc = 0);
+  virtual ~OutMemoryStream();
 
-	virtual void writeData(const void *data, SizeT len) override;
+  virtual void writeData(const void *data, SizeT len) override;
 };
 
 }

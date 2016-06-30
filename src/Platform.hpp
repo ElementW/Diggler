@@ -5,48 +5,48 @@
 #define BUILDINFO_DATE __DATE__
 
 #if defined(__LITTLE_ENDIAN__)
-	#define BUILDINFO_LITTLE_ENDIAN
+  #define BUILDINFO_LITTLE_ENDIAN
 #else
-	#define BUILDINFO_BIG_ENDIAN
+  #define BUILDINFO_BIG_ENDIAN
 #endif
 
 #if defined(WINDOWS) || defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64) // Windows
-	#define BUILDINFO_PLATFORM "Windows"
-	#define BUILDINFO_PLATFORM_WINDOWS
-	#if defined(__CYGWIN__)
-		#define BUILDINFO_PLATFORM_CYGWIN
-	#endif
+  #define BUILDINFO_PLATFORM "Windows"
+  #define BUILDINFO_PLATFORM_WINDOWS
+  #if defined(__CYGWIN__)
+    #define BUILDINFO_PLATFORM_CYGWIN
+  #endif
 #elif defined(__ANDROID_API__) // Android
-	#define BUILDINFO_PLATFORM "Android"
-	#define BUILDINFO_PLATFORM_ANDROID
-	#define BUILDINFO_PLATFORM_PTHREAD
-	#define BUILDINFO_PLATFORM_MMAP
-	#define BUILDINFO_PLATFORM_UNIXLIKE
+  #define BUILDINFO_PLATFORM "Android"
+  #define BUILDINFO_PLATFORM_ANDROID
+  #define BUILDINFO_PLATFORM_PTHREAD
+  #define BUILDINFO_PLATFORM_MMAP
+  #define BUILDINFO_PLATFORM_UNIXLIKE
 #elif defined(__linux__) || defined(linux) || defined(__linux) // Linux
-	#define BUILDINFO_PLATFORM "Linux"
-	#define BUILDINFO_PLATFORM_LINUX
-	#define BUILDINFO_PLATFORM_PTHREAD
-	#define BUILDINFO_PLATFORM_MMAP
-	#define BUILDINFO_PLATFORM_UNIXLIKE
+  #define BUILDINFO_PLATFORM "Linux"
+  #define BUILDINFO_PLATFORM_LINUX
+  #define BUILDINFO_PLATFORM_PTHREAD
+  #define BUILDINFO_PLATFORM_MMAP
+  #define BUILDINFO_PLATFORM_UNIXLIKE
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || \
       defined(__bsdi__) || defined(__DragonFly__) || defined(BSD) // BSD
-	#define BUILDINFO_PLATFORM "BSD"
-	#define BUILDINFO_PLATFORM_BSD
-	#define BUILDINFO_PLATFORM_PTHREAD
-	#define BUILDINFO_PLATFORM_MMAP
-	#define BUILDINFO_PLATFORM_UNIXLIKE
+  #define BUILDINFO_PLATFORM "BSD"
+  #define BUILDINFO_PLATFORM_BSD
+  #define BUILDINFO_PLATFORM_PTHREAD
+  #define BUILDINFO_PLATFORM_MMAP
+  #define BUILDINFO_PLATFORM_UNIXLIKE
 #elif (defined(__APPLE__) && defined(__MACH__)) // Mac
-	#define BUILDINFO_PLATFORM "Mac"
-	#define BUILDINFO_PLATFORM_MAC
-	#define BUILDINFO_PLATFORM_MMAP
-	#define BUILDINFO_PLATFORM_UNIXLIKE
+  #define BUILDINFO_PLATFORM "Mac"
+  #define BUILDINFO_PLATFORM_MAC
+  #define BUILDINFO_PLATFORM_MMAP
+  #define BUILDINFO_PLATFORM_UNIXLIKE
 #else // Any other
-	#define BUILDINFO_PLATFORM "Unknown"
-	#define BUILDINFO_PLATFORM_UNKNOWN
+  #define BUILDINFO_PLATFORM "Unknown"
+  #define BUILDINFO_PLATFORM_UNKNOWN
 #endif
 
 #if __x86_64__ || __ppc64__ || _WIN64
-	#define HAS_NATIVE_64BIT 1
+  #define HAS_NATIVE_64BIT 1
 #endif
 
 #include <vector>
@@ -71,11 +71,11 @@ using char16 = char16_t;
 using String = std::string;
 
 namespace proc {
-	/// @returns The executable's absolute path
-	std::string getExecutablePath();
+  /// @returns The executable's absolute path
+  std::string getExecutablePath();
 
-	/// @returns The executable's absolute path directory, including the end slash (/)
-	std::string getExecutableDirectory();
+  /// @returns The executable's absolute path directory, including the end slash (/)
+  std::string getExecutableDirectory();
 }
 
 /// @returns The system's error output stream
@@ -128,29 +128,29 @@ extern uint FastRand_Seed;
 /// @returns A random integer in range [0, 2^31-1]
 ///
 inline int FastRand() {
-	FastRand_Seed = (514229*((FastRand_Seed+4631018)>>1))^0x51d75169;
-	return FastRand_Seed & 0x7FFFFFFF;
+  FastRand_Seed = (514229*((FastRand_Seed+4631018)>>1))^0x51d75169;
+  return FastRand_Seed & 0x7FFFFFFF;
 }
 ///
 /// Fast pseudo-random number generator, very inaccurate
 /// @returns A random integer in range [0, max]
 ///
 inline int FastRand(int max) {
-	return FastRand() % (max+1);
+  return FastRand() % (max+1);
 }
 ///
 /// Fast pseudo-random number generator, very inaccurate
 /// @returns A random integer in range [min, max]
 ///
 inline int FastRand(int min, int max) {
-	return min + (FastRand() % (max-min+1) );
+  return min + (FastRand() % (max-min+1) );
 }
 ///
 /// Fast pseudo-random number generator, very inaccurate
 /// @returns A random float in range [0.0, 1.0[
 ///
 inline float FastRandF() {
-	return (float)FastRand() / 0x7FFFFFFF;
+  return (float)FastRand() / 0x7FFFFFFF;
 }
 
 ///
@@ -158,8 +158,8 @@ inline float FastRandF() {
 /// @returns Real modulus operation result, as such mod(x,y) is always positive
 ///
 constexpr int rmod(int x, int y) {
-	const int ret = x % y;
-	return (ret < 0) ? y+ret : ret;
+  const int ret = x % y;
+  return (ret < 0) ? y+ret : ret;
 }
 float rmod(float x, float y);
 double rmod(double x, double y);
@@ -169,7 +169,7 @@ double rmod(double x, double y);
 /// @returns x/y rounded down / Q in modulus' A=B×Q+R equation
 ///
 constexpr inline int divrd(int x, uint y) {
-	return (x < 0) ? (x+1)/(int)y-1 : x/(int)y;
+  return (x < 0) ? (x+1)/(int)y-1 : x/(int)y;
 }
 
 ///
@@ -177,7 +177,7 @@ constexpr inline int divrd(int x, uint y) {
 /// @see ::std::floor For results as float or double
 ///
 constexpr inline int floor(const float f) {
-	return (f > 0) ? (int)f : ((int)f)-1;
+  return (f > 0) ? (int)f : ((int)f)-1;
 }
 
 ///
@@ -185,14 +185,14 @@ constexpr inline int floor(const float f) {
 /// @see ::std::ceil For results as float or double
 ///
 constexpr inline int ceil(const float f) {
-	return (f < 0) ? (int)f : ((int)f)+1;
+  return (f < 0) ? (int)f : ((int)f)+1;
 }
 
 ///
 /// @returns 1×[sign of v]. 0 if v == 0.
 ///
 constexpr inline int signum(float v) {
-	return (v > 0) ? 1 : (v < 0) ? -1 : 0;
+  return (v > 0) ? 1 : (v < 0) ? -1 : 0;
 }
 
 ///
@@ -200,20 +200,20 @@ constexpr inline int signum(float v) {
 /// @see http://gamedev.stackexchange.com/questions/47362/cast-ray-to-select-block-in-voxel-game
 ///
 constexpr float intbound(float s, float ds) {
-	return (ds < 0) ? intbound(-s, -ds) : (1-rmod(s, 1.f))/ds;
+  return (ds < 0) ? intbound(-s, -ds) : (1-rmod(s, 1.f))/ds;
 }
 
 
 using FourCC = uint32;
 constexpr inline FourCC MakeFourCC(char a, char b, char c, char d) {
 #if defined(BUILDINFO_LITTLE_ENDIAN)
-	return d | c >> 8 | b >> 16 | a >> 24;
+  return d | c >> 8 | b >> 16 | a >> 24;
 #else
-	return a | b >> 8 | c >> 16 | d >> 24;
+  return a | b >> 8 | c >> 16 | d >> 24;
 #endif
 }
 constexpr inline FourCC MakeFourCC(const char *s) {
-	return MakeFourCC(s[0], s[1], s[2], s[3]);
+  return MakeFourCC(s[0], s[1], s[2], s[3]);
 }
 
 

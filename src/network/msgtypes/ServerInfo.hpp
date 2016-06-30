@@ -10,23 +10,23 @@ namespace Net {
 namespace MsgTypes {
 
 enum class ServerInfoSubtype : uint8 {
-	Request = 0,
-	Response = 1
+  Request = 0,
+  Response = 1
 };
 
 struct ServerInfoRequest : public MsgType {
-	std::vector<std::string> infos;
-	msgpack::object params;
+  std::vector<std::string> infos;
+  msgpack::object params;
 
-	void writeToMsg(OutMessage&) const override;
-	void readFromMsg(InMessage&) override;
+  void writeToMsg(OutMessage&) const override;
+  void readFromMsg(InMessage&) override;
 };
 
 struct ServerInfoResponse : public MsgType {
-	msgpack::object infos;
+  msgpack::object infos;
 
-	void writeToMsg(OutMessage&) const override;
-	void readFromMsg(InMessage&) override;
+  void writeToMsg(OutMessage&) const override;
+  void readFromMsg(InMessage&) override;
 };
 
 }

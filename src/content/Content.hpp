@@ -11,9 +11,9 @@ const uint16 BlockMetadataMask = 0x7fff; //~BlockMetadataBit;
 using LightData = uint16;
 
 namespace Content {
-	const BlockId BlockAirId = 0;
-	const BlockId BlockIgnoreId = ~BlockAirId;
-	const BlockId BlockUnknownId = 1;
+  const BlockId BlockAirId = 0;
+  const BlockId BlockIgnoreId = ~BlockAirId;
+  const BlockId BlockUnknownId = 1;
 }
 }
 

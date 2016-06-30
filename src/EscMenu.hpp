@@ -14,21 +14,21 @@ class Text;
 
 class EscMenu {
 private:
-	Game *G;
-	struct {
-		double start, duration;
-		bool active;
-	} m_transition;
-	UI::Text *txt_quit;
-	glm::mat4 matrix;
-	UI::Button *m_button;
+  Game *G;
+  struct {
+    double start, duration;
+    bool active;
+  } m_transition;
+  UI::Text *txt_quit;
+  glm::mat4 matrix;
+  UI::Button *m_button;
 
 public:
-	EscMenu(Game *G);
-	~EscMenu();
-	
-	void setVisible(bool);
-	void render();
+  EscMenu(Game *G);
+  ~EscMenu();
+  
+  void setVisible(bool);
+  void render();
 };
 
 }

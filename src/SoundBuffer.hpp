@@ -7,21 +7,21 @@ namespace Diggler {
 
 class SoundBuffer {
 private:
-	bool moved;
-	ALuint id;
+  bool moved;
+  ALuint id;
 
 public:
-	SoundBuffer();
-	// No copy
-	SoundBuffer(const SoundBuffer&) = delete;
-	// Move
-	SoundBuffer(SoundBuffer&&);
-	~SoundBuffer();
-	
-	void loadOgg(const std::string &path);
-	
-	operator ALint() const { return id; }
-	ALint getId() const { return id; }
+  SoundBuffer();
+  // No copy
+  SoundBuffer(const SoundBuffer&) = delete;
+  // Move
+  SoundBuffer(SoundBuffer&&);
+  ~SoundBuffer();
+  
+  void loadOgg(const std::string &path);
+  
+  operator ALint() const { return id; }
+  ALint getId() const { return id; }
 };
 
 }

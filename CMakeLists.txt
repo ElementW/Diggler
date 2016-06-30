@@ -4,7 +4,7 @@ project(Diggler C CXX)
 
 ### Checks
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-	message(FATAL_ERROR "Using retarded compiler, aborting.")
+  message(FATAL_ERROR "Using retarded compiler, aborting.")
 endif()
 
 ### Find path to build dir, relative if possible, to symlink resources directories
@@ -12,9 +12,9 @@ file(RELATIVE_PATH REL_BUILD_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_BINARY_D
 string(FIND "${REL_BUILD_PATH}" ".." RBP_2DOTPOS)
 # If we're going up, use absolute path
 if(${RBP_2DOTPOS} EQUAL 0)
-	set(PATH_TO_TOPDIR ${CMAKE_CURRENT_SOURCE_DIR})
+  set(PATH_TO_TOPDIR ${CMAKE_CURRENT_SOURCE_DIR})
 else()
-	file(RELATIVE_PATH PATH_TO_TOPDIR ${PROJECT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+  file(RELATIVE_PATH PATH_TO_TOPDIR ${PROJECT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 message(">> Path to topdir: ${PATH_TO_TOPDIR}")
 
@@ -29,10 +29,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__FILENAME__='\"$(subst ${CMAKE_SOURCE
 #" (fix buggy syntax highlighting on KDevelop/Kate)
 
 if(NOT CMAKE_BUILD_TYPE) # Defaults to release
-	set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type: Debug or Release" FORCE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type: Debug or Release" FORCE)
 endif()
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-	set(USE_GCC_LTO FALSE CACHE BOOL "Use GCC LTOs")
+  set(USE_GCC_LTO FALSE CACHE BOOL "Use GCC LTOs")
 endif()
 
 message(">> Using ${CMAKE_BUILD_TYPE} build configuration")
@@ -40,7 +40,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -DDEBUG -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -Os")
 if(USE_GCC_LTO)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
 endif()
 
 ### Packages
@@ -58,14 +58,14 @@ find_package(msgpack REQUIRED)
 pkg_search_module(EPOXY REQUIRED epoxy)
 pkg_search_module(GLFW REQUIRED glfw3)
 include_directories(
-	${ETC_INCLUDE_DIRS}
-	${LUA_INCLUDE_DIR}
-	${LZFX_INCLUDE_DIRS}
-	${ENET_INCLUDE_DIRS}
-	${EPOXY_INCLUDE_DIRS}
-	${GLFW_INCLUDE_DIRS}
-	${OPENAL_INCLUDE_DIR}
-	${MSGPACK_INCLUDE_DIR}
+  ${ETC_INCLUDE_DIRS}
+  ${LUA_INCLUDE_DIR}
+  ${LZFX_INCLUDE_DIRS}
+  ${ENET_INCLUDE_DIRS}
+  ${EPOXY_INCLUDE_DIRS}
+  ${GLFW_INCLUDE_DIRS}
+  ${OPENAL_INCLUDE_DIR}
+  ${MSGPACK_INCLUDE_DIR}
 )
 
 set(SRCS ";")
@@ -74,14 +74,14 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src")
 add_executable(diggler ${SRCS})
 
 target_link_libraries(diggler
-	${ETC_LIBRARIES}
-	${LUA_LIBRARY}
-	${LZFX_LIBRARIES}
-	${ENET_LIBRARIES}
-	${EPOXY_LIBRARIES}
-	${GLFW_LIBRARIES} 
-	${OPENAL_LIBRARY}
-	pthread)
+  ${ETC_LIBRARIES}
+  ${LUA_LIBRARY}
+  ${LZFX_LIBRARIES}
+  ${ENET_LIBRARIES}
+  ${EPOXY_LIBRARIES}
+  ${GLFW_LIBRARIES} 
+  ${OPENAL_LIBRARY}
+  pthread)
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${PATH_TO_TOPDIR}/assets" "${PROJECT_BINARY_DIR}/assets")
 
@@ -89,10 +89,10 @@ execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${PATH_TO_TOPDIR}/as
 
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
-	add_custom_target(doc
-		${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
-		COMMENT "Generate code documentation with Doxygen" VERBATIM
-	)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
+  add_custom_target(doc
+    ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
+    COMMENT "Generate code documentation with Doxygen" VERBATIM
+  )
 endif()

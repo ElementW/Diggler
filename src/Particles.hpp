@@ -12,45 +12,45 @@ namespace Diggler {
 class Game;
 
 struct Particle {
-	// Keep it a POD struct
-	glm::vec3 pos, vel, accel;
-	glm::vec4 color;
-	float size, decay;
+  // Keep it a POD struct
+  glm::vec3 pos, vel, accel;
+  glm::vec4 color;
+  float size, decay;
 };
 
 class ParticleEmitter {
-	static struct Renderer {
-		const Program *prog;
-		GLint att_coord,
-			  att_color,
-			  att_texcoord,
-			  att_pointSize,
-			  uni_mvp,
-			  uni_unicolor,
-			  uni_fogStart,
-			  uni_fogEnd;
-	} R;
-	Game *G;
-	void init();
-	
-	int count, maxCount;
-	std::vector<Particle> particles;
-	VBO vbo;
+  static struct Renderer {
+    const Program *prog;
+    GLint att_coord,
+        att_color,
+        att_texcoord,
+        att_pointSize,
+        uni_mvp,
+        uni_unicolor,
+        uni_fogStart,
+        uni_fogEnd;
+  } R;
+  Game *G;
+  void init();
+  
+  int count, maxCount;
+  std::vector<Particle> particles;
+  VBO vbo;
 public:
-	Particle pTemplate;
-	glm::vec3 pos;
+  Particle pTemplate;
+  glm::vec3 pos;
 
-	glm::vec3 posAmpl, velAmpl;
-	float decayAmpl;
+  glm::vec3 posAmpl, velAmpl;
+  float decayAmpl;
 
-	ParticleEmitter(Game*);
+  ParticleEmitter(Game*);
 
-	void setMaxCount(uint);
-	uint getMaxCount() const;
+  void setMaxCount(uint);
+  uint getMaxCount() const;
 
-	void emit(Particle&);
-	void update(double delta);
-	void render(const glm::mat4&);
+  void emit(Particle&);
+  void update(double delta);
+  void render(const glm::mat4&);
 };
 
 }

@@ -14,45 +14,45 @@ namespace Net {
 namespace MsgTypes {
 
 enum class ChunkTransferSubtype : uint8 {
-	Request = 0,
-	Response = 1,
-	Denied
+  Request = 0,
+  Response = 1,
+  Denied
 };
 
 struct ChunkTransferRequest : public MsgType {
-	struct ChunkData {
-		WorldId worldId;
-		glm::ivec3 chunkPos;
-	};
-	std::vector<ChunkData> chunks;
+  struct ChunkData {
+    WorldId worldId;
+    glm::ivec3 chunkPos;
+  };
+  std::vector<ChunkData> chunks;
 
-	void writeToMsg(OutMessage&) const override;
-	void readFromMsg(InMessage&) override;
+  void writeToMsg(OutMessage&) const override;
+  void readFromMsg(InMessage&) override;
 };
 
 struct ChunkTransferResponse : public MsgType {
-	struct ChunkData {
-		WorldId worldId;
-		glm::ivec3 chunkPos;
-		uint32 dataLength;
-		const void *data;
-	};
-	std::vector<ChunkData> chunks;
+  struct ChunkData {
+    WorldId worldId;
+    glm::ivec3 chunkPos;
+    uint32 dataLength;
+    const void *data;
+  };
+  std::vector<ChunkData> chunks;
 
-	void writeToMsg(OutMessage&) const override;
-	void readFromMsg(InMessage&) override;
+  void writeToMsg(OutMessage&) const override;
+  void readFromMsg(InMessage&) override;
 };
 
 struct ChunkTransferDenied : public MsgType {
-	enum Reason : uint8 {
-		NotSpecified,
-		PlayerTooFarAway,
-		PlayerInWrongWorld,
-		OutOfMapBounds
-	} reason;
+  enum Reason : uint8 {
+    NotSpecified,
+    PlayerTooFarAway,
+    PlayerInWrongWorld,
+    OutOfMapBounds
+  } reason;
 
-	void writeToMsg(OutMessage&) const override;
-	void readFromMsg(InMessage&) override;
+  void writeToMsg(OutMessage&) const override;
+  void readFromMsg(InMessage&) override;
 };
 
 }

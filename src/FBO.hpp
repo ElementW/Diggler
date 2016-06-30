@@ -9,18 +9,18 @@ namespace Diggler {
 
 class FBO {
 private:
-	bool m_hasStencil;
+  bool m_hasStencil;
 
 public:
-	Texture *tex;
-	GLuint id, rboId;
-	FBO(int w = 640, int h = 480, Texture::PixelFormat format = Texture::PixelFormat::RGB, bool stencil = false);
-	operator GLuint() const { return id; }
-	void resize(int w, int h);
-	void bind();
-	void unbind();
-	bool hasStencil() const;
-	~FBO();
+  Texture *tex;
+  GLuint id, rboId;
+  FBO(int w = 640, int h = 480, Texture::PixelFormat format = Texture::PixelFormat::RGB, bool stencil = false);
+  operator GLuint() const { return id; }
+  void resize(int w, int h);
+  void bind();
+  void unbind();
+  bool hasStencil() const;
+  ~FBO();
 };
 
 }

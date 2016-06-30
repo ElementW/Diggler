@@ -8,7 +8,7 @@ class World;
 
 class WorldGenerator {
 public:
-	virtual void generate(World &W, glm::ivec3 CP);
+  virtual void generate(World &W, glm::ivec3 CP);
 };
 
 }

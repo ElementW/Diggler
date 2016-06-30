@@ -24,37 +24,37 @@ class Server;
 
 class Game {
 public:
-	// Shared
-	double Time; uint64 TimeMs;
-	Net::Host H;
-	Universe *U;
-	PlayerList players;
-	ContentRegistry *CR;
-	
-	// Server
-	Server *S;
-	
-	// Client
-	Config *C;
-	GameWindow *GW;
-	UI::Manager *UIM;
-	LocalPlayer *LP;
-	ProgramManager *PM;
-	UI::FontManager FM;
-	struct RenderProperties {
-		bool bloom, wavingLiquids;
-		float fogStart, fogEnd;
-	} *RP;
-	Audio *A;
-	Net::Peer NS;
-	KeyBinds *KB;
-	int PlayerPosUpdateFreq;
-	
-	Game();
-	void init();
-	void uninitGL();
-	void updateTime(double time);
-	~Game();
+  // Shared
+  double Time; uint64 TimeMs;
+  Net::Host H;
+  Universe *U;
+  PlayerList players;
+  ContentRegistry *CR;
+  
+  // Server
+  Server *S;
+  
+  // Client
+  Config *C;
+  GameWindow *GW;
+  UI::Manager *UIM;
+  LocalPlayer *LP;
+  ProgramManager *PM;
+  UI::FontManager FM;
+  struct RenderProperties {
+    bool bloom, wavingLiquids;
+    float fogStart, fogEnd;
+  } *RP;
+  Audio *A;
+  Net::Peer NS;
+  KeyBinds *KB;
+  int PlayerPosUpdateFreq;
+  
+  Game();
+  void init();
+  void uninitGL();
+  void updateTime(double time);
+  ~Game();
 };
 
 }

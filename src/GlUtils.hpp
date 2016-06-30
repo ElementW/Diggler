@@ -7,9 +7,9 @@ namespace Diggler {
 
 class GlUtils {
 private:
-	GlUtils();
+  GlUtils();
 public:
-	static std::string getErrorString(GLenum code);
+  static std::string getErrorString(GLenum code);
 };
 
 }

@@ -8,9 +8,9 @@ namespace Diggler {
 
 class BlockDef : public ObjectDef {
 public:
-	bool solid, fullBlock;
-	//AABBVector boxes;
-	
+  bool solid, fullBlock;
+  //AABBVector boxes;
+  
 };
 
 }

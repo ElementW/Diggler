@@ -8,22 +8,22 @@ namespace Diggler {
 
 class MessageState : public State {
 private:
-	GameWindow *W;
-	std::string msg, subMsg;
-	UI::Text *txtMsg, *txtSubMsg;
+  GameWindow *W;
+  std::string msg, subMsg;
+  UI::Text *txtMsg, *txtSubMsg;
 
-	void setupUI();
+  void setupUI();
 
 public:
-	MessageState(GameWindow *W, const std::string &msg, const std::string &submsg = "");
-	~MessageState();
-	
-	//void onMouseButton(int key, int action, int mods);
-	//void onCursorPos(double x, double y);
-	void onResize(int w, int h);
-	void run();
-	
-	void updateViewport();
+  MessageState(GameWindow *W, const std::string &msg, const std::string &submsg = "");
+  ~MessageState();
+  
+  //void onMouseButton(int key, int action, int mods);
+  //void onCursorPos(double x, double y);
+  void onResize(int w, int h);
+  void run();
+  
+  void updateViewport();
 };
 
 }
