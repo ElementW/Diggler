@@ -1,8 +1,9 @@
-#ifndef NET_MSGTYPES_SERVERINFO_HPP
-#define NET_MSGTYPES_SERVERINFO_HPP
-#include <msgpack.hpp>
-#include "../Network.hpp"
+#ifndef DIGGLER_NET_MSGTYPES_SERVERINFO_HPP
+#define DIGGLER_NET_MSGTYPES_SERVERINFO_HPP
+
 #include "MsgType.hpp"
+
+#include <msgpack.hpp>
 
 namespace Diggler {
 namespace Net {
@@ -17,19 +18,19 @@ struct ServerInfoRequest : public MsgType {
 	std::vector<std::string> infos;
 	msgpack::object params;
 
-	void writeToMsg(OutMessage&) const;
-	void readFromMsg(InMessage&);
+	void writeToMsg(OutMessage&) const override;
+	void readFromMsg(InMessage&) override;
 };
 
 struct ServerInfoResponse : public MsgType {
 	msgpack::object infos;
 
-	void writeToMsg(OutMessage&) const;
-	void readFromMsg(InMessage&);
+	void writeToMsg(OutMessage&) const override;
+	void readFromMsg(InMessage&) override;
 };
 
 }
 }
 }
 
-#endif
+#endif /* DIGGLER_NET_MSGTYPES_SERVERINFO_HPP */

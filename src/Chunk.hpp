@@ -148,8 +148,9 @@ public:
 	/// @brief Gets a block's metadata.
 	/// Gets a block's metadata store, used to save advanced state values.
 	/// @returns Block's metadata.
+	/// @throws NoMetadataOnBlock if the targeted block doesn't have metadata
 	///
-	// TODO Datree& getBlockMetadata(int x, int y, int z);
+	// TODO msgpack::object& getBlockMetadata(int x, int y, int z);
 
 	/* ============ Setters ============ */
 
@@ -195,8 +196,6 @@ public:
 
 	void write(OutStream&) const;
 	void read(InStream&);
-	void send(Net::OutMessage&) const;
-	void recv(Net::InMessage&);
 };
 
 using ChunkRef = std::shared_ptr<Chunk>;

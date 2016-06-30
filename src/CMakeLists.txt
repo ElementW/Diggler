@@ -20,13 +20,16 @@ set(SRCS
 	${CSD}/GlobalProperties.cpp
 	${CSD}/GlUtils.cpp
 	${CSD}/io/FileStream.cpp
+	${CSD}/io/MemoryStream.cpp
 	${CSD}/io/Stream.cpp
 	${CSD}/KeyBinds.cpp
 	${CSD}/LocalPlayer.cpp
 	${CSD}/main.cpp
 	${CSD}/MessageState.cpp
+	${CSD}/network/msgtypes/Chat.cpp
+	${CSD}/network/msgtypes/ChunkTransfer.cpp
+	${CSD}/network/msgtypes/ServerInfo.cpp
 	${CSD}/network/NetHelper.cpp
-	${CSD}/network/Network.cpp
 	${CSD}/network/Network.cpp
 	${CSD}/Particles.cpp
 	${CSD}/Platform.cpp

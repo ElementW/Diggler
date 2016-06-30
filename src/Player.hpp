@@ -14,6 +14,8 @@ class VBO;
 class Game;
 class Texture;
 
+using PlayerGameID = uint32;
+
 class Player {
 protected:
 	static struct TexInfo {

@@ -1,5 +1,6 @@
-#ifndef NET_MSGTYPES_MSGTYPE_HPP
-#define NET_MSGTYPES_MSGTYPE_HPP
+#ifndef DIGGLER_NET_MSGTYPES_MSGTYPE_HPP
+#define DIGGLER_NET_MSGTYPES_MSGTYPE_HPP
+
 #include "../Network.hpp"
 
 namespace Diggler {
@@ -15,4 +16,4 @@ struct MsgType {
 }
 }
 
-#endif
+#endif /* DIGGLER_NET_MSGTYPES_MSGTYPE_HPP */

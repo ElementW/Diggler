@@ -18,6 +18,7 @@
 #include "EscMenu.hpp"
 #include "Audio.hpp"
 #include "network/NetHelper.hpp"
+#include "network/msgtypes/ChunkTransfer.hpp"
 #include "Particles.hpp"
 
 #include "content/Registry.hpp"
@@ -326,8 +327,8 @@ void GameState::onMouseButton(int key, int action, int mods) {
 	if (action == GLFW_PRESS) {
 		glm::ivec3 pointed, face;
 		if (G->LP->raytracePointed(32, &pointed, &face)) {
-			Net::OutMessage msg(Net::MessageType::ChunkUpdate);
-			msg.writeI16(G->LP->W->id);
+			Net::OutMessage msg(Net::MessageType::BlockUpdate);
+			msg.writeI32(G->LP->W->id);
 			if (key == GLFW_MOUSE_BUTTON_LEFT) {
 				msg.writeI32(pointed.x);
 				msg.writeI32(pointed.y);
@@ -798,6 +799,7 @@ void GameState::drawUI() {
 }
 
 bool GameState::processNetwork() {
+	using namespace Net::MsgTypes;
 	while (G->H.recv(m_msg, 0)) {
 		switch (m_msg.getType()) {
 			case Net::MessageType::Disconnect:
@@ -805,19 +807,26 @@ bool GameState::processNetwork() {
 				return false;
 
 			case Net::MessageType::ChunkTransfer: {
-				uint8 count = m_msg.readU8();
-				for (int i=0; i < count; ++i) {
-					WorldId wid = m_msg.readI16();
-					int x = m_msg.readI16(),
-					    y = m_msg.readI16(),
-					    z = m_msg.readI16();
-					// TODO handle this somewhere else?
-					// Against all common sense, arguments in constructors are evaluated BACKWARDS
-					//   ChunkRef c = G->U->getWorldEx(wid)->getNewEmptyChunk(m_msg.readI16(), m_msg.readI16(), m_msg.readI16());
-					// Effectively swapping X and Z
-					ChunkRef c = G->U->getWorldEx(wid)->getNewEmptyChunk(x, y, z);
-					c->recv(m_msg);
-					holdChunksInMem.push_back(c);
+				using S = ChunkTransferSubtype;
+				switch (static_cast<S>(m_msg.getSubtype())) {
+					case S::Request: {
+						; // No-op
+					} break;
+					case S::Response: {
+						ChunkTransferResponse ctr;
+						ctr.readFromMsg(m_msg);
+						for (const ChunkTransferResponse::ChunkData &cd : ctr.chunks) {
+							ChunkRef c = G->U->getWorldEx(cd.worldId)->getNewEmptyChunk(
+								cd.chunkPos.x, cd.chunkPos.y, cd.chunkPos.z);
+							InMemoryStream ims(cd.data, cd.dataLength);
+							c->read(ims);
+							holdChunksInMem.push_back(c);
+						}
+					} break;
+					case S::Denied: {
+						ChunkTransferDenied ctd;
+						ctd.readFromMsg(m_msg);
+					} break;
 				}
 			} break;
 			case Net::MessageType::Chat: {
@@ -864,14 +873,15 @@ bool GameState::processNetwork() {
 					getOutputStream() << "Invalid player update: #" << id << " is not on server" << std::endl;
 				}
 			} break;
-			case Net::MessageType::ChunkUpdate: {
+			case Net::MessageType::BlockUpdate: {
 				// TODO proper count
-				int count  = m_msg.getSize() /
-					(sizeof(uint16) * 3 + sizeof(uint16) * 3);
+				// TODO handle that in Chunk's ChangeHelper
+				int count  = m_msg.getSubtype();
 				for (int i=0; i < count; ++i) {
-					int x = m_msg.readU16(),
-						y = m_msg.readU16(),
-						z = m_msg.readU16();
+					const glm::ivec3 wcpos = m_msg.readIVec3();
+					uint8 x = m_msg.readU8(),
+								y = m_msg.readU8(),
+								z = m_msg.readU8();
 					WorldId wid = m_msg.readI16();
 					uint16 id = m_msg.readU16();
 					uint16 data = m_msg.readU16();

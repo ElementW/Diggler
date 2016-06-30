@@ -1,7 +1,7 @@
 #ifndef NETWORK_HPP
 #define NETWORK_HPP
 #include "../Platform.hpp"
-#include "../io/Stream.hpp"
+#include "../io/MemoryStream.hpp"
 #include <glm/vec3.hpp>
 #include <exception>
 
@@ -39,7 +39,7 @@ enum class MessageType : uint8 {
 	PlayerUpdate,
 	PlayerQuit,
 	ChunkTransfer,
-	ChunkUpdate,
+	BlockUpdate,
 	StatsUpdate,
 	Event,
 	Chat,
@@ -69,14 +69,11 @@ enum QuitReason : uint8 {
 
 using EventType = uint32;
 
-class Message : public SeekableStream {
+class Message : public virtual MemoryStream {
 protected:
 	friend class Host;
 	MessageType m_type;
 	uint8 m_subtype;
-	SizeT m_length;
-	PosT m_cursor;
-	uint8 *m_data;
 
 	Message() {}
 	Message(MessageType, uint8);
@@ -89,18 +86,13 @@ public:
 
 	inline MessageType getType() const { return m_type; }
 	inline uint8 getSubtype() const { return m_subtype; }
-	inline SizeT getSize() const { return m_length; }
 
-	inline PosT tell() const override {
-		return m_cursor;
-	}
-	void seek(OffT, Whence = Set) override;
 	inline SizeT remaining() const {
-		return getSize() - tell();
+		return length() - tell();
 	}
 };
 
-class InMessage : public Message, public InStream {
+class InMessage : public Message, public InMemoryStream {
 protected:
 	friend class Host;
 	Channels m_chan;
@@ -114,7 +106,6 @@ public:
 	InMessage();
 	~InMessage();
 
-	void readData(void *data, SizeT len) override;
 	inline const void* getCursorPtr(uint advanceCursor = 0) {
 		m_cursor += advanceCursor;
 		return &(m_data[m_cursor-advanceCursor]);
@@ -123,31 +114,28 @@ public:
 		return &(m_data[m_cursor]);
 	}
 
-	inline const void* data() const {
-		return m_data;
-	}
-
 	glm::vec3 readVec3();
 	glm::ivec3 readIVec3();
 
 	Channels getChannel() const;
 };
 
-class OutMessage : public Message, public OutStream {
+class OutMessage : public Message, public OutMemoryStream {
 protected:
 	friend class Host;
-	SizeT m_dataMemSize;
 	mutable uint8 *m_actualData;
-	void fit(SizeT);
+	void fit(SizeT) override;
 
 public:
-	OutMessage(MessageType t = MessageType::Null, uint8 subtype = 0);
+	OutMessage(MessageType t = MessageType::Null, uint8 subtype = 255);
 	~OutMessage();
 
-	void setType(MessageType t) { m_type = t; }
-	void setSubtype(uint8 t) { m_subtype = t; }
+	inline void setType(MessageType t) { m_type = t; }
+	template<typename T>
+	inline void setSubtype(T t) { m_subtype = static_cast<uint8>(t); }
+	template<typename T>
+	inline void setType(MessageType t, T st) { setType(t); setSubtype(st); }
 
-	void writeData(const void *data, SizeT len) override;
 	inline void writeVec3(float x, float y, float z) {
 		writeFloat(x);
 		writeFloat(y);

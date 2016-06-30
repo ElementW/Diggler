@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "Game.hpp"
+#include "network/msgtypes/ChunkTransfer.hpp"
 #include "network/Network.hpp"
 #include "network/NetHelper.hpp"
 #include "VersionInfo.hpp"
@@ -181,38 +182,62 @@ void Server::schedSendChunk(ChunkRef C, Player &P) {
 }
 
 void Server::sendChunks(const std::list<ChunkRef> &cs, Player &P) {
-	OutMessage msg(MessageType::ChunkTransfer);
-	msg.writeU8(cs.size()); // Nbr of sent chunks
+	using namespace Net::MsgTypes;
+	ChunkTransferResponse ctr;
+	std::vector<OutMemoryStream> chunkBufs(cs.size());
+	size_t i = 0;
 	for (const ChunkRef &cr : cs) {
-		Chunk &c = *cr;
-		msg.writeI16(c.getWorld()->id);
-		glm::ivec3 pos = c.getWorldChunkPos();
-		msg.writeI16(pos.x);
-		msg.writeI16(pos.y);
-		msg.writeI16(pos.z);
-		c.send(msg);
+		ctr.chunks.emplace_back();
+		ChunkTransferResponse::ChunkData &cd = ctr.chunks.back();
+		const Chunk &c = *cr;
+		cd.worldId = c.getWorld()->id;
+		cd.chunkPos = c.getWorldChunkPos();
+		c.write(chunkBufs[i]);
+		cd.dataLength = chunkBufs[i].length();
+		cd.data = chunkBufs[i].data();
+		++i;
 	}
+	OutMessage msg;
+	ctr.writeToMsg(msg);
 	H.send(P.P, msg, Tfer::Rel, Channels::MapTransfer);
 }
 
 void Server::handlePlayerChunkRequest(InMessage &msg, Player &plr) {
-	// TODO: distance & tool check, i.e. legitimate update
-	int cx = msg.readI16(), cy = msg.readI16(), cz = msg.readI16();
-	schedSendChunk(plr.W->getChunkEx(cx, cy, cz), plr);
+	using namespace Net::MsgTypes;
+	using S = ChunkTransferSubtype;
+	switch (static_cast<S>(msg.getSubtype())) {
+		case S::Request: {
+			// TODO: distance & tool check, i.e. legitimate update
+			ChunkTransferRequest ctr;
+			ctr.readFromMsg(msg);
+			for (const ChunkTransferRequest::ChunkData &cd : ctr.chunks) {
+				WorldRef wld = G.U->getWorld(cd.worldId);
+				if (wld) {
+					schedSendChunk(wld->getChunkEx(cd.chunkPos.x, cd.chunkPos.y, cd.chunkPos.z), plr);
+				}
+			}
+		} break;
+		case S::Response:
+		case S::Denied: {
+			; // No-op
+		} break;
+	}
 }
 
 void Server::handlePlayerMapUpdate(InMessage &msg, Player &plr) {
 	// TODO: distance & tool check, i.e. legitimate update
-	WorldId wid = msg.readI16();
+	WorldId wid = msg.readI32();
 	int x = msg.readI32(), y = msg.readI32(), z = msg.readI32();
 	BlockId id = msg.readU16();
 	BlockData data = msg.readU16(); 
 	ChunkRef c = G.U->getWorld(wid)->getChunkAtCoords(x, y, z);
 	if (c) {
 		c->setBlock(x, y, z, id, data);
-		// TODO: block datrees
 		if (!c->CH.empty()) {
-			OutMessage msg(MessageType::ChunkUpdate, 1);
+			OutMessage msg(MessageType::BlockUpdate, 1);
+			msg.writeI32(wid);
+			const glm::ivec3 wcpos = c->getWorldChunkPos();
+			msg.writeIVec3(wcpos);
 			c->CH.flush(msg);
 			NetHelper::Broadcast(G, msg, Tfer::Rel, Channels::MapUpdate);
 		}
@@ -312,7 +337,7 @@ void Server::chunkUpdater(WorldRef WR, bool &continueUpdate) {
 		for (auto pair : W) {
 			if ((c = pair.second.lock()) && !c->CH.empty()) {
 				// TODO: view range
-				OutMessage msg(MessageType::ChunkUpdate, 0);
+				OutMessage msg(MessageType::BlockUpdate, 0);
 				glm::ivec3 pos = c->getWorldChunkPos();
 				msg.writeI16(pos.x);
 				msg.writeI16(pos.y);
@@ -360,7 +385,7 @@ void Server::run() {
 				case MessageType::ChunkTransfer:
 					handlePlayerChunkRequest(msg, *plr);
 					break;
-				case MessageType::ChunkUpdate:
+				case MessageType::BlockUpdate:
 					handlePlayerMapUpdate(msg, *plr);
 					break;
 				

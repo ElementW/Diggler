@@ -14,8 +14,8 @@ public:
 class SeekableStream : public virtual Stream {
 public:
 	enum Whence {
-		Begin,
 		Set,
+		Current,
 		// End
 	};
 

@@ -580,12 +580,4 @@ void Chunk::read(InStream &is) {
 	}
 }
 
-void Chunk::recv(Net::InMessage &M) {
-	return read(M);
-}
-
-void Chunk::send(Net::OutMessage &M) const {
-	return write(M);
-}
-
 }

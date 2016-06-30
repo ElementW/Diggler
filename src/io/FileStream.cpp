@@ -4,9 +4,9 @@ namespace Diggler {
 
 inline std::ios::seekdir getSeekDir(SeekableStream::Whence whence) {
 	switch (whence) {
-		case SeekableStream::Whence::Begin:
-			return std::ios::beg;
 		case SeekableStream::Whence::Set:
+			return std::ios::beg;
+		case SeekableStream::Whence::Current:
 			return std::ios::cur;
 		// case SeekableStream::Whence::End:
 			// return std::ios::end;

@@ -45,34 +45,9 @@ static enet_uint32 TferToFlags(Tfer mode) {
 }
 
 Message::Message(MessageType t, uint8 s) :
+	MemoryStream(nullptr, 0),
 	m_type(t),
-	m_subtype(s),
-	m_length(0),
-	m_cursor(0),
-	m_data(nullptr) {
-}
-
-void Message::seek(OffT pos, Whence whence) {
-	switch (whence) {
-	case Begin:
-		if (pos < 0) {
-			m_cursor = 0;
-		} else if (pos >= static_cast<OffT>(m_length)) {
-			m_cursor = m_length - 1;
-		} else {
-			m_cursor = static_cast<PosT>(pos);
-		}
-		break;
-	case Set:
-		if (pos < -static_cast<OffT>(m_cursor)) {
-			m_cursor = 0;
-		} else if (pos >= static_cast<OffT>(m_length - m_cursor)) {
-			m_cursor = m_length - 1;
-		} else {
-			m_cursor += static_cast<PosT>(pos);
-		}
-		break;
-	}
+	m_subtype(s) {
 }
 
 
@@ -139,42 +114,28 @@ void InMessage::free() {
 
 OutMessage::OutMessage(MessageType t, uint8 subtype) :
 	Message(t, subtype),
-	m_dataMemSize(0),
 	m_actualData(nullptr) {
 }
 
 OutMessage::~OutMessage() {
 	std::free(m_actualData);
+	m_data = nullptr;
 }
 
 const static int OutMessage_AllocStep = 1024;
 void OutMessage::fit(SizeT len) {
-	if (len <= m_dataMemSize)
+	if (len <= m_allocated)
 		return;
 	SizeT targetSize = ((len + OutMessage_AllocStep - 1) /
 		OutMessage_AllocStep)*OutMessage_AllocStep; // Round up
-	decltype(m_actualData) newActualData = static_cast<decltype(m_actualData)>(
+	using DataT = decltype(m_actualData);
+	DataT newActualData = static_cast<DataT>(
 		std::realloc(m_actualData, HeaderSize + targetSize));
 	if (newActualData == nullptr)
 		throw std::bad_alloc();
 	m_actualData = newActualData;
 	m_data = newActualData + HeaderSize;
-	m_dataMemSize = targetSize;
-}
-
-void OutMessage::writeData(const void *data, SizeT len) {
-	fit(m_cursor + len);
-	std::memcpy(&(m_data[m_cursor]), data, len);
-	if (m_cursor + len > m_length) {
-		m_length = m_cursor + len;
-	}
-	m_cursor += len;
-}
-void InMessage::readData(void *data, SizeT len) {
-	if (m_cursor + len > m_length)
-		throw std::underflow_error("No more data to be read");
-	std::memcpy(data, &(m_data[m_cursor]), len);
-	m_cursor += len;
+	m_allocated = targetSize;
 }
 
 
