@@ -2,11 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 
 project(Diggler C CXX)
 
-### Checks
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-  message(FATAL_ERROR "Using retarded compiler, aborting.")
-endif()
-
 ### Find path to build dir, relative if possible, to symlink resources directories
 file(RELATIVE_PATH REL_BUILD_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_BINARY_DIR})
 string(FIND "${REL_BUILD_PATH}" ".." RBP_2DOTPOS)
@@ -45,6 +40,19 @@ endif()
 
 ### Packages
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+find_package(CXX14)
+if (NOT CXX14_FOUND)
+  message(FATAL_ERROR "C++14 feature support unavailable.
+Please use the latest version of your compiler.
+
+Here are the minimum requirements:
+- GCC version 5 (on Debian Jessie, enable Stretch/testing repos and get GCC from there)
+- clang version 3.4
+- MSVC: wait until Microsoft goes bankrupt, and use another compiler in the meantime
+- ICC: ICC 17.0 Beta doesn't yet support all required C++14 features")
+endif()
+set(CMAKE_CXX_FLAGS "${CXX14_FLAGS} ${CMAKE_CXX_FLAGS}")
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/enet")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/lzfx")
@@ -96,3 +104,6 @@ if (DOXYGEN_FOUND)
     COMMENT "Generate code documentation with Doxygen" VERBATIM
   )
 endif()
+
+file(GLOB_RECURSE FILELIST "*.hpp" "*.cpp")
+add_custom_target(files SOURCES ${FILELIST})
