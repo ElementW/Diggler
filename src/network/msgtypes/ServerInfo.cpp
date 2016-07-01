@@ -11,7 +11,7 @@ void ServerInfoRequest::readFromMsg(InMessage &msg) {
     infos.emplace_back(msg.readString());
   }
   Stream::PosT offset = msg.tell();
-  params = msgpack::unpack(static_cast<const char*>(msg.data()), msg.length(), offset).get();
+  params = msgpack::unpack(z, static_cast<const char*>(msg.data()), msg.length(), offset);
 }
 
 

@@ -15,6 +15,7 @@ enum class ServerInfoSubtype : uint8 {
 };
 
 struct ServerInfoRequest : public MsgType {
+  msgpack::zone z;
   std::vector<std::string> infos;
   msgpack::object params;
 
@@ -23,6 +24,7 @@ struct ServerInfoRequest : public MsgType {
 };
 
 struct ServerInfoResponse : public MsgType {
+  msgpack::zone z;
   msgpack::object infos;
 
   void writeToMsg(OutMessage&) const override;

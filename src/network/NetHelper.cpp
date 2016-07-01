@@ -1,4 +1,6 @@
 #include "NetHelper.hpp"
+
+#include "msgtypes/Chat.hpp"
 #include "../Game.hpp"
 #include "../Player.hpp"
 #include "../Server.hpp"
@@ -32,9 +34,12 @@ void MakeEvent(OutMessage &msg, EventType t, const glm::vec3 &p) {
 }
 
 void SendChat(Game *G, const std::string &str) {
-  OutMessage chat(MessageType::Chat);
-  chat.writeString(str);
-  G->H.send(G->NS, chat, Tfer::Unseq);
+  Net::MsgTypes::ChatSend cs;
+  cs.msg = msgpack::object(str, cs.z);
+
+  OutMessage msg;
+  cs.writeToMsg(msg);
+  G->H.send(G->NS, msg, Tfer::Unseq);
 }
 
 void SendEvent(Game *G, EventType t) {

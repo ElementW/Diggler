@@ -18,6 +18,7 @@ enum class ChatSubtype : uint8 {
 };
 
 struct ChatSend : public MsgType {
+  msgpack::zone z;
   msgpack::object msg;
 
   void writeToMsg(OutMessage&) const override;
@@ -25,6 +26,7 @@ struct ChatSend : public MsgType {
 };
 
 struct ChatAnnouncement : public MsgType {
+  msgpack::zone z;
   std::string announcementType;
   struct Origin {
     std::string name;
@@ -37,6 +39,7 @@ struct ChatAnnouncement : public MsgType {
 };
 
 struct ChatPlayerTalk : public MsgType {
+  msgpack::zone z;
   struct ChatPlayer {
     PlayerGameID id;
     msgpack::object display;

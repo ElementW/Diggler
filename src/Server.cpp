@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "Game.hpp"
+#include "network/msgtypes/Chat.hpp"
 #include "network/msgtypes/ChunkTransfer.hpp"
 #include "network/Network.hpp"
 #include "network/NetHelper.hpp"
@@ -116,24 +117,24 @@ void Server::handleDisconnect(Peer &peer) {
 }
 
 void Server::handleChat(InMessage &msg, Player *plr) {
-  std::string chatMsg = msg.readString();
-  std::string senderName = plr ? plr->name : "<console>";
-  if (chatMsg.length() > 1 && chatMsg[0] == '/') {
-    size_t pos = chatMsg.find_first_of(' ');
-    if (pos == std::string::npos) {
-      handleCommand(plr, chatMsg.substr(1), std::vector<std::string>());
-    } else {
-      handleCommand(plr, chatMsg.substr(1, pos-1), std::vector<std::string>());
-    }
-  } else {
-    // TODO: implement UTF8
-    getOutputStream() << senderName << ": " << chatMsg << endl;
-    std::ostringstream contentFormatter;
-    contentFormatter << senderName << "> " << chatMsg;
-    std::string content = contentFormatter.str();
-    OutMessage newMsg(MessageType::Chat);
-    newMsg.writeString(content);
-    NetHelper::Broadcast(G, newMsg, Tfer::Rel);
+  using namespace Net::MsgTypes;
+  using S = ChatSubtype;
+  switch (static_cast<S>(msg.getSubtype())) {
+    case S::Send: {
+      ChatSend cs;
+      cs.readFromMsg(msg);
+
+      ChatPlayerTalk cpt;
+      cpt.player.id = plr->id;
+      cpt.msg = cs.msg;
+      OutMessage omsg;
+      cpt.writeToMsg(omsg);
+      NetHelper::Broadcast(G, omsg, Tfer::Rel);
+    } break;
+    case S::Announcement:
+    case S::PlayerTalk:
+      ; // No-op
+      break;
   }
 }
 

@@ -18,6 +18,7 @@
 #include "EscMenu.hpp"
 #include "Audio.hpp"
 #include "network/NetHelper.hpp"
+#include "network/msgtypes/Chat.hpp"
 #include "network/msgtypes/ChunkTransfer.hpp"
 #include "Particles.hpp"
 
@@ -794,7 +795,34 @@ bool GameState::processNetwork() {
         }
       } break;
       case Net::MessageType::Chat: {
-        m_chatBox->addChatEntry(m_msg.readString());
+        using S = ChatSubtype;
+        switch (static_cast<S>(m_msg.getSubtype())) {
+          case S::Send: {
+            ; // No-op
+          } break;
+          case S::Announcement: {
+            ChatAnnouncement ca;
+            ca.readFromMsg(m_msg);
+            // TODO better formatting abilities
+            if (ca.msg.type == msgpack::type::STR) {
+              m_chatBox->addChatEntry(ca.msg.as<std::string>());
+            }
+          } break;
+          case S::PlayerTalk: {
+            ChatPlayerTalk cpt;
+            cpt.readFromMsg(m_msg);
+            // TODO better formatting abilities
+            if (cpt.msg.type == msgpack::type::STR) {
+              std::string playerName;
+              if (cpt.player.display.type == msgpack::type::NIL) {
+                playerName = G->players.getById(cpt.player.id).name + "> ";
+              } else if (cpt.player.display.type == msgpack::type::STR) {
+                cpt.player.display.convert(playerName);
+              }
+              m_chatBox->addChatEntry(playerName + cpt.msg.as<std::string>());
+            }
+          } break;
+        }
       } break;
       case Net::MessageType::PlayerJoin: {
         Player &plr = G->players.add();
