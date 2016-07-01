@@ -107,7 +107,6 @@ GameState::GameState(GameWindow *GW, const std::string &servHost, int servPort)
   m_3dRenderVBO->setData(renderQuad, 6*sizeof(Coord2DTex));
 
   m_crossHair.tex = new Texture(getAssetPath("crosshair.png"), Texture::PixelFormat::RGBA);
-  UI.headerBg.color = glm::vec4(0, 0, 0, .5f);
 
   //"\f0H\f1e\f2l\f3l\f4l\f5o \f6d\f7e\f8m\f9b\faa\fbz\fcz\fde\fes\ff,\n\f0ye see,it werks purrfektly :D\n(and also; it's optimized)"
 
@@ -172,14 +171,7 @@ void GameState::BuilderGun::select(int idx) {
 }
 
 void GameState::setupUI() {
-  UI.Ore = G->UIM->add<UI::Text>(); UI.Ore->setScale(2, 2);
-  UI.Loot = G->UIM->add<UI::Text>(); UI.Loot->setScale(2, 2);
-  UI.Weight = G->UIM->add<UI::Text>(); UI.Weight->setScale(2, 2);
-  UI.TeamOre = G->UIM->add<UI::Text>(); UI.TeamOre->setScale(2, 2);
-  UI.RedCash = G->UIM->add<UI::Text>(); UI.RedCash->setScale(2, 2);
-  UI.BlueCash = G->UIM->add<UI::Text>(); UI.BlueCash->setScale(2, 2);
   UI.FPS = G->UIM->add<UI::Text>(); UI.FPS->setScale(2, 2);
-  UI.Altitude = G->UIM->add<UI::Text>(); UI.Altitude->setScale(2, 2);
   UI.DebugInfo = G->UIM->add<UI::Text>(); UI.DebugInfo->setVisible(false);
   UI.EM = new EscMenu(G);
 
@@ -414,33 +406,8 @@ void GameState::updateViewport() {
   }
 
   int lineHeight = G->FM.getDefaultFont()->getHeight()*UIM.scale;
-  char str[15]; std::snprintf(str, 15, "Loot: %d/%d", G->LP->ore, Player::getMaxOre(G->LP->playerclass));
-  UI.Ore->setText(std::string(str));
-  UI.Ore->setPos(2*UIM.scale, h-lineHeight);
-
-  UI.Loot->setText("Loot: $0");
-  UI.Loot->setPos(w/6, h-lineHeight);
-
-  UI.Weight->setText("Weight: 0");
-  UI.Weight->setPos(w/3, h-lineHeight);
-
-  UI.TeamOre->setText("Team ore: 0");
-  UI.TeamOre->setPos(w/2, h-lineHeight);
-
-  UI.RedCash->setText("\f4Red: $0");
-  UI.RedCash->setPos((w*6)/8, h-lineHeight);
-
-  UI.BlueCash->setText("\fbBlue: $0");
-  UI.BlueCash->setPos((w*7)/8, h-lineHeight);
 
   UI.FPS->setPos(16, 16);
-  UI.Altitude->setText("Altitude: XX");
-  UI.Altitude->setPos(w-16-UI.Altitude->getSize().x, 16);
-  UI.lastAltitude = INT_MAX;
-
-  UI.headerBg.mat = glm::scale(glm::translate(*UIM.PM,
-    glm::vec3(0, h-lineHeight, 0)),
-    glm::vec3(w, lineHeight, 0));
 
   UI.DebugInfo->setPos(0, h-(lineHeight+UI.DebugInfo->getSize().y));
 
@@ -750,12 +717,6 @@ void GameState::renderDeathScreen() {
 
 void GameState::updateUI() {
   LocalPlayer &LP = *G->LP;
-  int altitude = LP.position.y;
-  if (altitude != UI.lastAltitude) {
-    char str[15]; std::snprintf(str, 15, "Altitude: %d", altitude);
-    UI.lastAltitude = altitude;
-    UI.Altitude->setText(std::string(str));
-  }
   if (debugInfo.show) {
     WorldRef w;
     int chunkMem = 0, maxChunkMem = 0;
@@ -790,7 +751,6 @@ void GameState::updateUI() {
 }
 
 void GameState::drawUI() {
-  G->UIM->drawRect(UI.headerBg.mat, UI.headerBg.color);
   G->UIM->render();
   m_chatBox->render();
 

@@ -114,21 +114,7 @@ private:
   } debugInfo;
 
   struct {
-    struct {
-      glm::mat4 mat;
-      glm::vec4 color;
-    } headerBg;
-
-    UI::Text *Ore;
-    UI::Text *Loot;
-    UI::Text *Weight;
-    UI::Text *TeamOre;
-    UI::Text *RedCash;
-    UI::Text *BlueCash;
-
     UI::Text *FPS;
-    UI::Text *Altitude;
-    int lastAltitude;
 
     UI::Text *DebugInfo;
 
