@@ -162,8 +162,8 @@ BlockData World::getBlockData(int x, int y, int z, bool buf2) {
   return 0;
 }
 
-bool World::blockHasMetadata(int x, int y, int z, bool buf2) {
-  return getBlockData(x, y, z, buf2) & BlockMetadataBit;
+bool World::blockHasExtdata(int x, int y, int z, bool buf2) {
+  return getBlockData(x, y, z, buf2) & BlockExtdataBit;
 }
 
 

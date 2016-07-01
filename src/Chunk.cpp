@@ -258,21 +258,21 @@ BlockData Chunk::getBlockData(int x, int y, int z, bool buf2) {
 #endif
   Data *buf = buf2 ? data2 : data;
   BlockData d = buf->data[I(x,y,z)];
-  if (d & BlockMetadataBit) {
-    // TODO Implement data in metadata
+  if (d & BlockExtdataBit) {
+    // TODO Implement data in extdata
     return 0;
   }
   return d;
 }
 
-bool Chunk::blockHasMetadata(int x, int y, int z, bool buf2) {
+bool Chunk::blockHasExtdata(int x, int y, int z, bool buf2) {
   if ((x < 0 || y < 0 || z < 0 || x >= CX || y >= CY || z >= CZ) && W)
-    return W->blockHasMetadata(wcx * CX + x, wcy * CY + y, wcz * CZ + z, buf2);
+    return W->blockHasExtdata(wcx * CX + x, wcy * CY + y, wcz * CZ + z, buf2);
 #if CHUNK_INMEM_COMPRESS
   imcUncompress();
 #endif
   Data *buf = buf2 ? data2 : data;
-  return buf->data[I(x,y,z)] & BlockMetadataBit;
+  return buf->data[I(x,y,z)] & BlockExtdataBit;
 }
 
 void Chunk::markAsDirty() {

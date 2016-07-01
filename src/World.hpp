@@ -101,21 +101,21 @@ public:
 
   ///
   /// @returns Block's data integer.
-  /// @note If the block has metadata, 0 is returned.
+  /// @note If the block has extdata, 0 is returned.
   ///
   BlockData getBlockData(int x, int y, int z, bool = false);
 
   ///
-  /// @returns `true` if block has metadata, `false` otherwise.
+  /// @returns `true` if block has extdata, `false` otherwise.
   ///
-  bool blockHasMetadata(int x, int y, int z, bool = false);
+  bool blockHasExtdata(int x, int y, int z, bool = false);
 
   ///
-  /// @brief Gets a block's metadata.
-  /// Gets a block's metadata store, used to save advanced state values.
-  /// @returns Block's metadata.
+  /// @brief Gets a block's extdata.
+  /// Gets a block's extdata store, used to save advanced state values.
+  /// @returns Block's extdata.
   ///
-  // TODO Datree& getBlockMetadata(int x, int y, int z);
+  // TODO msgpack::object&& getBlockExtdata(int x, int y, int z);
 
   /* ============ Setters ============ */
 
@@ -134,8 +134,8 @@ public:
   ///
   bool setBlockData(int x, int y, int z, BlockData data, bool = false);
 
-  // Copies metadata tree
-  // TODO void setMetadata(const Datree &meta);
+  // Copies extdata tree
+  // TODO void setExtdata(const msgpack::object& &meta);
 
   void onRenderPropertiesChanged();
   void refresh();

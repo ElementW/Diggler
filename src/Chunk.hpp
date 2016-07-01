@@ -69,7 +69,7 @@ private:
   int vertices, indicesOpq, indicesTpt;
 
   Data *data, *data2;
-  //std::map<int, Datree> metaStore;
+  //std::map<uint16, msgpack::object> extdataStore;
 
   State state;
   bool dirty;
@@ -135,22 +135,21 @@ public:
 
   ///
   /// @returns Block's data integer.
-  /// @note If the block has metadata, 0 is returned.
   ///
   BlockData getBlockData(int x, int y, int z, bool = false);
 
   ///
-  /// @returns `true` if block has metadata, `false` otherwise.
+  /// @returns `true` if block has extdata, `false` otherwise.
   ///
-  bool blockHasMetadata(int x, int y, int z, bool = false);
+  bool blockHasExtdata(int x, int y, int z, bool = false);
 
   ///
-  /// @brief Gets a block's metadata.
-  /// Gets a block's metadata store, used to save advanced state values.
-  /// @returns Block's metadata.
-  /// @throws NoMetadataOnBlock if the targeted block doesn't have metadata
+  /// @brief Gets a block's extdata.
+  /// Gets a block's extdata store,  to save advanced state values.
+  /// @returns Block's extdata.
+  /// @throws NoExtdataOnBlock if the targeted block doesn't have extdata
   ///
-  // TODO msgpack::object& getBlockMetadata(int x, int y, int z);
+  // TODO msgpack::object& getBlockExtdata(int x, int y, int z);
 
   /* ============ Setters ============ */
 
@@ -169,8 +168,8 @@ public:
   ///
   void setBlockData(int x, int y, int z, BlockData data, bool = false);
 
-  // Copies metadata tree
-  // TODO void setMetadata(const Datree &meta);
+  // Copies extdata tree
+  // TODO void setExtdata(const msgpack::object &meta);
 
   /* ============ Updates ============ */
 
