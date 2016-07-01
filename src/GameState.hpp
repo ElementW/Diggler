@@ -75,18 +75,6 @@ private:
     GLuint att_coord, uni_unicolor, uni_mvp;
   } m_highlightBox;
 
-  struct BuilderGun {
-    glm::mat4 matGun, matIcon;
-    Texture *tex;
-    std::vector<std::tuple<BlockId, Texture*>> blockTexs;
-    int index;
-    BlockId  currentBlock;
-    Texture *currentBlockTex;
-    BuilderGun();
-    ~BuilderGun();
-    void select(int idx);
-  } m_builderGun;
-
   KeyBindings *m_keybinds;
 
   Chatbox *m_chatBox;

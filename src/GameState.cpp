@@ -142,35 +142,6 @@ GameState::Bloom::~Bloom() {
   delete renderer.fbo;
 }
 
-GameState::BuilderGun::BuilderGun() {
-  tex = new Texture(getAssetPath("tools", "tex_tool_build.png"), Texture::PixelFormat::RGBA);
-  blockTexs.emplace_back(Content::BlockAirId, new Texture(getAssetPath("icons", "deconstruction.png"), Texture::PixelFormat::RGB));
-  /*for (uint i=0; i < sizeof(Blocks::TypeInfos)/sizeof(*Blocks::TypeInfos); ++i) {
-    const Blocks::TypeInfo &inf = Blocks::TypeInfos[i];
-    // TODO change to player's team
-    if (inf.teamCanBuild & Blocks::TeamRed) {
-      blockTexs.emplace_back(inf.type, new Texture(getAssetPath("icons", inf.icon), Texture::PixelFormat::RGB));
-    }
-  }*/
-  select(0);
-}
-
-GameState::BuilderGun::~BuilderGun() {
-  delete tex;
-  for (auto tuple : blockTexs)
-    delete std::get<1>(tuple);
-}
-
-void GameState::BuilderGun::select(int idx) {
-  int max = blockTexs.size();
-  if (idx < 0)
-    idx = max-1;
-  index = idx % max;
-  auto tuple = blockTexs.at(index);
-  currentBlock = std::get<0>(tuple);
-  currentBlockTex = std::get<1>(tuple);
-}
-
 void GameState::setupUI() {
   UI.FPS = G->UIM->add<UI::Text>(); UI.FPS->setScale(2, 2);
   UI.DebugInfo = G->UIM->add<UI::Text>(); UI.DebugInfo->setVisible(false);
@@ -374,10 +345,7 @@ void GameState::onResize(int w, int h) {
 }
 
 void GameState::onMouseScroll(double x, double y) {
-  if (y < 0)
-    m_builderGun.select(m_builderGun.index-1);
-  if (y > 0)
-    m_builderGun.select(m_builderGun.index+1);
+  (void) x; (void) y;
 }
 
 void GameState::updateViewport() {
@@ -394,16 +362,6 @@ void GameState::updateViewport() {
     m_crossHair.mat = glm::scale(glm::translate(*UIM.PM,
       glm::vec3((w-tw)/2, (h-th)/2, 0)),
       glm::vec3(tw, tw, 0));
-  }
-
-  { int scale = 3, tw = 120*scale, th = 126*scale;
-    m_builderGun.matGun = glm::scale(glm::translate(*UIM.PM,
-      glm::vec3((w-tw)/2, -46*scale, 0)),
-      glm::vec3(tw, th, 0));
-    int iw = 39*scale, ih = 21*scale;
-    m_builderGun.matIcon = glm::scale(glm::translate(*UIM.PM,
-      glm::vec3((w-iw)/2-3*scale, 9*scale, 0)),
-      glm::vec3(iw, ih, 0));
   }
 
   int lineHeight = G->FM.getDefaultFont()->getHeight()*UIM.scale;
@@ -757,8 +715,6 @@ void GameState::drawUI() {
 
   G->UIM->drawTex(m_crossHair.mat, *m_crossHair.tex);
   // TODO render weapon
-  G->UIM->drawTex(m_builderGun.matGun, *m_builderGun.tex);
-  G->UIM->drawTex(m_builderGun.matIcon, *m_builderGun.currentBlockTex);
 
   G->UIM->drawTex(UI::Element::Area{0,0,128,128}, *G->CR->getAtlas());
 }
