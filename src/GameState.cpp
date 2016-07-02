@@ -206,6 +206,11 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
       G->U->getWorld(0)->refresh();
     }
     break;
+  case GLFW_KEY_F12:
+    if (action == GLFW_PRESS && (mods & GLFW_MOD_SHIFT)) {
+      ::abort();
+    }
+    break;
   default:
     break;
   }
