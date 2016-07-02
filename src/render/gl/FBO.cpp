@@ -19,8 +19,8 @@ namespace Render {
 namespace gl {
 
 FBO::FBO(int w, int h, Texture::PixelFormat format, bool stencil) : m_hasStencil(stencil) {
-  BoundBufferSave<GL_FRAMEBUFFER> saveFbo;
   BoundBufferSave<GL_RENDERBUFFER> saveRbo;
+  BoundBufferSave<GL_FRAMEBUFFER> saveFbo;
 
   glGetError(); // Flush previous errors
 

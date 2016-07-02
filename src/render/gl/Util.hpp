@@ -41,10 +41,20 @@ struct BoundBufferSave {
   BoundBufferSave() {
     getUInteger(BoundBufferT, buffer);
   }
-  ~BoundBufferSave() {
-    glBindBuffer(BufferT, buffer);
-  }
+  inline ~BoundBufferSave();
 };
+template<> inline BoundBufferSave<GL_ARRAY_BUFFER>::~BoundBufferSave() {
+  glBindBuffer(GL_ARRAY_BUFFER, buffer);
+}
+template<> inline BoundBufferSave<GL_ELEMENT_ARRAY_BUFFER>::~BoundBufferSave() {
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
+}
+template<> inline BoundBufferSave<GL_FRAMEBUFFER>::~BoundBufferSave() {
+  glBindFramebuffer(GL_FRAMEBUFFER, buffer);
+}
+template<> inline BoundBufferSave<GL_RENDERBUFFER>::~BoundBufferSave() {
+  glBindRenderbuffer(GL_RENDERBUFFER, buffer);
+}
 
 }
 }
