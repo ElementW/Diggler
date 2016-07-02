@@ -12,10 +12,10 @@ namespace Diggler {
 ///
 /// @brief Axis-Aligned Bounding Box.
 ///
-template<typename T = typename glm::mediump_vec3::value_type>
+template<typename Vec3 = typename glm::vec3>
 class AABB {
 public:
-  using Vec3 = glm::tvec3<T, glm::mediump>;
+  using T = typename Vec3::value_type;
 
   Vec3 v1, v2;
 
@@ -58,7 +58,7 @@ public:
   /// @param other AABB to check intersection with.
   /// @returns `true` if AABB intersects, `false` otherwise.
   ///
-  bool intersects(const AABB<T> &other) const {
+  bool intersects(const AABB<Vec3> &other) const {
     bool xOverlap = !(other.v1.x > v2.x || other.v2.x < v1.x);
     bool yOverlap = !(other.v1.y > v2.y || other.v2.y < v1.y);
     bool zOverlap = !(other.v1.z > v2.z || other.v2.z < v1.z);
@@ -71,7 +71,7 @@ public:
   /// @param vx,vy,vz Velocity.
   /// @param[out] nx,ny,nz Collision normal.
   ///
-  float sweptCollision(AABB<T> other, float vx, float vy, float vz, float &nx, float &ny, float &nz) {
+  float sweptCollision(AABB<Vec3> other, float vx, float vy, float vz, float &nx, float &ny, float &nz) {
     T xInvEntry, yInvEntry, zInvEntry;
     T xInvExit, yInvExit, zInvExit;
 
@@ -158,10 +158,10 @@ public:
 
 extern template class AABB<>;
 
-template<typename T = float>
-class AABBVector : public std::vector<AABB<T>> {
+template<typename Vec3 = typename glm::vec3>
+class AABBVector : public std::vector<AABB<Vec3>> {
 public:
-  using Vec3 = glm::tvec3<T, glm::mediump>;
+  using T = typename Vec3::value_type;
 
   ///
   /// @brief Checks if a point is in the AABB vector.
@@ -169,7 +169,7 @@ public:
   /// @returns `true` if point is in one AABB or more, `false` otherwise.
   ///
   bool intersects(const Vec3 &point) const {
-    for (const AABB<T> &box : *this)
+    for (const AABB<Vec3> &box : *this)
       if (box.intersects(point))
         return true;
     return false;
@@ -180,8 +180,8 @@ public:
   /// @param other AABB to check intersection with.
   /// @returns `true` if AABBs intersects, `false` otherwise.
   ///
-  bool intersects(const AABB<T> &other) const {
-    for (const AABB<T> &box : *this)
+  bool intersects(const AABB<Vec3> &other) const {
+    for (const AABB<Vec3> &box : *this)
       if (box.intersects(other))
         return true;
     return false;
@@ -192,9 +192,9 @@ public:
   /// @param other AABB vector to check intersection with.
   /// @returns `true` if AABBs intersects, `false` otherwise.
   ///
-  bool intersects(const AABBVector<T> &other) const {
-    for (const AABB<T> &obox : other)
-      for (const AABB<T> &box : *this)
+  bool intersects(const AABBVector<Vec3> &other) const {
+    for (const AABB<Vec3> &obox : other)
+      for (const AABB<Vec3> &box : *this)
         if (box.intersects(obox))
           return true;
     return false;
