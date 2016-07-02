@@ -18,23 +18,14 @@ using PlayerGameID = uint32;
 
 class Player {
 protected:
-  static struct TexInfo {
-    Texture *tex;
-    union VBOs {
-      struct NamedVBOs {
-        VBO *walk1, *idle, *walk2, *fire;
-      };
-      VBO *vbos[4];
-    } side[4];
-  } ***TexInfos;
   static struct Renderer {
     const Program *prog;
     GLint att_coord,
-        att_texcoord,
         uni_mvp,
         uni_unicolor,
         uni_fogStart,
         uni_fogEnd;
+    VBO *vbo;
   } R;
   double m_lastPosTime;
   glm::vec3 m_predictPos;
@@ -43,25 +34,6 @@ protected:
   Player& operator=(const Player&) = delete;
 
 public:
-  enum Team : uint8 {
-    Red,
-    Blue,
-    LAST
-  } team;
-  enum class Class : uint8 {
-    Prospector,
-    Miner,
-    Engineer,
-    Sapper
-  } playerclass;
-  enum class Tools : uint8 {
-    Pickaxe,
-    ConstructionGun,
-    DeconstructionGun,
-    ProspectingRadar,
-    Detonator,
-    LAST
-  } tool;
   enum class Direction : uint8 {
     North,	// To +Z
     East,	// To +X
@@ -85,13 +57,6 @@ public:
   bool isAlive;
   Net::Peer P;
   std::list<ChunkRef> pendingChunks;
-
-  int ore, loot;
-
-  static const char* getTeamNameLowercase(Team t);
-  static const char* getToolNameLowercase(Tools t);
-  static int getMaxOre(Class c);
-  static int getMaxWeight(Class c);
 
   Player(Game *G = nullptr);
   Player(Player&&);
