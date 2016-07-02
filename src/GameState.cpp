@@ -18,8 +18,6 @@
 #include "EscMenu.hpp"
 #include "Audio.hpp"
 #include "network/NetHelper.hpp"
-#include "network/msgtypes/Chat.hpp"
-#include "network/msgtypes/ChunkTransfer.hpp"
 #include "Particles.hpp"
 
 #include "content/Registry.hpp"
@@ -28,8 +26,12 @@ using std::unique_ptr;
 
 namespace Diggler {
 
-GameState::GameState(GameWindow *GW, const std::string &servHost, int servPort)
-  : GW(GW), m_serverHost(servHost), m_serverPort(servPort), bloom(*GW->G) {
+GameState::GameState(GameWindow *GW, const std::string &servHost, int servPort) :
+  GW(GW),
+  CMH(*this),
+  m_serverHost(servHost),
+  m_serverPort(servPort),
+  bloom(*GW->G) {
   G = GW->G;
   int w = GW->getW(),
       h = GW->getH();
@@ -725,127 +727,9 @@ void GameState::drawUI() {
 }
 
 bool GameState::processNetwork() {
-  using namespace Net::MsgTypes;
   while (G->H.recv(m_msg, 0)) {
-    switch (m_msg.getType()) {
-      case Net::MessageType::NetDisconnect:
-        GW->showMessage("Disconnected", "Timed out");
-        return false;
-
-      case Net::MessageType::ChunkTransfer: {
-        using S = ChunkTransferSubtype;
-        switch (static_cast<S>(m_msg.getSubtype())) {
-          case S::Request: {
-            ; // No-op
-          } break;
-          case S::Response: {
-            ChunkTransferResponse ctr;
-            ctr.readFromMsg(m_msg);
-            for (const ChunkTransferResponse::ChunkData &cd : ctr.chunks) {
-              ChunkRef c = G->U->getWorldEx(cd.worldId)->getNewEmptyChunk(
-                cd.chunkPos.x, cd.chunkPos.y, cd.chunkPos.z);
-              InMemoryStream ims(cd.data, cd.dataLength);
-              c->read(ims);
-              holdChunksInMem.push_back(c);
-            }
-          } break;
-          case S::Denied: {
-            ChunkTransferDenied ctd;
-            ctd.readFromMsg(m_msg);
-          } break;
-        }
-      } break;
-      case Net::MessageType::Chat: {
-        using S = ChatSubtype;
-        switch (static_cast<S>(m_msg.getSubtype())) {
-          case S::Send: {
-            ; // No-op
-          } break;
-          case S::Announcement: {
-            ChatAnnouncement ca;
-            ca.readFromMsg(m_msg);
-            // TODO better formatting abilities
-            if (ca.msg.type == msgpack::type::STR) {
-              m_chatBox->addChatEntry(ca.msg.as<std::string>());
-            }
-          } break;
-          case S::PlayerTalk: {
-            ChatPlayerTalk cpt;
-            cpt.readFromMsg(m_msg);
-            // TODO better formatting abilities
-            if (cpt.msg.type == msgpack::type::STR) {
-              std::string playerName;
-              if (cpt.player.display.type == msgpack::type::NIL) {
-                playerName = G->players.getById(cpt.player.id).name + "> ";
-              } else if (cpt.player.display.type == msgpack::type::STR) {
-                cpt.player.display.convert(playerName);
-              }
-              m_chatBox->addChatEntry(playerName + cpt.msg.as<std::string>());
-            }
-          } break;
-        }
-      } break;
-      case Net::MessageType::PlayerJoin: {
-        Player &plr = G->players.add();
-        plr.id = m_msg.readU32();
-        plr.name = m_msg.readString();
-        getDebugStream() << "Player " << plr.name << '(' << plr.id << ") joined the party!" << std::endl;
-      } break;
-      case Net::MessageType::PlayerQuit: {
-        uint32 id = m_msg.readU32();
-        try {
-          Player &plr = G->players.getById(id);
-          getOutputStream() << plr.name << " is gone :(" << std::endl;
-          G->players.remove(plr);
-        } catch (const std::out_of_range &e) {
-          getOutputStream() << "Phantom player #" << id << " disconnected" << std::endl;
-        }
-      } break;
-      case Net::MessageType::PlayerUpdate: {
-        uint32 id = m_msg.readU32();
-        try {
-          Player &plr = G->players.getById(id);
-          switch (m_msg.getSubtype()) {
-            case Net::PlayerUpdateType::Move: {
-              glm::vec3 pos = m_msg.readVec3(),
-                    vel = m_msg.readVec3(),
-                    acc = m_msg.readVec3();
-              plr.setPosVel(pos, vel, acc);
-              plr.angle = m_msg.readFloat();
-            } break;
-            case Net::PlayerUpdateType::Die:
-              plr.setDead(false, (Player::DeathReason)m_msg.readU8());
-              break;
-            case Net::PlayerUpdateType::Respawn:
-              plr.setDead(false);
-              break;
-            default:
-              break;
-          }
-        } catch (const std::out_of_range &e) {
-          getOutputStream() << "Invalid player update: #" << id << " is not on server" << std::endl;
-        }
-      } break;
-      case Net::MessageType::BlockUpdate: {
-        // TODO proper count
-        // TODO handle that in Chunk's ChangeHelper
-        int count  = m_msg.getSubtype();
-        for (int i=0; i < count; ++i) {
-          const glm::ivec3 wcpos = m_msg.readIVec3();
-          uint8 x = m_msg.readU8(),
-                y = m_msg.readU8(),
-                z = m_msg.readU8();
-          WorldId wid = m_msg.readI16();
-          uint16 id = m_msg.readU16();
-          uint16 data = m_msg.readU16();
-          G->U->getWorld(wid)->setBlock(x, y, z, id, data);
-        }
-      } break;
-      case Net::MessageType::Event: {
-        // switch (m_msg.getSubtype())
-      } break;
-      default:
-        break;
+    if (!CMH.handleMessage(m_msg)) {
+      return false;
     }
   }
   return true;

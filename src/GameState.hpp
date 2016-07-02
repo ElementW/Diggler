@@ -15,6 +15,7 @@
 #include "render/gl/VBO.hpp"
 #include "content/Content.hpp"
 #include "network/Network.hpp"
+#include "network/ClientMessageHandler.hpp"
 // TODO strip?
 #include "Chunk.hpp"
 
@@ -33,8 +34,12 @@ class Text;
 
 class GameState : public State {
 private:
+  friend class Net::ClientMessageHandler;
+
   GameWindow *GW;
   Game *G;
+
+  Net::ClientMessageHandler CMH;
 
   std::string m_serverHost;
   int m_serverPort;
