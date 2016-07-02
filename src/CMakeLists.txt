@@ -1,3 +1,7 @@
+if(NOT DEFINED SRCS)
+  message(FATAL_ERROR "Please compile using the repo's root CMakeLists.txt")
+endif()
+
 set(CSD ${CMAKE_CURRENT_SOURCE_DIR})
 set(SRCS
   ${SRCS}
@@ -26,6 +30,7 @@ set(SRCS
   ${CSD}/LocalPlayer.cpp
   ${CSD}/main.cpp
   ${CSD}/MessageState.cpp
+  ${CSD}/network/msgtypes/BlockUpdate.cpp
   ${CSD}/network/msgtypes/Chat.cpp
   ${CSD}/network/msgtypes/ChunkTransfer.cpp
   ${CSD}/network/msgtypes/ServerInfo.cpp
