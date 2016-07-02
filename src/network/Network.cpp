@@ -317,11 +317,19 @@ void Host::send(Peer &peer, const OutMessage &msg, Tfer mode, Channels chan) {
     static_cast<uint8>(msg.m_type),
     msg.m_subtype
   };
-  std::memcpy(msg.m_actualData, header, Message::HeaderSize);
 
-  ENetPacket *packet = enet_packet_create(msg.m_actualData,
-    Message::HeaderSize + msg.m_length, TferToFlags(mode));
-  txBytes += Message::HeaderSize + msg.m_length;
+  ENetPacket *packet;
+  if (msg.m_actualData != nullptr) {
+    std::memcpy(msg.m_actualData, header, Message::HeaderSize);
+    packet = enet_packet_create(msg.m_actualData,
+      Message::HeaderSize + msg.m_length, TferToFlags(mode));
+    txBytes += Message::HeaderSize + msg.m_length;
+  } else {
+    packet = enet_packet_create(header,
+      Message::HeaderSize, TferToFlags(mode));
+    txBytes += Message::HeaderSize;
+  }
+
   //hexDump('S', packet->data, 2+msg.m_length);
   enet_peer_send(static_cast<ENetPeer*>(peer.peer), static_cast<uint8>(chan), packet);
   enet_host_flush(host);
