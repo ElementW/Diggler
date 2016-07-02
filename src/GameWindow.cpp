@@ -1,8 +1,12 @@
 #include "GameWindow.hpp"
+
+#include <sstream>
+
 #include <al.h>
 #include <glm/detail/setup.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 #include "Game.hpp"
 #include "GlobalProperties.hpp"
 #include "GLFWHandler.hpp"
@@ -20,13 +24,13 @@ static void glfwErrorCallback(int error, const char *description) {
 
 GameWindow::GameWindow(Game *G) : G(G) {
   if (InstanceCount++ == 0) {
+    glfwSetErrorCallback(glfwErrorCallback);
     int glfwStatus = glfwInit();
     if (glfwStatus != GL_TRUE) {
-      std::string err("GLFW init failed: ");
-      err += glfwStatus;
-      throw std::runtime_error(err);
+      std::ostringstream err;
+      err << "GLFW init failed (" << glfwStatus << ')';
+      throw std::runtime_error(err.str());
     }
-    glfwSetErrorCallback(glfwErrorCallback);
     getOutputStreamRaw() << "GLFW linked " << GLFW_VERSION_MAJOR << '.' << GLFW_VERSION_MINOR <<
         '.' << GLFW_VERSION_REVISION << ", using " << glfwGetVersionString() << std::endl;
   }
