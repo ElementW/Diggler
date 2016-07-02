@@ -1,7 +1,8 @@
 #ifndef ESC_MENU_HPP
 #define ESC_MENU_HPP
+
 #include <glm/glm.hpp>
-#include "VBO.hpp"
+
 #include "Program.hpp"
 
 namespace Diggler {

@@ -6,7 +6,11 @@
 
 namespace Diggler {
 
+namespace Render {
+namespace gl {
 class VBO;
+}
+}
 class GameWindow;
 class Texture;
 
@@ -14,7 +18,7 @@ namespace UI {
 
 class Manager {
 private:
-  std::unique_ptr<VBO> m_rectVbo;
+  std::unique_ptr<Render::gl::VBO> m_rectVbo;
   std::list<std::unique_ptr<Element>> m_elements;
   Element *m_hoveredElement;
   Element *m_focusedElement;

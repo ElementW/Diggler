@@ -1,8 +1,9 @@
 #include "Particles.hpp"
-#include <glm/gtc/type_ptr.hpp>
 #include "Platform.hpp"
+
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Game.hpp"
-#include "GlUtils.hpp"
 
 namespace Diggler {
 

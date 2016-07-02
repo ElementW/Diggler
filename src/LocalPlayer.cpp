@@ -179,7 +179,7 @@ void LocalPlayer::render(const glm::mat4 &transform) const {
   glEnableVertexAttribArray(P->att("coord"));
   glEnableVertexAttribArray(P->att("color"));
   glUniformMatrix4fv(P->uni("mvp"), 1, GL_FALSE, glm::value_ptr(transform));
-  static VBO vbo;
+  static Render::gl::VBO vbo;
   const glm::ivec3 &min = aabbmin, &max = aabbmax;
   struct Coord { int x, y, z; float r, g, b; } pts[] = {
     { min.x, min.y, min.z, 0.f, 1.f, 0.f },

@@ -1,11 +1,14 @@
 #ifndef PARTICLES_HPP
 #define PARTICLES_HPP
+
 #include <vector>
+
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
+
 #include "Program.hpp"
-#include "VBO.hpp"
+#include "render/gl/VBO.hpp"
 
 namespace Diggler {
 
@@ -35,7 +38,7 @@ class ParticleEmitter {
   
   int count, maxCount;
   std::vector<Particle> particles;
-  VBO vbo;
+  Render::gl::VBO vbo;
 public:
   Particle pTemplate;
   glm::vec3 pos;

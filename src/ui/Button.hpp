@@ -1,8 +1,9 @@
 #ifndef UI_BUTTON_HPP
 #define UI_BUTTON_HPP
+
 #include "Element.hpp"
+
 #include <memory>
-#include "../VBO.hpp"
 
 namespace Diggler {
 namespace UI {

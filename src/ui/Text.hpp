@@ -1,7 +1,9 @@
 #ifndef TEXT_HPP
 #define TEXT_HPP
+
 #include <memory>
 #include <string>
+
 #include "Font.hpp"
 #include "Element.hpp"
 
@@ -11,7 +13,7 @@ namespace UI {
 class Text : public Element {
 private:
   int m_scaleX, m_scaleY, m_elementCount;
-  VBO m_vbo;
+  Render::gl::VBO m_vbo;
   std::string m_fontName;
   glm::mat4 m_matrix;
   std::string m_text;

@@ -31,7 +31,7 @@ Player::Player(Game *G) :
         -sz, .0f, 0.0f,
          sz, szH, 0.0f,
       };
-      R.vbo = new VBO;
+      R.vbo = new Render::gl::VBO;
       R.vbo->setData(coords, 6*3);
     }
   }

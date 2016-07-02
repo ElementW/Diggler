@@ -1,12 +1,14 @@
 #include "Font.hpp"
+
 #include <fstream>
+
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
 #include "../Texture.hpp"
 #include "../Program.hpp"
-#include "../VBO.hpp"
+#include "../render/gl/VBO.hpp"
 #include "../Game.hpp"
-#include "../GlUtils.hpp"
 
 namespace Diggler {
 namespace UI {
@@ -66,7 +68,7 @@ struct Vertex { int x, y; float tx, ty; float r, g, b ,a; };
 
 #define eraseCurChar() elements -= 6;
 
-int Font::updateVBO(VBO &vbo, const std::string &text, GLenum usage) const {
+int Font::updateVBO(Render::gl::VBO &vbo, const std::string &text, GLenum usage) const {
   int elements = text.size()*6;
   Vertex *verts = new Vertex[elements];
   uint8 c, w; int line = 0, cx = 0, v = 0; float l, r;
@@ -119,7 +121,7 @@ int Font::updateVBO(VBO &vbo, const std::string &text, GLenum usage) const {
   return elements;
 }
 
-void Font::draw(const VBO &vbo, int count, const glm::mat4& matrix) const {
+void Font::draw(const Render::gl::VBO &vbo, int count, const glm::mat4& matrix) const {
   glEnableVertexAttribArray(R.att_coord);
   glEnableVertexAttribArray(R.att_texcoord);
   glEnableVertexAttribArray(R.att_color);

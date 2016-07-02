@@ -10,7 +10,7 @@
 #include "KeyBinds.hpp"
 #include "GlobalProperties.hpp"
 #include "Game.hpp"
-#include "FBO.hpp"
+#include "render/gl/FBO.hpp"
 #include "Clouds.hpp"
 #include "Chatbox.hpp"
 #include "CaveGenerator.hpp"
@@ -87,8 +87,8 @@ GameState::GameState(GameWindow *GW, const std::string &servHost, int servPort)
   m_highlightBox.uni_unicolor = m_highlightBox.program->uni("unicolor");
   m_highlightBox.uni_mvp = m_highlightBox.program->uni("mvp");
 
-  m_3dFbo = new FBO(w, h, Texture::PixelFormat::RGB, true);
-  m_3dRenderVBO = new VBO();
+  m_3dFbo = new Render::gl::FBO(w, h, Texture::PixelFormat::RGB, true);
+  m_3dRenderVBO = new Render::gl::VBO();
   m_clouds = new Clouds(G, 32, 32, 4);
   //m_sky = new Skybox(G, getAssetPath("alpine"));
   m_3dFboRenderer = G->PM->getProgram(PM_2D | PM_TEXTURED); //getSpecialProgram("effect3dRender");
@@ -121,14 +121,14 @@ GameState::Bloom::Bloom(Game &G) {
   enable = true;
   scale = 4;
 
-  extractor.fbo = new FBO(G.GW->getW()/scale, G.GW->getH()/scale, Texture::PixelFormat::RGBA);
+  extractor.fbo = new Render::gl::FBO(G.GW->getW()/scale, G.GW->getH()/scale, Texture::PixelFormat::RGBA);
   extractor.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
   extractor.prog = G.PM->getSpecialProgram("bloomExtractor");
   extractor.att_coord = extractor.prog->att("coord");
   extractor.att_texcoord = extractor.prog->att("texcoord");
   extractor.uni_mvp = extractor.prog->uni("mvp");
 
-  renderer.fbo = new FBO(G.GW->getW()/scale, G.GW->getH()/scale, Texture::PixelFormat::RGBA);
+  renderer.fbo = new Render::gl::FBO(G.GW->getW()/scale, G.GW->getH()/scale, Texture::PixelFormat::RGBA);
   renderer.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
   renderer.prog = G.PM->getSpecialProgram("bloom");
   renderer.att_coord = renderer.prog->att("coord");

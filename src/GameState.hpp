@@ -1,13 +1,18 @@
 #ifndef GAME_STATE_HPP
 #define GAME_STATE_HPP
+
 #include "State.hpp"
+
 #include <thread>
 #include <map>
 #include <list>
+
 #include <glm/detail/type_vec2.hpp>
 #include <glm/detail/type_vec.hpp>
+
 #include "GameWindow.hpp"
-#include "VBO.hpp"
+#include "render/gl/FBO.hpp"
+#include "render/gl/VBO.hpp"
 #include "content/Content.hpp"
 #include "network/Network.hpp"
 // TODO strip?
@@ -20,7 +25,6 @@ class KeyBindings;
 class Font;
 class Program;
 class Clouds;
-class FBO;
 class Game;
 class Chatbox;
 namespace UI {
@@ -38,7 +42,7 @@ private:
   glm::vec3 m_lookat;
   glm::vec2 m_angles;
 
-  FBO *m_3dFbo;
+  Render::gl::FBO *m_3dFbo;
   const Program *m_3dFboRenderer;
   GLuint m_3dFboRenderer_coord, m_3dFboRenderer_texcoord, m_3dFboRenderer_mvp;
 
@@ -46,12 +50,12 @@ private:
     bool enable;
     int scale;
     struct Extractor {
-      FBO *fbo;
+      Render::gl::FBO *fbo;
       const Program *prog;
       GLuint att_coord, att_texcoord, uni_mvp;
     } extractor;
     struct Renderer {
-      FBO *fbo;
+      Render::gl::FBO *fbo;
       const Program *prog;
       GLuint att_coord, att_texcoord, uni_pixshift, uni_mvp;
     } renderer;
@@ -59,7 +63,7 @@ private:
     ~Bloom();
   } bloom;
 
-  VBO *m_3dRenderVBO;
+  Render::gl::VBO *m_3dRenderVBO;
   struct Coord2DTex { int x, y; uint8 u, v; };
   Clouds *m_clouds;
   Skybox *m_sky;
@@ -70,7 +74,7 @@ private:
   } m_crossHair;
 
   struct {
-    VBO vbo;
+    Render::gl::VBO vbo;
     const Program *program;
     GLuint att_coord, uni_unicolor, uni_mvp;
   } m_highlightBox;

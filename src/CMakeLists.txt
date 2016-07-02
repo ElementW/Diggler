@@ -17,14 +17,12 @@ set(SRCS
   ${CSD}/Config.cpp
   ${CSD}/content/Registry.cpp
   ${CSD}/EscMenu.cpp
-  ${CSD}/FBO.cpp
   ${CSD}/Frustum.cpp
   ${CSD}/Game.cpp
   ${CSD}/GameState.cpp
   ${CSD}/GameWindow.cpp
   ${CSD}/GLFWHandler.cpp
   ${CSD}/GlobalProperties.cpp
-  ${CSD}/GlUtils.cpp
   ${CSD}/io/FileStream.cpp
   ${CSD}/io/MemoryStream.cpp
   ${CSD}/io/Stream.cpp
@@ -60,7 +58,6 @@ set(SRCS
   ${CSD}/Universe.cpp
   ${CSD}/util/BitmapDumper.cpp
   ${CSD}/util/TexturePacker.cpp
-  ${CSD}/VBO.cpp
   ${CSD}/World.cpp
   PARENT_SCOPE
 )

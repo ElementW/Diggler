@@ -1,15 +1,17 @@
-#ifndef DIGGLER_VBO_HPP
-#define DIGGLER_VBO_HPP
+#ifndef DIGGLER_RENDER_GL_VBO_HPP
+#define DIGGLER_RENDER_GL_VBO_HPP
 
-#include "Platform.hpp"
+#include "../../Platform.hpp"
 
 #include <vector>
 
 #include <epoxy/gl.h>
 
-#include "render/gl/Util.hpp"
+#include "Util.hpp"
 
 namespace Diggler {
+namespace Render {
+namespace gl {
 
 class VBO {
 private:
@@ -31,17 +33,17 @@ public:
   operator GLuint() const { return id; }
   void setSize(uint size, GLenum usage = GL_STATIC_DRAW);
   template <typename T> void setData(const std::vector<T>& data, GLenum usage = GL_STATIC_DRAW) {
-    Render::gl::BoundBufferSave<GL_ARRAY_BUFFER> save;
+    BoundBufferSave<GL_ARRAY_BUFFER> save;
     glBindBuffer(GL_ARRAY_BUFFER, id);
     glBufferData(GL_ARRAY_BUFFER, data.size()*sizeof(T), data.data(), usage);
   }
   template <typename T> void setData(const T *data, uint count, GLenum usage = GL_STATIC_DRAW) {
-    Render::gl::BoundBufferSave<GL_ARRAY_BUFFER> save;
+    BoundBufferSave<GL_ARRAY_BUFFER> save;
     glBindBuffer(GL_ARRAY_BUFFER, id);
     glBufferData(GL_ARRAY_BUFFER, count*sizeof(T), data, usage);
   }
   template <typename T> void setSubData(const T *data, uint offset, uint count) {
-    Render::gl::BoundBufferSave<GL_ARRAY_BUFFER> save;
+    BoundBufferSave<GL_ARRAY_BUFFER> save;
     glBindBuffer(GL_ARRAY_BUFFER, id);
     glBufferSubData(GL_ARRAY_BUFFER, offset*sizeof(T), count*sizeof(T), data);
   }
@@ -50,5 +52,7 @@ public:
 };
 
 }
+}
+}
 
-#endif /* DIGGLER_VBO_HPP */
+#endif /* DIGGLER_RENDER_GL_VBO_HPP */

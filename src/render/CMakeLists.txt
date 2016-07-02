@@ -5,3 +5,8 @@ if(DIGGLER_RENDERER STREQUAL "gl")
 else()
   message(FATAL_ERROR "Unknown renderer")
 endif()
+
+set(SRCS
+  ${SRCS}
+  PARENT_SCOPE
+)

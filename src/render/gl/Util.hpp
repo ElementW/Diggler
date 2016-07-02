@@ -9,6 +9,8 @@ namespace Diggler {
 namespace Render {
 namespace gl {
 
+const char* getErrorString(GLenum code);
+
 inline void getInteger(GLenum src, GLint &dst) {
   glGetIntegerv(src, &dst);
 }
@@ -32,12 +34,12 @@ constexpr GLenum getBinding(GLenum bufferT) {
   }
 }
 
-template<GLenum BufferT>
+template<GLenum BufferT, GLenum BoundBufferT = getBinding(BufferT)>
 struct BoundBufferSave {
   GLuint buffer;
 
   BoundBufferSave() {
-    getUInteger(getBinding(BufferT), buffer);
+    getUInteger(BoundBufferT, buffer);
   }
   ~BoundBufferSave() {
     glBindBuffer(BufferT, buffer);

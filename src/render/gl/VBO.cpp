@@ -1,6 +1,8 @@
 #include "VBO.hpp"
 
 namespace Diggler {
+namespace Render {
+namespace gl {
 
 static void unref(int *rc, GLuint id) {
   if (--(*rc) == 0) {
@@ -44,19 +46,22 @@ void VBO::bind() const {
 }
 
 int VBO::getSize() const {
-  GLint currentBoundArray; glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentBoundArray);
+  BoundBufferSave<GL_ARRAY_BUFFER> save;
+
   GLint data;
   bind();
   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &data);
-  glBindBuffer(GL_ARRAY_BUFFER, currentBoundArray);
+
   return data;
 }
 
 void VBO::setSize(uint size, GLenum usage) {
-  GLint currentBoundArray; glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentBoundArray);
+  BoundBufferSave<GL_ARRAY_BUFFER> save;
+
   glBindBuffer(GL_ARRAY_BUFFER, id);
   glBufferData(GL_ARRAY_BUFFER, size, nullptr, usage);
-  glBindBuffer(GL_ARRAY_BUFFER, currentBoundArray);
 }
 
+}
+}
 }

@@ -1,7 +1,8 @@
 #include "ProgramManager.hpp"
-#include <sstream>
 #include "Platform.hpp"
-#include "GlUtils.hpp"
+
+#include <sstream>
+
 #include "Game.hpp"
 
 #define PROGRAM_MANAGER_DEBUG 0

@@ -1,8 +1,10 @@
-#include "GlUtils.hpp"
+#include "Util.hpp"
 
 namespace Diggler {
+namespace Render {
+namespace gl {
 
-std::string GlUtils::getErrorString(GLenum code) {
+const char* getErrorString(GLenum code) {
   switch (code) {
     case GL_NO_ERROR:
       return "GL_NO_ERROR";
@@ -38,4 +40,6 @@ std::string GlUtils::getErrorString(GLenum code) {
   return "";
 }
 
+}
+}
 }

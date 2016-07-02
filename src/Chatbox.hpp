@@ -38,7 +38,7 @@ private:
   struct Vertex {
     float x, y, r, g, b, a;
   };
-  VBO m_vbo;
+  Render::gl::VBO m_vbo;
   int m_posX, m_posY;
 
 public:

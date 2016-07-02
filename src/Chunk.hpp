@@ -1,10 +1,13 @@
 #ifndef CHUNK_HPP
 #define CHUNK_HPP
+
 #include <memory>
 #include <mutex>
+
 #include <epoxy/gl.h>
 #include <glm/glm.hpp>
-#include "VBO.hpp"
+
+#include "render/gl/VBO.hpp"
 #include "Program.hpp"
 #include "Texture.hpp"
 #include "content/Content.hpp"
@@ -65,7 +68,7 @@ public:
 
 private:
   Game *G; WorldRef W;
-  VBO *vbo, *ibo;
+  Render::gl::VBO *vbo, *ibo;
   int vertices, indicesOpq, indicesTpt;
 
   Data *data, *data2;

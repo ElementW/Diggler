@@ -86,8 +86,8 @@ Chunk::Chunk(Game *G, WorldRef W, int X, int Y, int Z) :
   data->clear();
   
   if (GlobalProperties::IsClient) {
-    vbo = new VBO;
-    ibo = new VBO;
+    vbo = new Render::gl::VBO;
+    ibo = new Render::gl::VBO;
     if (R.prog == nullptr) {
       loadShader();
       TextureAtlas = G->CR->getAtlas();

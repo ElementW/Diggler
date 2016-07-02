@@ -1,7 +1,9 @@
 #include "Manager.hpp"
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "../VBO.hpp"
+
+#include "../render/gl/VBO.hpp"
 #include "../Texture.hpp"
 #include "../Program.hpp"
 #include "../Game.hpp"
@@ -40,7 +42,7 @@ void Manager::setup(Game *G) {
     RR.uni_mvp = RR.prog->uni("mvp");
     RR.uni_unicolor = RR.prog->uni("unicolor");
   }
-  m_rectVbo.reset(new VBO);
+  m_rectVbo.reset(new Render::gl::VBO);
   const uint8 verts[6*4] = {
     0, 0, 0, 1,
     1, 0, 1, 1,

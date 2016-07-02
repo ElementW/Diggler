@@ -1,16 +1,23 @@
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
 #include "Platform.hpp"
+
 #include <list>
+
 #include <glm/glm.hpp>
 #include <epoxy/gl.h>
+
 #include "network/Network.hpp"
 #include "World.hpp"
 
 namespace Diggler {
 
 class Program;
+namespace Render {
+namespace gl {
 class VBO;
+}
+}
 class Game;
 class Texture;
 
@@ -25,7 +32,7 @@ protected:
         uni_unicolor,
         uni_fogStart,
         uni_fogEnd;
-    VBO *vbo;
+    Render::gl::VBO *vbo;
   } R;
   double m_lastPosTime;
   glm::vec3 m_predictPos;
