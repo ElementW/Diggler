@@ -4,3 +4,6 @@
 [submodule "ext/luajit-2.0"]
 	path = ext/lua
 	url = http://luajit.org/git/luajit-2.0.git
+[submodule "assets/lua/lds"]
+	path = assets/lua/lds
+	url = https://github.com/neomantra/lds.git
