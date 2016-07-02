@@ -1,6 +1,10 @@
 #include "Audio.hpp"
+
+#include <cstring>
+
 #include <AL/al.h>
 #include <AL/alext.h>
+
 #include "Game.hpp"
 #include "Sound.hpp"
 #include "GlobalProperties.hpp"

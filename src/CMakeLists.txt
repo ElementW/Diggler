@@ -2,6 +2,8 @@ if(NOT DEFINED SRCS)
   message(FATAL_ERROR "Please compile using the repo's root CMakeLists.txt")
 endif()
 
+add_subdirectory("render")
+
 set(CSD ${CMAKE_CURRENT_SOURCE_DIR})
 set(SRCS
   ${SRCS}

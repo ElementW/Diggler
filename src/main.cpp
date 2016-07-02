@@ -1,8 +1,10 @@
+#include <cstring>
 #include <iostream>
 #include <memory>
 #include <thread>
 #include <chrono>
 #include <sys/signal.h>
+
 #include "Game.hpp"
 #include "GameWindow.hpp"
 #include "GameState.hpp"
