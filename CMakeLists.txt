@@ -62,7 +62,13 @@ find_package(OpenAL REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(LuaJIT REQUIRED)
+
 find_package(msgpack REQUIRED)
+if(NOT msgpack_FOUND)
+  message(FATAL_ERROR "Bundled msgpack-c not found. Have you checked out submodules?
+git submodule update --init")
+endif()
+
 pkg_search_module(EPOXY REQUIRED epoxy)
 pkg_search_module(GLFW REQUIRED glfw3)
 include_directories(
