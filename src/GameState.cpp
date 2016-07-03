@@ -20,6 +20,7 @@
 #include "network/NetHelper.hpp"
 #include "Particles.hpp"
 
+#include "network/msgtypes/BlockUpdate.hpp"
 #include "content/Registry.hpp"
 
 using std::unique_ptr;
@@ -298,20 +299,14 @@ void GameState::onMouseButton(int key, int action, int mods) {
   if (action == GLFW_PRESS) {
     glm::ivec3 pointed, face;
     if (G->LP->raytracePointed(32, &pointed, &face)) {
-      Net::OutMessage msg(Net::MessageType::BlockUpdate);
-      msg.writeI32(G->LP->W->id);
+      Net::OutMessage msg;
       if (key == GLFW_MOUSE_BUTTON_LEFT) {
-        msg.writeI32(pointed.x);
-        msg.writeI32(pointed.y);
-        msg.writeI32(pointed.z);
-        msg.writeU16(Content::BlockAirId);
-        msg.writeU16(0);
+        Net::MsgTypes::BlockUpdateBreak bub;
+        bub.worldId = G->LP->W->id;
+        bub.pos = pointed;
+        bub.writeToMsg(msg);
       } else {
-        msg.writeI32(face.x);
-        msg.writeI32(face.y);
-        msg.writeI32(face.z);
-        msg.writeU16(Content::BlockUnknownId);//m_builderGun.currentBlock);
-        msg.writeU16(0);
+        // TODO stubbed
       }
       sendMsg(msg, Net::Tfer::Rel, Net::Channels::MapUpdate);
     }

@@ -16,7 +16,7 @@ WorldRef Universe::getWorld(WorldId id) {
   return it->second.lock();
 }
 
-WorldRef Universe::getWorldEx(WorldId id) {
+WorldRef Universe::getLoadWorld(WorldId id) {
   // TODO World loading
   iterator it = find(id);
   if (it == end()) {

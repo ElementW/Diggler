@@ -34,7 +34,7 @@ public:
   /// *synchronously* loads it.
   /// @returns Reference to the world.
   ///
-  WorldRef getWorldEx(WorldId id);
+  WorldRef getLoadWorld(WorldId id);
 
   ///
   /// @brief Creates a world.

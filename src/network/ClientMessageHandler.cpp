@@ -3,6 +3,7 @@
 #include "../Chatbox.hpp"
 #include "../Game.hpp"
 #include "../GameState.hpp"
+#include "msgtypes/BlockUpdate.hpp"
 #include "msgtypes/Chat.hpp"
 #include "msgtypes/ChunkTransfer.hpp"
 
@@ -30,7 +31,7 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
           ChunkTransferResponse ctr;
           ctr.readFromMsg(msg);
           for (const ChunkTransferResponse::ChunkData &cd : ctr.chunks) {
-            ChunkRef c = GS.G->U->getWorldEx(cd.worldId)->getNewEmptyChunk(
+            ChunkRef c = GS.G->U->getLoadWorld(cd.worldId)->getNewEmptyChunk(
               cd.chunkPos.x, cd.chunkPos.y, cd.chunkPos.z);
             InMemoryStream ims(cd.data, cd.dataLength);
             c->read(ims);
@@ -115,18 +116,28 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
       }
     } break;
     case MessageType::BlockUpdate: {
-      // TODO proper count
       // TODO handle that in Chunk's ChangeHelper
-      int count  = msg.getSubtype();
-      for (int i=0; i < count; ++i) {
-        const glm::ivec3 wcpos = msg.readIVec3();
-        uint8 x = msg.readU8(),
-              y = msg.readU8(),
-              z = msg.readU8();
-        WorldId wid = msg.readI16();
-        uint16 id = msg.readU16();
-        uint16 data = msg.readU16();
-        GS.G->U->getWorld(wid)->setBlock(x, y, z, id, data);
+      using S = BlockUpdateSubtype;
+      switch (static_cast<S>(msg.getSubtype())) {
+        case S::Notify: {
+          BlockUpdateNotify bun;
+          bun.readFromMsg(msg);
+          for (const BlockUpdateNotify::UpdateData &upd : bun.updates) {
+            WorldRef w = GS.G->U->getWorld(upd.worldId);
+            if (w) {
+              ChunkRef c = w->getChunkAtCoords(upd.pos);
+              if (c) {
+                c->setBlock(rmod(upd.pos.x, CX), rmod(upd.pos.y, CY), rmod(upd.pos.z, CZ),
+                            upd.id, upd.data);
+                // TODO extdata & light
+              }
+            }
+          }
+        } break;
+        case S::Place:
+        case S::Break: {
+          ; // No-op
+        } break;
       }
     } break;
     case MessageType::Event: {

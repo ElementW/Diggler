@@ -122,7 +122,7 @@ private:
   void lockMouse();
   void unlockMouse();
 
-  // TODO: FIXME!!! Ugly as fuck
+  // TODO: REMOVEME!!!
   std::list<ChunkRef> holdChunksInMem;
 
 public:

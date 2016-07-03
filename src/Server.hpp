@@ -16,6 +16,9 @@ private:
   Game &G;
   lua_State *L;
 
+  // TODO: REMOVEME!!!
+  std::list<ChunkRef> holdChunksInMem;
+
   void handleCommand(Player*, const std::string &command, const std::vector<std::string> &args);
 
   void handlePlayerJoin(Net::InMessage&, Net::Peer&);

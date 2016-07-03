@@ -23,6 +23,12 @@ class Game;
 class World;
 using WorldRef = std::shared_ptr<World>;
 
+namespace Net {
+namespace MsgTypes {
+struct BlockUpdateNotify;
+}
+}
+
 constexpr int CX = 16, CY = 16, CZ = 16;
 
 class Chunk {
@@ -69,7 +75,7 @@ public:
 private:
   Game *G; WorldRef W;
   Render::gl::VBO *vbo, *ibo;
-  int vertices, indicesOpq, indicesTpt;
+  uint vertices, indicesOpq, indicesTpt;
 
   Data *data, *data2;
   //std::map<uint16, msgpack::object> extdataStore;
@@ -82,8 +88,8 @@ private:
   void calcMemUsage();
 #if CHUNK_INMEM_COMPRESS
   union {
-    int imcSize;
-    int imcUnusedSince;
+    uint imcSize;
+    uint64 imcUnusedSince;
   };
   void *imcData;
   void imcCompress();
@@ -95,7 +101,7 @@ public:
     (CZ > (CX > CY ? CX : CY) ? CZ : (CX > CY ? CX : CY));
     // * 1.4142135623f; but we're already at 2x the radius (i.e. diameter)
   constexpr static float MidX = CX/2.f, MidY = CY/2.f, MidZ = CZ/2.f;
-  int blkMem;
+  uint blkMem;
   State getState();
 
   class ChangeHelper {
@@ -110,7 +116,7 @@ public:
     void add(int x, int y, int z);
     bool empty() const;
     int count() const;
-    void flush(Net::OutMessage&);
+    void flush(Net::MsgTypes::BlockUpdateNotify&);
     void discard();
   } CH;
 

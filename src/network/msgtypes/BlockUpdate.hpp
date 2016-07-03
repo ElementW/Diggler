@@ -6,6 +6,7 @@
 #include <msgpack.hpp>
 
 #include "../../content/Content.hpp"
+#include "../../World.hpp"
 
 namespace Diggler {
 namespace Net {
@@ -24,11 +25,17 @@ struct BlockUpdateNotify : public MsgType {
       bool : 4, light : 1, extdata : 1, data : 1, id : 1;
     } updated;
     static_assert(sizeof(updated) == 1, "Bitfields aren't packed");
+    WorldId worldId;
     glm::ivec3 pos;
     BlockId id;
     BlockData data;
     msgpack::object extdata;
     LightData light;
+    enum Cause : uint8 {
+      Unspecified = 0,
+      PlayerPlace,
+      PlayerBreak
+    } cause;
   };
   std::vector<UpdateData> updates;
 
@@ -38,6 +45,7 @@ struct BlockUpdateNotify : public MsgType {
 
 struct BlockUpdatePlace : public MsgType {
   msgpack::zone z;
+  WorldId worldId;
   glm::ivec3 pos;
   BlockId id;
   BlockData data;
@@ -48,6 +56,7 @@ struct BlockUpdatePlace : public MsgType {
 };
 
 struct BlockUpdateBreak : public MsgType {
+  WorldId worldId;
   glm::ivec3 pos;
 
   void writeToMsg(OutMessage&) const override;

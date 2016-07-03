@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "Game.hpp"
+#include "network/msgtypes/BlockUpdate.hpp"
 #include "network/msgtypes/Chat.hpp"
 #include "network/msgtypes/ChunkTransfer.hpp"
 #include "network/Network.hpp"
@@ -59,7 +60,7 @@ void Server::handlePlayerJoin(InMessage &msg, Peer &peer) {
   plr.name = name;
   plr.id = FastRand();
   plr.P = peer;
-  plr.W = G.U->getWorldEx(0);
+  plr.W = G.U->getLoadWorld(0);
 
   // Confirm successful join
   OutMessage join(MessageType::PlayerJoin);
@@ -90,7 +91,7 @@ void Server::handlePlayerJoin(InMessage &msg, Peer &peer) {
   for (int x = -2; x < 2; ++x)
     for (int y = -2; y < 2; ++y)
       for (int z = -2; z < 2; ++z)
-        schedSendChunk(G.U->getWorld(0)->getChunkEx(x, y, z), plr);
+        schedSendChunk(G.U->getWorld(0)->getLoadChunk(x, y, z), plr);
 }
 
 void Server::handlePlayerQuit(Peer &peer, QuitReason reason) {
@@ -214,7 +215,7 @@ void Server::handlePlayerChunkRequest(InMessage &msg, Player &plr) {
       for (const ChunkTransferRequest::ChunkData &cd : ctr.chunks) {
         WorldRef wld = G.U->getWorld(cd.worldId);
         if (wld) {
-          schedSendChunk(wld->getChunkEx(cd.chunkPos.x, cd.chunkPos.y, cd.chunkPos.z), plr);
+          schedSendChunk(wld->getLoadChunk(cd.chunkPos.x, cd.chunkPos.y, cd.chunkPos.z), plr);
         }
       }
     } break;
@@ -227,21 +228,35 @@ void Server::handlePlayerChunkRequest(InMessage &msg, Player &plr) {
 
 void Server::handlePlayerMapUpdate(InMessage &msg, Player &plr) {
   // TODO: distance & tool check, i.e. legitimate update
-  WorldId wid = msg.readI32();
-  int x = msg.readI32(), y = msg.readI32(), z = msg.readI32();
-  BlockId id = msg.readU16();
-  BlockData data = msg.readU16(); 
-  ChunkRef c = G.U->getWorld(wid)->getChunkAtCoords(x, y, z);
-  if (c) {
-    c->setBlock(x, y, z, id, data);
-    if (!c->CH.empty()) {
-      OutMessage msg(MessageType::BlockUpdate, 1);
-      msg.writeI32(wid);
-      const glm::ivec3 wcpos = c->getWorldChunkPos();
-      msg.writeIVec3(wcpos);
-      c->CH.flush(msg);
-      NetHelper::Broadcast(G, msg, Tfer::Rel, Channels::MapUpdate);
-    }
+  using namespace Net::MsgTypes;
+  using S = BlockUpdateSubtype;
+  switch (static_cast<S>(msg.getSubtype())) {
+    case S::Notify: {
+      ; // No-op
+    } break;
+    case S::Place: {
+      BlockUpdatePlace bup;
+      bup.readFromMsg(msg);
+      //TODO
+    } break;
+    case S::Break: {
+      BlockUpdateBreak bub;
+      bub.readFromMsg(msg);
+      WorldRef w = G.U->getWorld(bub.worldId);
+      if (w) {
+        ChunkRef c = w->getChunkAtCoords(bub.pos);
+        if (c) {
+          c->setBlock(rmod(bub.pos.x, CX), rmod(bub.pos.y, CY), rmod(bub.pos.z, CZ), 0, 0);
+          if (!c->CH.empty()) {
+            BlockUpdateNotify bun;
+            c->CH.flush(bun);
+            OutMessage omsg;
+            bun.writeToMsg(omsg);
+            NetHelper::Broadcast(G, omsg, Tfer::Rel, Channels::MapUpdate);
+          }
+        }
+      }
+    } break;
   }
 }
 
@@ -312,6 +327,11 @@ void Server::start() {
 
   WorldRef wr = G.U->createWorld(0);
   World0Ref = wr;
+
+  for (int x = -2; x < 2; ++x)
+    for (int y = -2; y < 2; ++y)
+      for (int z = -2; z < 2; ++z)
+        holdChunksInMem.emplace_back(G.U->getWorld(0)->getLoadChunk(x, y, z));
 }
 
 void Server::stop() {
@@ -338,12 +358,10 @@ void Server::chunkUpdater(WorldRef WR, bool &continueUpdate) {
     for (auto pair : W) {
       if ((c = pair.second.lock()) && !c->CH.empty()) {
         // TODO: view range
-        OutMessage msg(MessageType::BlockUpdate, 0);
-        glm::ivec3 pos = c->getWorldChunkPos();
-        msg.writeI16(pos.x);
-        msg.writeI16(pos.y);
-        msg.writeI16(pos.z);
-        c->CH.flush(msg);
+        Net::MsgTypes::BlockUpdateNotify bun;
+        c->CH.flush(bun);
+        OutMessage msg;
+        bun.writeToMsg(msg);
         NetHelper::Broadcast(G, msg, Tfer::Rel, Channels::MapUpdate);
       }
     }

@@ -1,14 +1,20 @@
 #include "Chunk.hpp"
+
 #include "Platform.hpp"
+
+#include <cstring>
+#include <cstddef>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include <lzfx.h>
+#include <fasthash.h>
+
 #include "GlobalProperties.hpp"
 #include "Game.hpp"
 #include "content/Registry.hpp"
-#include <cstring>
-#include <cstddef>
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <lzfx.h>
-#include <fasthash.h>
+#include "network/msgtypes/BlockUpdate.hpp"
 
 #if CHUNK_INMEM_COMPRESS
   #include <cstdlib>
@@ -18,7 +24,7 @@
 
 namespace Diggler {
 
-Chunk::Renderer Chunk::R = {0};
+Chunk::Renderer Chunk::R = {};
 const Texture *Chunk::TextureAtlas = nullptr;
 
 struct GLCoord {
@@ -51,15 +57,17 @@ void Chunk::ChangeHelper::add(int x, int y, int z) {
   m_changes.emplace_back(x, y, z);
 }
 
-void Chunk::ChangeHelper::flush(Net::OutMessage &msg) {
-  msg.writeU8(m_changes.size());
+using Net::MsgTypes::BlockUpdateNotify;
+void Chunk::ChangeHelper::flush(BlockUpdateNotify &bun) {
   for (glm::ivec3 &c : m_changes) {
-    msg.writeU8(c.x);
-    msg.writeU8(c.y);
-    msg.writeU8(c.z);
-    msg.writeU16(C.data->id[I(c.x, c.y, c.z)]);
-    msg.writeU16(C.data->data[I(c.x, c.y, c.z)]);
-    msg.writeU16(C.data->light[I(c.x, c.y, c.z)]);
+    bun.updates.emplace_back();
+    BlockUpdateNotify::UpdateData &upd = bun.updates.back();
+    upd.worldId = C.W->id;
+    upd.pos = glm::ivec3(C.wcx * CX + c.x, C.wcy * CY + c.y, C.wcz * CZ + c.z);
+    upd.id = C.data->id[I(c.x, c.y, c.z)];
+    upd.data = C.data->data[I(c.x, c.y, c.z)];
+    upd.light = C.data->light[I(c.x, c.y, c.z)];
+    upd.cause = BlockUpdateNotify::UpdateData::Cause::Unspecified;
   }
   m_changes.clear();
 }
@@ -190,6 +198,8 @@ Chunk::~Chunk() {
 void Chunk::notifyChange(int x, int y, int z) {
   if (state != State::Ready)
     return;
+
+  markAsDirty();
 
   CH.add(x, y, z);
   if (GlobalProperties::IsClient) {
@@ -324,7 +334,7 @@ void Chunk::updateClient() {
   GLCoord		vertex[CX * CY * CZ * 6 /* faces */ * 4 /* vertices */ / 2 /* face removing (HSR) makes a lower vert max */];
   GLushort	idxOpaque[CX * CY * CZ * 6 /* faces */ * 6 /* indices */ / 2 /* HSR */],
         idxTransp[CX*CY*CZ*6*6/2];
-  int v = 0, io = 0, it = 0;
+  uint v = 0, io = 0, it = 0;
 
   bool hasWaves = G->RP->wavingLiquids;
   BlockId bt, bu /*BlockUp*/, bn /*BlockNear*/;
@@ -383,7 +393,7 @@ void Chunk::updateClient() {
           mayDisp = false;
         }
 
-        GLushort *index; int i; bool transp = ContentRegistry::isTransparent(bt);
+        GLushort *index; uint i; bool transp = ContentRegistry::isTransparent(bt);
         if (transp) {
           index = idxTransp;
           i = it;
@@ -568,7 +578,7 @@ void Chunk::read(InStream &is) {
   }
 
   delete[] compressedData;
-  markAsDirty();
+  state = State::Ready;
 
   { ChunkRef nc;
     nc = W->getChunk(wcx+1, wcy, wcz); if (nc) nc->markAsDirty();

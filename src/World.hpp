@@ -82,6 +82,9 @@ public:
   inline ChunkRef getChunkAtCoords(int x, int y, int z) {
     return getChunk(divrd(x, CX), divrd(y, CY), divrd(z, CZ));
   }
+  inline ChunkRef getChunkAtCoords(const glm::ivec3 &v) {
+    return getChunk(divrd(v.x, CX), divrd(v.y, CY), divrd(v.z, CZ));
+  }
 
   ///
   /// @brief Gets a chunk.
@@ -89,9 +92,12 @@ public:
   /// and add said chunk to the load queue.
   /// @returns `ChunkRef` to the chunk.
   ///
-  ChunkRef getChunkEx(int cx, int cy, int cz);
-  inline ChunkRef getChunkExAtCoords(int x, int y, int z) {
-    return getChunkEx(divrd(x, CX), divrd(y, CY), divrd(z, CZ));
+  ChunkRef getLoadChunk(int cx, int cy, int cz);
+  inline ChunkRef getLoadChunkAtCoords(int x, int y, int z) {
+    return getLoadChunk(divrd(x, CX), divrd(y, CY), divrd(z, CZ));
+  }
+  inline ChunkRef getLoadChunkAtCoords(const glm::ivec3 &v) {
+    return getLoadChunk(divrd(v.x, CX), divrd(v.y, CY), divrd(v.z, CZ));
   }
 
   ///

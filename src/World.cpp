@@ -87,7 +87,7 @@ ChunkRef World::getChunk(int cx, int cy, int cz) {
   return ChunkRef();
 }
 
-ChunkRef World::getChunkEx(int cx, int cy, int cz) {
+ChunkRef World::getLoadChunk(int cx, int cy, int cz) {
   iterator it = find(glm::ivec3(cx, cy, cz));
   if (it != end()) {
     if (!it->second.expired())
@@ -412,7 +412,7 @@ void World::read(InStream &M) {
     byte *compressedData = new byte[compressedSize];
     M.readData(compressedData, compressedSize);
     bytesRead += compressedSize;
-    Chunk &c = *getChunkEx(x, y, z);
+    Chunk &c = *getLoadChunk(x, y, z);
     uint outLen = targetDataSize;
     int rz = lzfx_decompress(compressedData, compressedSize, c.data, &outLen);
     if (rz < 0 || outLen != targetDataSize) {
