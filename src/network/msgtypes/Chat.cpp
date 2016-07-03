@@ -28,8 +28,8 @@ void ChatAnnouncement::readFromMsg(InMessage &imsg) {
   announcementType = imsg.readString();
   origin.name = imsg.readString();
   Stream::PosT offset = imsg.tell();
-  origin.display = msgpack::unpack(static_cast<const char*>(imsg.data()),
-    imsg.length(), offset).get();
+  origin.display = msgpack::unpack(z, static_cast<const char*>(imsg.data()),
+    imsg.length(), offset);
   msg = msgpack::unpack(z, static_cast<const char*>(imsg.data()), imsg.length(), offset);
 }
 
@@ -45,8 +45,8 @@ void ChatPlayerTalk::writeToMsg(OutMessage &omsg) const {
 void ChatPlayerTalk::readFromMsg(InMessage &imsg) {
   player.id = imsg.readU32();
   Stream::PosT offset = imsg.tell();
-  player.display = msgpack::unpack(static_cast<const char*>(imsg.data()),
-    imsg.length(), offset).get();
+  player.display = msgpack::unpack(z, static_cast<const char*>(imsg.data()),
+    imsg.length(), offset);
   msg = msgpack::unpack(z, static_cast<const char*>(imsg.data()), imsg.length(), offset);
 }
 
