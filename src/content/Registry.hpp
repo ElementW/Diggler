@@ -49,9 +49,9 @@ public:
   const TexturePacker::Coord* gTC(BlockId, FaceDirection) const;
   const Texture* getAtlas() const;
 
-  void registerBlock(/* TODO */);
-  void registerItem(/* TODO */);
-  void registerFluid(/* TODO */);
+  BlockId registerBlock(/* TODO */);
+  BlockId registerItem(/* TODO */);
+  BlockId registerFluid(/* TODO */);
   void registerMapgen(/* TODO */);
 
   const BlockDef& getBlockDef(BlockId);

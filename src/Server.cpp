@@ -139,12 +139,6 @@ void Server::handleChat(InMessage &msg, Player *plr) {
   }
 }
 
-void Server::handleEvent(InMessage &msg, Peer &peer) {
-  (void) msg; (void) peer;
-  // Player &plr = G.players.getByPeer(peer);
-  // switch (msg.getSubtype())
-}
-
 void Server::handleCommand(Player *plr, const std::string &command, const std::vector<std::string> &args) {
   getDebugStream() << "Command \"" << command << '"' << std::endl;
 }
@@ -237,7 +231,21 @@ void Server::handlePlayerMapUpdate(InMessage &msg, Player &plr) {
     case S::Place: {
       BlockUpdatePlace bup;
       bup.readFromMsg(msg);
-      //TODO
+      WorldRef w = G.U->getWorld(bup.worldId);
+      if (w) {
+        ChunkRef c = w->getChunkAtCoords(bup.pos);
+        if (c) {
+          c->setBlock(rmod(bup.pos.x, CX), rmod(bup.pos.y, CY), rmod(bup.pos.z, CZ),
+                      bup.id, bup.data);
+          if (!c->CH.empty()) {
+            BlockUpdateNotify bun;
+            c->CH.flush(bun);
+            OutMessage omsg;
+            bun.writeToMsg(omsg);
+            NetHelper::Broadcast(G, omsg, Tfer::Rel, Channels::MapUpdate);
+          }
+        }
+      }
     } break;
     case S::Break: {
       BlockUpdateBreak bub;
@@ -246,7 +254,8 @@ void Server::handlePlayerMapUpdate(InMessage &msg, Player &plr) {
       if (w) {
         ChunkRef c = w->getChunkAtCoords(bub.pos);
         if (c) {
-          c->setBlock(rmod(bub.pos.x, CX), rmod(bub.pos.y, CY), rmod(bub.pos.z, CZ), 0, 0);
+          c->setBlock(rmod(bub.pos.x, CX), rmod(bub.pos.y, CY), rmod(bub.pos.z, CZ),
+                      Content::BlockAirId, 0);
           if (!c->CH.empty()) {
             BlockUpdateNotify bun;
             c->CH.flush(bun);
@@ -397,9 +406,6 @@ void Server::run() {
           break;
         case MessageType::PlayerUpdate:
           handlePlayerUpdate(msg, *plr);
-          break;
-        case MessageType::Event:
-          handleEvent(msg, peer);
           break;
         case MessageType::ChunkTransfer:
           handlePlayerChunkRequest(msg, *plr);

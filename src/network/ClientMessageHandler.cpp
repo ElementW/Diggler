@@ -140,11 +140,13 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
         } break;
       }
     } break;
-    case MessageType::Event: {
-      // switch (msg.getSubtype())
+
+    case MessageType::ServerInfo:
+    case MessageType::NetConnect:
+    case MessageType::Null:
+    default: {
+      ; // No-op
     } break;
-    default:
-      break;
   }
   return true;
 }

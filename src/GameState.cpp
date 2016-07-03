@@ -306,7 +306,12 @@ void GameState::onMouseButton(int key, int action, int mods) {
         bub.pos = pointed;
         bub.writeToMsg(msg);
       } else {
-        // TODO stubbed
+        Net::MsgTypes::BlockUpdatePlace bup;
+        bup.worldId = G->LP->W->id;
+        bup.pos = face;
+        bup.id = Content::BlockUnknownId;
+        bup.data = 0;
+        bup.writeToMsg(msg);
       }
       sendMsg(msg, Net::Tfer::Rel, Net::Channels::MapUpdate);
     }

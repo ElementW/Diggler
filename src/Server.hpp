@@ -27,7 +27,6 @@ private:
 
   void handleChat(Net::InMessage&, Player*);
 
-  void handleEvent(Net::InMessage&, Net::Peer&);
   void handlePlayerUpdate(Net::InMessage&, Player&);
     void handlePlayerDeath(Net::InMessage&, Player&);
   void handlePlayerChunkRequest(Net::InMessage&, Player&);

@@ -21,29 +21,12 @@ void Broadcast(Game &G, const OutMessage &msg, Tfer tfer, Channels chan) {
   }
 }
 
-void MakeEvent(OutMessage &msg, EventType t, const Player &p) {
-  msg.setType(MessageType::Event);
-  msg.setSubtype(t);
-  msg.writeU32(p.id);
-}
-
-void MakeEvent(OutMessage &msg, EventType t, const glm::vec3 &p) {
-  msg.setType(MessageType::Event);
-  msg.setSubtype(t);
-  msg.writeVec3(p);
-}
-
 void SendChat(Game *G, const std::string &str) {
   Net::MsgTypes::ChatSend cs;
   cs.msg = msgpack::object(str, cs.z);
 
   OutMessage msg;
   cs.writeToMsg(msg);
-  G->H.send(G->NS, msg, Tfer::Unseq);
-}
-
-void SendEvent(Game *G, EventType t) {
-  OutMessage msg(MessageType::Event, t);
   G->H.send(G->NS, msg, Tfer::Unseq);
 }
 

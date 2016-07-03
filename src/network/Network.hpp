@@ -40,8 +40,6 @@ enum class MessageType : uint8 {
   PlayerQuit,
   ChunkTransfer,
   BlockUpdate,
-  StatsUpdate,
-  Event,
   Chat,
 
   NetConnect = 240,
