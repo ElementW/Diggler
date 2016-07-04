@@ -9,7 +9,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <lzfx.h>
-#include <fasthash.h>
+#include <MurmurHash2.h>
 
 #include "GlobalProperties.hpp"
 #include "Game.hpp"
@@ -530,7 +530,7 @@ void Chunk::write(OutStream &os) const {
     os.writeU16(compressedSize);
     os.writeData(compressed, compressedSize);
   }
-  os.writeU32(fasthash32(chunkData, dataSize, 0xFA0C778C));
+  os.writeU32(MurmurHash2(chunkData, dataSize, 0xFA0C778C));
 
   delete[] compressed;
 }
@@ -552,7 +552,7 @@ void Chunk::read(InStream &is) {
         "] has bad size " << outLen << '/' << targetDataSize << std::endl;
     }
   }
-  if (is.readU32() != fasthash32(data, outLen, 0xFA0C778C)) {
+  if (is.readU32() != MurmurHash2(data, outLen, 0xFA0C778C)) {
     getErrorStream() << "Chunk[" << wcx << ',' << wcy << ' ' << wcz <<
         "] decompression gave bad chunk content" << std::endl;
   }

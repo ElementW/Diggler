@@ -13,6 +13,5 @@ add_library(stb_image STATIC stb_image.c)
 add_library(stb_perlin STATIC stb_perlin.c)
 add_library(stb_vorbis STATIC stb_vorbis.c)
 add_library(simplexnoise STATIC simplexnoise.cpp)
-add_library(fasthash STATIC fasthash.c)
 
-set(ETC_LIBRARIES stb_image stb_perlin stb_vorbis simplexnoise fasthash PARENT_SCOPE)
+set(ETC_LIBRARIES stb_image stb_perlin stb_vorbis simplexnoise PARENT_SCOPE)

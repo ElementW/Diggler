@@ -111,5 +111,5 @@ if (DOXYGEN_FOUND)
   )
 endif()
 
-file(GLOB_RECURSE FILELIST "*.hpp" "*.cpp")
+file(GLOB_RECURSE FILELIST "*.h" "*.hpp" "*.cpp")
 add_custom_target(files SOURCES ${FILELIST})
