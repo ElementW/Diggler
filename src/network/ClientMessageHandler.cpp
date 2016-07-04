@@ -65,7 +65,12 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
           if (cpt.msg.type == msgpack::type::STR) {
             std::string playerName;
             if (cpt.player.display.type == msgpack::type::NIL) {
-              playerName = GS.G->players.getById(cpt.player.id).name + "> ";
+              const Player *blabbermouth = GS.G->players.getByGameId(cpt.player.id);
+              [[likely(true)]] if (blabbermouth != nullptr) {
+                playerName = blabbermouth->name + "> ";
+              } else {
+                playerName = "?> ";
+              }
             } else if (cpt.player.display.type == msgpack::type::STR) {
               cpt.player.display.convert(playerName);
             }
@@ -83,9 +88,11 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
     case MessageType::PlayerQuit: {
       uint32 id = msg.readU32();
       try {
-        Player &plr = GS.G->players.getById(id);
-        getOutputStream() << plr.name << " is gone :(" << std::endl;
-        GS.G->players.remove(plr);
+        Player *plr = GS.G->players.getByGameId(id);
+        if (plr != nullptr) {
+          getOutputStream() << plr->name << " is gone :(" << std::endl;
+          GS.G->players.remove(*plr);
+        }
       } catch (const std::out_of_range &e) {
         getOutputStream() << "Phantom player #" << id << " disconnected" << std::endl;
       }
@@ -93,23 +100,25 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
     case MessageType::PlayerUpdate: {
       uint32 id = msg.readU32();
       try {
-        Player &plr = GS.G->players.getById(id);
-        switch (msg.getSubtype()) {
-          case PlayerUpdateType::Move: {
-            glm::vec3 pos = msg.readVec3(),
-                  vel = msg.readVec3(),
-                  acc = msg.readVec3();
-            plr.setPosVel(pos, vel, acc);
-            plr.angle = msg.readFloat();
-          } break;
-          case PlayerUpdateType::Die:
-            plr.setDead(false, (Player::DeathReason)msg.readU8());
-            break;
-          case PlayerUpdateType::Respawn:
-            plr.setDead(false);
-            break;
-          default:
-            break;
+        Player *plr = GS.G->players.getByGameId(id);
+        if (plr != nullptr) {
+          switch (msg.getSubtype()) {
+            case PlayerUpdateType::Move: {
+              glm::vec3 pos = msg.readVec3(),
+                    vel = msg.readVec3(),
+                    acc = msg.readVec3();
+              plr->setPosVel(pos, vel, acc);
+              plr->angle = msg.readFloat();
+            } break;
+            case PlayerUpdateType::Die:
+              plr->setDead(false, (Player::DeathReason)msg.readU8());
+              break;
+            case PlayerUpdateType::Respawn:
+              plr->setDead(false);
+              break;
+            default:
+              break;
+          }
         }
       } catch (const std::out_of_range &e) {
         getOutputStream() << "Invalid player update: #" << id << " is not on server" << std::endl;

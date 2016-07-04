@@ -26,9 +26,23 @@ public:
 
   using std::vector<Player>::operator[];
 
-  Player& getById(uint32);
-  Player& getByName(const std::string&);
-  Player& getByPeer(const Net::Peer&);
+  /**
+   * @brief Gets a Player using its game session ID
+   * @return Pointer to Player, may be nullptr if not found
+   */
+  Player* getByGameId(uint32);
+
+  /**
+   * @brief Gets a Player using its name
+   * @return Pointer to Player, may be nullptr if not found
+   */
+  Player* getByName(const std::string&);
+
+  /**
+   * @brief Gets a Player using its network peer object
+   * @return Pointer to Player, may be nullptr if not found
+   */
+  Player* getByPeer(const Net::Peer&);
 
   Player& add();
   void remove(const Player&);

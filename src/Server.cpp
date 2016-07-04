@@ -19,26 +19,14 @@ using namespace Diggler::Net;
 
 namespace Diggler {
 
-Player* Server::getPlayerByPeer(const Peer &peer) {
-  try {
-    return &G.players.getByPeer(peer);
-  } catch (const std::out_of_range &e) {
-    return nullptr;
-  }
+inline Player* Server::getPlayerByPeer(const Peer &peer) {
+  return G.players.getByPeer(peer);
 }
-Player* Server::getPlayerById(uint32 id) {
-  try {
-    return &G.players.getById(id);
-  } catch (const std::out_of_range &e) {
-    return nullptr;
-  }
+inline Player* Server::getPlayerById(uint32 id) {
+  return G.players.getByGameId(id);
 }
-Player* Server::getPlayerByName(const std::string &name) {
-  try {
-    return &G.players.getByName(name);
-  } catch (const std::out_of_range &e) {
-    return nullptr;
-  }
+inline Player* Server::getPlayerByName(const std::string &name) {
+  return G.players.getByName(name);
 }
 
 void Server::handlePlayerJoin(InMessage &msg, Peer &peer) {
