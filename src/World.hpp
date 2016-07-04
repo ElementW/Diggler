@@ -103,18 +103,18 @@ public:
   ///
   /// @returns The block ID at specified location.
   ///
-  BlockId getBlockId(int x, int y, int z, bool = false);
+  BlockId getBlockId(int x, int y, int z);
 
   ///
   /// @returns Block's data integer.
   /// @note If the block has extdata, 0 is returned.
   ///
-  BlockData getBlockData(int x, int y, int z, bool = false);
+  BlockData getBlockData(int x, int y, int z);
 
   ///
   /// @returns `true` if block has extdata, `false` otherwise.
   ///
-  bool blockHasExtdata(int x, int y, int z, bool = false);
+  bool blockHasExtdata(int x, int y, int z);
 
   ///
   /// @brief Gets a block's extdata.
@@ -128,17 +128,17 @@ public:
   ///
   /// @brief Sets the block at specified location, replacing its ID and data.
   ///
-  bool setBlock(int x, int y, int z, BlockId id, BlockData data = 0, bool = false);
+  bool setBlock(int x, int y, int z, BlockId id, BlockData data = 0);
 
   ///
   /// @brief Sets the block ID at specified location, keeping its (meta)data.read()
   ///
-  bool setBlockId(int x, int y, int z, BlockId id, bool = false);
+  bool setBlockId(int x, int y, int z, BlockId id);
 
   ///
   /// @brief Sets the block data at specified location, keeping its ID.
   ///
-  bool setBlockData(int x, int y, int z, BlockData data, bool = false);
+  bool setBlockData(int x, int y, int z, BlockData data);
 
   // Copies extdata tree
   // TODO void setExtdata(const msgpack::object& &meta);

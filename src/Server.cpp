@@ -357,13 +357,7 @@ void Server::chunkUpdater(WorldRef WR, bool &continueUpdate) {
     ChunkRef c;
     for (auto pair : W)
       if ((c = pair.second.lock()))
-        c->updateServerPrepare();
-    for (auto pair : W)
-      if ((c = pair.second.lock()))
         c->updateServer();
-    for (auto pair : W)
-      if ((c = pair.second.lock()))
-        c->updateServerSwap();
     for (auto pair : W) {
       if ((c = pair.second.lock()) && !c->CH.empty()) {
         // TODO: view range

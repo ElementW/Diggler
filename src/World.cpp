@@ -99,71 +99,71 @@ ChunkRef World::getLoadChunk(int cx, int cy, int cz) {
 }
 
 
-bool World::setBlock(int x, int y, int z, BlockId id, BlockData data, bool buf2) {
+bool World::setBlock(int x, int y, int z, BlockId id, BlockData data) {
   iterator it = find(glm::ivec3(divrd(x, CX), divrd(y, CY), divrd(z, CZ)));
   if (it != end()) {
     ChunkWeakRef &cwr = it->second;
     ChunkRef cr;
     if ((cr = cwr.lock())) {
-      cr->setBlock(rmod(x, CX), rmod(y, CY), rmod(z, CZ), id, data, buf2);
+      cr->setBlock(rmod(x, CX), rmod(y, CY), rmod(z, CZ), id, data);
       return true;
     }
   }
   return false;
 }
 
-bool World::setBlockId(int x, int y, int z, BlockId id, bool buf2) {
+bool World::setBlockId(int x, int y, int z, BlockId id) {
   iterator it = find(glm::ivec3(divrd(x, CX), divrd(y, CY), divrd(z, CZ)));
   if (it != end()) {
     ChunkWeakRef &cwr = it->second;
     ChunkRef cr;
     if ((cr = cwr.lock())) {
-      cr->setBlockId(rmod(x, CX), rmod(y, CY), rmod(z, CZ), id, buf2);
+      cr->setBlockId(rmod(x, CX), rmod(y, CY), rmod(z, CZ), id);
       return true;
     }
   }
   return false;
 }
 
-bool World::setBlockData(int x, int y, int z, BlockData data, bool buf2) {
+bool World::setBlockData(int x, int y, int z, BlockData data) {
   iterator it = find(glm::ivec3(divrd(x, CX), divrd(y, CY), divrd(z, CZ)));
   if (it != end()) {
     ChunkWeakRef &cwr = it->second;
     ChunkRef cr;
     if ((cr = cwr.lock())) {
-      cr->setBlockData(rmod(x, CX), rmod(y, CY), rmod(z, CZ), data, buf2);
+      cr->setBlockData(rmod(x, CX), rmod(y, CY), rmod(z, CZ), data);
       return true;
     }
   }
   return false;
 }
 
-BlockId World::getBlockId(int x, int y, int z, bool buf2) {
+BlockId World::getBlockId(int x, int y, int z) {
   iterator it = find(glm::ivec3(divrd(x, CX), divrd(y, CY), divrd(z, CZ)));
   if (it != end()) {
     ChunkWeakRef &cwr = it->second;
     ChunkRef cr;
     if ((cr = cwr.lock())) {
-      return cr->getBlockId(rmod(x, CX), rmod(y, CY), rmod(z, CZ), buf2);
+      return cr->getBlockId(rmod(x, CX), rmod(y, CY), rmod(z, CZ));
     }
   }
   return Content::BlockIgnoreId;
 }
 
-BlockData World::getBlockData(int x, int y, int z, bool buf2) {
+BlockData World::getBlockData(int x, int y, int z) {
   iterator it = find(glm::ivec3(divrd(x, CX), divrd(y, CY), divrd(z, CZ)));
   if (it != end()) {
     ChunkWeakRef &cwr = it->second;
     ChunkRef cr;
     if ((cr = cwr.lock())) {
-      return cr->getBlockData(rmod(x, CX), rmod(y, CY), rmod(z, CZ), buf2);
+      return cr->getBlockData(rmod(x, CX), rmod(y, CY), rmod(z, CZ));
     }
   }
   return 0;
 }
 
-bool World::blockHasExtdata(int x, int y, int z, bool buf2) {
-  return getBlockData(x, y, z, buf2) & BlockExtdataBit;
+bool World::blockHasExtdata(int x, int y, int z) {
+  return getBlockData(x, y, z) & BlockExtdataBit;
 }
 
 

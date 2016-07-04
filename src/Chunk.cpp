@@ -86,7 +86,7 @@ void Chunk::ChangeHelper::discard() {
 
 Chunk::Chunk(Game *G, WorldRef W, int X, int Y, int Z) :
   wcx(X), wcy(Y), wcz(Z),
-  G(G), W(W), vbo(nullptr), data(nullptr), data2(nullptr),
+  G(G), W(W), vbo(nullptr), data(nullptr),
   state(State::Unavailable),
   CH(*this) {
   dirty = true;
@@ -100,10 +100,6 @@ Chunk::Chunk(Game *G, WorldRef W, int X, int Y, int Z) :
       loadShader();
       TextureAtlas = G->CR->getAtlas();
     }
-  }
-  if (GlobalProperties::IsServer) {
-    data2 = new Data;
-    data2->clear();
   }
 #if CHUNK_INMEM_COMPRESS
   imcUnusedSince = 0;
@@ -144,8 +140,6 @@ void Chunk::calcMemUsage() {
 #endif
   if (data)
     blkMem += AllocaSize;
-  if (data2)
-    blkMem += AllocaSize;
 }
 
 #if CHUNK_INMEM_COMPRESS
@@ -185,7 +179,7 @@ void Chunk::onRenderPropertiesChanged() {
 }
 
 Chunk::~Chunk() {
-  delete data; delete data2;
+  delete data;
   if (GlobalProperties::IsClient) {
     delete vbo; delete ibo;
   }
@@ -216,58 +210,53 @@ void Chunk::notifyChange(int x, int y, int z) {
   }
 }
 
-void Chunk::setBlock(int x, int y, int z, BlockId id, BlockData data, bool buf2) {
+void Chunk::setBlock(int x, int y, int z, BlockId id, BlockData data) {
   if ((x < 0 || y < 0 || z < 0 || x >= CX || y >= CY || z >= CZ) && G)
-    return (void)W->setBlock(wcx * CX + x, wcy * CY + y, wcz * CZ + z, id, data, buf2);
+    return (void)W->setBlock(wcx * CX + x, wcy * CY + y, wcz * CZ + z, id, data);
 #if CHUNK_INMEM_COMPRESS
   imcUncompress();
 #endif
-  Data *buf = buf2 ? data2 : this->data;
-  buf->id[I(x,y,z)] = id;
-  buf->data[I(x,y,z)] = data;
+  this->data->id[I(x,y,z)] = id;
+  this->data->data[I(x,y,z)] = data;
   notifyChange(x, y, z);
 }
 
-void Chunk::setBlockId(int x, int y, int z, BlockId id, bool buf2) {
+void Chunk::setBlockId(int x, int y, int z, BlockId id) {
   if ((x < 0 || y < 0 || z < 0 || x >= CX || y >= CY || z >= CZ) && W)
-    return (void)W->setBlockId(wcx * CX + x, wcy * CY + y, wcz * CZ + z, id, buf2);
+    return (void)W->setBlockId(wcx * CX + x, wcy * CY + y, wcz * CZ + z, id);
 #if CHUNK_INMEM_COMPRESS
   imcUncompress();
 #endif
-  Data *buf = buf2 ? data2 : data;
-  buf->id[I(x,y,z)] = id;
+  this->data->id[I(x,y,z)] = id;
   notifyChange(x, y, z);
 }
 
-void Chunk::setBlockData(int x, int y, int z, BlockData data, bool buf2) {
+void Chunk::setBlockData(int x, int y, int z, BlockData data) {
   if ((x < 0 || y < 0 || z < 0 || x >= CX || y >= CY || z >= CZ) && W)
-    return (void)W->setBlockData(wcx * CX + x, wcy * CY + y, wcz * CZ + z, data, buf2);
+    return (void)W->setBlockData(wcx * CX + x, wcy * CY + y, wcz * CZ + z, data);
 #if CHUNK_INMEM_COMPRESS
   imcUncompress();
 #endif
-  Data *buf = buf2 ? data2 : this->data;
-  buf->data[I(x,y,z)] = data;
+  this->data->data[I(x,y,z)] = data;
   notifyChange(x, y, z);
 }
  
-BlockId Chunk::getBlockId(int x, int y, int z, bool buf2) {
+BlockId Chunk::getBlockId(int x, int y, int z) {
   if ((x < 0 || y < 0 || z < 0 || x >= CX || y >= CY || z >= CZ) && W)
-    return W->getBlockId(wcx * CX + x, wcy * CY + y, wcz * CZ + z, buf2);
+    return W->getBlockId(wcx * CX + x, wcy * CY + y, wcz * CZ + z);
 #if CHUNK_INMEM_COMPRESS
   imcUncompress();
 #endif
-  Data *buf = buf2 ? data2 : data;
-  return buf->id[I(x,y,z)];
+  return this->data->id[I(x,y,z)];
 }
 
-BlockData Chunk::getBlockData(int x, int y, int z, bool buf2) {
+BlockData Chunk::getBlockData(int x, int y, int z) {
   if ((x < 0 || y < 0 || z < 0 || x >= CX || y >= CY || z >= CZ) && W)
-    return W->getBlockData(wcx * CX + x, wcy * CY + y, wcz * CZ + z, buf2);
+    return W->getBlockData(wcx * CX + x, wcy * CY + y, wcz * CZ + z);
 #if CHUNK_INMEM_COMPRESS
   imcUncompress();
 #endif
-  Data *buf = buf2 ? data2 : data;
-  BlockData d = buf->data[I(x,y,z)];
+  BlockData d = this->data->data[I(x,y,z)];
   if (d & BlockExtdataBit) {
     // TODO Implement data in extdata
     return 0;
@@ -275,22 +264,17 @@ BlockData Chunk::getBlockData(int x, int y, int z, bool buf2) {
   return d;
 }
 
-bool Chunk::blockHasExtdata(int x, int y, int z, bool buf2) {
+bool Chunk::blockHasExtdata(int x, int y, int z) {
   if ((x < 0 || y < 0 || z < 0 || x >= CX || y >= CY || z >= CZ) && W)
-    return W->blockHasExtdata(wcx * CX + x, wcy * CY + y, wcz * CZ + z, buf2);
+    return W->blockHasExtdata(wcx * CX + x, wcy * CY + y, wcz * CZ + z);
 #if CHUNK_INMEM_COMPRESS
   imcUncompress();
 #endif
-  Data *buf = buf2 ? data2 : data;
-  return buf->data[I(x,y,z)] & BlockExtdataBit;
+  return this->data->data[I(x,y,z)] & BlockExtdataBit;
 }
 
 void Chunk::markAsDirty() {
   dirty = true;
-}
-
-void Chunk::updateServerPrepare() {
-  memcpy(data2, data, AllocaSize);
 }
 
 void Chunk::updateServer() {
@@ -318,10 +302,6 @@ void Chunk::updateServer() {
 #endif
       }
   mut.unlock();
-}
-
-void Chunk::updateServerSwap() {
-  std::swap(data, data2);
 }
 
 struct RGB { float r, g, b; };
