@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(LZFX)
+project(LZFX C)
 
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3")
 
 set(LZFX_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
 set(LZFX_INCLUDE_DIRS ${LZFX_INCLUDE_DIRS} PARENT_SCOPE)
+include_directories(${LZFX_INCLUDE_DIRS})
 
 add_library(lzfx STATIC lzfx.c)
-target_include_directories(lzfx PUBLIC ${LZFX_INCLUDE_DIRS})
 
 set(LZFX_LIBRARIES lzfx PARENT_SCOPE)

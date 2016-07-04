@@ -93,7 +93,7 @@ target_link_libraries(diggler
   ${LZFX_LIBRARIES}
   ${ENET_LIBRARIES}
   ${EPOXY_LIBRARIES}
-  ${GLFW_LIBRARIES} 
+  ${GLFW_LIBRARIES}
   ${OPENAL_LIBRARY}
   pthread)
 
