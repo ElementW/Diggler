@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "../../Program.hpp"
+#include "VAO.hpp"
 #include "VBO.hpp"
 
 namespace Diggler {
@@ -30,6 +31,7 @@ protected:
   struct EmitterEntry {
     ParticleEmitter *emitter;
     VBO vbo;
+    VAO vao;
   };
   std::vector<EmitterEntry> emitters;
 

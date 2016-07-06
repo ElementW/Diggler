@@ -127,6 +127,10 @@ public:
   void bind() const {
     glBindBuffer(GL_ARRAY_BUFFER, m_id);
   }
+
+  static void unbind() {
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  }
 };
 
 }

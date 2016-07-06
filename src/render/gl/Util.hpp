@@ -29,6 +29,8 @@ constexpr GLenum getBinding(GLenum bufferT) {
       return GL_FRAMEBUFFER_BINDING;
     case GL_RENDERBUFFER:
       return GL_RENDERBUFFER_BINDING;
+    case GL_VERTEX_ARRAY:
+      return GL_VERTEX_ARRAY_BINDING;
     default:
       return 0;
   }
@@ -54,6 +56,9 @@ template<> inline BoundBufferSave<GL_FRAMEBUFFER>::~BoundBufferSave() {
 }
 template<> inline BoundBufferSave<GL_RENDERBUFFER>::~BoundBufferSave() {
   glBindRenderbuffer(GL_RENDERBUFFER, buffer);
+}
+template<> inline BoundBufferSave<GL_VERTEX_ARRAY>::~BoundBufferSave() {
+  glBindVertexArray(buffer);
 }
 
 }

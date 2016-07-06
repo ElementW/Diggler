@@ -43,6 +43,11 @@ void GLParticlesRenderer::updateParticleData(ParticleEmitter *pe,
   uintptr_t idx = getRendererData(pe);
   EmitterEntry &entry = emitters.at(idx);
   entry.vbo.setDataKeepSize(data, count, GL_STREAM_DRAW);
+  entry.vao.vertexAttrib(entry.vbo, att_coord, 3, GL_FLOAT, sizeof(GLParticle), 0);
+  entry.vao.vertexAttrib(entry.vbo, att_color, 4, GL_FLOAT, sizeof(GLParticle),
+    offsetof(GLParticle, r));
+  entry.vao.vertexAttrib(entry.vbo, att_pointSize, 1, GL_FLOAT, sizeof(GLParticle),
+    offsetof(GLParticle, s));
 }
 
 void GLParticlesRenderer::unregisterEmitter(ParticleEmitter *pe) {
@@ -64,10 +69,7 @@ void GLParticlesRenderer::render(RenderParams &rp) {
   glUniform4f(uni_unicolor, 1.f, 1.f, 1.f, 1.f);
 
   for (EmitterEntry &entry : emitters) {
-    entry.vbo.bind();
-    glVertexAttribPointer(att_coord, 3, GL_FLOAT, GL_FALSE, sizeof(GLParticle), 0);
-    glVertexAttribPointer(att_color, 4, GL_FLOAT, GL_FALSE, sizeof(GLParticle), (GLvoid*)(3*sizeof(float)));
-    glVertexAttribPointer(att_pointSize, 1, GL_FLOAT, GL_FALSE, sizeof(GLParticle), (GLvoid*)(7*sizeof(float)));
+    entry.vao.bind();
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(entry.emitter->getMaxCount()));
   }
 
