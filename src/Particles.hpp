@@ -1,5 +1,5 @@
-#ifndef PARTICLES_HPP
-#define PARTICLES_HPP
+#ifndef DIGGLER_PARTICLES_HPP
+#define DIGGLER_PARTICLES_HPP
 
 #include <vector>
 
@@ -7,11 +7,11 @@
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 
-#include "Program.hpp"
-#include "render/gl/VBO.hpp"
-
 namespace Diggler {
 
+namespace Render {
+class ParticlesRenderer;
+}
 class Game;
 
 struct Particle {
@@ -22,24 +22,18 @@ struct Particle {
 };
 
 class ParticleEmitter {
-  static struct Renderer {
-    const Program *prog;
-    GLint att_coord,
-        att_color,
-        att_texcoord,
-        att_pointSize,
-        uni_mvp,
-        uni_unicolor,
-        uni_fogStart,
-        uni_fogEnd;
-  } R;
+  friend class Render::ParticlesRenderer;
+  uintptr_t rendererData;
+
   Game *G;
-  void init();
-  
-  int count, maxCount;
+
+  uint count, maxCount;
   std::vector<Particle> particles;
-  Render::gl::VBO vbo;
 public:
+  struct ParticleRenderData {
+    float x, y, z, r, g, b, a, s;
+  };
+
   Particle pTemplate;
   glm::vec3 pos;
 
@@ -47,15 +41,17 @@ public:
   float decayAmpl;
 
   ParticleEmitter(Game*);
+  ~ParticleEmitter();
 
   void setMaxCount(uint);
-  uint getMaxCount() const;
+  uint getMaxCount() const {
+    return maxCount;
+  }
 
   void emit(Particle&);
   void update(double delta);
-  void render(const glm::mat4&);
 };
 
 }
 
-#endif
+#endif /* DIGGLER_PARTICLES_HPP */

@@ -11,6 +11,7 @@
 #include "GlobalProperties.hpp"
 #include "Game.hpp"
 #include "render/gl/FBO.hpp"
+#include "render/Renderer.hpp"
 #include "Clouds.hpp"
 #include "Chatbox.hpp"
 #include "CaveGenerator.hpp"
@@ -550,7 +551,7 @@ void GameState::gameLoop() {
       }
       W.renderTransparent(m_transform);
 
-      static ParticleEmitter pe(G);
+      /*static ParticleEmitter pe(G);
       pe.posAmpl = glm::vec3(1, 1, 1);
       pe.pTemplate.color = glm::vec4(0, 0.4, 0.9, 1);
       pe.pTemplate.size = 0.07;
@@ -559,14 +560,16 @@ void GameState::gameLoop() {
       pe.pTemplate.decay = 4;
       pe.decayAmpl = 2;
       
-      /*pe.setMaxCount(4*4*800);
+      pe.setMaxCount(4*4*800);
       pe.posAmpl = glm::vec3(2*16, 1, 2*16);
       pe.pos = glm::vec3(2*16, 4*16+4, 2*16);
       pe.pTemplate.vel = glm::vec3(0, -4, 0);
-      pe.velAmpl = glm::vec3(0, 2, 0); rain*/
+      pe.velAmpl = glm::vec3(0, 2, 0); rain
       
       pe.update(deltaT);
-      pe.render(m_transform);
+      Render::RenderParams rp;
+      rp.transform = m_transform;
+      G->R->PR->render(rp);*/
 
       // TODO: replace harcoded 32 viewdistance
       if (G->LP->raytracePointed(32, &m_pointedBlock, &m_pointedFacing)) {

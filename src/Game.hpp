@@ -11,6 +11,10 @@ using std::shared_ptr;
 
 namespace Diggler {
 
+namespace Render {
+class Renderer;
+}
+
 namespace UI {
 class Manager;
 }
@@ -40,6 +44,7 @@ public:
   UI::Manager *UIM;
   LocalPlayer *LP;
   ProgramManager *PM;
+  Render::Renderer *R;
   UI::FontManager FM;
   struct RenderProperties {
     bool bloom, wavingLiquids;

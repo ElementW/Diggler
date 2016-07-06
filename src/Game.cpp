@@ -3,6 +3,7 @@
 #include "content/Registry.hpp"
 #include "GlobalProperties.hpp"
 #include "KeyBinds.hpp"
+#include "render/gl/Renderer.hpp"
 
 namespace Diggler {
 
@@ -20,6 +21,7 @@ void Game::init() {
     CR = new ContentRegistry;
     PM = new ProgramManager(*this);
     LP = new LocalPlayer(this);
+    R = new Render::gl::GLRenderer(this);
     RP = new RenderProperties; { // TODO move somewhere else?
       RP->bloom = true;
       RP->wavingLiquids = !true;

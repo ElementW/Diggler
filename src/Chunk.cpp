@@ -472,7 +472,7 @@ void Chunk::updateClient() {
 
   vertices = v;
   vbo->setData(vertex, v);
-  ibo->setSize((io+it) * sizeof(*idxOpaque));
+  ibo->resize((io+it) * sizeof(*idxOpaque));
   ibo->setSubData(idxOpaque, 0, io);
   ibo->setSubData(idxTransp, io, it);
   indicesOpq = io;
@@ -492,7 +492,7 @@ void Chunk::render(const glm::mat4 &transform) {
 
   glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(transform));
   vbo->bind();
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo->id);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo->id());
   glVertexAttribPointer(R.att_coord, 3, GL_BYTE, GL_FALSE, sizeof(GLCoord), 0);
   glVertexAttribPointer(R.att_wave, 1, GL_BYTE, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, w));
   glVertexAttribPointer(R.att_texcoord, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, tx));
@@ -507,7 +507,7 @@ void Chunk::renderTransparent(const glm::mat4 &transform) {
   // Here we really need to pass the matrix again since the call is made in a second render pass
   glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(transform));
   vbo->bind();
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo->id);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo->id());
   glVertexAttribPointer(R.att_coord, 3, GL_BYTE, GL_FALSE, sizeof(GLCoord), 0);
   glVertexAttribPointer(R.att_wave, 1, GL_BYTE, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, w));
   glVertexAttribPointer(R.att_texcoord, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, tx));
