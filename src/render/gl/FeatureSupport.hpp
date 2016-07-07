@@ -14,7 +14,8 @@ public:
   FeatureSupport() = delete;
 
   static bool
-    VAO;
+    VAO /* Vertex Array Objects */,
+    DSA /* Direct State Access */;
 
   static void probe();
 };
