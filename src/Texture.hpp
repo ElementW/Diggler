@@ -20,34 +20,51 @@ public:
     Clamp
   };
 private:
-  GLuint id;
-  int w, h;
+  GLuint m_id;
+  uint m_w, m_h;
   PixelFormat m_format;
   void create();
   void setPlaceholder();
 
 public:
-  Texture(int w, int h, PixelFormat format = PixelFormat::RGB);
-  Texture(int w, int h, const uint8_t *data, PixelFormat format = PixelFormat::RGB);
-  Texture(const std::string& path, PixelFormat format = PixelFormat::RGB);
-  static void unbind();
+  Texture(uint w, uint m_h, PixelFormat format = PixelFormat::RGB);
+  Texture(uint w, uint m_h, const uint8_t *data, PixelFormat format = PixelFormat::RGB);
+  Texture(const std::string &path, PixelFormat format = PixelFormat::RGB);
+  ~Texture();
 
-  inline GLuint getId() const { return id; }
-  inline operator GLuint() const { return getId(); }
-  void resize(int w, int h);
-  int getW();
-  int getH();
-  PixelFormat getPixelFormat();
-  int getRequiredBufferSize();
+  inline GLuint id() const { return m_id; }
+  inline operator GLuint() const { return m_id; }
+
+  void resize(uint w, uint h);
+
+  uint w() const {
+    return m_w;
+  }
+
+  uint h() const {
+    return m_h;
+  }
+
+
+  PixelFormat pixelFormat();
+  uint requiredBufferSize();
   void getTexture(uint8_t *data);
-  void setTexture(int w, int h, const uint8_t *data, PixelFormat format = PixelFormat::RGB);
+  void setTexture(uint w, uint h, const uint8_t *data, PixelFormat format = PixelFormat::RGB);
   void setTexture(const uint8_t *data, PixelFormat format = PixelFormat::RGB);
-  void setSubTexture(int x, int y, int w, int h, const uint8_t *data, PixelFormat format = PixelFormat::RGB);
+  void setSubTexture(int x, int y, uint w, uint h, const uint8_t *data, PixelFormat format = PixelFormat::RGB);
   void setFiltering(Filter min, Filter mag);
   void setWrapping(Wrapping s, Wrapping t);
-  void bind() const;
-  void bind(int number) const;
-  ~Texture();
+
+
+  void bind() const {
+    glBindTexture(GL_TEXTURE_2D, m_id);
+  }
+
+  void bind(uint number) const;
+
+  static void unbind() {
+    glBindTexture(GL_TEXTURE_2D, 0);
+  }
 };
 }
 

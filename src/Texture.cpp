@@ -1,4 +1,4 @@
-#include "Texture.hpp"
+﻿#include "Texture.hpp"
 #include "Platform.hpp"
 #include <stb_image.h>
 #include <cstdio>
@@ -11,26 +11,25 @@
 
 namespace Diggler {
 
-Texture::Texture(int w, int h, Texture::PixelFormat format) : w(w), h(h), m_format(format) {
+Texture::Texture(uint w, uint h, Texture::PixelFormat format) :
+  m_w(w),
+  m_h(h),
+  m_format(format) {
   PushBoundTex();
   create();
   setPlaceholder();
   PopBoundTex();
 }
 
-Texture::Texture(int w, int h, const uint8_t* data, Texture::PixelFormat format) {
+Texture::Texture(uint w, uint h, const uint8_t* data, Texture::PixelFormat format) {
   PushBoundTex();
   create();
   setTexture(w, h, data, format);
   PopBoundTex();
 }
 
-void Texture::unbind() {
-  glBindTexture(GL_TEXTURE_2D, 0);
-}
-
 static GLenum getGlTexFormat(Texture::PixelFormat fmt);
-Texture::Texture(const std::string& path, PixelFormat format) {
+Texture::Texture(const std::string &path, PixelFormat format) {
   PushBoundTex();
   create();
   int stbiFormat;
@@ -50,17 +49,17 @@ Texture::Texture(const std::string& path, PixelFormat format) {
   FILE *fp = fopen(path.c_str(), "rb");
   if (fp != nullptr) {
     ptr = stbi_load_from_file(fp, &width, &height, &channels, stbiFormat);
-    w = width; h = height;
+    m_w = width; m_h = height;
   }
   if (ptr && width && height) {
-    setTexture(w, h, ptr, format);
+    setTexture(m_w, m_h, ptr, format);
     stbi_image_free(ptr);
 #if TEXTURE_LOAD_DEBUG
     getDebugStream() << "Loaded image \"" << path << "\" w=" << w << " h=" << h <<
       " c=" << channels << " pf=" << (int)format << " glPf=" << (int)getGlTexFormat(format) << std::endl;
 #endif
   } else {
-    w = 64; h = 64;
+    m_w = 64; m_h = 64;
     if (fp == nullptr)
       getErrorStream() << "Failed to open \"" << path << "\" : " << std::strerror(errno) << std::endl;
     else
@@ -70,9 +69,16 @@ Texture::Texture(const std::string& path, PixelFormat format) {
   PopBoundTex();
 }
 
+Texture::~Texture() {
+  GLint currentBoundTex; glGetIntegerv(GL_TEXTURE_BINDING_2D, &currentBoundTex);
+  if (static_cast<GLuint>(currentBoundTex) == m_id)
+    glBindTexture(GL_TEXTURE_2D, 0);
+  glDeleteTextures(1, &m_id);
+}
+
 void Texture::create() {
-  glGenTextures(1, &id);
-  glBindTexture(GL_TEXTURE_2D, id);
+  glGenTextures(1, &m_id);
+  glBindTexture(GL_TEXTURE_2D, m_id);
   setFiltering(Filter::Nearest, Filter::Nearest);
 }
 
@@ -82,9 +88,8 @@ GLenum getFilterGlConstant(Texture::Filter filter) {
     return GL_LINEAR;
   case Texture::Filter::Nearest:
     return GL_NEAREST;
-  default:
-    return 0;
   }
+  return 0;
 }
 
 void Texture::setFiltering(Filter min, Filter mag) {
@@ -101,9 +106,8 @@ static GLenum getWrapGlConstant(Texture::Wrapping wrap) {
     return GL_CLAMP;
   case Texture::Wrapping::Repeat:
     return GL_REPEAT;
-  default:
-    return 0;
   }
+  return 0;
 }
 
 void Texture::setWrapping(Wrapping s, Wrapping t) {
@@ -114,7 +118,7 @@ void Texture::setWrapping(Wrapping s, Wrapping t) {
 }
 
 void Texture::setPlaceholder() {
-  int pxLength;
+  size_t pxLength;
   switch (m_format) {
   case PixelFormat::RGB:
     pxLength = 3;
@@ -126,9 +130,9 @@ void Texture::setPlaceholder() {
     pxLength = 1;
     break;
   }
-  unsigned char *white = new unsigned char[w * h * pxLength];
-  memset(white, 255, w * h * pxLength);
-  setTexture(w, h, white, m_format);
+  unsigned char *white = new unsigned char[m_w * m_h * pxLength];
+  memset(white, 255, m_w * m_h * pxLength);
+  setTexture(m_w, m_h, white, m_format);
   delete[] white;
 }
 
@@ -147,10 +151,10 @@ static GLenum getGlTexFormat(Texture::PixelFormat fmt) {
   return 0;
 }
 
-void Texture::setTexture(int w, int h, const uint8_t *data, PixelFormat format) {
+void Texture::setTexture(uint w, uint h, const uint8_t *data, PixelFormat format) {
   PushBoundTex();
   bind();
-  this->w = w; this->h = h;
+  m_w = w; m_h = h;
   this->m_format = format;
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // This. GL = state machine
   GLenum glFormat = getGlTexFormat(format);
@@ -167,10 +171,10 @@ void Texture::setTexture(int w, int h, const uint8_t *data, PixelFormat format) 
 }
 
 void Texture::setTexture(const uint8_t *data, PixelFormat format) {
-  return setSubTexture(0, 0, w, h, data, format);
+  return setSubTexture(0, 0, m_w, m_h, data, format);
 }
 
-void Texture::setSubTexture(int x, int y, int w, int h, const uint8_t *data, PixelFormat format) {
+void Texture::setSubTexture(int x, int y, uint w, uint h, const uint8_t *data, PixelFormat format) {
   PushBoundTex();
   bind();
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -182,8 +186,8 @@ void Texture::setSubTexture(int x, int y, int w, int h, const uint8_t *data, Pix
   PopBoundTex();
 }
 
-void Texture::resize(int w, int h) {
-  if (this->w == w && this->h == h)
+void Texture::resize(uint w, uint h) {
+  if (m_w == w && m_h == h)
     return;
   PushBoundTex();
   bind();
@@ -197,25 +201,17 @@ void Texture::resize(int w, int h) {
     glFormat,  // format
     GL_UNSIGNED_BYTE, // type
     nullptr);
-  this->w = w;
-  this->h = h;
+  m_w = w;
+  m_h = h;
   PopBoundTex();
 }
 
-int Texture::getW() {
-  return w;
-}
-
-int Texture::getH() {
-  return h;
-}
-
-Texture::PixelFormat Texture::getPixelFormat() {
+Texture::PixelFormat Texture::pixelFormat() {
   return m_format;
 }
 
-int Texture::getRequiredBufferSize() {
-  int texelSize;
+uint Texture::requiredBufferSize() {
+  uint texelSize;
   switch (m_format) {
   case PixelFormat::RGB:
     texelSize = 3;
@@ -227,7 +223,7 @@ int Texture::getRequiredBufferSize() {
     texelSize = 1;
     break;
   }
-  return w * h * texelSize;
+  return m_w * m_h * texelSize;
 }
 
 void Texture::getTexture(uint8_t* data) {
@@ -237,21 +233,10 @@ void Texture::getTexture(uint8_t* data) {
   PopBoundTex();
 }
 
-void Texture::bind() const {
-  glBindTexture(GL_TEXTURE_2D, id);
-}
-
-void Texture::bind(int number) const {
+void Texture::bind(uint number) const {
   glActiveTexture(GL_TEXTURE0+number);
-  glBindTexture(GL_TEXTURE_2D, id);
+  glBindTexture(GL_TEXTURE_2D, m_id);
   glActiveTexture(GL_TEXTURE0);
-}
-
-Texture::~Texture() {
-  GLint currentBoundTex; glGetIntegerv(GL_TEXTURE_BINDING_2D, &currentBoundTex);
-  if (currentBoundTex == (GLint)id)
-    glBindTexture(GL_TEXTURE_2D, 0);
-  glDeleteTextures(1, &id);
 }
 
 }

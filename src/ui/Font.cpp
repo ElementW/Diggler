@@ -57,9 +57,9 @@ Font::Font(Game *G, const std::string& path) : G(G) {
     int left = 0;
     for (uint8 i=0; i < 95; i++) {
       texPos[i].width = widths[i];
-      texPos[i].left = (float)left / m_texture->getW();
+      texPos[i].left = (float)left / m_texture->w();
       left += widths[i];
-      texPos[i].right = (float)left / m_texture->getW();
+      texPos[i].right = (float)left / m_texture->w();
     }
   }
 }
