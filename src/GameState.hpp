@@ -118,6 +118,8 @@ private:
     class EscMenu *EM;
   } UI;
 
+  uint64 frameTime;
+
   void setupUI();
   void lockMouse();
   void unlockMouse();

@@ -2,6 +2,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <algorithm>
+#include <chrono>
 #include <cstdio>
 #include <iomanip>
 #include <memory>
@@ -495,6 +496,7 @@ void GameState::gameLoop() {
   G->A->update();
   LP->setHasNoclip(true);
 
+  std::chrono::time_point<std::chrono::steady_clock> frameStart, frameEnd;
   while (!GW->shouldClose()) {
     if (!processNetwork()) return;
 
@@ -517,8 +519,10 @@ void GameState::gameLoop() {
         sendMsg(msg, Net::Tfer::Unrel, Net::Channels::Movement);
         nextNetUpdate = T+1.0/G->PlayerPosUpdateFreq;
       }
+
       glClearColor(0.0, 0.0, 0.0, 1.0);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      frameStart = std::chrono::steady_clock::now();
 
       if (bloom.enable) {
         m_3dFbo->bind();
@@ -668,6 +672,9 @@ void GameState::gameLoop() {
     if (isMenuToggled)
       UI.EM->render();
 
+    frameEnd = std::chrono::steady_clock::now();
+    frameTime = std::chrono::duration_cast<std::chrono::duration<uint64, std::micro>>(frameEnd  - frameStart).count();
+
     glfwSwapBuffers(*GW);
     glfwPollEvents();
 
@@ -714,7 +721,8 @@ void GameState::updateUI() {
       " C: " << divrd(m_pointedBlock.x, CX) << ' ' << divrd(m_pointedBlock.y, CZ) << ' ' <<
         divrd(m_pointedBlock.z, CZ) << std::endl <<
       "RX: " << G->H.getRxBytes() << std::endl <<
-      "TX: " << G->H.getTxBytes();
+      "TX: " << G->H.getTxBytes() << std::endl <<
+      "Frame time: " << frameTime;
     UI.DebugInfo->setText(oss.str());
   }
 }
