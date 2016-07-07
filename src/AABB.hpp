@@ -17,7 +17,10 @@ class AABB {
 public:
   using T = typename Vec3::value_type;
 
-  Vec3 v1, v2;
+  union {
+    struct { Vec3 v1, v2; };
+    struct { Vec3 min, max; };
+  };
 
   AABB(const Vec3 &vec1 = Vec3(), const Vec3 &vec2 = Vec3()) {
     set(vec1, vec2);
