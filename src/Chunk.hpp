@@ -23,11 +23,16 @@ class Game;
 class World;
 using WorldRef = std::shared_ptr<World>;
 
+namespace Render {
+class WorldRenderer;
+}
+
 namespace Net {
 namespace MsgTypes {
 struct BlockUpdateNotify;
 }
 }
+
 
 constexpr int CX = 16, CY = 16, CZ = 16;
 
@@ -35,21 +40,11 @@ class Chunk {
 private:
   friend World;
   friend CaveGenerator;
+  friend class Render::WorldRenderer;
+  uintptr_t rendererData;
 
-  static struct Renderer {
-    const Program *prog;
-    GLint att_coord,
-        att_color,
-        att_texcoord,
-        att_wave,
-        uni_mvp,
-        uni_unicolor,
-        uni_fogStart,
-        uni_fogEnd,
-        uni_time;
-  } R;
-  static const Texture *TextureAtlas;
-  int wcx, wcy, wcz;
+public:
+  const int wcx, wcy, wcz;
 
   struct Data {
     static constexpr FourCC MagicMarker = MakeFourCC("CKDT");
@@ -61,7 +56,6 @@ private:
     void clear();
   };
 
-public:
   constexpr static int AllocaSize = sizeof(Data);
 
   enum class State : uint8 {
@@ -72,20 +66,26 @@ public:
     Evicted
   };
 
-private:
-  Game *G; WorldRef W;
-  Render::gl::VBO *vbo, *ibo;
-  uint vertices, indicesOpq, indicesTpt;
+  struct Vertex {
+    uint8 x, y, z, w;
+    uint16 tx, ty;
+    float r, g, b;
+  };
 
+  Game *const G;
+  const WorldRef W;
+
+private:
   Data *data;
   //std::map<uint16, msgpack::object> extdataStore;
 
   State state;
   bool dirty;
   std::mutex mut;
-  void loadShader();
 
+public:
   void calcMemUsage();
+
 #if CHUNK_INMEM_COMPRESS
   union {
     uint imcSize;
@@ -96,7 +96,6 @@ private:
   void imcUncompress();
 #endif
 
-public:
   constexpr static float CullSphereRadius =
     (CZ > (CX > CY ? CX : CY) ? CZ : (CX > CY ? CX : CY));
     // * 1.4142135623f; but we're already at 2x the radius (i.e. diameter)
@@ -151,7 +150,6 @@ public:
   /// @returns `true` if block has extdata, `false` otherwise.
   ///
   bool blockHasExtdata(int x, int y, int z);
-
   ///
   /// @brief Gets a block's extdata.
   /// Gets a block's extdata store,  to save advanced state values.
@@ -159,6 +157,10 @@ public:
   /// @throws NoExtdataOnBlock if the targeted block doesn't have extdata
   ///
   // TODO msgpack::object& getBlockExtdata(int x, int y, int z);
+
+  bool isDirty() const {
+    return dirty;
+  }
 
   /* ============ Setters ============ */
 
@@ -192,11 +194,6 @@ public:
 
   void updateClient();
   void updateServer();
-
-  /* ============ Rendering ============ */
-
-  void render(const glm::mat4 &trasnsform);
-  void renderTransparent(const glm::mat4 &transform);
 
   /* ============ Serialization ============ */
 

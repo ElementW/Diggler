@@ -3,8 +3,6 @@
 
 #include "../ParticlesRenderer.hpp"
 
-#include <vector>
-
 #include "../../Program.hpp"
 #include "VAO.hpp"
 #include "VBO.hpp"
@@ -28,12 +26,10 @@ protected:
           uni_unicolor,
           uni_fogStart,
           uni_fogEnd;
-  struct EmitterEntry {
-    ParticleEmitter *emitter;
-    VBO vbo;
+  struct EmitterRenderData {
     VAO vao;
+    VBO vbo;
   };
-  std::vector<EmitterEntry> emitters;
 
 public:
   GLParticlesRenderer(Game*);

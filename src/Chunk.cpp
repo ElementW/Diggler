@@ -15,6 +15,7 @@
 #include "Game.hpp"
 #include "content/Registry.hpp"
 #include "network/msgtypes/BlockUpdate.hpp"
+#include "render/Renderer.hpp"
 
 #if CHUNK_INMEM_COMPRESS
   #include <cstdlib>
@@ -23,15 +24,6 @@
 #define SHOW_CHUNK_UPDATES 1
 
 namespace Diggler {
-
-Chunk::Renderer Chunk::R = {};
-const Texture *Chunk::TextureAtlas = nullptr;
-
-struct GLCoord {
-  uint8 x, y, z, w;
-  uint16 tx, ty;
-  float r, g, b;
-};
 
 constexpr float Chunk::CullSphereRadius;
 constexpr float Chunk::MidX, Chunk::MidY, Chunk::MidZ;
@@ -86,48 +78,27 @@ void Chunk::ChangeHelper::discard() {
 
 Chunk::Chunk(Game *G, WorldRef W, int X, int Y, int Z) :
   wcx(X), wcy(Y), wcz(Z),
-  G(G), W(W), vbo(nullptr), data(nullptr),
+  G(G), W(W), data(nullptr),
   state(State::Unavailable),
   CH(*this) {
   dirty = true;
   data = new Data;
   data->clear();
-  
-  if (GlobalProperties::IsClient) {
-    vbo = new Render::gl::VBO;
-    ibo = new Render::gl::VBO;
-    if (R.prog == nullptr) {
-      loadShader();
-      TextureAtlas = G->CR->getAtlas();
-    }
-  }
+
 #if CHUNK_INMEM_COMPRESS
   imcUnusedSince = 0;
   imcData = nullptr;
 #endif
   calcMemUsage();
+
+  if (GlobalProperties::IsClient) {
+    G->R->WR->registerChunk(this);
+  }
 }
 
 Chunk::State Chunk::getState() {
   // TODO: check for CKDT magic marker presence when MADV_FREE gets implemented
   return state;
-}
-
-void Chunk::loadShader() {
-  bool w = G->RP->wavingLiquids;
-  ProgramManager::FlagsT flags = PM_3D | PM_TEXTURED | PM_COLORED | PM_FOG;
-  if (w)
-    flags |= PM_WAVE;
-  R.prog = G->PM->getProgram(flags);
-  R.att_coord = R.prog->att("coord");
-  R.att_color = R.prog->att("color");
-  R.att_texcoord = R.prog->att("texcoord");
-  R.att_wave = w ? R.prog->att("wave") : -1;
-  R.uni_mvp = R.prog->uni("mvp");
-  R.uni_unicolor = R.prog->uni("unicolor");
-  R.uni_fogStart = R.prog->uni("fogStart");
-  R.uni_fogEnd = R.prog->uni("fogEnd");
-  R.uni_time = w ? R.prog->uni("time") : -1;
 }
 
 void Chunk::calcMemUsage() {
@@ -175,17 +146,17 @@ void Chunk::imcUncompress() {
 #endif
 
 void Chunk::onRenderPropertiesChanged() {
-  loadShader();
+
 }
 
 Chunk::~Chunk() {
   delete data;
-  if (GlobalProperties::IsClient) {
-    delete vbo; delete ibo;
-  }
 #if CHUNK_INMEM_COMPRESS
   std::free(imcData);
 #endif
+  if (GlobalProperties::IsClient) {
+    G->R->WR->unregisterChunk(this);
+  }
   // getDebugStream() << W->id << '.' << wcx << ',' << wcy << ',' << wcz << " destruct" << std::endl;
 }
 
@@ -311,9 +282,9 @@ void Chunk::updateClient() {
 #endif
   mut.lock();
   ContentRegistry &CR = *G->CR;
-  GLCoord		vertex[CX * CY * CZ * 6 /* faces */ * 4 /* vertices */ / 2 /* face removing (HSR) makes a lower vert max */];
-  GLushort	idxOpaque[CX * CY * CZ * 6 /* faces */ * 6 /* indices */ / 2 /* HSR */],
-        idxTransp[CX*CY*CZ*6*6/2];
+  Vertex   vertex[CX * CY * CZ * 6 /* faces */ * 4 /* vertices */ / 2 /* face removing (HSR) makes a lower vert max */];
+  GLushort idxOpaque[CX * CY * CZ * 6 /* faces */ * 6 /* indices */ / 2 /* HSR */],
+           idxTransp[CX*CY*CZ*6*6/2];
   uint v = 0, io = 0, it = 0;
 
   bool hasWaves = G->RP->wavingLiquids;
@@ -470,49 +441,9 @@ void Chunk::updateClient() {
     }
   }
 
-  vertices = v;
-  vbo->setData(vertex, v);
-  ibo->resize((io+it) * sizeof(*idxOpaque));
-  ibo->setSubData(idxOpaque, 0, io);
-  ibo->setSubData(idxTransp, io, it);
-  indicesOpq = io;
-  indicesTpt = it;
+  G->R->WR->updateChunk(this, vertex, v, idxOpaque, io, idxTransp, it);
   dirty = false;
   mut.unlock();
-}
-
-void Chunk::render(const glm::mat4 &transform) {
-#if SHOW_CHUNK_UPDATES
-  glUniform4f(R.uni_unicolor, 1.f, dirty ? 0.f : 1.f, dirty ? 0.f : 1.f, 1.f);
-#endif
-  if (dirty)
-    updateClient();
-  if (!indicesOpq)
-    return;
-
-  glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(transform));
-  vbo->bind();
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo->id());
-  glVertexAttribPointer(R.att_coord, 3, GL_BYTE, GL_FALSE, sizeof(GLCoord), 0);
-  glVertexAttribPointer(R.att_wave, 1, GL_BYTE, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, w));
-  glVertexAttribPointer(R.att_texcoord, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, tx));
-  glVertexAttribPointer(R.att_color, 3, GL_FLOAT, GL_FALSE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, r));
-  glDrawElements(GL_TRIANGLES, indicesOpq, GL_UNSIGNED_SHORT, nullptr);
-}
-
-void Chunk::renderTransparent(const glm::mat4 &transform) {
-  if (!indicesTpt)
-    return;
-
-  // Here we really need to pass the matrix again since the call is made in a second render pass
-  glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(transform));
-  vbo->bind();
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo->id());
-  glVertexAttribPointer(R.att_coord, 3, GL_BYTE, GL_FALSE, sizeof(GLCoord), 0);
-  glVertexAttribPointer(R.att_wave, 1, GL_BYTE, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, w));
-  glVertexAttribPointer(R.att_texcoord, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, tx));
-  glVertexAttribPointer(R.att_color, 3, GL_FLOAT, GL_FALSE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, r));
-  glDrawElements(GL_TRIANGLES, indicesTpt, GL_UNSIGNED_SHORT, (GLvoid*)(indicesOpq*sizeof(GLshort)));
 }
 
 void Chunk::write(OutStream &os) const {

@@ -3,12 +3,18 @@
 
 #include <glm/mat4x4.hpp>
 
+#include "../Frustum.hpp"
+#include "../World.hpp"
+
 namespace Diggler {
 namespace Render {
 
 class RenderParams {
 public:
   glm::mat4 transform;
+  Frustum frustum;
+
+  World *world;
 };
 
 }

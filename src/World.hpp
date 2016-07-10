@@ -13,6 +13,7 @@
 
 #include "io/Stream.hpp"
 #include "network/Network.hpp"
+#include "Particles.hpp"
 
 namespace Diggler {
 
@@ -41,7 +42,7 @@ struct WorldChunkMapSorter {
 };
 using WorldChunkMap = std::map<glm::ivec3, ChunkWeakRef, WorldChunkMapSorter>;
 
-class World : private WorldChunkMap {
+class World final : private WorldChunkMap {
 private:
   friend class Chunk;
   friend class CaveGenerator;
@@ -61,6 +62,8 @@ public:
   using WorldChunkMap::size;
   using WorldChunkMap::begin;
   using WorldChunkMap::end;
+
+  std::vector<ParticleEmitter> emitters;
 
   const WorldId id;
   const bool isRemote;
@@ -174,11 +177,6 @@ public:
   void read(InStream&);
   void send(Net::OutMessage&) const;
   void recv(Net::InMessage&);
-
-  /* ============ Rendering ============ */
-
-  void render(const glm::mat4 &transform);
-  void renderTransparent(const glm::mat4 &transform);
 };
 
 using WorldRef = std::shared_ptr<World>;

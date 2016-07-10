@@ -30,9 +30,7 @@ void GLParticlesRenderer::registerEmitter(ParticleEmitter *pe) {
   if (pe == nullptr) {
     return;
   }
-  emitters.emplace_back();
-  emitters.back().emitter = pe;
-  setRendererData(pe, emitters.size() - 1);
+  setRendererData(pe, reinterpret_cast<uintptr_t>(new EmitterRenderData));
 }
 
 void GLParticlesRenderer::updateParticleData(ParticleEmitter *pe,
@@ -40,13 +38,12 @@ void GLParticlesRenderer::updateParticleData(ParticleEmitter *pe,
   if (pe == nullptr) {
     return;
   }
-  uintptr_t idx = getRendererData(pe);
-  EmitterEntry &entry = emitters.at(idx);
-  entry.vbo.setDataKeepSize(data, count, GL_STREAM_DRAW);
-  entry.vao.vertexAttrib(entry.vbo, att_coord, 3, GL_FLOAT, sizeof(GLParticle), 0);
-  entry.vao.vertexAttrib(entry.vbo, att_color, 4, GL_FLOAT, sizeof(GLParticle),
+  EmitterRenderData *rd = reinterpret_cast<EmitterRenderData*>(getRendererData(pe));
+  rd->vbo.setDataKeepSize(data, count, GL_STREAM_DRAW);
+  rd->vao.vertexAttrib(rd->vbo, att_coord, 3, GL_FLOAT, sizeof(GLParticle), 0);
+  rd->vao.vertexAttrib(rd->vbo, att_color, 4, GL_FLOAT, sizeof(GLParticle),
     offsetof(GLParticle, r));
-  entry.vao.vertexAttrib(entry.vbo, att_pointSize, 1, GL_FLOAT, sizeof(GLParticle),
+  rd->vao.vertexAttrib(rd->vbo, att_pointSize, 1, GL_FLOAT, sizeof(GLParticle),
     offsetof(GLParticle, s));
 }
 
@@ -54,8 +51,7 @@ void GLParticlesRenderer::unregisterEmitter(ParticleEmitter *pe) {
   if (pe == nullptr) {
     return;
   }
-  uintptr_t idx = getRendererData(pe);
-  emitters.erase(emitters.begin() + idx);
+  delete reinterpret_cast<EmitterRenderData*>(getRendererData(pe));
 }
 
 void GLParticlesRenderer::render(RenderParams &rp) {
@@ -68,9 +64,10 @@ void GLParticlesRenderer::render(RenderParams &rp) {
   glUniform1f(uni_fogEnd, G->RP->fogEnd);
   glUniform4f(uni_unicolor, 1.f, 1.f, 1.f, 1.f);
 
-  for (EmitterEntry &entry : emitters) {
-    entry.vao.bind();
-    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(entry.emitter->getMaxCount()));
+  for (ParticleEmitter &pe : rp.world->emitters) {
+    EmitterRenderData *rd = reinterpret_cast<EmitterRenderData*>(getRendererData(&pe));
+    rd->vao.bind();
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(pe.getMaxCount()));
   }
 
   glDisableVertexAttribArray(att_pointSize);

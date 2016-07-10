@@ -5,6 +5,7 @@
 
 #include "FeatureSupport.hpp"
 #include "ParticlesRenderer.hpp"
+#include "WorldRenderer.hpp"
 
 namespace Diggler {
 namespace Render {
@@ -16,6 +17,7 @@ public:
     Renderer(G) {
     FeatureSupport::probe();
     PR = new GLParticlesRenderer(G);
+    WR = new GLWorldRenderer(G);
   }
 };
 

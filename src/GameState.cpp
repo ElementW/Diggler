@@ -547,13 +547,17 @@ void GameState::gameLoop() {
       glEnable(GL_DEPTH_TEST);
       glEnable(GL_CULL_FACE);
 
-      W.render(m_transform);
+      Render::RenderParams rp;
+      rp.world = WR.get();
+      rp.transform = m_transform;
+      rp.frustum = G->LP->camera.frustum;
+      G->R->WR->render(rp);
       for (Player &p : G->players) {
         p.update(deltaT);
         if (G->LP->camera.frustum.sphereInFrustum(p.position, 2))
           p.render(m_transform);
       }
-      W.renderTransparent(m_transform);
+      //W.renderTransparent(m_transform);
 
       /*static ParticleEmitter pe(G);
       pe.posAmpl = glm::vec3(1, 1, 1);

@@ -5,5 +5,6 @@ set(SRCS
   ${CSD}/FeatureSupport.cpp
   ${CSD}/ParticlesRenderer.cpp
   ${CSD}/Util.cpp
+  ${CSD}/WorldRenderer.cpp
   PARENT_SCOPE
 )
