@@ -7,6 +7,7 @@
 
 #include <epoxy/gl.h>
 
+#include "FeatureSupport.hpp"
 #include "Util.hpp"
 
 namespace Diggler {
@@ -50,11 +51,29 @@ public:
 
 
   void resize(uint size, GLenum usage = GL_STATIC_DRAW) {
-    BoundBufferSave<GL_ARRAY_BUFFER> save;
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_id);
     m_size = size;
-    glBufferData(GL_ARRAY_BUFFER, m_size, nullptr, usage);
+    m_usage = usage;
+    if (FeatureSupport::DSA) {
+      glNamedBufferData(m_id, m_size, nullptr, m_usage);
+    } else {
+      BoundBufferSave<GL_ARRAY_BUFFER> save;
+      glBindBuffer(GL_ARRAY_BUFFER, m_id);
+      glBufferData(GL_ARRAY_BUFFER, m_size, nullptr, m_usage);
+    }
+  }
+
+  void resizeGrow(uint size, GLenum usage = GL_STATIC_DRAW) {
+    if (size > m_size || m_usage != usage) {
+      m_size = size;
+      m_usage = usage;
+      if (FeatureSupport::DSA) {
+          glNamedBufferData(m_id, m_size, nullptr, m_usage);
+      } else {
+        BoundBufferSave<GL_ARRAY_BUFFER> save;
+        glBindBuffer(GL_ARRAY_BUFFER, m_id);
+        glBufferData(GL_ARRAY_BUFFER, m_size, nullptr, m_usage);
+      }
+    }
   }
 
   GLuint size() const {
@@ -68,59 +87,95 @@ public:
 
 
   template <typename T> void setData(const std::vector<T>& data, GLenum usage = GL_STATIC_DRAW) {
-    BoundBufferSave<GL_ARRAY_BUFFER> save;
-    glBindBuffer(GL_ARRAY_BUFFER, m_id);
     m_size = data.size()*sizeof(T);
     m_usage = usage;
-    glBufferData(GL_ARRAY_BUFFER, m_size, data.data(), m_usage);
-  }
-
-  template <typename T> void setData(const T *data, uint count, GLenum usage = GL_STATIC_DRAW) {
-    BoundBufferSave<GL_ARRAY_BUFFER> save;
-    glBindBuffer(GL_ARRAY_BUFFER, m_id);
-    m_size = count*sizeof(T);
-    m_usage = usage;
-    glBufferData(GL_ARRAY_BUFFER, m_size, data, m_usage);
-  }
-
-
-  template <typename T> void setDataKeepSize(const std::vector<T>& data, GLenum usage = GL_STATIC_DRAW) {
-    BoundBufferSave<GL_ARRAY_BUFFER> save;
-    glBindBuffer(GL_ARRAY_BUFFER, m_id);
-    const GLuint targetSize = data.size()*sizeof(T);
-    if (targetSize <= m_size && m_usage == usage) {
-      glBufferSubData(GL_ARRAY_BUFFER, 0, targetSize, data.data());
+    if (FeatureSupport::DSA) {
+      glNamedBufferData(m_id, m_size, data.data(), m_usage);
     } else {
-      m_size = targetSize;
-      m_usage = usage;
+      BoundBufferSave<GL_ARRAY_BUFFER> save;
+      glBindBuffer(GL_ARRAY_BUFFER, m_id);
       glBufferData(GL_ARRAY_BUFFER, m_size, data.data(), m_usage);
     }
   }
 
-  template <typename T> void setDataKeepSize(const T *data, uint count, GLenum usage = GL_STATIC_DRAW) {
-    BoundBufferSave<GL_ARRAY_BUFFER> save;
-    glBindBuffer(GL_ARRAY_BUFFER, m_id);
-    const GLuint targetSize = count*sizeof(T);
-    if (targetSize <= m_size && m_usage == usage) {
-      glBufferSubData(GL_ARRAY_BUFFER, 0, targetSize, data);
+  template <typename T> void setData(const T *data, uint count, GLenum usage = GL_STATIC_DRAW) {
+    m_size = count*sizeof(T);
+    m_usage = usage;
+    if (FeatureSupport::DSA) {
+      glNamedBufferData(m_id, m_size, data, m_usage);
     } else {
-      m_size = targetSize;
-      m_usage = usage;
+      BoundBufferSave<GL_ARRAY_BUFFER> save;
+      glBindBuffer(GL_ARRAY_BUFFER, m_id);
       glBufferData(GL_ARRAY_BUFFER, m_size, data, m_usage);
     }
   }
 
 
+  template <typename T> void setDataKeepSize(const std::vector<T>& data, GLenum usage = GL_STATIC_DRAW) {
+    const GLuint targetSize = data.size()*sizeof(T);
+    if (FeatureSupport::DSA) {
+      if (targetSize <= m_size && m_usage == usage) {
+        glNamedBufferSubData(m_id, 0, targetSize, data.data());
+      } else {
+        m_size = targetSize;
+        m_usage = usage;
+        glNamedBufferData(m_id, m_size, data.data(), m_usage);
+      }
+    } else {
+      BoundBufferSave<GL_ARRAY_BUFFER> save;
+      glBindBuffer(GL_ARRAY_BUFFER, m_id);
+      if (targetSize <= m_size && m_usage == usage) {
+        glBufferSubData(GL_ARRAY_BUFFER, 0, targetSize, data.data());
+      } else {
+        m_size = targetSize;
+        m_usage = usage;
+        glBufferData(GL_ARRAY_BUFFER, m_size, data.data(), m_usage);
+      }
+    }
+  }
+
+  template <typename T> void setDataKeepSize(const T *data, uint count, GLenum usage = GL_STATIC_DRAW) {
+    const GLuint targetSize = count*sizeof(T);
+    if (FeatureSupport::DSA) {
+      if (targetSize <= m_size && m_usage == usage) {
+        glNamedBufferSubData(m_id, 0, targetSize, data);
+      } else {
+        m_size = targetSize;
+        m_usage = usage;
+        glNamedBufferData(m_id, m_size, data, m_usage);
+      }
+    } else {
+      BoundBufferSave<GL_ARRAY_BUFFER> save;
+      glBindBuffer(GL_ARRAY_BUFFER, m_id);
+      if (targetSize <= m_size && m_usage == usage) {
+        glBufferSubData(GL_ARRAY_BUFFER, 0, targetSize, data);
+      } else {
+        m_size = targetSize;
+        m_usage = usage;
+        glBufferData(GL_ARRAY_BUFFER, m_size, data, m_usage);
+      }
+    }
+  }
+
+
   template <typename T> void setSubData(const std::vector<T>& data, uint offset) {
-    BoundBufferSave<GL_ARRAY_BUFFER> save;
-    glBindBuffer(GL_ARRAY_BUFFER, m_id);
-    glBufferSubData(GL_ARRAY_BUFFER, offset*sizeof(T), data.size()*sizeof(T), data.data());
+    if (FeatureSupport::DSA) {
+      glNamedBufferSubData(m_id, offset*sizeof(T), data.size()*sizeof(T), data.data());
+    } else {
+      BoundBufferSave<GL_ARRAY_BUFFER> save;
+      glBindBuffer(GL_ARRAY_BUFFER, m_id);
+      glBufferSubData(GL_ARRAY_BUFFER, offset*sizeof(T), data.size()*sizeof(T), data.data());
+    }
   }
 
   template <typename T> void setSubData(const T *data, uint offset, uint count) {
-    BoundBufferSave<GL_ARRAY_BUFFER> save;
-    glBindBuffer(GL_ARRAY_BUFFER, m_id);
-    glBufferSubData(GL_ARRAY_BUFFER, offset*sizeof(T), count*sizeof(T), data);
+    if (FeatureSupport::DSA) {
+      glNamedBufferSubData(m_id, offset*sizeof(T), count*sizeof(T), data);
+    } else {
+      BoundBufferSave<GL_ARRAY_BUFFER> save;
+      glBindBuffer(GL_ARRAY_BUFFER, m_id);
+      glBufferSubData(GL_ARRAY_BUFFER, offset*sizeof(T), count*sizeof(T), data);
+    }
   }
 
 

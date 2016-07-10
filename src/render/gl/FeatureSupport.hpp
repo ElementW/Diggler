@@ -15,7 +15,9 @@ public:
 
   static bool
     VAO /* Vertex Array Objects */,
-    DSA /* Direct State Access */;
+    DSA_ARB /* Direct State Access, ARB version */,
+    DSA_EXT /* Direct State Access, EXT version */,
+    DSA /* Direct State Access, one or move of above */;
 
   static void probe();
 };
