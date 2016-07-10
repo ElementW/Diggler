@@ -18,6 +18,7 @@ namespace gl {
 class VAO {
 protected:
   GLuint m_id;
+  GLuint m_eabId;
   struct VertexAttrib {
     GLuint vboId;
     GLuint index;
@@ -31,7 +32,8 @@ protected:
 public:
   // Ctor / dtor
   VAO() :
-    m_id(0) {
+    m_id(0),
+    m_eabId(0) {
     if (FeatureSupport::VAO) {
       glGenVertexArrays(1, &m_id);
     }
@@ -65,6 +67,7 @@ public:
     GLsizei offset = 0, bool normalize = false) {
     if (FeatureSupport::VAO) {
       BoundBufferSave<GL_VERTEX_ARRAY> save;
+      glBindVertexArray(m_id);
       vbo.bind();
       glVertexAttribPointer(index, size, type, normalize, stride,
         reinterpret_cast<GLvoid*>(offset));
@@ -81,12 +84,24 @@ public:
     }
   }
 
+  void bindElementArrayBuffer(const VBO &eab) {
+    if (FeatureSupport::VAO) {
+      BoundBufferSave<GL_VERTEX_ARRAY> save;
+      glBindVertexArray(m_id);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eab);
+    } else {
+      m_eabId = eab.id();
+    }
+  }
+
 
   void bind() const {
     if (FeatureSupport::VAO) {
       glBindVertexArray(m_id);
     } else {
-      BoundBufferSave<GL_ARRAY_BUFFER> save;
+      BoundBufferSave<GL_ARRAY_BUFFER> vboSave;
+      BoundBufferSave<GL_ELEMENT_ARRAY_BUFFER> eabSave;
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_eabId);
       GLuint boundVbo = 0;
       for (const VertexAttrib &va : m_vertexAttribs) {
         if (boundVbo != va.vboId) {
