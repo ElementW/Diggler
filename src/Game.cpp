@@ -17,17 +17,17 @@ Game::Game() :
 }
 
 void Game::init() {
+  CR = new ContentRegistry;
   if (GlobalProperties::IsClient) {
-    CR = new ContentRegistry;
     PM = new ProgramManager(*this);
     LP = new LocalPlayer(this);
-    R = new Render::gl::GLRenderer(this);
     RP = new RenderProperties; { // TODO move somewhere else?
       RP->bloom = true;
       RP->wavingLiquids = !true;
       RP->fogStart = 16;
       RP->fogEnd = 24;
     }
+    R = new Render::gl::GLRenderer(this);
     A = new Audio(*this);
     KB = new KeyBinds;
     PlayerPosUpdateFreq = 4;
@@ -36,17 +36,15 @@ void Game::init() {
   }
 }
 
-void Game::uninitGL() {
-  delete PM;
-  delete RP;
-}
-
 Game::~Game() {
+  delete CR;
   if (GlobalProperties::IsClient) {
-    delete A;
-    delete CR;
-    delete LP;
     delete KB;
+    delete A;
+    delete R;
+    delete RP;
+    delete LP;
+    delete PM;
   }
   if (GlobalProperties::IsServer) {
   }

@@ -48,6 +48,13 @@ static void showHelp(char **argv) {
   << std::endl;
 }
 
+template<class T>
+struct default_destruct final {
+  void operator()(T *ptr) {
+    ptr->~T();
+  }
+};
+
 int main(int argc, char **argv) {
   InitRand();
 
@@ -107,8 +114,9 @@ int main(int argc, char **argv) {
   Config cfg;
   cfg.load(getConfigDirectory() + "/config.cfg");
 
-  Game G;
-  G.C = &cfg;
+  alignas(alignof(Game)) uint8 G_mem[sizeof(Game)];
+  std::unique_ptr<Game, default_destruct<Game>> G(new (G_mem) Game);
+  G->C = &cfg;
 
   bool networkSuccess = InitNetwork();
 
@@ -121,7 +129,7 @@ int main(int argc, char **argv) {
       GlobalProperties::PlayerName = name;
     }
 
-    GameWindow GW(&G);
+    GameWindow GW(G.get());
     
     /*/GW.setNextState(std::make_shared<UITestState>(&GW));/*/
     if (networkSuccess)
@@ -131,15 +139,15 @@ int main(int argc, char **argv) {
     /**/
 
     GW.run();
-    G.uninitGL();
+    G.reset();
   }
   if (GlobalProperties::IsServer) {
     if (!networkSuccess) {
       getErrorStream() << "Network init failed!" << std::endl;
       return 1;
     }
-    Server S(G, port);
-    G.S = &S;
+    Server S(*G, port);
+    G->S = &S;
     S.run();
   }
 
