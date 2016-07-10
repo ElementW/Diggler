@@ -4,14 +4,6 @@
 
 namespace Diggler {
 
-Frustum::Frustum() {
-
-}
-
-Frustum::~Frustum() {
-
-}
-
 void Frustum::setCamInternals(float rad, float ratio, float nearD, float farD) {
   this->ratio = ratio;
   this->angle = rad;

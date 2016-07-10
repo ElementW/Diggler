@@ -47,8 +47,9 @@ public:
   float nearD, farD, ratio, angle,tang;
   float nw,nh,fw,fh;
 
-  Frustum();
-  ~Frustum();
+  Frustum() = default;
+  ~Frustum() = default;
+
   void setCamInternals(float rad, float ratio, float nearD, float farD);
   void setCamDef(const glm::vec3 &p, const glm::vec3 &l, const glm::vec3 &u);
   bool pointInFrustum(const glm::vec3 &p) const;
