@@ -85,7 +85,7 @@ ProgramManager::~ProgramManager() {
   for (const std::pair<FlagsT, Program*> pair : m_programs) {
     delete pair.second;
   }
-  for (const Program* prog : m_specialPrograms) {
+  for (const Program *prog : m_specialPrograms) {
     delete prog;
   }
 }
