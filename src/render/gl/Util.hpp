@@ -15,8 +15,20 @@ inline void getInteger(GLenum src, GLint &dst) {
   glGetIntegerv(src, &dst);
 }
 
+inline GLint getInteger(GLenum src) {
+  GLint dst;
+  glGetIntegerv(src, &dst);
+  return dst;
+}
+
 inline void getUInteger(GLenum src, GLuint &dst) {
   glGetIntegerv(src, reinterpret_cast<GLint*>(&dst));
+}
+
+inline GLuint getUInteger(GLenum src) {
+  GLuint dst;
+  glGetIntegerv(src, reinterpret_cast<GLint*>(&dst));
+  return dst;
 }
 
 constexpr GLenum getBinding(GLenum bufferT) {
@@ -31,9 +43,8 @@ constexpr GLenum getBinding(GLenum bufferT) {
       return GL_RENDERBUFFER_BINDING;
     case GL_VERTEX_ARRAY:
       return GL_VERTEX_ARRAY_BINDING;
-    default:
-      return 0;
   }
+  return 0;
 }
 
 template<GLenum BufferT, GLenum BoundBufferT = getBinding(BufferT)>
