@@ -25,7 +25,7 @@ private:
   shared_ptr<State> m_currentState, m_nextState;
 
 public:
-  UI::Manager UIM;
+  UI::Manager *UIM;
 
   Game *G;
 

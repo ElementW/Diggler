@@ -129,16 +129,18 @@ int main(int argc, char **argv) {
       GlobalProperties::PlayerName = name;
     }
 
-    GameWindow GW(G.get());
-    
-    /*/GW.setNextState(std::make_shared<UITestState>(&GW));/*/
-    if (networkSuccess)
-      GW.setNextState(std::make_shared<GameState>(&GW, host, port));
-    else
-      GW.showMessage("Network init failed!");
-    /**/
+    {
+      GameWindow GW(G.get());
 
-    GW.run();
+      /*/GW.setNextState(std::make_shared<UITestState>(&GW));/*/
+      if (networkSuccess)
+        GW.setNextState(std::make_shared<GameState>(&GW, host, port));
+      else
+        GW.showMessage("Network init failed!");
+      /**/
+
+      GW.run();
+    }
     G.reset();
   }
   if (GlobalProperties::IsServer) {

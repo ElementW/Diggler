@@ -422,11 +422,11 @@ bool GameState::connectLoop() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     UI::Text::Size sz = cUI.Connecting->getSize();
-    mat = glm::scale(glm::translate(*G->GW->UIM.PM, glm::vec3(GW->getW()/2-sz.x, GW->getH()/2, 0.f)),
+    mat = glm::scale(glm::translate(*G->UIM->PM, glm::vec3(GW->getW()/2-sz.x, GW->getH()/2, 0.f)),
       glm::vec3(2.f, 2.f, 1.f));
     cUI.Connecting->render(mat);
     for (int i=0; i < 6; ++i) {
-      mat = glm::scale(glm::translate(*G->GW->UIM.PM,
+      mat = glm::scale(glm::translate(*G->UIM->PM,
         glm::vec3(GW->getW()/2 - 1 + sin(T*3+0.3*i)*sz.x, GW->getH()/2-sz.y, 0.f)),
         glm::vec3(2.f, 2.f, 1.f));
       cUI.Dot->render(mat);
@@ -612,7 +612,7 @@ void GameState::gameLoop() {
         glEnableVertexAttribArray(bloom.extractor.att_coord);
         glEnableVertexAttribArray(bloom.extractor.att_texcoord);
         m_3dRenderVBO->bind();
-        glUniformMatrix4fv(bloom.extractor.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM1));
+        glUniformMatrix4fv(bloom.extractor.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM1));
         glVertexAttribPointer(bloom.extractor.att_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
         glVertexAttribPointer(bloom.extractor.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -628,7 +628,7 @@ void GameState::gameLoop() {
         glEnableVertexAttribArray(bloom.renderer.att_coord);
         glEnableVertexAttribArray(bloom.renderer.att_texcoord);
         m_3dRenderVBO->bind();
-        glUniformMatrix4fv(bloom.renderer.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM1));
+        glUniformMatrix4fv(bloom.renderer.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM1));
         glUniform2f(bloom.renderer.uni_pixshift, 1.f/(GW->getW()/bloom.scale), 1.f/(GW->getH()/bloom.scale));
         glVertexAttribPointer(bloom.renderer.att_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
         glVertexAttribPointer(bloom.renderer.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
@@ -646,7 +646,7 @@ void GameState::gameLoop() {
         glEnableVertexAttribArray(bloom.renderer.att_coord);
         glEnableVertexAttribArray(bloom.renderer.att_texcoord);
         m_3dRenderVBO->bind();
-        glUniformMatrix4fv(bloom.renderer.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM1));
+        glUniformMatrix4fv(bloom.renderer.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM1));
         glVertexAttribPointer(bloom.renderer.att_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
         glVertexAttribPointer(bloom.renderer.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
         glDrawArrays(GL_TRIANGLES, 0, 6);

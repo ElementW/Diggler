@@ -90,7 +90,7 @@ void Chatbox::render() {
     m_vbo.bind();
     glEnableVertexAttribArray(RenderProgram_coord);
     glEnableVertexAttribArray(RenderProgram_color);
-    glUniformMatrix4fv(RenderProgram_mvp, 1, GL_FALSE, glm::value_ptr(*G->GW->UIM.PM));
+    glUniformMatrix4fv(RenderProgram_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM));
     glVertexAttribPointer(RenderProgram_coord, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
     glVertexAttribPointer(RenderProgram_color, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, r));
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -104,7 +104,7 @@ void Chatbox::render() {
   for (const ChatEntry &entry : m_chatEntries)
     totalHeight += entry.height;
   totalHeight *= 2;
-  glm::mat4 msgMatrix = glm::scale(glm::translate(*G->GW->UIM.PM, glm::vec3(m_posX, m_posY+totalHeight, 0)), glm::vec3(2));
+  glm::mat4 msgMatrix = glm::scale(glm::translate(*G->UIM->PM, glm::vec3(m_posX, m_posY+totalHeight, 0)), glm::vec3(2));
   for (const ChatEntry &entry : m_chatEntries) {
     msgMatrix = glm::translate(msgMatrix, glm::vec3(0, -entry.height, 0));
     entry.text->render(msgMatrix);

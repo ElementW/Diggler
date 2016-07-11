@@ -47,10 +47,10 @@ void EscMenu::render() {
 
   int width = G->UIM->scale*256;
   int pxScroll = G->GW->getW()-scroll*width;
-  matrix = glm::scale(glm::translate(*G->GW->UIM.PM, glm::vec3(pxScroll, 0, 0)), glm::vec3(width, G->GW->getH(), 0));
+  matrix = glm::scale(glm::translate(*G->UIM->PM, glm::vec3(pxScroll, 0, 0)), glm::vec3(width, G->GW->getH(), 0));
   G->UIM->drawRect(matrix, glm::vec4(0.f, 0.f, 0.f, 0.8f));
   
-  matrix = glm::translate(*G->GW->UIM.PM, glm::vec3(pxScroll, G->GW->getH()-txt_quit->getSize().y, 0));
+  matrix = glm::translate(*G->UIM->PM, glm::vec3(pxScroll, G->GW->getH()-txt_quit->getSize().y, 0));
   txt_quit->setMatrix(&matrix);
   txt_quit->render();
 }
