@@ -30,7 +30,16 @@ void GLParticlesRenderer::registerEmitter(ParticleEmitter *pe) {
   if (pe == nullptr) {
     return;
   }
-  setRendererData(pe, reinterpret_cast<uintptr_t>(new EmitterRenderData));
+  EmitterRenderData &rd = *(new EmitterRenderData);
+  setRendererData(pe, reinterpret_cast<uintptr_t>(&rd));
+  { VAO::Config cfg = rd.vao.configure();
+    cfg.vertexAttrib(rd.vbo, att_coord, 3, GL_FLOAT, sizeof(GLParticle), 0);
+    cfg.vertexAttrib(rd.vbo, att_color, 4, GL_FLOAT, sizeof(GLParticle),
+      offsetof(GLParticle, r));
+    cfg.vertexAttrib(rd.vbo, att_pointSize, 1, GL_FLOAT, sizeof(GLParticle),
+      offsetof(GLParticle, s));
+    cfg.commit();
+  }
 }
 
 void GLParticlesRenderer::updateParticleData(ParticleEmitter *pe,
@@ -38,13 +47,8 @@ void GLParticlesRenderer::updateParticleData(ParticleEmitter *pe,
   if (pe == nullptr) {
     return;
   }
-  EmitterRenderData *rd = reinterpret_cast<EmitterRenderData*>(getRendererData(pe));
-  rd->vbo.setDataKeepSize(data, count, GL_STREAM_DRAW);
-  rd->vao.vertexAttrib(rd->vbo, att_coord, 3, GL_FLOAT, sizeof(GLParticle), 0);
-  rd->vao.vertexAttrib(rd->vbo, att_color, 4, GL_FLOAT, sizeof(GLParticle),
-    offsetof(GLParticle, r));
-  rd->vao.vertexAttrib(rd->vbo, att_pointSize, 1, GL_FLOAT, sizeof(GLParticle),
-    offsetof(GLParticle, s));
+  EmitterRenderData &rd = *reinterpret_cast<EmitterRenderData*>(getRendererData(pe));
+  rd.vbo.setDataKeepSize(data, count, GL_STREAM_DRAW);
 }
 
 void GLParticlesRenderer::unregisterEmitter(ParticleEmitter *pe) {
@@ -65,8 +69,8 @@ void GLParticlesRenderer::render(RenderParams &rp) {
   glUniform4f(uni_unicolor, 1.f, 1.f, 1.f, 1.f);
 
   for (ParticleEmitter &pe : rp.world->emitters) {
-    EmitterRenderData *rd = reinterpret_cast<EmitterRenderData*>(getRendererData(&pe));
-    rd->vao.bind();
+    EmitterRenderData &rd = *reinterpret_cast<EmitterRenderData*>(getRendererData(&pe));
+    rd.vao.bind();
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(pe.getMaxCount()));
   }
 

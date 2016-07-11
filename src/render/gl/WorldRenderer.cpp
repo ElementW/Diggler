@@ -45,7 +45,17 @@ void GLWorldRenderer::registerChunk(Chunk *c) {
   if (c == nullptr) {
     return;
   }
-  setRendererData(c, reinterpret_cast<uintptr_t>(new ChunkEntry));
+  ChunkEntry &ce = *(new ChunkEntry);
+  setRendererData(c, reinterpret_cast<uintptr_t>(&ce));
+  { VAO::Config cfg = ce.vao.configure();
+    cfg.vertexAttrib(ce.vbo, att_coord, 3, GL_BYTE, sizeof(GLCoord), 0);
+    //cfg.vertexAttrib(ce.vbo, att_wave, 1, GL_BYTE, sizeof(GLCoord), offsetof(GLCoord, w));
+    cfg.vertexAttrib(ce.vbo, att_texcoord, 2, GL_UNSIGNED_SHORT, sizeof(GLCoord),
+      offsetof(GLCoord, tx), true);
+    cfg.vertexAttrib(ce.vbo, att_color, 3, GL_FLOAT, sizeof(GLCoord), offsetof(GLCoord, r));
+    cfg.elementArrayBuffer(ce.ibo);
+    cfg.commit();
+  }
 }
 
 void GLWorldRenderer::updateChunk(Chunk *c, Chunk::Vertex *vertices, uint vertCount,
@@ -77,7 +87,7 @@ void GLWorldRenderer::render(RenderParams &rp) {
   glEnableVertexAttribArray(att_coord);
   glEnableVertexAttribArray(att_texcoord);
   glEnableVertexAttribArray(att_color);
-  glEnableVertexAttribArray(att_wave);
+  //glEnableVertexAttribArray(att_wave);
   TextureAtlas->bind();
 
   const static glm::vec3 cShift(Chunk::MidX, Chunk::MidY, Chunk::MidZ);
@@ -104,19 +114,21 @@ void GLWorldRenderer::render(RenderParams &rp) {
           continue;
 
         glUniformMatrix4fv(uni_mvp, 1, GL_FALSE, glm::value_ptr(chunkTransform));
-        ce.vbo.bind();
+        ce.vao.bind();
+        /*ce.vbo.bind();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ce.ibo);
         glVertexAttribPointer(att_coord, 3, GL_BYTE, GL_FALSE, sizeof(GLCoord), 0);
-        glVertexAttribPointer(att_wave, 1, GL_BYTE, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, w));
+        //glVertexAttribPointer(att_wave, 1, GL_BYTE, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, w));
         glVertexAttribPointer(att_texcoord, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, tx));
-        glVertexAttribPointer(att_color, 3, GL_FLOAT, GL_FALSE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, r));
+        glVertexAttribPointer(att_color, 3, GL_FLOAT, GL_FALSE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, r));*/
         glDrawElements(GL_TRIANGLES, ce.indicesOpq, GL_UNSIGNED_SHORT, nullptr);
         //lastVertCount += cc->vertices;
       }
     }
   }
+  VAO::unbind();
 
-  glDisableVertexAttribArray(att_wave);
+  //glDisableVertexAttribArray(att_wave);
   glDisableVertexAttribArray(att_color);
   glDisableVertexAttribArray(att_texcoord);
   glDisableVertexAttribArray(att_coord);

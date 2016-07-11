@@ -17,6 +17,8 @@ namespace gl {
 
 class VAO {
 protected:
+  friend struct Config;
+
   GLuint m_id;
   GLuint m_eabId;
   struct VertexAttrib {
@@ -62,46 +64,70 @@ public:
     return m_id;
   }
 
+  struct Config {
+    VAO &vao;
+    GLuint prevVAO;
 
-  void vertexAttrib(const VBO &vbo, GLuint index, GLint size, GLenum type, GLsizei stride,
-    GLsizei offset = 0, bool normalize = false) {
-    if (FeatureSupport::VAO) {
-      BoundBufferSave<GL_VERTEX_ARRAY> save;
-      glBindVertexArray(m_id);
-      vbo.bind();
-      glVertexAttribPointer(index, size, type, normalize, stride,
-        reinterpret_cast<GLvoid*>(offset));
-    } else {
-      m_vertexAttribs.emplace_back();
-      VertexAttrib &va = m_vertexAttribs.back();
-      va.vboId = vbo.id();
-      va.index = index;
-      va.size = size;
-      va.type = type;
-      va.stride = stride;
-      va.offset = offset;
-      va.normalize = normalize;
+    Config(VAO &vao) :
+      vao(vao) {
+      if (FeatureSupport::VAO) {
+        getUInteger(GL_VERTEX_ARRAY_BINDING, prevVAO);
+        glBindVertexArray(vao.m_id);
+      }
     }
-  }
 
-  void bindElementArrayBuffer(const VBO &eab) {
-    if (FeatureSupport::VAO) {
-      BoundBufferSave<GL_VERTEX_ARRAY> save;
-      glBindVertexArray(m_id);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eab);
-    } else {
-      m_eabId = eab.id();
+    Config(const Config&) = delete;
+
+    Config(Config &&cfg) :
+      vao(cfg.vao),
+      prevVAO(cfg.prevVAO) {
     }
-  }
 
+    void commit() {
+      if (FeatureSupport::VAO) {
+        glBindVertexArray(prevVAO);
+      }
+    }
+
+    void vertexAttrib(const VBO &vbo, GLuint index, GLint size, GLenum type, GLsizei stride,
+      GLsizei offset = 0, bool normalize = false) {
+      if (FeatureSupport::VAO) {
+        BoundBufferSave<GL_ARRAY_BUFFER> vboSave;
+        vbo.bind();
+        glEnableVertexAttribArray(index);
+        glVertexAttribPointer(index, size, type, normalize, stride,
+          reinterpret_cast<GLvoid*>(offset));
+      } else {
+        vao.m_vertexAttribs.emplace_back();
+        VertexAttrib &va = vao.m_vertexAttribs.back();
+        va.vboId = vbo.id();
+        va.index = index;
+        va.size = size;
+        va.type = type;
+        va.stride = stride;
+        va.offset = offset;
+        va.normalize = normalize;
+      }
+    }
+
+    void elementArrayBuffer(const VBO &eab) {
+      if (FeatureSupport::VAO) {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eab);
+      } else {
+        vao.m_eabId = eab.id();
+      }
+    }
+  };
+
+  Config configure() {
+    return Config(*this);
+  }
 
   void bind() const {
     if (FeatureSupport::VAO) {
       glBindVertexArray(m_id);
     } else {
       BoundBufferSave<GL_ARRAY_BUFFER> vboSave;
-      BoundBufferSave<GL_ELEMENT_ARRAY_BUFFER> eabSave;
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_eabId);
       GLuint boundVbo = 0;
       for (const VertexAttrib &va : m_vertexAttribs) {
         if (boundVbo != va.vboId) {
@@ -111,6 +137,7 @@ public:
         glVertexAttribPointer(va.index, va.size, va.type, va.normalize, va.stride,
           reinterpret_cast<GLvoid*>(va.offset));
       }
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_eabId);
     }
   }
 

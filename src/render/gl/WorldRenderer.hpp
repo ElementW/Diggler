@@ -32,7 +32,8 @@ protected:
   const Texture *TextureAtlas;
 
   struct ChunkEntry {
-    Render::gl::VBO vbo, ibo;
+    VAO vao;
+    VBO vbo, ibo;
     uint vertCount, indicesOpq, indicesTpt;
   };
   std::vector<ChunkEntry> m_chunks;
