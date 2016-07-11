@@ -16,23 +16,26 @@ std::string ProgramManager::getShadersName(FlagsT flags) {
     return "2d";
 }
 
-void ProgramManager::getDefines(FlagsT flags, std::vector<std::string> &defs) {
+void ProgramManager::getPreludeLines(FlagsT flags, std::vector<std::string> &lines) {
+  auto addDefine = [&lines](const char* d) { lines.push_back(std::string("#define ") + d); };
   if (flags & PM_TEXTURED)
-    defs.push_back("TEXTURED");
+    addDefine("TEXTURED");
   if (flags & PM_TEXSHIFT)
-    defs.push_back("TEXSHIFT");
+    addDefine("TEXSHIFT");
   if (flags & PM_COLORED)
-    defs.push_back("COLORED");
+    addDefine("COLORED");
   if (flags & PM_FOG)
-    defs.push_back("FOG");
+    addDefine("FOG");
   if (flags & PM_DISCARD)
-    defs.push_back("DISCARD");
+    addDefine("DISCARD");
   if (flags & PM_TIME)
-    defs.push_back("TIME");
+    addDefine("TIME");
   if (flags & PM_WAVE)
-    defs.push_back("WAVE");
+    addDefine("WAVE");
   if (flags & PM_POINTSIZE)
-    defs.push_back("POINTSIZE");
+    addDefine("POINTSIZE");
+  if (flags & PM_EARLY_DEPTH_TEST)
+    lines.push_back("layout(early_fragment_tests) in;");
 }
 
 ProgramManager::ProgramManager(Game &G) : G(G) {
@@ -45,16 +48,17 @@ const Program* ProgramManager::getProgram(FlagsT flags) {
     return it->second;
   std::string shaderName = getShadersName(flags);
   Program* prog = new Program(getAssetPath(shaderName + ".v.glsl"), getAssetPath(shaderName + ".f.glsl"));
-  std::vector<std::string> defs;
-  getDefines(flags, defs);
-  prog->setDefines(defs);
+  std::vector<std::string> preludeLines;
+  getPreludeLines(flags, preludeLines);
+  prog->setPreludeLines(preludeLines);
   if (!prog->link()) {
     getErrorStream() << "Link failed on " << shaderName << std::endl;
-    if (defs.size() > 0) {
+    if (preludeLines.size() > 0) {
       std::ostringstream oss;
-      for (const std::string &s : defs)
-        oss << s << "; ";
-      getErrorStream() << "Defs: " << oss.str() << std::endl;
+      for (const std::string &line : preludeLines) {
+        oss << line << std::endl;
+      }
+      getErrorStream() << "Prelude: " << oss.str();
     }
     /*FIXME: use in debug? GLint sz;
     glGetShaderiv(prog->getVShId(), GL_SHADER_SOURCE_LENGTH, &sz);=

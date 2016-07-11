@@ -17,7 +17,8 @@ public:
     VAO /* Vertex Array Objects */,
     DSA_ARB /* Direct State Access, ARB version */,
     DSA_EXT /* Direct State Access, EXT version */,
-    DSA /* Direct State Access, one or move of above */;
+    DSA /* Direct State Access, one or move of above */,
+    shader_image_load_store;
 
   static void probe();
 };

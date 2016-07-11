@@ -17,9 +17,9 @@ Program::Program(const std::string& vshPath, const std::string& fshPath)
   //getDebugStream() << id << ':' << vsh->getError() << fsh->getError()<< std::endl;
 }
 
-void Program::setDefines(const std::vector<std::string> &defs) {
-  vsh->setDefines(defs);
-  fsh->setDefines(defs);
+void Program::setPreludeLines(const std::vector<std::string> &lines) {
+  vsh->setPreludeLines(lines);
+  fsh->setPreludeLines(lines);
 }
 
 

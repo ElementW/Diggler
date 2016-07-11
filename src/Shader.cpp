@@ -5,31 +5,24 @@
 
 namespace Diggler {
 
-Shader::Shader(Type type) : srcDefines(nullptr), type(type) {
+Shader::Shader(Type type) :
+  m_preludeLines(nullptr),
+  type(type) {
   id = glCreateShader((GLenum)type);
 }
 
-Shader::Shader(Shader::Type type, const std::string &path) : srcDefines(nullptr) {
+Shader::Shader(Shader::Type type, const std::string &path) :
+  m_preludeLines(nullptr) {
   id = glCreateShader((GLenum)type);
   compileFromFile(path);
 }
 
 Shader::~Shader() {
-  delete[] srcDefines;
   glDeleteShader(id);
 }
 
-void Shader::setDefines(const std::vector<std::string> &defs) {
-  delete[] srcDefines;
-  if (defs.size() == 0)
-    return;
-  std::ostringstream oss;
-  for (const std::string &s : defs) {
-    oss << "#define " << s << "\n";
-  }
-  char *strDefines = new char[(uint)oss.tellp()+1];
-  std::copy_n(oss.str().c_str(), (uint)oss.tellp()+1, strDefines);
-  srcDefines = strDefines;
+void Shader::setPreludeLines(const std::vector<std::string> &lines) {
+  m_preludeLines = &lines;
 }
 
 bool Shader::compileFromFile(const std::string &path) {
@@ -41,8 +34,11 @@ bool Shader::compileFromString(const std::string &source, const std::string &pat
     return false;
   std::ostringstream oss;
   oss << "#version 100\n";
-  if (srcDefines)
-    oss << srcDefines;
+  if (m_preludeLines) {
+    for (const std::string &line : *m_preludeLines) {
+      oss << line << "\n";
+    }
+  }
   oss << "#line 1\n";
   oss << source;
   // Beware of the lifetime, we use c_str() afterwards!

@@ -181,38 +181,37 @@ void LocalPlayer::render(const glm::mat4 &transform) const {
   glUniformMatrix4fv(P->uni("mvp"), 1, GL_FALSE, glm::value_ptr(transform));
   static Render::gl::VBO vbo;
   const glm::ivec3 &min = aabbmin, &max = aabbmax;
-  struct Coord { int x, y, z; float r, g, b; } pts[] = {
-    { min.x, min.y, min.z, 0.f, 1.f, 0.f },
-    { max.x, min.y, min.z, 0.f, 1.f, 0.f },
-    { min.x, min.y, min.z, 0.f, 1.f, 0.f },
-    { min.x, max.y, min.z, 0.f, 1.f, 0.f },
-    { min.x, min.y, min.z, 0.f, 1.f, 0.f },
-    { min.x, min.y, max.z, 0.f, 1.f, 0.f },
-    { max.x, min.y, min.z, 0.f, 1.f, 0.f },
-    { max.x, max.y, min.z, 0.f, 1.f, 0.f },
-    { max.x, min.y, min.z, 0.f, 1.f, 0.f },
-    { max.x, min.y, max.z, 0.f, 1.f, 0.f },
-    { min.x, max.y, min.z, 0.f, 1.f, 0.f },
-    { max.x, max.y, min.z, 0.f, 1.f, 0.f },
+  struct Coord { int x, y, z; uint8 r, g, b; } pts[] = {
+    { min.x, min.y, min.z, 0, 1, 0 },
+    { max.x, min.y, min.z, 0, 1, 0 },
+    { min.x, min.y, min.z, 0, 1, 0 },
+    { min.x, max.y, min.z, 0, 1, 0 },
+    { min.x, min.y, min.z, 0, 1, 0 },
+    { min.x, min.y, max.z, 0, 1, 0 },
+    { max.x, min.y, min.z, 0, 1, 0 },
+    { max.x, max.y, min.z, 0, 1, 0 },
+    { max.x, min.y, min.z, 0, 1, 0 },
+    { max.x, min.y, max.z, 0, 1, 0 },
+    { min.x, max.y, min.z, 0, 1, 0 },
+    { max.x, max.y, min.z, 0, 1, 0 },
 
-    { max.x, max.y, max.z, 0.f, 1.f, 0.f },
-    { min.x, max.y, max.z, 0.f, 1.f, 0.f },
-    { max.x, max.y, max.z, 0.f, 1.f, 0.f },
-    { max.x, min.y, max.z, 0.f, 1.f, 0.f },
-    { max.x, max.y, max.z, 0.f, 1.f, 0.f },
-    { max.x, max.y, min.z, 0.f, 1.f, 0.f },
-    { min.x, max.y, max.z, 0.f, 1.f, 0.f },
-    { min.x, min.y, max.z, 0.f, 1.f, 0.f },
-    { min.x, max.y, max.z, 0.f, 1.f, 0.f },
-    { min.x, max.y, min.z, 0.f, 1.f, 0.f },
-    { max.x, min.y, max.z, 0.f, 1.f, 0.f },
-    { min.x, min.y, max.z, 0.f, 1.f, 0.f },
+    { max.x, max.y, max.z, 0, 1, 0 },
+    { min.x, max.y, max.z, 0, 1, 0 },
+    { max.x, max.y, max.z, 0, 1, 0 },
+    { max.x, min.y, max.z, 0, 1, 0 },
+    { max.x, max.y, max.z, 0, 1, 0 },
+    { max.x, max.y, min.z, 0, 1, 0 },
+    { min.x, max.y, max.z, 0, 1, 0 },
+    { min.x, min.y, max.z, 0, 1, 0 },
+    { min.x, max.y, max.z, 0, 1, 0 },
+    { min.x, max.y, min.z, 0, 1, 0 },
+    { max.x, min.y, max.z, 0, 1, 0 },
+    { min.x, min.y, max.z, 0, 1, 0 },
   };
-  vbo.setData(pts, sizeof(pts)/sizeof(Coord), GL_STREAM_DRAW);
+  vbo.setDataKeepSize(pts, sizeof(pts)/sizeof(Coord), GL_STREAM_DRAW);
   vbo.bind();
-  //glPointSize(4.f);
   glVertexAttribPointer(P->att("coord"), 3, GL_INT, GL_FALSE, sizeof(Coord), 0);
-  glVertexAttribPointer(P->att("color"), 3, GL_FLOAT, GL_FALSE, sizeof(Coord), (GLvoid*)(offsetof(Coord, r)));
+  glVertexAttribPointer(P->att("color"), 3, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Coord), (GLvoid*)(offsetof(Coord, r)));
   glDrawArrays(GL_LINES, 0, sizeof(pts)/sizeof(Coord));
   glDisableVertexAttribArray(P->att("color"));
   glDisableVertexAttribArray(P->att("coord"));

@@ -14,6 +14,7 @@
 #define PM_TIME      0x40
 #define PM_WAVE      (0x80 | PM_TIME)
 #define PM_POINTSIZE 0x100
+#define PM_EARLY_DEPTH_TEST 0x200
 
 namespace Diggler {
 
@@ -26,7 +27,7 @@ private:
   std::unordered_map<FlagsT, Program*> m_programs;
   std::vector<Program*> m_specialPrograms;
   static std::string getShadersName(FlagsT flags);
-  static void getDefines(FlagsT flags, std::vector<std::string> &defs);
+  static void getPreludeLines(FlagsT flags, std::vector<std::string> &lines);
 
 public:
   ProgramManager(Game&);

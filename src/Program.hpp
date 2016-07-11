@@ -26,10 +26,10 @@ public:
   Program(const std::string& vshPath, const std::string& fshPath);
 
   ///
-  /// Set shaders' #defines
+  /// Set shaders' prelude lines
   /// @see Shader::setDefines(const std::vector<std::string>&);
   ///
-  void setDefines(const std::vector<std::string>&);
+  void setPreludeLines(const std::vector<std::string>&);
 
   ///
   /// Links the shaders together

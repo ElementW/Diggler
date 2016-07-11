@@ -10,7 +10,7 @@ class Shader {
 private:
   GLuint id;
   GLint compiled = GL_FALSE;
-  const char *srcDefines;
+  const std::vector<std::string> *m_preludeLines;
 
 public:
   enum class Type : GLenum {
@@ -20,10 +20,8 @@ public:
   Shader(Type type);
   Shader(Type type, const std::string& path);
   ~Shader();
-  
-  /// Sets GLSL source defines
-  /// Syntax: "{name}[ {value}]"
-  void setDefines(const std::vector<std::string>&);
+
+  void setPreludeLines(const std::vector<std::string>&);
   bool compileFromFile(const std::string& path);
   bool compileFromString(const std::string& source, const std::string& path = "<source>");
   std::string getError() const;

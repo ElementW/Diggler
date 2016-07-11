@@ -115,12 +115,6 @@ void GLWorldRenderer::render(RenderParams &rp) {
 
         glUniformMatrix4fv(uni_mvp, 1, GL_FALSE, glm::value_ptr(chunkTransform));
         ce.vao.bind();
-        /*ce.vbo.bind();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ce.ibo);
-        glVertexAttribPointer(att_coord, 3, GL_BYTE, GL_FALSE, sizeof(GLCoord), 0);
-        //glVertexAttribPointer(att_wave, 1, GL_BYTE, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, w));
-        glVertexAttribPointer(att_texcoord, 2, GL_UNSIGNED_SHORT, GL_TRUE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, tx));
-        glVertexAttribPointer(att_color, 3, GL_FLOAT, GL_FALSE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, r));*/
         glDrawElements(GL_TRIANGLES, ce.indicesOpq, GL_UNSIGNED_SHORT, nullptr);
         //lastVertCount += cc->vertices;
       }
