@@ -7,3 +7,6 @@
 [submodule "assets/lua/lds"]
 	path = assets/lua/lds
 	url = https://github.com/neomantra/lds.git
+[submodule "ext/StackTracePlus"]
+	path = ext/StackTracePlus
+	url = https://github.com/ignacio/StackTracePlus.git

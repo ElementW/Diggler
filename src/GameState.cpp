@@ -1,6 +1,5 @@
 #include "GameState.hpp"
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
@@ -8,11 +7,16 @@
 #include <memory>
 #include <sstream>
 #include <thread>
+
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "KeyBinds.hpp"
 #include "GlobalProperties.hpp"
 #include "Game.hpp"
 #include "render/gl/FBO.hpp"
 #include "render/Renderer.hpp"
+#include "scripting/lua/State.hpp"
 #include "Clouds.hpp"
 #include "Chatbox.hpp"
 #include "CaveGenerator.hpp"
@@ -220,7 +224,7 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
     break;
   }
 
-  if (m_chatBox->isChatting()) {
+  if (m_chatBox && m_chatBox->isChatting()) {
     switch (key) {
     case GLFW_KEY_ENTER:
       if (action == GLFW_PRESS) {
@@ -311,7 +315,7 @@ void GameState::onMouseButton(int key, int action, int mods) {
         Net::MsgTypes::BlockUpdatePlace bup;
         bup.worldId = G->LP->W->id;
         bup.pos = face;
-        bup.id = Content::BlockUnknownId;
+        bup.id = 2; //Content::BlockUnknownId;
         bup.data = 0;
         bup.writeToMsg(msg);
       }
@@ -475,9 +479,14 @@ bool GameState::connectLoop() {
     default: {
       std::ostringstream sstm;
       sstm << "Type: " << (int)m_msg.getType() << " Subtype: " << (int)m_msg.getSubtype();
-      GW->showMessage("Received weird packet", sstm.str());
+      GW->showMessage("Received unexpected packet", sstm.str());
     } return true;
   }
+
+  G->LS->initialize();
+  const std::string gameLuaRuntimePath(getAssetsDirectory() + "/lua");
+  G->LS->setGameLuaRuntimePath(gameLuaRuntimePath);
+  G->LS->dofile(gameLuaRuntimePath + "/Diggler.lua");
 
   getDebugStream() << "Joined as " << LP.name << '/' << LP.id << std::endl;
   return false;
@@ -687,6 +696,8 @@ void GameState::gameLoop() {
   }
   Net::OutMessage quit(Net::MessageType::PlayerQuit);
   sendMsg(quit, Net::Tfer::Rel);
+
+  G->LS->finalize();
 }
 
 void GameState::renderDeathScreen() {

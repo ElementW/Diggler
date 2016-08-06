@@ -97,7 +97,13 @@ target_link_libraries(diggler
   ${OPENAL_LIBRARY}
   pthread)
 
-execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${PATH_TO_TOPDIR}/assets" "${PROJECT_BINARY_DIR}/assets")
+add_custom_command(TARGET diggler PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E create_symlink "${PATH_TO_TOPDIR}/assets"
+  "${PROJECT_BINARY_DIR}/assets")
+
+add_custom_command(TARGET diggler PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/src/scripting/lua/api"
+  "${PROJECT_BINARY_DIR}/assets/lua/ffi")
 
 #install(TARGETS digglerz RUNTIME DESTINATION bin)
 

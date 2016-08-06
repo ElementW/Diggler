@@ -3,6 +3,7 @@ if(NOT DEFINED SRCS)
 endif()
 
 add_subdirectory("render")
+add_subdirectory("scripting")
 
 set(CSD ${CMAKE_CURRENT_SOURCE_DIR})
 set(SRCS

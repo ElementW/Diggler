@@ -1,19 +1,41 @@
-require('io')
+local rtpath = digglerNative.gameLuaRuntimePath
+package.path = package.path .. ';' .. rtpath .. '/?.lua;' .. rtpath .. '/lds/?.lua'
 
-local diggler = {
+ffi = require('ffi')
+io = require('io')
+debug = require('debug')
+local STP = require "StackTracePlus"
+debug.traceback = STP.stacktrace
+
+diggler = {
   mods = {},
   modOverlays = {},
   modsById = {},
 
+  publicEnv = {},
   exportedFuncs = {}
 }
+
+ffi.cdef[[
+struct Diggler_Game;
+
+union PtrConvert {
+	void *ptr;
+	char str[sizeof(void*)];
+};
+]]
+do
+  local cvt = ffi.new('union PtrConvert', {str = digglerNative.gameInstancePtrStr})
+  diggler.gameInstance = ffi.cast('struct Diggler_Game*', cvt.ptr)
+end
 
 function diggler.export(name, func)
   diggler.exportedFuncs[name] = func
 end
 
+
 package.loaded['diggler'] = diggler
-package.loaded['lds'] = require('lds/lds')
+package.loaded['lds'] = require('lds')
 
 local function setoverlay(tab, orig)
   local mt = getmetatable(tab) or {}
@@ -42,22 +64,64 @@ local function trim(s)
   return match(s,'^()%s*$') and '' or match(s,'^%s*(.*%S)')
 end
 
+diggler.modGlobalOverrides = {
+  collectgarbage = function(opt, ...)
+    if opt == 'count' or opt == 'collect' then
+      return collectgarbage(opt)
+    end
+  end
+}
+
 function diggler.loadModLua(path)
   local digglerOverlay = {}
   local packageOverlay = { ['path'] = path .. '/?.lua;' .. package.path }
   setoverlay(packageOverlay, package)
+  setoverlay(digglerOverlay, diggler.publicEnv)
   local env = {
-    ['package'] = packageOverlay,
-    ['print'] = function (...)
+    package = packageOverlay,
+    diggler = digglerOverlay,
+    print = function (...)
       print("<init " .. path .. ">", ...)
     end,
-    ['require'] = function (module)
+    CurrentModPath = path
+  }
+  for k, v in pairs({
+    require = function (module)
       if module == 'diggler' then
         return digglerOverlay
       end
       return require(module)
+    end,
+    dofile = function (name)
+      local f, e = loadfile(name)
+      if not f then error(e, 2) end
+      setfenv(f, env)
+      return f()
+    end,
+    loadfile = function (name)
+      if name == nil then
+        return
+      end
+      local f, e = loadfile(name)
+      if f then
+        setfenv(f, env)
+      end
+      return f, e
+    end,
+    loadstring = function (string, chunkname)
+      local f = loadstring(string, chunkname)
+      if f then
+        setfenv(f, env)
+      end
+      return f
     end
-  }
+  }) do
+    env[k] = v
+  end
+  for k, v in pairs(diggler.modGlobalOverrides) do
+    env[k] = v
+  end
+  env['_G'] = env
   setoverlay(env, _G)
 
   local file = io.open(path .. '/mod.lua', "r")
@@ -177,12 +241,14 @@ function diggler.getModByUuid(mod, uuid)
 end
 diggler.export("getMod", diggler.getMod)
 
-
+--[[
 function diggler.registerBlock(mod, name, block)
   print("Calling registerBlock from mod " .. (mod and mod.id or "<none>"))
 end
 diggler.export("registerBlock", diggler.registerBlock)
+]]
+dofile(rtpath .. '/api/io.lua')
+dofile(rtpath .. '/api/registerBlock.lua')
 
-
-local m = diggler.loadMod('TestMod')
+local m = diggler.loadMod('/media/source/Diggler/mods/TestMod')
 diggler.initMod(m)

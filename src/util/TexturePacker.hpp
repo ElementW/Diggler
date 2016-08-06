@@ -3,6 +3,8 @@
 
 #include "../Platform.hpp"
 
+#include <memory>
+
 namespace Diggler {
 
 class Texture;
@@ -16,6 +18,8 @@ public:
   int atlasWidth, atlasHeight;
 
 private:
+  std::unique_ptr<uint8[]> m_defaultTexture;
+
   uint8 *atlasData;
 
   Texture *atlasTex;

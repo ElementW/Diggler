@@ -15,6 +15,12 @@ namespace Render {
 class Renderer;
 }
 
+namespace Scripting {
+namespace Lua {
+class State;
+}
+}
+
 namespace UI {
 class Manager;
 }
@@ -34,10 +40,11 @@ public:
   Universe *U;
   PlayerList players;
   ContentRegistry *CR;
-  
+  Scripting::Lua::State *LS;
+
   // Server
   Server *S;
-  
+
   // Client
   Config *C;
   GameWindow *GW;
@@ -54,7 +61,7 @@ public:
   Net::Peer NS;
   KeyBinds *KB;
   int PlayerPosUpdateFreq;
-  
+
   Game();
   void init();
   void updateTime(double time);

@@ -2,14 +2,18 @@ local D = require('diggler')
 
 local TestMod = {
   uuid = "BWtAgKUjcW+H+CUQcOW3/Q",
-  id = "TestMod:",
+  id = "TestMod",
   name = "Test Mod",
   version = 1,
   versionStr = "1.0.0",
   description = "A mod to test Lua scripting ability",
   tags = {"test"},
-  authors = {"gravgun"},
-  license = "GPLv3",
+  authors = {"ElementW"},
+  license = {
+    name = "GPLv3",
+    descUrl = "https://www.gnu.org/licenses/gpl-3.0.html",
+    fulltextUrl = "https://www.gnu.org/licenses/gpl-3.0.txt"
+  },
   deps = {},
   optdeps = {},
 
@@ -28,13 +32,7 @@ local TestMod = {
 
 function TestMod.init() 
   print("Hey i'm " .. CurrentMod.id)
-  D.registerBlock('test', {
-    dispname = 'block.test.name',
-    sandboxTab = 'blocks',
-    harvest = { pickaxe = 0, shovel = 10000 },
-    maxStackSize = 32,
-    tex = "test.png"
-  })
+  dofile(CurrentModPath .. '/blocks.lua')
 end
 
 function TestMod.deinit() 

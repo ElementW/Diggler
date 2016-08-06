@@ -294,6 +294,7 @@ void Chunk::updateClient() {
   for(int8 x = 0; x < CX; x++) {
     for(int8 y = 0; y < CY; y++) {
       for(int8 z = 0; z < CZ; z++) {
+        const glm::ivec3 blockPos(x + wcx * CX, y + wcy * CY, z + wcz * CZ);
         bt = data->id[I(x,y,z)];
 
         // Empty block?
@@ -344,7 +345,7 @@ void Chunk::updateClient() {
           mayDisp = false;
         }
 
-        GLushort *index; uint i; bool transp = ContentRegistry::isTransparent(bt);
+        GLushort *index; uint i; bool transp = CR.isTransparent(bt);
         if (transp) {
           index = idxTransp;
           i = it;
@@ -356,10 +357,10 @@ void Chunk::updateClient() {
         // View from negative x
         bn = getBlockId(x - 1, y, z);
         if ((mayDisp && bn == BlockTypeLava && getBlockId(x-1, y+1, z) != BlockTypeLava)
-          || ContentRegistry::isFaceVisible(bt, bn)) {
+          || CR.isFaceVisible(bt, bn)) {
           index[i++] = v; index[i++] = v+1; index[i++] = v+2;
           index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
-          tc = CR.gTC(bt, FaceDirection::XDec);
+          tc = CR.blockTexCoord(bt, FaceDirection::XDec, blockPos);
           vertex[v++] = {x,     y,     z,     0, tc->x, tc->v, .6f, .6f, .6f};
           vertex[v++] = {x,     y,     z + 1, 0, tc->u, tc->v, .6f, .6f, .6f};
           vertex[v++] = {x,     y + 1, z,     w, tc->x, tc->y, .6f, .6f, .6f};
@@ -369,10 +370,10 @@ void Chunk::updateClient() {
         // View from positive x
         bn = getBlockId(x + 1, y, z);
         if ((mayDisp && bn == BlockTypeLava && getBlockId(x+1, y+1, z) != BlockTypeLava)
-          || ContentRegistry::isFaceVisible(bt, bn)) {
+          || CR.isFaceVisible(bt, bn)) {
           index[i++] = v; index[i++] = v+1; index[i++] = v+2;
           index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
-          tc = CR.gTC(bt, FaceDirection::XInc);
+          tc = CR.blockTexCoord(bt, FaceDirection::XInc, blockPos);
           vertex[v++] = {x + 1, y,     z,     0, tc->u, tc->v, .6f, .6f, .6f};
           vertex[v++] = {x + 1, y + 1, z,     w, tc->u, tc->y, .6f, .6f, .6f};
           vertex[v++] = {x + 1, y,     z + 1, 0, tc->x, tc->v, .6f, .6f, .6f};
@@ -382,11 +383,11 @@ void Chunk::updateClient() {
         // Negative Y
         bn = getBlockId(x, y - 1, z);
         if ((hasWaves && bn == BlockTypeLava)
-          || ContentRegistry::isFaceVisible(bt, bn)) {
+          || CR.isFaceVisible(bt, bn)) {
           index[i++] = v; index[i++] = v+1; index[i++] = v+2;
           index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
           float shade = (data->id[I(x,y,z)] == BlockTypeShock) ? 1.5f : .2f;;
-          tc = CR.gTC(bt, FaceDirection::YDec);
+          tc = CR.blockTexCoord(bt, FaceDirection::YDec, blockPos);
           vertex[v++] = {x,     y,     z, 0, tc->u, tc->v, shade, shade, shade};
           vertex[v++] = {x + 1, y,     z, 0, tc->u, tc->y, shade, shade, shade};
           vertex[v++] = {x,     y, z + 1, 0, tc->x, tc->v, shade, shade, shade};
@@ -396,10 +397,10 @@ void Chunk::updateClient() {
         // Positive Y
         bn = getBlockId(x, y + 1, z);
         if ((hasWaves && bt == BlockTypeLava && bu != BlockTypeLava)
-          || ContentRegistry::isFaceVisible(bt, bn)) {
+          || CR.isFaceVisible(bt, bn)) {
           index[i++] = v; index[i++] = v+1; index[i++] = v+2;
           index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
-          tc = CR.gTC(bt, FaceDirection::YInc);
+          tc = CR.blockTexCoord(bt, FaceDirection::YInc, blockPos);
           vertex[v++] = {x,     y + 1,     z, w, tc->x, tc->v, .8f, .8f, .8f};
           vertex[v++] = {x,     y + 1, z + 1, w, tc->u, tc->v, .8f, .8f, .8f};
           vertex[v++] = {x + 1, y + 1,     z, w, tc->x, tc->y, .8f, .8f, .8f};
@@ -409,10 +410,10 @@ void Chunk::updateClient() {
         // Negative Z
         bn = getBlockId(x, y, z - 1);
         if ((mayDisp && bn == BlockTypeLava && getBlockId(x, y+1, z-1) != BlockTypeLava)
-          || ContentRegistry::isFaceVisible(bt, bn)) {
+          || CR.isFaceVisible(bt, bn)) {
           index[i++] = v; index[i++] = v+1; index[i++] = v+2;
           index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
-          tc = CR.gTC(bt, FaceDirection::ZDec);
+          tc = CR.blockTexCoord(bt, FaceDirection::ZDec, blockPos);
           vertex[v++] = {x,     y,     z, 0, tc->u, tc->v, .4f, .4f, .4f};
           vertex[v++] = {x,     y + 1, z, w, tc->u, tc->y, .4f, .4f, .4f};
           vertex[v++] = {x + 1, y,     z, 0, tc->x, tc->v, .4f, .4f, .4f};
@@ -422,10 +423,10 @@ void Chunk::updateClient() {
         // Positive Z
         bn = getBlockId(x, y, z + 1);
         if ((mayDisp && bn == BlockTypeLava && getBlockId(x, y+1, z+1) != BlockTypeLava)
-          || ContentRegistry::isFaceVisible(bt, bn)) {
+          || CR.isFaceVisible(bt, bn)) {
           index[i++] = v; index[i++] = v+1; index[i++] = v+2;
           index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
-          tc = CR.gTC(bt, FaceDirection::ZInc);
+          tc = CR.blockTexCoord(bt, FaceDirection::ZInc, blockPos);
           vertex[v++] = {x,     y,     z + 1, 0, tc->x, tc->v, .4f, .4f, .4f};
           vertex[v++] = {x + 1, y,     z + 1, 0, tc->u, tc->v, .4f, .4f, .4f};
           vertex[v++] = {x,     y + 1, z + 1, w, tc->x, tc->y, .4f, .4f, .4f};

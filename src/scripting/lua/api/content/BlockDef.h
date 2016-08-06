@@ -1,0 +1,10 @@
+#ifndef DIGGLER_SCRIPTING_LUA_API_CONTENT_BLOCK_DEF_H
+#define DIGGLER_SCRIPTING_LUA_API_CONTENT_BLOCK_DEF_H
+
+#include <cstdint>
+
+extern "C" {
+#include "BlockDef.code.h"
+}
+
+#endif /* DIGGLER_SCRIPTING_LUA_API_CONTENT_BLOCK_DEF_H */

@@ -2,7 +2,42 @@
 #include "Content.hpp"
 #include "../GlobalProperties.hpp"
 
+#define PRINT_BLOCK_REGISTRATIONS 1
+
 namespace Diggler {
+
+using CR = ContentRegistry;
+
+CR::BlockRegistration::BlockRegistration(ContentRegistry &registry,
+  const ContentRegistry::BlockNameMap::iterator &it) :
+  registry(registry),
+  it(it),
+  state(Uncommitted),
+  def(it->second->second) {
+}
+
+CR::BlockRegistration::~BlockRegistration() {
+  if (state == Uncommitted) {
+    registry.m_blocks.erase(it->second);
+  }
+}
+
+CR::BlockRegistration::BlockRegistration(CR::BlockRegistration &&o) :
+  registry(o.registry),
+  it(o.it),
+  state(o.state),
+  def(o.def) {
+  o.state = Moved;
+}
+
+BlockId CR::BlockRegistration::commit() {
+  state = Committed;
+#if PRINT_BLOCK_REGISTRATIONS
+  getDebugStream() << "Registered block " << it->first << " with id " <<
+    it->second->first << std::endl;
+#endif
+  return it->second->first;
+}
 
 #define NON 0x0
 #define RED 0x1
@@ -41,14 +76,14 @@ static const DefBlocksInfo DefBlocksInfos[] = {
   {"diggler:transp_blue", "Force Field",	0,		0,	25,		ANY, "translucent_blue.png"}
 };
 
-bool ContentRegistry::isTransparent(BlockId id) {
+bool ContentRegistry::isTransparent(BlockId id) const {
   if (id == Content::BlockAirId)
     return true;
   return false;
   // TODO return getBlockDef(id).isTransparent;
 }
 
-bool ContentRegistry::isFaceVisible(BlockId id1, BlockId id2) {
+bool ContentRegistry::isFaceVisible(BlockId id1, BlockId id2) const {
   // TODO: node mesh/boxes -> not fullblock, faces may not be hidden
   if (isTransparent(id1)) {
     return (id1 != id2);
@@ -57,7 +92,7 @@ bool ContentRegistry::isFaceVisible(BlockId id1, BlockId id2) {
   }
 }
 
-bool ContentRegistry::canEntityGoThrough(BlockId id/* , Entity& ent*/) {
+bool ContentRegistry::canEntityGoThrough(BlockId id/* , Entity& ent*/) const {
   if (id == Content::BlockAirId)
     return true;
   return false;
@@ -66,87 +101,34 @@ bool ContentRegistry::canEntityGoThrough(BlockId id/* , Entity& ent*/) {
 }
 
 using Coord = TexturePacker::Coord;
+static Coord unk1, unk2, unk3, unk4, unk5, unk6, unk7, unk8;
 #define AddTex(b, t) Coord b = m_texturePacker->add(getAssetPath("blocks", t));
-ContentRegistry::ContentRegistry() : m_atlas(nullptr) {
+ContentRegistry::ContentRegistry() :
+  m_atlas(nullptr),
+  m_nextMaxBlockId(Content::BlockUnknownId + 1) {
+  { ContentRegistry::BlockRegistration br(registerBlock(Content::BlockAirId, "air"));
+    br.def.appearance.look.type = BlockDef::Appearance::Look::Type::Hidden;
+    br.def.phys.hasCollision = false;
+    br.commit();
+  }
+  { ContentRegistry::BlockRegistration br(registerBlock(Content::BlockUnknownId, "unknown"));
+    br.def.appearance.look.type = BlockDef::Appearance::Look::Type::Hidden;
+    br.def.phys.hasCollision = true;
+    br.commit();
+  }
+
   m_texturePacker = new TexturePacker(64*8, 64*8);
   m_texturePacker->freezeTexUpdate(true);
 
   // Valve checkerboard! :)
-  m_unknownBlockTex = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\xFF\x00\xFF\xFF\x00\xFF\x00\x00\x00");
-#if 1
-  AddTex(texDirt,				"tex_block_dirt.png");
-  AddTex(texDirtSign,			"tex_block_dirt_sign.png");
-  AddTex(texRock,				"tex_block_rock.png");
-  AddTex(texOre,				"tex_block_ore.png");
-  AddTex(texGold,				"tex_block_silver.png");
-  AddTex(texDiamond,			"tex_block_diamond.png");
-  AddTex(texHomeRed,			"tex_block_home_red.png");
-  AddTex(texHomeBlue,			"tex_block_home_blue.png");
-  AddTex(texSolidRed,			"tex_block_red.png");
-  AddTex(texSolidBlue,		"tex_block_blue.png");
-  AddTex(texLadder,			"tex_block_ladder.png");
-  AddTex(texLadderTop,		"tex_block_ladder_top.png");
-  AddTex(texSpikes,			"tex_block_spikes.png");
-  AddTex(texJump,				"tex_block_jump.png");
-  AddTex(texJumpTop,			"tex_block_jump_top.png");
-  AddTex(texExplosive,		"tex_block_explosive.png");
-  AddTex(texMetal,			"tex_block_metal.png");
-  AddTex(texBankTopRed,		"tex_block_bank_top_red.png");
-  AddTex(texBankLeftRed,		"tex_block_bank_left_red.png");
-  AddTex(texBankFrontRed,		"tex_block_bank_front_red.png");
-  AddTex(texBankRightRed,		"tex_block_bank_right_red.png");
-  AddTex(texBankBackRed,		"tex_block_bank_back_red.png");
-  AddTex(texBankTopBlue,		"tex_block_bank_top_blue.png");
-  AddTex(texBankLeftBlue,		"tex_block_bank_left_blue.png");
-  AddTex(texBankFrontBlue,	"tex_block_bank_front_blue.png");
-  AddTex(texBankRightBlue,	"tex_block_bank_right_blue.png");
-  AddTex(texBankBackBlue,		"tex_block_bank_back_blue.png");
-  AddTex(texTeleSideA,		"tex_block_teleporter_a.png");
-  AddTex(texTeleSideB,		"tex_block_teleporter_b.png");
-  AddTex(texTeleTop,			"tex_block_teleporter_top.png");
-  AddTex(texTeleBottom,		"tex_block_teleporter_bottom.png");
-  AddTex(texLava,				"tex_block_lava.png");
-  AddTex(texRoad,				"tex_block_road_orig.png");
-  AddTex(texRoadTop,			"tex_block_road_top.png");
-  AddTex(texRoadBottom,		"tex_block_road_bottom.png");
-  AddTex(texBeaconRed,		"tex_block_beacon_top_red.png");
-  AddTex(texBeaconBlue,		"tex_block_beacon_top_blue.png");
-  AddTex(texTransRed,			"tex_block_trans_red.png");
-  AddTex(texTransBlue,		"tex_block_trans_blue.png");
-
-  Coord texNil {0, 0, 0, 0};
-
-  const Coord sideTextures[22][6] = {
-    /* Air */	{texNil, texNil, texNil, texNil, texNil, texNil},
-    /* Dirt */	{texDirt, texDirt, texDirt, texDirt, texDirt, texDirt},
-    /* Ore */	{texOre, texOre, texOre, texOre, texOre, texOre},
-    /* Gold */	{texGold, texGold, texGold, texGold, texGold, texGold},
-    /*Diamond*/	{texDiamond, texDiamond, texDiamond, texDiamond, texDiamond, texDiamond},
-    /* Rock */	{texRock, texRock, texRock, texRock, texRock, texRock},
-    /* Ladder */{texLadder, texLadder, texLadderTop, texLadderTop, texLadder, texLadder},
-    /* TNT*/	{texExplosive, texExplosive, texExplosive, texExplosive, texExplosive, texExplosive},
-    /* Jump */	{texJump, texJump, texJumpTop, texTeleBottom, texJump, texJump},
-    /* Shock */	{texTeleSideA, texTeleSideA, texTeleBottom, texSpikes, texTeleSideB, texTeleSideB},
-    /*BankRed*/	{texBankFrontRed, texBankBackRed, texBankTopRed, texBankTopRed, texBankLeftRed, texBankRightRed},
-    /*BankBlue*/{texBankFrontBlue, texBankBackBlue, texBankTopBlue, texBankTopBlue, texBankLeftBlue, texBankRightBlue},
-    /*BeaconR*/	{texTeleSideA, texTeleSideA, texBeaconRed, texLadderTop, texTeleSideB, texTeleSideB},
-    /*BeaconB*/	{texTeleSideA, texTeleSideA, texBeaconBlue, texLadderTop, texTeleSideB, texTeleSideB},
-    /* Road */	{texRoad, texRoad, texRoad, texRoad, texRoad, texRoad},
-    /* SolidR */{texSolidRed, texSolidRed, texSolidRed, texSolidRed, texSolidRed, texSolidRed},
-    /* SolidB */{texSolidBlue, texSolidBlue, texSolidBlue, texSolidBlue, texSolidBlue, texSolidBlue},
-    /* Metal */	{texMetal, texMetal, texMetal, texMetal, texMetal, texMetal},
-    /*DirtSign*/{texDirtSign, texDirtSign, texDirtSign, texDirtSign, texDirtSign, texDirtSign},
-    /* Lava */	{texLava, texLava, texLava, texLava, texLava, texLava},
-    /* TransR */{texTransRed, texTransRed, texTransRed, texTransRed, texTransRed, texTransRed},
-    /* TransB */{texTransBlue, texTransBlue, texTransBlue, texTransBlue, texTransBlue, texTransBlue},
-  };
-  for (int i=0; i < 22; ++i) {
-    BlockFaceTexCoords c;
-    for (int j=0; j < 6; ++j)
-      c.coords[j] = sideTextures[i][j];
-    m_coords.push_back(c);
-  }
-#endif
+  unk1 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\xFF\x00\xFF\xFF\x00\xFF\x00\x00\x00");
+  unk2 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\x00\x00\xFF\x00\x00\xFF\x00\x00\x00");
+  unk3 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\x00\xFF\x00\x00\xFF\x00\x00\x00\x00");
+  unk4 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\xFF\x00\x00\xFF\x00\x00\x00\x00\x00");
+  unk5 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\x00\xFF\xFF\x00\xFF\xFF\x00\x00\x00");
+  unk6 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\xFF\xFF\x00\xFF\xFF\x00\x00\x00\x00");
+  unk7 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00");
+  unk8 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\x00\x0F\x00\x00\x0F\x00\x00\x00\x00");
 
   m_texturePacker->freezeTexUpdate(false);
   m_atlas = m_texturePacker->getAtlas();
@@ -156,15 +138,92 @@ ContentRegistry::~ContentRegistry() {
   delete m_texturePacker;
 }
 
-const TexturePacker::Coord* ContentRegistry::gTC(BlockId t, FaceDirection d) const {
+TexturePacker::Coord ContentRegistry::addTexture(const std::string &texName,
+  const std::string &path) {
+  const TexturePacker::Coord coord = m_texturePacker->add(path);
+  m_textureCoords.emplace(std::piecewise_construct,
+    std::forward_as_tuple(texName),
+    std::forward_as_tuple(coord));
+  return coord;
+}
+
+const TexturePacker::Coord* ContentRegistry::blockTexCoord(BlockId t, FaceDirection d,
+  const glm::ivec3 &pos) const {
   if (t == Content::BlockUnknownId) {
-    return &m_unknownBlockTex;
+    const Coord *unk[] = {
+      &unk1, &unk2, &unk3, &unk4, &unk5, &unk6, &unk7, &unk8
+    };
+    return unk[rmod(pos.x, 2) + 2*(rmod(pos.y, 2)) + 4*(rmod(pos.z, 2))]; //&m_unknownBlockTex;
   }
-  return &(m_coords[(int)t].coords[(int)d]);
+  const BlockDef &bdef = m_blocks.at(t);
+  using Type = BlockDef::Appearance::Look::Type;
+  switch (bdef.appearance.look.type) {
+    case Type::Cube: {
+      const BlockDef::Appearance::Texture &tex =
+        bdef.appearance.look.data.cube.sides[static_cast<uint>(d)].texture->second;
+      if (tex.repeat.xdiv == 1 && tex.repeat.ydiv == 1) {
+        return &tex.coord;
+      }
+      size_t idx = 0;
+      switch (d) {
+      case FaceDirection::XInc:
+        idx = rmod(pos.z, tex.repeat.xdiv) +
+              tex.repeat.xdiv*(rmod(pos.y, tex.repeat.ydiv));
+        break;
+      case FaceDirection::XDec:
+        idx = rmod(-pos.z - 1, tex.repeat.xdiv) +
+              tex.repeat.xdiv*(rmod(pos.y, tex.repeat.ydiv));
+        break;
+      case FaceDirection::YInc:
+        idx = rmod(-pos.z - 1, tex.repeat.xdiv) +
+              tex.repeat.xdiv*(rmod(pos.x, tex.repeat.ydiv));
+        break;
+      case FaceDirection::YDec:
+        idx = rmod(pos.z, tex.repeat.xdiv) +
+              tex.repeat.xdiv*(rmod(pos.x, tex.repeat.ydiv));
+        break;
+      case FaceDirection::ZInc:
+        idx = rmod(-pos.x - 1, tex.repeat.xdiv) +
+              tex.repeat.xdiv*(rmod(pos.y, tex.repeat.ydiv));
+        break;
+      case FaceDirection::ZDec:
+        idx = rmod(pos.x, tex.repeat.xdiv) +
+              tex.repeat.xdiv*(rmod(pos.y, tex.repeat.ydiv));
+        break;
+      }
+      return &tex.divCoords[idx];
+    } break;
+    case Type::Hidden:
+      ;
+  }
+  return nullptr;
 }
 
 const Texture* ContentRegistry::getAtlas() const {
   return m_atlas;
+}
+
+ContentRegistry::BlockRegistration ContentRegistry::registerBlock(BlockId id, const char *name) {
+  BlockIdMap::iterator bit = m_blocks.emplace(std::piecewise_construct,
+     std::forward_as_tuple(id),
+     std::forward_as_tuple())
+   .first;
+  return BlockRegistration(*this, m_blockNames.emplace(std::piecewise_construct,
+      std::forward_as_tuple(name),
+      std::forward_as_tuple(bit))
+    .first);
+}
+
+ContentRegistry::BlockRegistration ContentRegistry::registerBlock(const char *name) {
+  BlockId id = Content::BlockUnknownId;
+  if (m_freedBlockIds.empty()) {
+    id = m_nextMaxBlockId;
+    ++m_nextMaxBlockId;
+  } else {
+    id = m_freedBlockIds.back();
+    m_freedBlockIds.pop_back();
+  }
+  return registerBlock(id, name);
 }
 
 }

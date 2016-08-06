@@ -1,9 +1,11 @@
 #include "Game.hpp"
+
 #include "Audio.hpp"
 #include "content/Registry.hpp"
 #include "GlobalProperties.hpp"
 #include "KeyBinds.hpp"
 #include "render/gl/Renderer.hpp"
+#include "scripting/lua/State.hpp"
 
 namespace Diggler {
 
@@ -18,6 +20,7 @@ Game::Game() :
 
 void Game::init() {
   CR = new ContentRegistry;
+  LS = new Scripting::Lua::State(this);
   if (GlobalProperties::IsClient) {
     PM = new ProgramManager(*this);
     LP = new LocalPlayer(this);

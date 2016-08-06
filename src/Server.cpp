@@ -1,16 +1,21 @@
 #include "Server.hpp"
+
+#include <algorithm>
+#include <iterator>
+#include <thread>
+#include <sstream>
+
+#include <lua.h>
+
 #include "Game.hpp"
 #include "network/msgtypes/BlockUpdate.hpp"
 #include "network/msgtypes/Chat.hpp"
 #include "network/msgtypes/ChunkTransfer.hpp"
 #include "network/Network.hpp"
 #include "network/NetHelper.hpp"
+#include "scripting/lua/State.hpp"
 #include "VersionInfo.hpp"
 #include "CaveGenerator.hpp"
-#include <iterator>
-#include <algorithm>
-#include <thread>
-#include <sstream>
 
 using std::cout;
 using std::endl;
@@ -301,6 +306,10 @@ Server::Server(Game &G, uint16 port) : G(G) {
   } catch (Net::Exception &e) {
     getErrorStream() << "Couldn't open port " << port << " for listening" << endl <<
       "Make sure no other server instance is running" << endl;
+    if (port <= 1024) {
+      getErrorStream() << "The selected port is in range 1-1024, which typically require root "
+        "privileges. Make sure you have permission to bind to this port." << endl;
+    }
     throw "Server init failed";
   }
 
@@ -309,10 +318,7 @@ Server::Server(Game &G, uint16 port) : G(G) {
 }
 
 void Server::startInternals() {
-  L = luaL_newstate();
-  luaL_openlibs(L);
-  luaL_loadfile(L, "");
-  lua_pcall(L, 0, 0, 0);
+  G.LS->initialize();
 }
 
 // FIXME ugly ugly hack to keep it in mem
@@ -336,7 +342,7 @@ void Server::stop() {
 }
 
 void Server::stopInternals() {
-  lua_close(L);
+  G.LS->finalize();
 }
 
 void Server::chunkUpdater(WorldRef WR, bool &continueUpdate) {

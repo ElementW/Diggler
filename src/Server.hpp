@@ -1,7 +1,8 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
+
 #include <memory>
-#include <lua.hpp>
+
 #include "network/Network.hpp"
 #include "Player.hpp"
 
@@ -14,7 +15,6 @@ class Game;
 class Server {
 private:
   Game &G;
-  lua_State *L;
 
   // TODO: REMOVEME!!!
   std::list<ChunkRef> holdChunksInMem;

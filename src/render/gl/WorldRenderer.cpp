@@ -62,7 +62,7 @@ void GLWorldRenderer::updateChunk(Chunk *c, Chunk::Vertex *vertices, uint vertCo
   uint16 *indicesOpq, uint idxOpqCount, uint16 *indicesTpt, uint idxTptCount) {
   ChunkEntry &ce = *reinterpret_cast<ChunkEntry*>(getRendererData(c));
   ce.vbo.setDataKeepSize(vertices, vertCount, GL_DYNAMIC_DRAW);
-  ce.ibo.resizeGrow(sizeof(uint16) * (idxOpqCount + idxTptCount));
+  ce.ibo.resizeGrow(sizeof(uint16) * (idxOpqCount + idxTptCount), GL_DYNAMIC_DRAW);
   ce.ibo.setSubData(indicesOpq, 0, idxOpqCount);
   ce.ibo.setSubData(indicesTpt, idxOpqCount, idxTptCount);
   ce.indicesOpq = idxOpqCount;
