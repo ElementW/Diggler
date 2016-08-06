@@ -81,6 +81,7 @@ TexturePacker::Coord TexturePacker::add(const std::string& path) {
   int width, height, channels;
   unsigned char *ptr = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
   if (!ptr || !width || !height) {
+    getErrorStream() << "Could not load '" << path << "': " << stbi_failure_reason() << std::endl;
     if (!m_defaultTexture) {
       m_defaultTexture.reset(new uint8[8*8*4]);
       uint i = 0;
