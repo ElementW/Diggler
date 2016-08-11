@@ -1,5 +1,5 @@
-#ifndef CONTENT_REGISTRY_HPP
-#define CONTENT_REGISTRY_HPP
+#ifndef DIGGLER_CONTENT_REGISTRY_HPP
+#define DIGGLER_CONTENT_REGISTRY_HPP
 
 #include <unordered_map>
 #include <vector>
@@ -22,14 +22,16 @@ enum class FaceDirection : uint8_t {
   ZDec = 5
 };
 
-class ContentRegistry {
+namespace Content {
+
+class Registry {
 public:
   using BlockIdMap = std::unordered_map<BlockId, BlockDef>;
   using BlockNameMap = std::unordered_map<std::string, BlockIdMap::iterator>;
 
   class BlockRegistration {
   protected:
-    ContentRegistry &registry;
+    Registry &registry;
     const BlockNameMap::iterator it;
     enum {
       Uncommitted,
@@ -39,7 +41,7 @@ public:
   public:
     BlockDef &def;
 
-    BlockRegistration(ContentRegistry &registry, const BlockNameMap::iterator &it);
+    BlockRegistration(Registry &registry, const BlockNameMap::iterator &it);
     ~BlockRegistration();
 
     BlockRegistration(const BlockRegistration&) = delete;
@@ -66,14 +68,14 @@ private:
   std::vector<BlockId> m_freedBlockIds;
 
   // No copy
-  ContentRegistry(const ContentRegistry&) = delete;
-  ContentRegistry& operator=(const ContentRegistry&) = delete;
+  Registry(const Registry&) = delete;
+  Registry& operator=(const Registry&) = delete;
 
   BlockRegistration registerBlock(BlockId id, const char *name);
 
 public:
-  ContentRegistry();
-  ~ContentRegistry();
+  Registry();
+  ~Registry();
 
   bool isTransparent(BlockId id) const;
   bool isFaceVisible(BlockId id1, BlockId id2) const;
@@ -90,5 +92,6 @@ public:
 };
 
 }
+}
 
-#endif
+#endif /* DIGGLER_CONTENT_REGISTRY_HPP */

@@ -281,7 +281,7 @@ void Chunk::updateClient() {
   imcUncompress();
 #endif
   mut.lock();
-  ContentRegistry &CR = *G->CR;
+  Content::Registry &CR = *G->CR;
   Vertex   vertex[CX * CY * CZ * 6 /* faces */ * 4 /* vertices */ / 2 /* face removing (HSR) makes a lower vert max */];
   GLushort idxOpaque[CX * CY * CZ * 6 /* faces */ * 6 /* indices */ / 2 /* HSR */],
            idxTransp[CX*CY*CZ*6*6/2];

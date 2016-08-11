@@ -8,8 +8,9 @@ using namespace Diggler;
 
 void Diggler_Content_Registry_registerBlock(struct Diggler_Game *cG,
   const char *name, struct Diggler_Content_BlockDef *cBdef) {
+  using namespace Content;
   Game &G = *reinterpret_cast<Game*>(cG);
-  ContentRegistry::BlockRegistration br(G.CR->registerBlock(name));
+  Registry::BlockRegistration br(G.CR->registerBlock(name));
   { decltype(cBdef->appearance) &cApp = cBdef->appearance;
     decltype(br.def.appearance) &app = br.def.appearance;
     std::vector<decltype(app.textures)::iterator> textureIts;
@@ -29,9 +30,6 @@ void Diggler_Content_Registry_registerBlock(struct Diggler_Game *cG,
       if (cTex.repeatXdiv > 1 || cTex.repeatYdiv > 1) {
         uint16 width  = (tex.coord.u - tex.coord.x) / cTex.repeatXdiv,
                height = (tex.coord.v - tex.coord.y) / cTex.repeatYdiv;
-        getDebugStream() << "Split " << tex.coord.x << ' ' << tex.coord.y << ' ' << tex.coord.u <<
-          ' ' << tex.coord.v << " into " << static_cast<int>(tex.repeat.xdiv) << 'x' <<
-          static_cast<int>(tex.repeat.ydiv) << std::endl;
         for (int16 y = cTex.repeatYdiv - 1; y >= 0; --y) {
           for (int16 x = cTex.repeatXdiv - 1; x >= 0; --x) {
             tex.divCoords.emplace_back(TexturePacker::Coord {
@@ -40,9 +38,6 @@ void Diggler_Content_Registry_registerBlock(struct Diggler_Game *cG,
               static_cast<uint16>(tex.coord.x + width * (x + 1)),
               static_cast<uint16>(tex.coord.y + height * (y + 1))
             });
-            const TexturePacker::Coord &coord = tex.divCoords.back();
-            getDebugStream() << "> " << coord.x << ' ' << coord.y << ' ' << coord.u <<
-              ' ' << coord.v << std::endl;
           }
         }
       }

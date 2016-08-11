@@ -1,5 +1,5 @@
-#ifndef DIGGLER_BLOCK_DEF_HPP
-#define DIGGLER_BLOCK_DEF_HPP
+#ifndef DIGGLER_CONTENT_BLOCK_DEF_HPP
+#define DIGGLER_CONTENT_BLOCK_DEF_HPP
 
 #include <unordered_map>
 
@@ -9,6 +9,7 @@
 //#include "../AABB.hpp"
 
 namespace Diggler {
+namespace Content {
 
 class BlockDef : public ObjectDef {
 public:
@@ -52,5 +53,6 @@ public:
 };
 
 }
+}
 
-#endif /* DIGGLER_BLOCK_DEF_HPP */
+#endif /* DIGGLER_CONTENT_BLOCK_DEF_HPP */

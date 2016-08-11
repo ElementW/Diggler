@@ -66,7 +66,7 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
             std::string playerName;
             if (cpt.player.display.type == msgpack::type::NIL) {
               const Player *blabbermouth = GS.G->players.getByGameId(cpt.player.id);
-              [[likely(true)]] if (blabbermouth != nullptr) {
+              if (blabbermouth != nullptr) {
                 playerName = blabbermouth->name + "> ";
               } else {
                 playerName = "?> ";

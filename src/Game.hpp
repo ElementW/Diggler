@@ -11,6 +11,10 @@ using std::shared_ptr;
 
 namespace Diggler {
 
+namespace Content {
+class Registry;
+}
+
 namespace Render {
 class Renderer;
 }
@@ -26,7 +30,6 @@ class Manager;
 }
 
 class Audio;
-class ContentRegistry;
 class Config;
 class GameWindow;
 class KeyBinds;
@@ -39,7 +42,7 @@ public:
   Net::Host H;
   Universe *U;
   PlayerList players;
-  ContentRegistry *CR;
+  Content::Registry *CR;
   Scripting::Lua::State *LS;
 
   // Server

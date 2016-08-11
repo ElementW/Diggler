@@ -1,7 +1,7 @@
-#ifndef CONTENT_HPP
-#define CONTENT_HPP
+#ifndef DIGGLER_CONTENT_HPP
+#define DIGGLER_CONTENT_HPP
 
-#include "../Platform.hpp"
+#include "../platform/Types.hpp"
 
 #include <limits>
 #include <type_traits>
@@ -43,4 +43,4 @@ namespace Content {
 }
 }
 
-#endif
+#endif /* DIGGLER_CONTENT_HPP */

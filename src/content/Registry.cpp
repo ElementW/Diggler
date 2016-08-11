@@ -5,24 +5,23 @@
 #define PRINT_BLOCK_REGISTRATIONS 1
 
 namespace Diggler {
+namespace Content {
 
-using CR = ContentRegistry;
-
-CR::BlockRegistration::BlockRegistration(ContentRegistry &registry,
-  const ContentRegistry::BlockNameMap::iterator &it) :
+Registry::BlockRegistration::BlockRegistration(Registry &registry,
+  const Registry::BlockNameMap::iterator &it) :
   registry(registry),
   it(it),
   state(Uncommitted),
   def(it->second->second) {
 }
 
-CR::BlockRegistration::~BlockRegistration() {
+Registry::BlockRegistration::~BlockRegistration() {
   if (state == Uncommitted) {
     registry.m_blocks.erase(it->second);
   }
 }
 
-CR::BlockRegistration::BlockRegistration(CR::BlockRegistration &&o) :
+Registry::BlockRegistration::BlockRegistration(Registry::BlockRegistration &&o) :
   registry(o.registry),
   it(o.it),
   state(o.state),
@@ -30,7 +29,7 @@ CR::BlockRegistration::BlockRegistration(CR::BlockRegistration &&o) :
   o.state = Moved;
 }
 
-BlockId CR::BlockRegistration::commit() {
+BlockId Registry::BlockRegistration::commit() {
   state = Committed;
 #if PRINT_BLOCK_REGISTRATIONS
   getDebugStream() << "Registered block " << it->first << " with id " <<
@@ -76,14 +75,14 @@ static const DefBlocksInfo DefBlocksInfos[] = {
   {"diggler:transp_blue", "Force Field",	0,		0,	25,		ANY, "translucent_blue.png"}
 };
 
-bool ContentRegistry::isTransparent(BlockId id) const {
+bool Registry::isTransparent(BlockId id) const {
   if (id == Content::BlockAirId)
     return true;
   return false;
   // TODO return getBlockDef(id).isTransparent;
 }
 
-bool ContentRegistry::isFaceVisible(BlockId id1, BlockId id2) const {
+bool Registry::isFaceVisible(BlockId id1, BlockId id2) const {
   // TODO: node mesh/boxes -> not fullblock, faces may not be hidden
   if (isTransparent(id1)) {
     return (id1 != id2);
@@ -92,7 +91,7 @@ bool ContentRegistry::isFaceVisible(BlockId id1, BlockId id2) const {
   }
 }
 
-bool ContentRegistry::canEntityGoThrough(BlockId id/* , Entity& ent*/) const {
+bool Registry::canEntityGoThrough(BlockId id/* , Entity& ent*/) const {
   if (id == Content::BlockAirId)
     return true;
   return false;
@@ -103,15 +102,15 @@ bool ContentRegistry::canEntityGoThrough(BlockId id/* , Entity& ent*/) const {
 using Coord = TexturePacker::Coord;
 static Coord unk1, unk2, unk3, unk4, unk5, unk6, unk7, unk8;
 #define AddTex(b, t) Coord b = m_texturePacker->add(getAssetPath("blocks", t));
-ContentRegistry::ContentRegistry() :
+Registry::Registry() :
   m_atlas(nullptr),
   m_nextMaxBlockId(Content::BlockUnknownId + 1) {
-  { ContentRegistry::BlockRegistration br(registerBlock(Content::BlockAirId, "air"));
+  { Registry::BlockRegistration br(registerBlock(Content::BlockAirId, "air"));
     br.def.appearance.look.type = BlockDef::Appearance::Look::Type::Hidden;
     br.def.phys.hasCollision = false;
     br.commit();
   }
-  { ContentRegistry::BlockRegistration br(registerBlock(Content::BlockUnknownId, "unknown"));
+  { Registry::BlockRegistration br(registerBlock(Content::BlockUnknownId, "unknown"));
     br.def.appearance.look.type = BlockDef::Appearance::Look::Type::Hidden;
     br.def.phys.hasCollision = true;
     br.commit();
@@ -134,11 +133,11 @@ ContentRegistry::ContentRegistry() :
   m_atlas = m_texturePacker->getAtlas();
 }
 
-ContentRegistry::~ContentRegistry() {
+Registry::~Registry() {
   delete m_texturePacker;
 }
 
-TexturePacker::Coord ContentRegistry::addTexture(const std::string &texName,
+TexturePacker::Coord Registry::addTexture(const std::string &texName,
   const std::string &path) {
   const TexturePacker::Coord coord = m_texturePacker->add(path);
   m_textureCoords.emplace(std::piecewise_construct,
@@ -147,7 +146,7 @@ TexturePacker::Coord ContentRegistry::addTexture(const std::string &texName,
   return coord;
 }
 
-const TexturePacker::Coord* ContentRegistry::blockTexCoord(BlockId t, FaceDirection d,
+const TexturePacker::Coord* Registry::blockTexCoord(BlockId t, FaceDirection d,
   const glm::ivec3 &pos) const {
   if (t == Content::BlockUnknownId) {
     const Coord *unk[] = {
@@ -199,11 +198,11 @@ const TexturePacker::Coord* ContentRegistry::blockTexCoord(BlockId t, FaceDirect
   return nullptr;
 }
 
-const Texture* ContentRegistry::getAtlas() const {
+const Texture* Registry::getAtlas() const {
   return m_atlas;
 }
 
-ContentRegistry::BlockRegistration ContentRegistry::registerBlock(BlockId id, const char *name) {
+Registry::BlockRegistration Registry::registerBlock(BlockId id, const char *name) {
   BlockIdMap::iterator bit = m_blocks.emplace(std::piecewise_construct,
      std::forward_as_tuple(id),
      std::forward_as_tuple())
@@ -214,7 +213,7 @@ ContentRegistry::BlockRegistration ContentRegistry::registerBlock(BlockId id, co
     .first);
 }
 
-ContentRegistry::BlockRegistration ContentRegistry::registerBlock(const char *name) {
+Registry::BlockRegistration Registry::registerBlock(const char *name) {
   BlockId id = Content::BlockUnknownId;
   if (m_freedBlockIds.empty()) {
     id = m_nextMaxBlockId;
@@ -226,4 +225,5 @@ ContentRegistry::BlockRegistration ContentRegistry::registerBlock(const char *na
   return registerBlock(id, name);
 }
 
+}
 }

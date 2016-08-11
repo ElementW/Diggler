@@ -19,7 +19,7 @@ Game::Game() :
 }
 
 void Game::init() {
-  CR = new ContentRegistry;
+  CR = new Content::Registry;
   LS = new Scripting::Lua::State(this);
   if (GlobalProperties::IsClient) {
     PM = new ProgramManager(*this);

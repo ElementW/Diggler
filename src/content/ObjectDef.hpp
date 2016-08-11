@@ -1,8 +1,9 @@
-#ifndef OBJECT_DEF_HPP
-#define OBJECT_DEF_HPP
+#ifndef DIGGLER_CONTENT_OBJECT_DEF_HPP
+#define DIGGLER_CONTENT_OBJECT_DEF_HPP
 #include "../Platform.hpp"
 
 namespace Diggler {
+namespace Content {
 
 class ObjectDef {
 public:
@@ -14,5 +15,6 @@ public:
 };
 
 }
+}
 
-#endif
+#endif /* DIGGLER_CONTENT_OBJECT_DEF_HPP */
