@@ -30,7 +30,7 @@ public:
    * @brief Gets a Player using its game session ID
    * @return Pointer to Player, may be nullptr if not found
    */
-  Player* getByGameId(uint32);
+  Player* getBySessId(Player::SessionID);
 
   /**
    * @brief Gets a Player using its name

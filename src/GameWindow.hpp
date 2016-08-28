@@ -8,8 +8,6 @@
 #include "Platform.hpp"
 #include "ui/Manager.hpp"
 
-using std::shared_ptr;
-
 namespace Diggler {
 
 class Game;
@@ -22,7 +20,7 @@ private:
   GLFWwindow *m_window;
   int m_w, m_h;
 
-  shared_ptr<State> m_currentState, m_nextState;
+  std::unique_ptr<State> m_currentState, m_nextState;
 
 public:
   UI::Manager *UIM;
@@ -52,7 +50,7 @@ public:
 
   void updateViewport();
 
-  void setNextState(const shared_ptr<State> next);
+  void setNextState(std::unique_ptr<State> &&next);
   void run();
 
   void showMessage(const std::string &msg, const std::string &submsg = "");

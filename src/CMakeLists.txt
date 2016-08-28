@@ -16,6 +16,8 @@ set(SRCS
   ${CSD}/Chunk.cpp
   ${CSD}/Clouds.cpp
   ${CSD}/Config.cpp
+  ${CSD}/content/AssetManager.cpp
+  ${CSD}/content/ModManager.cpp
   ${CSD}/content/Registry.cpp
   ${CSD}/EscMenu.cpp
   ${CSD}/Frustum.cpp
@@ -34,6 +36,8 @@ set(SRCS
   ${CSD}/network/msgtypes/BlockUpdate.cpp
   ${CSD}/network/msgtypes/Chat.cpp
   ${CSD}/network/msgtypes/ChunkTransfer.cpp
+  ${CSD}/network/msgtypes/ConnectionParam.cpp
+  ${CSD}/network/msgtypes/PlayerUpdate.cpp
   ${CSD}/network/msgtypes/ServerInfo.cpp
   ${CSD}/network/ClientMessageHandler.cpp
   ${CSD}/network/NetHelper.cpp

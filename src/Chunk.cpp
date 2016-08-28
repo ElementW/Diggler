@@ -92,7 +92,7 @@ Chunk::Chunk(Game *G, WorldRef W, int X, int Y, int Z) :
   calcMemUsage();
 
   if (GlobalProperties::IsClient) {
-    G->R->WR->registerChunk(this);
+    G->R->renderers.world->registerChunk(this);
   }
 }
 
@@ -155,7 +155,7 @@ Chunk::~Chunk() {
   std::free(imcData);
 #endif
   if (GlobalProperties::IsClient) {
-    G->R->WR->unregisterChunk(this);
+    G->R->renderers.world->unregisterChunk(this);
   }
   // getDebugStream() << W->id << '.' << wcx << ',' << wcy << ',' << wcz << " destruct" << std::endl;
 }
@@ -442,7 +442,7 @@ void Chunk::updateClient() {
     }
   }
 
-  G->R->WR->updateChunk(this, vertex, v, idxOpaque, io, idxTransp, it);
+  G->R->renderers.world->updateChunk(this, vertex, v, idxOpaque, io, idxTransp, it);
   dirty = false;
   mut.unlock();
 }

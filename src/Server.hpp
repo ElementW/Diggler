@@ -50,7 +50,7 @@ public:
 
   bool isPlayerOnline(const std::string &playername) const;
   bool isIPOnline(const std::string &ip) const;
-  Player* getPlayerById(uint32 id);
+  Player* getPlayerBySessId(uint32 id);
   Player* getPlayerByPeer(const Net::Peer &peer);
   Player* getPlayerByName(const std::string &name);
   void kick(Player &p, Net::QuitReason r = Net::QuitReason::Kicked, const std::string& message = "");

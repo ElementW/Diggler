@@ -64,7 +64,7 @@ Font::Font(Game *G, const std::string& path) : G(G) {
   }
 }
 
-struct Vertex { int x, y; float tx, ty; float r, g, b ,a; };
+struct Vertex { int16 x, y; float tx, ty; float r, g, b ,a; };
 
 #define eraseCurChar() elements -= 6;
 
@@ -121,16 +121,16 @@ int Font::updateVBO(Render::gl::VBO &vbo, const std::string &text, GLenum usage)
   return elements;
 }
 
-void Font::draw(const Render::gl::VBO &vbo, int count, const glm::mat4& matrix) const {
+void Font::draw(const Render::gl::VBO &vbo, int count, const glm::mat4 &matrix) const {
+  R.prog->bind();
   glEnableVertexAttribArray(R.att_coord);
   glEnableVertexAttribArray(R.att_texcoord);
   glEnableVertexAttribArray(R.att_color);
 
-  R.prog->bind();
   m_texture->bind();
   vbo.bind();
   glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(matrix));
-  glVertexAttribPointer(R.att_coord, 2, GL_INT, GL_FALSE, sizeof(Vertex), 0);
+  glVertexAttribPointer(R.att_coord, 2, GL_SHORT, GL_FALSE, sizeof(Vertex), 0);
   glVertexAttribPointer(R.att_texcoord, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, tx));
   glVertexAttribPointer(R.att_color, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, r));
   glDrawArrays(GL_TRIANGLES, 0, count);

@@ -6,6 +6,7 @@
 #include "msgtypes/BlockUpdate.hpp"
 #include "msgtypes/Chat.hpp"
 #include "msgtypes/ChunkTransfer.hpp"
+#include "msgtypes/PlayerUpdate.hpp"
 
 namespace Diggler {
 namespace Net {
@@ -65,7 +66,7 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
           if (cpt.msg.type == msgpack::type::STR) {
             std::string playerName;
             if (cpt.player.display.type == msgpack::type::NIL) {
-              const Player *blabbermouth = GS.G->players.getByGameId(cpt.player.id);
+              const Player *blabbermouth = GS.G->players.getBySessId(cpt.player.id);
               if (blabbermouth != nullptr) {
                 playerName = blabbermouth->name + "> ";
               } else {
@@ -81,14 +82,14 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
     } break;
     case MessageType::PlayerJoin: {
       Player &plr = GS.G->players.add();
-      plr.id = msg.readU32();
+      plr.sessId = msg.readU32();
       plr.name = msg.readString();
-      getDebugStream() << "Player " << plr.name << '(' << plr.id << ") joined the party!" << std::endl;
+      getDebugStream() << "Player " << plr.name << '(' << plr.sessId << ") joined the party!" << std::endl;
     } break;
     case MessageType::PlayerQuit: {
       uint32 id = msg.readU32();
       try {
-        Player *plr = GS.G->players.getByGameId(id);
+        Player *plr = GS.G->players.getBySessId(id);
         if (plr != nullptr) {
           getOutputStream() << plr->name << " is gone :(" << std::endl;
           GS.G->players.remove(*plr);
@@ -98,30 +99,51 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
       }
     } break;
     case MessageType::PlayerUpdate: {
-      uint32 id = msg.readU32();
-      try {
-        Player *plr = GS.G->players.getByGameId(id);
-        if (plr != nullptr) {
-          switch (msg.getSubtype()) {
-            case PlayerUpdateType::Move: {
-              glm::vec3 pos = msg.readVec3(),
-                    vel = msg.readVec3(),
-                    acc = msg.readVec3();
-              plr->setPosVel(pos, vel, acc);
-              plr->angle = msg.readFloat();
-            } break;
-            case PlayerUpdateType::Die:
-              plr->setDead(false, (Player::DeathReason)msg.readU8());
-              break;
-            case PlayerUpdateType::Respawn:
-              plr->setDead(false);
-              break;
-            default:
-              break;
+      using S = PlayerUpdateSubtype;
+      switch (static_cast<S>(msg.getSubtype())) {
+        case S::Move: {
+          PlayerUpdateMove pum;
+          pum.readFromMsg(msg);
+          if (!pum.plrSessId) {
+            getOutputStream() << "PlayerUpdateMove without player session ID" << std::endl;
+            return true;
           }
-        }
-      } catch (const std::out_of_range &e) {
-        getOutputStream() << "Invalid player update: #" << id << " is not on server" << std::endl;
+          Player *plr = GS.G->players.getBySessId(*pum.plrSessId);
+          if (!plr) {
+            getOutputStream() << "PlayerUpdateMove: sess#" << *pum.plrSessId <<
+              " is not on server" << std::endl;
+            return true;
+          }
+          glm::vec3 pos = pum.position ? *pum.position : plr->position,
+                    vel = pum.velocity ? *pum.velocity : plr->velocity,
+                    acc = pum.accel ? *pum.accel : plr->accel;
+          plr->setPosVel(pos, vel, acc);
+          plr->angle = pum.angle;
+        } break;
+        case S::Die: {
+          PlayerUpdateDie pud;
+          pud.readFromMsg(msg);
+          Player *plr = GS.G->players.getBySessId(pud.plrSessId);
+          if (!plr) {
+            getOutputStream() << "PlayerUpdateDie: sess#" << pud.plrSessId <<
+              " is not on server" << std::endl;
+            return true;
+          }
+          plr->setDead(false, pud.reason);
+        } break;
+        case S::Respawn: {
+          PlayerUpdateRespawn pur;
+          pur.readFromMsg(msg);
+          Player *plr = GS.G->players.getBySessId(pur.plrSessId);
+          if (!plr) {
+            getOutputStream() << "PlayerUpdateRespawn: sess#" << pur.plrSessId <<
+              " is not on server" << std::endl;
+            return true;
+          }
+          plr->setDead(false);
+        } break;
+        default:
+          break;
       }
     } break;
     case MessageType::BlockUpdate: {

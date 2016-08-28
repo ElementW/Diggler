@@ -16,8 +16,10 @@ public:
     Linear
   };
   enum class Wrapping {
+    ClampEdge,
+    ClampBorder,
     Repeat,
-    Clamp
+    MirroredRepeat
   };
 private:
   GLuint m_id;
@@ -54,7 +56,9 @@ public:
   void setSubTexture(int x, int y, uint w, uint h, const uint8_t *data, PixelFormat format = PixelFormat::RGB);
   void setFiltering(Filter min, Filter mag);
   void setWrapping(Wrapping s, Wrapping t);
-
+  inline void setWrapping(Wrapping w) {
+    setWrapping(w, w);
+  }
 
   void bind() const {
     glBindTexture(GL_TEXTURE_2D, m_id);

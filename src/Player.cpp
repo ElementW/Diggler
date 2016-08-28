@@ -8,11 +8,14 @@
 
 namespace Diggler {
 
-Player::Renderer Player::R = {0};
+Player::Renderer Player::R = {};
 
 Player::Player(Game *G) :
-  G(G), position(0), velocity(0), accel(0), angle(0), toolUseTime(0),
-  isAlive(true) {
+  G(G),
+  angle(0),
+  toolUseTime(0),
+  isAlive(true),
+  peer(nullptr) {
   if (GlobalProperties::IsClient) {
     if (R.prog == nullptr) {
       R.prog = G->PM->getProgram(PM_3D | PM_FOG);
@@ -31,32 +34,10 @@ Player::Player(Game *G) :
         -sz, .0f, 0.0f,
          sz, szH, 0.0f,
       };
-      R.vbo = new Render::gl::VBO;
+      R.vbo = std::make_unique<Render::gl::VBO>();
       R.vbo->setData(coords, 6*3);
     }
   }
-}
-
-using std::swap;
-Player::Player(Player &&p) {
-  *this = std::move(p);
-}
-
-Player& Player::operator=(Player &&p) {
-  swap(direction, p.direction);
-  swap(G, p.G);
-  swap(position, p.position);
-  swap(velocity, p.velocity);
-  swap(accel, p.accel);
-  swap(name, p.name);
-  swap(id, p.id);
-  swap(P, p.P);
-  swap(isAlive, p.isAlive);
-  return *this;
-}
-
-Player::~Player() {
-  delete R.vbo;
 }
 
 void Player::setPosVel(const glm::vec3 &pos, const glm::vec3 &vel, const glm::vec3 &acc) {

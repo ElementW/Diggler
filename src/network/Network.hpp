@@ -1,9 +1,14 @@
 #ifndef NETWORK_HPP
 #define NETWORK_HPP
-#include "../Platform.hpp"
-#include "../io/MemoryStream.hpp"
-#include <glm/vec3.hpp>
+
 #include <exception>
+
+#include <glm/vec3.hpp>
+
+#include "../Platform.hpp"
+#include "../platform/PreprocUtils.hpp"
+#include "../crypto/DiffieHellman.hpp"
+#include "../io/MemoryStream.hpp"
 
 namespace Diggler {
 namespace Net {
@@ -20,6 +25,8 @@ enum class Tfer {
 
 enum class Channels : uint8 {
   Base = 0,
+  ConnectionMeta,
+  ConnectionMetaPlain,
   Chat,
   Life,
   Movement,
@@ -35,6 +42,8 @@ enum class MessageType : uint8 {
 
   ServerInfo = 220,
 
+  ConnectionParam = 200,
+
   PlayerJoin = 1,
   PlayerUpdate,
   PlayerQuit,
@@ -44,16 +53,6 @@ enum class MessageType : uint8 {
 
   NetConnect = 240,
   NetDisconnect
-};
-
-enum PlayerUpdateType : uint8 {
-  Move,
-  ChangeTool,
-  ChangeClass,
-  ChangeTeam,
-  Die,
-  Respawn,
-  ToolUse
 };
 
 enum QuitReason : uint8 {
@@ -82,6 +81,8 @@ protected:
 public:
   static constexpr uint HeaderSize = 2;
 
+  virtual ~Message() {}
+
   inline MessageType getType() const { return m_type; }
   inline uint8 getSubtype() const { return m_subtype; }
 
@@ -94,10 +95,8 @@ class InMessage : public Message, public InMemoryStream {
 protected:
   friend class Host;
   Channels m_chan;
-  void *m_packet;
   void setType(MessageType type);
-  void fromData(const void *data, SizeT len, Channels chan = Channels::Base);
-  void fromPacket(void *packet, Channels chan = Channels::Base);
+  void fromData(const void *data, SizeT, Channels);
   void free();
 
 public:
@@ -166,20 +165,43 @@ class Exception : public std::exception {
 
 using Port = uint16;
 
+class Host;
+
 struct Peer {
-  void *peer;
+  Crypto::DiffieHellman::SecretKey connectionSk;
+  Crypto::DiffieHellman::PublicKey connectionPk;
+
+  Crypto::DiffieHellman::PublicKey remotePk;
+  Crypto::DiffieHellman::SharedSecret sharedSecret;
+
+  Host &host;
+  void *const peer;
+
+  Peer(Host&, void*);
+  nocopy(Peer);
+  nomove(Peer);
 
   bool operator==(const Peer&) const;
   bool operator!=(const Peer&) const;
 
-  void disconnect();
-  std::string getHost();
-  std::string getIp();
-  Port getPort();
+  /**
+   * @brief Disconnects the peer.
+   * @param data
+   * Adds the peer for pending disconnection. A NetDisconnect event will be generated once the
+   * peer has successfully disconnected, and the current Peer object will be deallocated as per
+   * Host::recv's rules.
+   */
+  void disconnect(uint32 data = 0);
+  std::string peerHost();
+  std::string peerIP();
+  Port peerPort();
 };
 
 class Host {
 private:
+  std::vector<Peer*> m_peersToDelete;
+  void processPeersToDelete();
+
   void *host;
   uint64 rxBytes, txBytes;
 
@@ -187,17 +209,27 @@ private:
   Host& operator=(Host&) = delete;
   Host& operator=(const Host&) = delete;
 
+  void sendKeyExchange(Peer&);
+
 public:
   using Timeout = uint32;
 
+public:
   Host();
   ~Host();
   void create(Port port = 0, uint maxconn = 64);
-  Peer connect(const std::string &hostAddr, Port port, Timeout timeout);
+  Peer& connect(const std::string &hostAddr, Port port, Timeout timeout);
 
   void send(Peer &peer, const OutMessage &msg, Tfer mode = Tfer::Rel, Channels chan = Channels::Base);
-  bool recv(InMessage &msg, Peer &peer, Timeout timeout);
-  bool recv(InMessage &msg, Timeout timeout = 0);
+
+  // Returns true if a message is available, and put it in msg.
+  // msg may be modified even if recv returns false.
+  // If the msg is a NetDisconnect, returned peer object is put on a deletion list and will be
+  // freed upon the next call to recv.
+  bool recv(InMessage &msg, Peer **peer, Timeout timeout);
+  inline bool recv(InMessage &msg, Timeout timeout) {
+    return recv(msg, nullptr, timeout);
+  }
 
   inline uint64 getRxBytes() const {
     return rxBytes;

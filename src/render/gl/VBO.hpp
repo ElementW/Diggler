@@ -25,7 +25,11 @@ public:
     m_id(0),
     m_size(0),
     m_usage(GL_STATIC_DRAW) {
-    glGenBuffers(1, &m_id);
+    if (FeatureSupport::DSA_ARB) {
+      glCreateBuffers(1, &m_id);
+    } else {
+      glGenBuffers(1, &m_id);
+    }
   }
 
   ~VBO() {

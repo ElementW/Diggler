@@ -12,17 +12,20 @@ include(CheckCXXSourceCompiles)
 include(FindPackageHandleStandardArgs)
 
 set(CXX14_FLAG_CANDIDATES
-    #Gnu and Intel Linux
-    "-std=c++14"
-    #Microsoft Visual Studio, and everything that automatically accepts C++14
+    # GCC 6+ and everything that automatically accepts C++14
     " "
-    #Intel windows
+    # GCC < 6 and Intel Linux
+    "-std=c++14"
+    # Intel Windows
     "/Qstd=c++14"
     )
 
 set(CXX14_TEST_SOURCE
 "
 [[deprecated]] void unused() {}
+
+template<typename T>
+constexpr T pi = T(3.1415926535897932385);
 
 constexpr int numberwang(int n) {
     if (n < 0) {
@@ -31,7 +34,7 @@ constexpr int numberwang(int n) {
     return n - 1;
 }
 
-auto lambda = [](auto a, auto b) { return a * b; };
+auto lambda = [v = 0](auto a, auto b) { return v + a * b; };
 
 auto square(int n)  {
     return lambda(n, n) * numberwang(2);
@@ -39,6 +42,7 @@ auto square(int n)  {
 
 int main() {
     int s = square(3);
+    double pie = pi<double>;
     return 0;
 }
 ")
@@ -47,7 +51,7 @@ foreach(FLAG ${CXX14_FLAG_CANDIDATES})
     set(SAFE_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
     set(CMAKE_REQUIRED_FLAGS "${FLAG}")
     unset(CXX14_FLAG_DETECTED CACHE)
-    message(STATUS "Try C++14 flag = [${FLAG}]")
+    message(STATUS "Trying C++14 flag '${FLAG}'")
     check_cxx_source_compiles("${CXX14_TEST_SOURCE}" CXX14_FLAG_DETECTED)
     set(CMAKE_REQUIRED_FLAGS "${SAFE_CMAKE_REQUIRED_FLAGS}")
     if(CXX14_FLAG_DETECTED)

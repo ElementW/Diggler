@@ -1,6 +1,8 @@
-#ifndef GAME_HPP
-#define GAME_HPP
+#ifndef DIGGLER_GAME_HPP
+#define DIGGLER_GAME_HPP
+
 #include <memory>
+
 #include "ui/FontManager.hpp"
 #include "Universe.hpp"
 #include "PlayerList.hpp"
@@ -12,6 +14,8 @@ using std::shared_ptr;
 namespace Diggler {
 
 namespace Content {
+class AssetManager;
+class ModManager;
 class Registry;
 }
 
@@ -35,7 +39,11 @@ class GameWindow;
 class KeyBinds;
 class Server;
 
-class Game {
+class Game final {
+private:
+  template<typename T>
+  using ptr = std::unique_ptr<T>;
+
 public:
   // Shared
   double Time; uint64 TimeMs;
@@ -43,6 +51,8 @@ public:
   Universe *U;
   PlayerList players;
   Content::Registry *CR;
+  ptr<Content::AssetManager> AM;
+  ptr<Content::ModManager> MM;
   Scripting::Lua::State *LS;
 
   // Server
@@ -61,16 +71,22 @@ public:
     float fogStart, fogEnd;
   } *RP;
   Audio *A;
-  Net::Peer NS;
+  Net::Peer *NS;
   KeyBinds *KB;
   int PlayerPosUpdateFreq;
 
   Game();
   void init();
+  void initClient();
+  void initServer();
+  void finalize();
+  void finalizeClient();
+  void finalizeServer();
+
   void updateTime(double time);
   ~Game();
 };
 
 }
 
-#endif
+#endif /* DIGGLER_GAME_HPP */

@@ -13,6 +13,7 @@
 #include "GameWindow.hpp"
 #include "render/gl/FBO.hpp"
 #include "render/gl/VBO.hpp"
+#include "render/gl/VAO.hpp"
 #include "content/Content.hpp"
 #include "network/Network.hpp"
 #include "network/ClientMessageHandler.hpp"
@@ -69,7 +70,7 @@ private:
   } bloom;
 
   Render::gl::VBO *m_3dRenderVBO;
-  struct Coord2DTex { int x, y; uint8 u, v; };
+  struct Coord2DTex { int16 x, y; uint8 u, v; };
   Clouds *m_clouds;
   Skybox *m_sky;
 
@@ -80,6 +81,7 @@ private:
 
   struct {
     Render::gl::VBO vbo;
+    Render::gl::VAO vao;
     const Program *program;
     GLuint att_coord, uni_unicolor, uni_mvp;
   } m_highlightBox;

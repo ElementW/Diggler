@@ -1,5 +1,5 @@
-#ifndef VERSION_INFO_HPP
-#define VERSION_INFO_HPP
+#ifndef DIGGLER_VERSION_INFO_HPP
+#define DIGGLER_VERSION_INFO_HPP
 
 namespace Diggler {
   const char* VersionString = "0.1.0";
@@ -8,4 +8,4 @@ namespace Diggler {
   int VersionRevision = 0;
 }
 
-#endif
+#endif /* DIGGLER_VERSION_INFO_HPP */

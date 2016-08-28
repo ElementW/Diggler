@@ -2,6 +2,22 @@ cmake_minimum_required(VERSION 2.8)
 
 project(Diggler C CXX)
 
+set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+
+if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
+  # Forbid in-tree builds. With CMake, doing an in-tree build breaks out-of-tree ones
+  # when generating from .in files into the source directory, overriding the path of out-of-tree
+  # generated ones.
+  # TL;DR: in-tree build = BAD IDEA.
+  file(REMOVE_RECURSE CMakeFiles CMakeCache.txt)
+  message(FATAL_ERROR
+    "You are doing an in-tree build (i.e. the source and binary directories are the same).\
+In-tree builds aren't supported and will *never* be.\
+Make a \"build\" directory and run cmake here.
+\
+Don't forget to remove CMakeFiles and CMakeCache.txt.")
+endif()
+
 ### Find path to build dir, relative if possible, to symlink resources directories
 file(RELATIVE_PATH REL_BUILD_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_BINARY_DIR})
 string(FIND "${REL_BUILD_PATH}" ".." RBP_2DOTPOS)
@@ -43,13 +59,13 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 find_package(CXX14)
 if (NOT CXX14_FOUND)
-  message(FATAL_ERROR "C++14 feature support unavailable.
-Please use the latest version of your compiler.
-
-Here are the minimum requirements:
-- GCC version 5 (on Debian Jessie, enable Stretch/testing repos and get GCC from there)
-- clang version 3.4
-- MSVC: wait until Microsoft goes bankrupt, and use another compiler in the meantime
+  message(FATAL_ERROR "C++14 feature support unavailable.\
+Please use the latest version of your compiler.\
+\
+Here are the minimum requirements:\
+- GCC version 5 (on Debian Jessie, enable Stretch/testing repos and get GCC from there)\
+- clang version 3.4\
+- MSVC: wait until Microsoft goes bankrupt, and use another compiler in the meantime\
 - ICC: ICC 17.0 Beta doesn't yet support all required C++14 features")
 endif()
 set(CMAKE_CXX_FLAGS "${CXX14_FLAGS} ${CMAKE_CXX_FLAGS}")
@@ -71,6 +87,8 @@ endif()
 
 pkg_search_module(EPOXY REQUIRED epoxy)
 pkg_search_module(GLFW REQUIRED glfw3)
+pkg_search_module(SQLITE3 REQUIRED sqlite3)
+pkg_search_module(LIBSODIUM REQUIRED libsodium)
 include_directories(
   ${ETC_INCLUDE_DIRS}
   ${LUA_INCLUDE_DIR}
@@ -78,6 +96,8 @@ include_directories(
   ${ENET_INCLUDE_DIRS}
   ${EPOXY_INCLUDE_DIRS}
   ${GLFW_INCLUDE_DIRS}
+  ${LIBSODIUM_INCLUDE_DIRS}
+  ${SQLITE3_INCLUDE_DIRS}
   ${OPENAL_INCLUDE_DIR}
   ${MSGPACK_INCLUDE_DIR}
 )
@@ -94,6 +114,8 @@ target_link_libraries(diggler
   ${ENET_LIBRARIES}
   ${EPOXY_LIBRARIES}
   ${GLFW_LIBRARIES}
+  ${LIBSODIUM_LIBRARIES}
+  ${SQLITE3_LIBRARIES}
   ${OPENAL_LIBRARY}
   pthread)
 

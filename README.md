@@ -26,3 +26,5 @@ You should already have OpenGL available thanks to Mesa or proprietary drivers.
 Arch: `pacman -S glm openal libepoxy glfw luajit`
 
 Debian (Jessie **w/ testing**, or up) & derivatives: `apt-get install libglm-dev libopenal-dev libepoxy-dev libglfw3-dev libx{i,randr}-dev libluajit-5.1-dev`
+
+Fedora (tested on F24): `dnf install glm-devel openal-soft-devel libepoxy-devel glfw-devel luajit-devel`

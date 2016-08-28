@@ -10,3 +10,6 @@
 [submodule "ext/StackTracePlus"]
 	path = ext/StackTracePlus
 	url = https://github.com/ignacio/StackTracePlus.git
+[submodule "ext/Optional"]
+	path = ext/Optional
+	url = https://github.com/akrzemi1/Optional.git

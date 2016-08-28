@@ -11,6 +11,7 @@
 #include "network/msgtypes/BlockUpdate.hpp"
 #include "network/msgtypes/Chat.hpp"
 #include "network/msgtypes/ChunkTransfer.hpp"
+#include "network/msgtypes/PlayerUpdate.hpp"
 #include "network/Network.hpp"
 #include "network/NetHelper.hpp"
 #include "scripting/lua/State.hpp"
@@ -27,8 +28,8 @@ namespace Diggler {
 inline Player* Server::getPlayerByPeer(const Peer &peer) {
   return G.players.getByPeer(peer);
 }
-inline Player* Server::getPlayerById(uint32 id) {
-  return G.players.getByGameId(id);
+inline Player *Server::getPlayerBySessId(uint32 id) {
+  return G.players.getBySessId(id);
 }
 inline Player* Server::getPlayerByName(const std::string &name) {
   return G.players.getByName(name);
@@ -36,7 +37,7 @@ inline Player* Server::getPlayerByName(const std::string &name) {
 
 void Server::handlePlayerJoin(InMessage &msg, Peer &peer) {
   std::string name = msg.readString();
-  getOutputStream() << peer.getHost() << " is joining as " << name << std::endl;
+  getOutputStream() << peer.peerHost() << " is joining as " << name << std::endl;
   
   // TODO: ban list
   Player *possible = getPlayerByName(name);
@@ -45,42 +46,42 @@ void Server::handlePlayerJoin(InMessage &msg, Peer &peer) {
     OutMessage kick(MessageType::PlayerQuit, QuitReason::UsernameAlreadyUsed);
     kick.writeString("You are \faalready\f0 playing on this server");
     H.send(peer, kick, Tfer::Rel);
-    getOutputStream() << peer.getHost() << " tried to connect as " << name << ": name is taken" << endl;
+    getOutputStream() << peer.peerHost() << " tried to connect as " << name << ": name is taken" << endl;
     return;
   }
 
   Player &plr = G.players.add();
   plr.name = name;
-  plr.id = FastRand();
-  plr.P = peer;
+  plr.sessId = FastRand();
+  plr.peer = &peer;
   plr.W = G.U->getLoadWorld(0);
 
   // Confirm successful join
   OutMessage join(MessageType::PlayerJoin);
-  join.writeU32(plr.id);
+  join.writeU32(plr.sessId);
   join.writeI16(plr.W->id);
   H.send(peer, join, Tfer::Rel);
   
   // Send the player list
   for (Player &p : G.players) {
-    if (p.id == plr.id)
+    if (p.sessId == plr.sessId)
       continue; // ok, he knows he's here
     OutMessage playerMsg(MessageType::PlayerJoin);
-    playerMsg.writeU32(p.id);
+    playerMsg.writeU32(p.sessId);
     playerMsg.writeString(p.name);
     H.send(peer, playerMsg, Tfer::Rel);
   }
   
   // Broadcast player's join
   OutMessage broadcast(MessageType::PlayerJoin);
-  broadcast.writeU32(plr.id);
+  broadcast.writeU32(plr.sessId);
   broadcast.writeString(plr.name);
   for (Player &p : G.players) {
-    if (p.id == plr.id)
+    if (p.sessId == plr.sessId)
       continue; // don't send broadcast to the player
-    H.send(p.P, broadcast, Tfer::Rel);
+    H.send(*p.peer, broadcast, Tfer::Rel);
   }
-  getOutputStream() << plr.name << " joined from " << peer.getHost() << endl;
+  getOutputStream() << plr.name << " joined from " << peer.peerHost() << endl;
   for (int x = -2; x < 2; ++x)
     for (int y = -2; y < 2; ++y)
       for (int z = -2; z < 2; ++z)
@@ -93,16 +94,16 @@ void Server::handlePlayerQuit(Peer &peer, QuitReason reason) {
     Player &plr = *plrPtr;
     // Broadcast disconnection
     OutMessage broadcast(MessageType::PlayerQuit, reason);
-    broadcast.writeU32(plr.id);
+    broadcast.writeU32(plr.sessId);
     for (Player &p : G.players) {
-      if (p.id == plr.id)
+      if (p.sessId == plr.sessId)
         continue; // dont send broadcast to the player
-      H.send(p.P, broadcast, Tfer::Rel);
+      H.send(*p.peer, broadcast, Tfer::Rel);
     }
     getOutputStream() << plr.name << " disconnected" << endl;
     G.players.remove(plr);
   } else {
-    getOutputStream() << peer.getHost() << " disconnected" << endl;
+    getOutputStream() << peer.peerHost() << " disconnected" << endl;
   }
 }
 
@@ -119,7 +120,7 @@ void Server::handleChat(InMessage &msg, Player *plr) {
       cs.readFromMsg(msg);
 
       ChatPlayerTalk cpt;
-      cpt.player.id = plr->id;
+      cpt.player.id = plr->sessId;
       cpt.msg = cs.msg;
       OutMessage omsg;
       cpt.writeToMsg(omsg);
@@ -137,28 +138,23 @@ void Server::handleCommand(Player *plr, const std::string &command, const std::v
 }
 
 void Server::handlePlayerUpdate(InMessage &msg, Player &plr) {
-  switch (msg.getSubtype()) {
-  case PlayerUpdateType::Move: {
+  using namespace Net::MsgTypes;
+  using S = PlayerUpdateSubtype;
+  switch (static_cast<S>(msg.getSubtype())) {
+  case S::Move: {
+    PlayerUpdateMove pum;
+    pum.readFromMsg(msg);
+    pum.plrSessId = plr.sessId;
     // Broadcast movement
-    OutMessage bcast(MessageType::PlayerUpdate, PlayerUpdateType::Move);
-    bcast.writeU32(plr.id);
-    glm::vec3 pos = msg.readVec3(),
-        vel = msg.readVec3(),
-        acc = msg.readVec3();
-    plr.setPosVel(pos, vel, acc);
-    plr.angle = msg.readFloat();
-    bcast.writeVec3(pos);
-    bcast.writeVec3(vel);
-    bcast.writeVec3(acc);
-    bcast.writeFloat(plr.angle);
+    OutMessage bcast; pum.writeToMsg(bcast);
     for (Player &p : G.players) {
-      if (p.id == plr.id)
+      if (p.sessId == plr.sessId)
         continue; // dont send broadcast to the player
       // TODO: confirm position to player
-      H.send(p.P, bcast, Tfer::Unrel);
+      H.send(*p.peer, bcast, Tfer::Unrel);
     }
   } break;
-  case PlayerUpdateType::Die:
+  case S::Die:
     handlePlayerDeath(msg, plr);
     break;
   default:
@@ -188,7 +184,7 @@ void Server::sendChunks(const std::list<ChunkRef> &cs, Player &P) {
   }
   OutMessage msg;
   ctr.writeToMsg(msg);
-  H.send(P.P, msg, Tfer::Rel, Channels::MapTransfer);
+  H.send(*P.peer, msg, Tfer::Rel, Channels::MapTransfer);
 }
 
 void Server::handlePlayerChunkRequest(InMessage &msg, Player &plr) {
@@ -263,26 +259,27 @@ void Server::handlePlayerMapUpdate(InMessage &msg, Player &plr) {
 }
 
 void Server::handlePlayerDeath(InMessage &msg, Player &plr) {
-  uint8 drb = msg.readU8();
-  Player::DeathReason dr = (Player::DeathReason)drb;
-  plr.setDead(false, dr);
-  OutMessage out(MessageType::PlayerUpdate, PlayerUpdateType::Die);
-  out.writeU32(plr.id);
-  out.writeU8(drb);
+  using namespace Net::MsgTypes;
+  PlayerUpdateDie pud;
+  pud.readFromMsg(msg);
+  pud.plrSessId = plr.sessId;
+  plr.setDead(false, pud.reason);
+  OutMessage out; pud.writeToMsg(out);
   for (Player &p : G.players) {
-    if (p.id != plr.id)
-      H.send(p.P, out, Tfer::Rel, Channels::Life);
+    if (p.sessId != plr.sessId)
+      H.send(*p.peer, out, Tfer::Rel, Channels::Life);
   }
   
   // Respawn player later
-  Game *G = &this->G; uint32 id = plr.id;
-  std::thread respawn([G, id] {
+  Game *G = &this->G; Player::SessionID sid = plr.sessId;
+  std::thread respawn([G, sid] {
     std::this_thread::sleep_for(std::chrono::seconds(2));
-    Player *plr = G->S->getPlayerById(id);
+    Player *plr = G->S->getPlayerBySessId(sid);
     if (plr) {
       plr->setDead(false);
-      OutMessage out(MessageType::PlayerUpdate, PlayerUpdateType::Respawn);
-      out.writeU32(id);
+      PlayerUpdateRespawn pur;
+      pur.plrSessId = sid;
+      OutMessage out; pur.writeToMsg(out);
       NetHelper::Broadcast(G, out, Tfer::Rel, Channels::Life);
     }
   });
@@ -380,12 +377,13 @@ void Server::chunkUpdater(WorldRef WR, bool &continueUpdate) {
 
 void Server::run() {
   InMessage msg;
-  Peer peer;
+  Peer *peerPtr;
   bool continueUpdate = true;
   std::thread upd(&Server::chunkUpdater, this, G.U->getWorld(0), std::ref(continueUpdate));
   Player *plr;
   while (true) {
-    if (H.recv(msg, peer, 100)) {
+    if (H.recv(msg, &peerPtr, 100)) {
+      Peer &peer = *peerPtr;
       plr = getPlayerByPeer(peer);
       if (plr != nullptr) {
         switch (msg.getType()) {
@@ -408,7 +406,7 @@ void Server::run() {
       }
       switch (msg.getType()) {
       case MessageType::NetConnect:
-        getOutputStream() << peer.getHost() << " NEWCONN" << std::endl;
+        getOutputStream() << peer.peerHost() << " NEWCONN" << std::endl;
         break;
       case MessageType::NetDisconnect:
         handleDisconnect(peer);
@@ -441,10 +439,10 @@ bool Server::isPlayerOnline(const std::string &playername) const {
 
 void Server::kick(Player &p, Net::QuitReason r, const std::string &message) {
   OutMessage msg(MessageType::PlayerQuit, r);
-  msg.writeU32(p.id);
+  msg.writeU32(p.sessId);
   msg.writeString(message);
-  H.send(p.P, msg, Tfer::Rel);
-  p.P.disconnect();
+  H.send(*p.peer, msg, Tfer::Rel);
+  p.peer->disconnect();
 }
 
 Server::~Server() {

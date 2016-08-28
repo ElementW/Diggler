@@ -16,8 +16,9 @@ public:
   GLRenderer(Game *G) :
     Renderer(G) {
     FeatureSupport::probe();
-    PR = new GLParticlesRenderer(G);
-    WR = new GLWorldRenderer(G);
+    getDebugStream() << "GLRenderer, using features: " << FeatureSupport::supported() << std::endl;
+    renderers.particles = new GLParticlesRenderer(G);
+    renderers.world = new GLWorldRenderer(G);
   }
 };
 

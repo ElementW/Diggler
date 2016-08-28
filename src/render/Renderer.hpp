@@ -21,8 +21,10 @@ protected:
 public:
   virtual ~Renderer() = 0;
 
-  ParticlesRenderer *PR;
-  WorldRenderer *WR;
+  struct Renderers {
+    ParticlesRenderer *particles;
+    WorldRenderer *world;
+  } renderers;
 };
 
 inline Renderer::~Renderer() {}

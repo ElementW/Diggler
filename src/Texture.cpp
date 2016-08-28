@@ -102,10 +102,14 @@ void Texture::setFiltering(Filter min, Filter mag) {
 
 static GLenum getWrapGlConstant(Texture::Wrapping wrap) {
   switch (wrap) {
-  case Texture::Wrapping::Clamp:
-    return GL_CLAMP;
+  case Texture::Wrapping::ClampEdge:
+    return GL_CLAMP_TO_EDGE;
+  case Texture::Wrapping::ClampBorder:
+    return GL_CLAMP_TO_BORDER;
   case Texture::Wrapping::Repeat:
     return GL_REPEAT;
+  case Texture::Wrapping::MirroredRepeat:
+    return GL_MIRRORED_REPEAT;
   }
   return 0;
 }

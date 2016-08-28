@@ -20,8 +20,6 @@ void MakeEvent(Net::OutMessage&, Net::EventType, const Player&);
 void SendEvent(Game*, Net::EventType);
 
 void SendChat(Game*, const std::string&);
-void SendToolUse(Game*);
-void SendToolUse(Game*, int x, int y, int z);
 
 }
 }

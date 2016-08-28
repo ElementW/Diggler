@@ -26,6 +26,7 @@
 #include "network/NetHelper.hpp"
 #include "Particles.hpp"
 
+#include "network/msgtypes/PlayerUpdate.hpp"
 #include "network/msgtypes/BlockUpdate.hpp"
 #include "content/Registry.hpp"
 
@@ -95,6 +96,10 @@ GameState::GameState(GameWindow *GW, const std::string &servHost, int servPort) 
   m_highlightBox.att_coord = m_highlightBox.program->att("coord");
   m_highlightBox.uni_unicolor = m_highlightBox.program->uni("unicolor");
   m_highlightBox.uni_mvp = m_highlightBox.program->uni("mvp");
+  { Render::gl::VAO::Config cfg = m_highlightBox.vao.configure();
+    cfg.vertexAttrib(m_highlightBox.vbo, m_highlightBox.att_coord, 3, GL_FLOAT, 0);
+    cfg.commit();
+  }
 
   m_3dFbo = new Render::gl::FBO(w, h, Texture::PixelFormat::RGB, true);
   m_3dRenderVBO = new Render::gl::VBO();
@@ -388,7 +393,7 @@ void GameState::updateViewport() {
 }
 
 void GameState::sendMsg(Net::OutMessage &msg, Net::Tfer mode, Net::Channels chan) {
-  G->H.send(G->NS, msg, mode, chan);
+  G->H.send(*G->NS, msg, mode, chan);
 }
 
 void GameState::run() {
@@ -402,13 +407,15 @@ bool GameState::connectLoop() {
   std::string &serverHost = m_serverHost;
   int serverPort = m_serverPort;
   bool finished = false, success = false; Game *G = this->G;
-  m_networkThread = std::thread([G, &success, &finished, &serverHost, serverPort]() {
+  std::string failureStr;
+  m_networkThread = std::thread([G, &success, &finished, &serverHost, serverPort, &failureStr]() {
     try {
       G->H.create();
-      G->NS = G->H.connect(serverHost, serverPort, 5000);
+      G->NS = &G->H.connect(serverHost, serverPort, 5000);
       success = true;
     } catch (const Net::Exception &e) {
       success = false;
+      failureStr = e.what();
     }
     finished = true;
   });
@@ -447,9 +454,7 @@ bool GameState::connectLoop() {
   if (GW->shouldClose())
     return true;
   if (!success) {
-    std::ostringstream oss;
-    oss << serverHost << ':' << serverPort << " did not respond";
-    GW->showMessage("Could not connect to server", oss.str());
+    GW->showMessage("Could not connect to server", failureStr);
     return true;
   }
 
@@ -469,7 +474,7 @@ bool GameState::connectLoop() {
   switch (m_msg.getType()) {
     case Net::MessageType::PlayerJoin: {
       G->U = new Universe(G, true);
-      LP.id = m_msg.readU32();
+      LP.sessId = m_msg.readU32();
       LP.W = G->U->createWorld(m_msg.readI16());
     } break;
     case Net::MessageType::PlayerQuit: {
@@ -488,7 +493,7 @@ bool GameState::connectLoop() {
   G->LS->setGameLuaRuntimePath(gameLuaRuntimePath);
   G->LS->dofile(gameLuaRuntimePath + "/Diggler.lua");
 
-  getDebugStream() << "Joined as " << LP.name << '/' << LP.id << std::endl;
+  getDebugStream() << "Joined as " << LP.name << '/' << LP.sessId << std::endl;
   return false;
 }
 
@@ -520,11 +525,14 @@ void GameState::gameLoop() {
 
     if (G->LP->isAlive) {
       if (T > nextNetUpdate) {
-        Net::OutMessage msg(Net::MessageType::PlayerUpdate, Net::PlayerUpdateType::Move);
-        msg.writeVec3(LP->position);
-        msg.writeVec3(LP->velocity);
-        msg.writeVec3(LP->accel);
-        msg.writeFloat(LP->angle);
+        Net::MsgTypes::PlayerUpdateMove pum;
+        pum.position = LP->position;
+        if (LP->velocity != glm::vec3()) {
+          pum.velocity = LP->velocity;
+          pum.accel = LP->accel;
+        }
+        pum.angle = LP->angle;
+        Net::OutMessage msg; pum.writeToMsg(msg);
         sendMsg(msg, Net::Tfer::Unrel, Net::Channels::Movement);
         nextNetUpdate = T+1.0/G->PlayerPosUpdateFreq;
       }
@@ -560,7 +568,7 @@ void GameState::gameLoop() {
       rp.world = WR.get();
       rp.transform = m_transform;
       rp.frustum = G->LP->camera.frustum;
-      G->R->WR->render(rp);
+      G->R->renderers.world->render(rp);
       for (Player &p : G->players) {
         p.update(deltaT);
         if (G->LP->camera.frustum.sphereInFrustum(p.position, 2))
@@ -591,16 +599,14 @@ void GameState::gameLoop() {
       // TODO: replace harcoded 32 viewdistance
       if (G->LP->raytracePointed(32, &m_pointedBlock, &m_pointedFacing)) {
         m_highlightBox.program->bind();
-        glEnableVertexAttribArray(m_highlightBox.att_coord);
-        m_highlightBox.vbo.bind();
-        glVertexAttribPointer(m_highlightBox.att_coord, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        m_highlightBox.vao.bind();
 
         glUniform4f(m_highlightBox.uni_unicolor, 1.f, 1.f, 1.f, .1f);
         glUniformMatrix4fv(m_highlightBox.uni_mvp, 1, GL_FALSE, glm::value_ptr(
           glm::scale(glm::translate(m_transform, glm::vec3(m_pointedBlock)+glm::vec3(.5f)), glm::vec3(0.5f*1.03f))));
         glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
 
-        glDisableVertexAttribArray(m_highlightBox.att_coord);
+        m_highlightBox.vao.unbind();
       }
 
       glDisable(GL_CULL_FACE);
@@ -622,7 +628,7 @@ void GameState::gameLoop() {
         glEnableVertexAttribArray(bloom.extractor.att_texcoord);
         m_3dRenderVBO->bind();
         glUniformMatrix4fv(bloom.extractor.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM1));
-        glVertexAttribPointer(bloom.extractor.att_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
+        glVertexAttribPointer(bloom.extractor.att_coord, 2, GL_SHORT, GL_FALSE, sizeof(Coord2DTex), 0);
         glVertexAttribPointer(bloom.extractor.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glDisableVertexAttribArray(bloom.extractor.att_texcoord);
@@ -639,7 +645,7 @@ void GameState::gameLoop() {
         m_3dRenderVBO->bind();
         glUniformMatrix4fv(bloom.renderer.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM1));
         glUniform2f(bloom.renderer.uni_pixshift, 1.f/(GW->getW()/bloom.scale), 1.f/(GW->getH()/bloom.scale));
-        glVertexAttribPointer(bloom.renderer.att_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
+        glVertexAttribPointer(bloom.renderer.att_coord, 2, GL_SHORT, GL_FALSE, sizeof(Coord2DTex), 0);
         glVertexAttribPointer(bloom.renderer.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glDisableVertexAttribArray(bloom.renderer.att_texcoord);
@@ -656,7 +662,7 @@ void GameState::gameLoop() {
         glEnableVertexAttribArray(bloom.renderer.att_texcoord);
         m_3dRenderVBO->bind();
         glUniformMatrix4fv(bloom.renderer.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM1));
-        glVertexAttribPointer(bloom.renderer.att_coord, 2, GL_INT, GL_FALSE, sizeof(Coord2DTex), 0);
+        glVertexAttribPointer(bloom.renderer.att_coord, 2, GL_SHORT, GL_FALSE, sizeof(Coord2DTex), 0);
         glVertexAttribPointer(bloom.renderer.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glDisableVertexAttribArray(bloom.renderer.att_texcoord);
@@ -675,8 +681,9 @@ void GameState::gameLoop() {
       }
       if (!G->LP->deathSent) {
         G->LP->deathSent = true;
-        Net::OutMessage out(Net::MessageType::PlayerUpdate, Net::PlayerUpdateType::Die);
-        out.writeU8((uint8)G->LP->deathReason);
+        Net::MsgTypes::PlayerUpdateDie pud;
+        pud.reason = G->LP->deathReason;
+        Net::OutMessage out; pud.writeToMsg(out);
         sendMsg(out, Net::Tfer::Rel, Net::Channels::Life);
       }
       renderDeathScreen();

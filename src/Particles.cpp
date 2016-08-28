@@ -8,11 +8,11 @@ namespace Diggler {
 
 ParticleEmitter::ParticleEmitter(Game *G) :
   G(G) {
-  G->R->PR->registerEmitter(this);
+  G->R->renderers.particles->registerEmitter(this);
 }
 
 ParticleEmitter::~ParticleEmitter() {
-  G->R->PR->unregisterEmitter(this);
+  G->R->renderers.particles->unregisterEmitter(this);
 }
 
 void ParticleEmitter::setMaxCount(uint count) {
@@ -35,7 +35,7 @@ void ParticleEmitter::emit(Particle &p) {
 void ParticleEmitter::update(double delta) {
   ParticleRenderData *data = new ParticleRenderData[maxCount];
   float deltaF = delta;
-  for (int i=0; i < maxCount; ++i) {
+  for (uint i = 0; i < maxCount; ++i) {
     Particle &p = particles[i];
     p.vel += p.accel * deltaF;
     p.pos += p.vel * deltaF;
@@ -44,7 +44,7 @@ void ParticleEmitter::update(double delta) {
       emit(p);
     data[i] = { p.pos.x, p.pos.y, p.pos.z, p.color.r, p.color.g, p.color.b, p.color.a, p.size };
   }
-  G->R->PR->updateParticleData(this, data, maxCount);
+  G->R->renderers.particles->updateParticleData(this, data, maxCount);
   delete[] data;
 }
 

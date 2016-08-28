@@ -31,12 +31,12 @@ void PlayerList::remove(const Player &plr) {
   throw std::out_of_range("Can't remove player: not in list");
 }
 
-Player* PlayerList::getByGameId(uint32 id) {
-  if (G->LP && id == G->LP->id)
+Player* PlayerList::getBySessId(Player::SessionID sid) {
+  if (G->LP && sid == G->LP->sessId)
     return G->LP;
   for (auto it = begin();
     it != end(); ++it) {
-    if (it->id == id) {
+    if (it->sessId == sid) {
       return &*it;
     }
   }
@@ -58,7 +58,7 @@ Player* PlayerList::getByName(const std::string &name) {
 Player* PlayerList::getByPeer(const Net::Peer &peer) {
   for (auto it = begin();
     it != end(); ++it) {
-    if (it->P == peer) {
+    if (*it->peer == peer) {
       return &*it;
     }
   }

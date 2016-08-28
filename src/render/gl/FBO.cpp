@@ -1,5 +1,6 @@
 #include "FBO.hpp"
 
+#include "FeatureSupport.hpp"
 #include "Util.hpp"
 
 #ifdef IN_IDE_PARSER
@@ -32,13 +33,25 @@ FBO::FBO(int w, int h, Texture::PixelFormat format, bool stencil) : m_hasStencil
   // Set up renderbuffer to which depth/stencil will be written to
   glGenRenderbuffers(1, &rboId);
   glBindRenderbuffer(GL_RENDERBUFFER, rboId);
-  if (stencil)
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
-  else
+  if (stencil) {
+    glRenderbufferStorage(GL_RENDERBUFFER, FeatureSupport::FBO_ARB ? GL_DEPTH24_STENCIL8 :
+      GL_DEPTH24_STENCIL8_OES, w, h);
+  } else {
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
+  }
 
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *tex, 0);
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, stencil ? GL_DEPTH_STENCIL_ATTACHMENT : GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
+  if (stencil) {
+    if (FeatureSupport::FBO_ARB) {
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER,
+        rboId);
+    } else {
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboId);
+    }
+  } else {
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
+  }
 
   glCheck();
 }

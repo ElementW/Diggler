@@ -12,6 +12,7 @@
 #include "Audio.hpp"
 #include "Game.hpp"
 #include "network/NetHelper.hpp"
+#include "render/gl/VAO.hpp"
 
 namespace Diggler {
 
@@ -174,14 +175,11 @@ void LocalPlayer::update(float delta) {
 }
 
 void LocalPlayer::render(const glm::mat4 &transform) const {
-  const Program *P = G->PM->getProgram(PM_3D | PM_COLORED);
-  P->bind();
-  glEnableVertexAttribArray(P->att("coord"));
-  glEnableVertexAttribArray(P->att("color"));
-  glUniformMatrix4fv(P->uni("mvp"), 1, GL_FALSE, glm::value_ptr(transform));
   static Render::gl::VBO vbo;
-  const glm::ivec3 &min = aabbmin, &max = aabbmax;
-  struct Coord { int x, y, z; uint8 r, g, b; } pts[] = {
+  static Render::gl::VAO vao;
+  static bool vaoConfigured = false;
+  const glm::f32vec3 min = aabbmin, max = aabbmax;
+  struct Coord { float x, y, z; uint8 r, g, b; } pts[] = {
     { min.x, min.y, min.z, 0, 1, 0 },
     { max.x, min.y, min.z, 0, 1, 0 },
     { min.x, min.y, min.z, 0, 1, 0 },
@@ -209,12 +207,19 @@ void LocalPlayer::render(const glm::mat4 &transform) const {
     { min.x, min.y, max.z, 0, 1, 0 },
   };
   vbo.setDataKeepSize(pts, sizeof(pts)/sizeof(Coord), GL_STREAM_DRAW);
-  vbo.bind();
-  glVertexAttribPointer(P->att("coord"), 3, GL_INT, GL_FALSE, sizeof(Coord), 0);
-  glVertexAttribPointer(P->att("color"), 3, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Coord), (GLvoid*)(offsetof(Coord, r)));
+  const Program &P = *G->PM->getProgram(PM_3D | PM_COLORED);
+  if (!vaoConfigured) {
+    vaoConfigured = true;
+    Render::gl::VAO::Config cfg = vao.configure();
+    cfg.vertexAttrib(vbo, P.att("coord"), 3, GL_FLOAT, sizeof(Coord), 0);
+    cfg.vertexAttrib(vbo, P.att("color"), 3, GL_UNSIGNED_BYTE, sizeof(Coord), offsetof(Coord, r));
+    cfg.commit();
+  }
+  P.bind();
+  glUniformMatrix4fv(P.uni("mvp"), 1, GL_FALSE, glm::value_ptr(transform));
+  vao.bind();
   glDrawArrays(GL_LINES, 0, sizeof(pts)/sizeof(Coord));
-  glDisableVertexAttribArray(P->att("color"));
-  glDisableVertexAttribArray(P->att("coord"));
+  vao.unbind();
 }
 
 void LocalPlayer::forceCameraUpdate() {

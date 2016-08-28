@@ -116,7 +116,7 @@ GameWindow::GameWindow(Game *G) : G(G) {
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-  glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+  //glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
   glfwWindowHint(GLFW_SAMPLES, 0); // Gimme aliasing everywhere
   //glfwWindowHint(GLFW_STENCIL_BITS, 8);
 
@@ -190,6 +190,8 @@ GameWindow::GameWindow(Game *G) : G(G) {
 }
 
 GameWindow::~GameWindow() {
+  m_currentState.reset();
+  m_nextState.reset();
   delete UIM;
 
   glfwDestroyWindow(m_window);
@@ -243,13 +245,13 @@ void GameWindow::cbResize(int w, int h) {
   m_currentState->onResize(w, h);
 }
 
-void GameWindow::setNextState(const shared_ptr<State> next) {
-  m_nextState = next;
+void GameWindow::setNextState(std::unique_ptr<State> &&next) {
+  m_nextState = std::move(next);
 }
 
 void GameWindow::run() {
   while (m_nextState != nullptr && !glfwWindowShouldClose(m_window)) {
-    m_currentState = m_nextState;
+    m_currentState = std::move(m_nextState);
     m_nextState = nullptr;
     UIM->clear();
     m_currentState->run();
@@ -257,7 +259,7 @@ void GameWindow::run() {
 }
 
 void GameWindow::showMessage(const std::string &msg, const std::string &submsg) {
-  setNextState(std::make_shared<MessageState>(this, msg, submsg));
+  setNextState(std::move(std::make_unique<MessageState>(this, msg, submsg)));
 }
 
 }

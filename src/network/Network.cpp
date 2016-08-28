@@ -1,9 +1,15 @@
 #include "Network.hpp"
-#include <enet/enet.h>
+
+#include <chrono>
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
 #include <memory>
+
+#include <enet/enet.h>
+
+#include "../crypto/Random.hpp"
+#include "msgtypes/ConnectionParam.hpp"
 
 #include <iomanip>
 
@@ -53,8 +59,7 @@ Message::Message(MessageType t, uint8 s) :
 
 InMessage::InMessage() :
   Message(MessageType::Null, 0),
-  m_chan(Channels::Base),
-  m_packet(nullptr) {
+  m_chan(Channels::Base) {
 }
 
 InMessage::~InMessage() {
@@ -79,36 +84,17 @@ void InMessage::fromData(const void *data, SizeT len, Channels chan) {
   m_length = len;
   m_type = static_cast<MessageType>(bytes[0]);
   m_subtype = bytes[1];
-  m_data = static_cast<uint8*>(std::malloc(len-HeaderSize));
-  std::memcpy(m_data, &(bytes[HeaderSize]), len-HeaderSize);
-}
-
-void InMessage::fromPacket(void *packet, Channels chan) {
-  ENetPacket *enpkt = static_cast<ENetPacket*>(packet);
-  SizeT len = enpkt->dataLength;
-  if (len < HeaderSize) {
-    throw std::invalid_argument("Message length is smaller than message header");
-  }
-  uint8 *const bytes = static_cast<uint8*>(enpkt->data);
-  free();
-  m_packet = packet;
-  m_chan = chan;
-  m_cursor = 0;
-  m_length = len;
-  m_type = static_cast<MessageType>(bytes[0]);
-  m_subtype = bytes[1];
-  m_data = &(bytes[HeaderSize]);
+  // m_data/bytes is guaranteed never to be written to, so we can const_cast it
+  m_data = const_cast<uint8*>(bytes) + HeaderSize;
 }
 
 void InMessage::free() {
-  if (m_packet != nullptr) {
-    enet_packet_destroy(static_cast<ENetPacket*>(m_packet));
-  } else {
-    std::free(m_data);
+  if (m_data != nullptr) {
+    delete[] (m_data - HeaderSize);
   }
   m_type = MessageType::Null;
   m_subtype = m_length = m_cursor = 0;
-  m_packet = m_data = nullptr;
+  m_data = nullptr;
 }
 
 
@@ -160,6 +146,14 @@ Channels InMessage::getChannel() const {
   return m_chan;
 }
 
+Peer::Peer(Host &host, void *peer) :
+  host(host),
+  peer(peer) {
+  reinterpret_cast<ENetPeer*>(this->peer)->data = this;
+  Crypto::Random::randomData(connectionPk);
+  Crypto::DiffieHellman::scalarmultBase(connectionSk, connectionPk);
+}
+
 bool Peer::operator==(const Peer &other) const {
   return peer == other.peer;
 }
@@ -168,13 +162,13 @@ bool Peer::operator!=(const Peer &other) const {
   return !(*this == other);
 }
 
-void Peer::disconnect() {
-  ENetPeer *const peer = static_cast<ENetPeer*>(this->peer);
-  enet_peer_disconnect(peer, 0);
+void Peer::disconnect(uint32 data) {
+  ENetPeer *const peer = reinterpret_cast<ENetPeer*>(this->peer);
+  enet_peer_disconnect(peer, data);
 }
 
-std::string Peer::getHost() {
-  const ENetPeer *const peer = static_cast<const ENetPeer*>(this->peer);
+std::string Peer::peerHost() {
+  const ENetPeer *const peer = reinterpret_cast<const ENetPeer*>(this->peer);
   std::ostringstream oss;
   char *chars = new char[512];
   enet_address_get_host_ip(&peer->host->address, chars, 512);
@@ -184,8 +178,8 @@ std::string Peer::getHost() {
   return oss.str();
 }
 
-std::string Peer::getIp() {
-  const ENetPeer *const peer = static_cast<const ENetPeer*>(this->peer);
+std::string Peer::peerIP() {
+  const ENetPeer *const peer = reinterpret_cast<const ENetPeer*>(this->peer);
   char *chars = new char[512];
   enet_address_get_host_ip(&peer->host->address, chars, 512);
   std::string str(chars);
@@ -193,8 +187,8 @@ std::string Peer::getIp() {
   return str;
 }
 
-Port Peer::getPort() {
-  const ENetPeer *const peer = static_cast<const ENetPeer*>(this->peer);
+Port Peer::peerPort() {
+  const ENetPeer *const peer = reinterpret_cast<const ENetPeer*>(this->peer);
   return peer->host->address.port;
 }
 
@@ -204,6 +198,11 @@ Host::Host() :
   host(nullptr),
   rxBytes(0),
   txBytes(0) {
+}
+
+Host::~Host() {
+  ENetHost *const host = reinterpret_cast<ENetHost*>(this->host);
+  enet_host_destroy(host);
 }
 
 void Host::create(Port port, uint maxconn) {
@@ -220,8 +219,8 @@ void Host::create(Port port, uint maxconn) {
   }
 }
 
-Peer Host::connect(const std::string &hostAddr, Port port, Timeout timeout) {
-  ENetHost *const host = static_cast<ENetHost*>(this->host);
+Peer& Host::connect(const std::string &hostAddr, Port port, Timeout timeout) {
+  ENetHost *const host = reinterpret_cast<ENetHost*>(this->host);
   ENetAddress address;
   ENetEvent event;
   ENetPeer *peer;
@@ -236,102 +235,140 @@ Peer Host::connect(const std::string &hostAddr, Port port, Timeout timeout) {
 
   if (enet_host_service(host, &event, timeout) > 0 &&
     event.type == ENET_EVENT_TYPE_CONNECT) {
-    Peer p; p.peer = peer;
-    return p;
+    Peer *p = new Peer(*this, peer);
+    sendKeyExchange(*p);
+    return *p;
   }
 
   enet_peer_reset(peer);
   throw Exception();
 }
 
-Host::~Host() {
-  ENetHost *const host = static_cast<ENetHost*>(this->host);
-  enet_host_destroy(host);
+void Host::processPeersToDelete() {
+  for (Peer *peer : m_peersToDelete) {
+    delete peer;
+  }
+  m_peersToDelete.clear();
 }
 
-/*static void hexDump(char in, uint8 *buf, int len) {
+void Host::sendKeyExchange(Peer &p) {
+  MsgTypes::ConnectionParamDHKeyExchange dhke;
+  dhke.pk = p.connectionPk;
+  OutMessage keMsg;
+  dhke.writeToMsg(keMsg);
+  send(p, keMsg);
+}
+
+static void hexDump(char in, uint8 *buf, int len) {
   std::cout << in << ": " << std::setiosflags(std::ios::internal);
   for (int i=0; i < len; ++i) {
     std::cout << std::setfill('0') << std::setw(2) << std::hex << (int)buf[i] << ' ';
   }
   std::cout << std::dec << std::endl;
-}*/
-
-bool Host::recv(InMessage &msg, Peer &peer, Timeout timeout) {
-  ENetHost *const host = static_cast<ENetHost*>(this->host);
-  ENetEvent event;
-  if (enet_host_service(host, &event, timeout) >= 0){
-    switch (event.type) {
-    case ENET_EVENT_TYPE_NONE:
-      return false;
-    case ENET_EVENT_TYPE_CONNECT:
-      peer.peer = event.peer;
-      msg.setType(MessageType::NetConnect);
-      break;
-    case ENET_EVENT_TYPE_RECEIVE:
-      peer.peer = event.peer;
-      //hexDump('R', event.packet->data, event.packet->dataLength);
-      // Packet "ownership" is transferred to msg
-      msg.fromPacket(event.packet, static_cast<Channels>(event.channelID));
-      rxBytes += event.packet->dataLength;
-      break;
-    case ENET_EVENT_TYPE_DISCONNECT:
-      peer.peer = event.peer;
-      msg.setType(MessageType::NetDisconnect);
-      enet_peer_reset(event.peer);
-    }
-    return true;
-  }
-  throw Exception();
 }
 
-bool Host::recv(InMessage &msg, Timeout timeout) {
-  ENetHost *const host = static_cast<ENetHost*>(this->host);
+bool Host::recv(InMessage &msg, Peer **peer, Timeout timeout) {
+  ENetHost *const host = reinterpret_cast<ENetHost*>(this->host);
+  processPeersToDelete();
+  auto start = std::chrono::steady_clock::now();
+
   ENetEvent event;
-  if (enet_host_service(host, &event, timeout) >= 0){
-    switch (event.type) {
-    case ENET_EVENT_TYPE_NONE:
+  while (true) {
+    auto now = std::chrono::steady_clock::now();
+    enet_uint32 elapsed = static_cast<enet_uint32>(
+      std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count());
+    if (enet_host_service(host, &event, timeout - elapsed) > 0) {
+      Peer *peerPtr = event.peer == nullptr ? nullptr :
+        reinterpret_cast<Peer*>(event.peer->data);
+      switch (event.type) {
+      case ENET_EVENT_TYPE_NONE:
+        break;
+      case ENET_EVENT_TYPE_CONNECT:
+        peerPtr = new Peer(*this, event.peer);
+        *peer = peerPtr;
+        sendKeyExchange(*peerPtr);
+        msg.setType(MessageType::NetConnect);
+        return true;
+      case ENET_EVENT_TYPE_RECEIVE: {
+        if (peer) {
+          *peer = peerPtr;
+        }
+
+        const Message::SizeT pktLen = event.packet->dataLength;
+        const Channels pktChannel = static_cast<Channels>(event.channelID);
+        const bool decrypt = (pktChannel == Channels::ConnectionMetaPlain);
+        byte *rcvData = new uint8[pktLen];
+        if (decrypt) {
+          // TODO: decryption
+          std::memcpy(rcvData, event.packet->data, pktLen);
+        } else {
+          std::memcpy(rcvData, event.packet->data, pktLen);
+        }
+        // pktData's ownership is transferred to msg
+        msg.fromData(rcvData, pktLen, pktChannel);
+        rxBytes += event.packet->dataLength;
+
+        if (msg.getType() == MessageType::ConnectionParam &&
+            msg.getSubtype() == static_cast<int>(MsgTypes::ConnectionParamSubtype::DHKeyExchange)) {
+          MsgTypes::ConnectionParamDHKeyExchange dhke; dhke.readFromMsg(msg);
+          peerPtr->remotePk = dhke.pk;
+          if (Crypto::DiffieHellman::scalarmult(peerPtr->connectionSk, peerPtr->remotePk,
+            peerPtr->sharedSecret) != 0) {
+            // TODO: properly handle key exchange failure
+            throw std::runtime_error("DH key exchange failed");
+          }
+          getDebugStream() << "hello DH! " << peerPtr->sharedSecret.hex() << std::endl;
+        } else {
+          return true;
+        }
+      } break;
+      case ENET_EVENT_TYPE_DISCONNECT:
+        if (peer) {
+          *peer = peerPtr;
+        }
+        msg.setType(MessageType::NetDisconnect);
+        m_peersToDelete.emplace_back(peerPtr);
+        return true;
+      }
+    } else {
       return false;
-    case ENET_EVENT_TYPE_CONNECT:
-      msg.setType(MessageType::NetConnect);
-      break;
-    case ENET_EVENT_TYPE_RECEIVE:
-      //hexDump('R', event.packet->data, event.packet->dataLength);
-      // Packet "ownership" is transferred to msg
-      msg.fromPacket(event.packet, static_cast<Channels>(event.channelID));
-      rxBytes += event.packet->dataLength;
-      break;
-    case ENET_EVENT_TYPE_DISCONNECT:
-      msg.setType(MessageType::NetDisconnect);
-      enet_peer_reset(event.peer);
     }
-    return true;
   }
   throw Exception();
 }
 
 void Host::send(Peer &peer, const OutMessage &msg, Tfer mode, Channels chan) {
-  ENetHost *const host = static_cast<ENetHost*>(this->host);
+  ENetHost *const host = reinterpret_cast<ENetHost*>(this->host);
+  const bool encrypt = (chan == Channels::ConnectionMetaPlain);
 
-  const uint8 header[Message::HeaderSize] = {
-    static_cast<uint8>(msg.m_type),
+  const byte header[Message::HeaderSize] = {
+    static_cast<byte>(msg.m_type),
     msg.m_subtype
   };
 
-  ENetPacket *packet;
+  size_t pktLen = Message::HeaderSize + (msg.m_actualData == nullptr ? 0 : msg.m_length);
+  ENetPacket *packet = enet_packet_create(nullptr, pktLen, TferToFlags(mode));
+  byte *pktData = packet->data;
+  txBytes += pktLen;
   if (msg.m_actualData != nullptr) {
     std::memcpy(msg.m_actualData, header, Message::HeaderSize);
-    packet = enet_packet_create(msg.m_actualData,
-      Message::HeaderSize + msg.m_length, TferToFlags(mode));
-    txBytes += Message::HeaderSize + msg.m_length;
+    if (encrypt) {
+      // TODO: don't memcpy, encrypt!
+      std::memcpy(pktData, msg.m_actualData, pktLen);
+    } else {
+      std::memcpy(pktData, msg.m_actualData, pktLen);
+    }
   } else {
-    packet = enet_packet_create(header,
-      Message::HeaderSize, TferToFlags(mode));
-    txBytes += Message::HeaderSize;
+    if (encrypt) {
+      // TODO: don't memcpy, encrypt!
+      std::memcpy(pktData, header, pktLen);
+    } else {
+      std::memcpy(pktData, header, pktLen);
+    }
   }
 
-  //hexDump('S', packet->data, 2+msg.m_length);
-  enet_peer_send(static_cast<ENetPeer*>(peer.peer), static_cast<uint8>(chan), packet);
+  hexDump('S', pktData, pktLen);
+  enet_peer_send(reinterpret_cast<ENetPeer*>(peer.peer), static_cast<uint8>(chan), packet);
   enet_host_flush(host);
 }
 
