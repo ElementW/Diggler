@@ -1,9 +1,6 @@
 [submodule "msgpack-c"]
 	path = ext/msgpack-c
 	url = https://github.com/msgpack/msgpack-c.git
-[submodule "ext/luajit-2.0"]
-	path = ext/lua
-	url = http://luajit.org/git/luajit-2.0.git
 [submodule "assets/lua/lds"]
 	path = assets/lua/lds
 	url = https://github.com/neomantra/lds.git
@@ -13,3 +10,6 @@
 [submodule "ext/Optional"]
 	path = ext/Optional
 	url = https://github.com/akrzemi1/Optional.git
+[submodule "ext/enet"]
+	path = ext/enet
+	url = https://github.com/freeminer/enet.git

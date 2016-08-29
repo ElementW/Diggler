@@ -71,6 +71,8 @@ endif()
 set(CMAKE_CXX_FLAGS "${CXX14_FLAGS} ${CMAKE_CXX_FLAGS}")
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/enet")
+set(ENET_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/ext/enet/include")
+set(ENET_LIBRARIES enet)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/lzfx")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/etc")
 find_package(glm)
@@ -85,11 +87,13 @@ if(NOT msgpack_FOUND)
 git submodule update --init")
 endif()
 
+find_package(Optional REQUIRED)
+
 pkg_search_module(EPOXY REQUIRED epoxy)
 pkg_search_module(GLFW REQUIRED glfw3)
 pkg_search_module(SQLITE3 REQUIRED sqlite3)
 pkg_search_module(LIBSODIUM REQUIRED libsodium)
-include_directories(
+include_directories(BEFORE
   ${ETC_INCLUDE_DIRS}
   ${LUA_INCLUDE_DIR}
   ${LZFX_INCLUDE_DIRS}
@@ -100,8 +104,14 @@ include_directories(
   ${SQLITE3_INCLUDE_DIRS}
   ${OPENAL_INCLUDE_DIR}
   ${MSGPACK_INCLUDE_DIR}
+  ${OPTIONAL_INCLUDE_DIR}
 )
 
+# Glob all source files so they show up in Qt Creator
+#file(GLOB_RECURSE FILELIST "*.h" "*.hpp" "*.cpp")
+#add_custom_target(files SOURCES ${FILELIST})
+
+# Add diggler executable target
 set(SRCS ";")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src")
 
@@ -138,6 +148,3 @@ if (DOXYGEN_FOUND)
     COMMENT "Generate code documentation with Doxygen" VERBATIM
   )
 endif()
-
-file(GLOB_RECURSE FILELIST "*.h" "*.hpp" "*.cpp")
-add_custom_target(files SOURCES ${FILELIST})

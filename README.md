@@ -2,7 +2,7 @@
 
 A game of cubes and the like.
 
-## Compiling
+## Obtaining source
 
 This repository uses git submodules, **do not download it using the "Download ZIP" option!**
 
@@ -12,6 +12,19 @@ git clone https://github.com/ElementW/Diggler.git
 cd Diggler
 git submodule update --init
 ```
+
+## Compiling
+
+Diggler uses CMake to generate its build files. If you have an IDE that supports CMake, import the project.
+If you want to compile it using the command line:
+```sh
+mkdir build
+cd build
+cmake ..
+make -j$(nproc)
+```
+
+**Important note**: Diggler does **not** suport in-source builds, i.e. running CMake in the top level directory, due to 1. the impossibility to have multiple builds that way, and 2. because of the frequent build structure fuckery it causes. Make sure to configure your IDE/run CMake to have the build directory elsewhere. Disregarding this will have CMake bail out instantly as well as remind you of this one more time.
 
 ### Dependencies
 
