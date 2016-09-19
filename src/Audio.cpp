@@ -1,6 +1,7 @@
 #include "Audio.hpp"
 
 #include <cstring>
+#include <sstream>
 
 #include <AL/al.h>
 #include <AL/alext.h>
@@ -16,25 +17,25 @@ namespace Diggler {
 Audio::Audio(Game &G) : G(G), sounds(m_sounds) {
   if (!GlobalProperties::IsSoundEnabled)
     return;
-  
-  int alMajor, alMinor;
-  alcGetIntegerv(nullptr, ALC_MAJOR_VERSION, 1, &alMajor);
-  alcGetIntegerv(nullptr, ALC_MINOR_VERSION, 1, &alMinor);
-  getDebugStreamRaw() << "OpenAL " << alMajor << '.' << alMinor;
-  
+
   ALboolean enumeration = alcIsExtensionPresent(nullptr, "ALC_ENUMERATION_EXT");
-  if (enumeration == AL_FALSE)
-    ; // enumeration not supported
-  else {
+  if (enumeration == AL_FALSE) {
+    getDebugStream() <<
+      "OpenAL device enumeration unsupported. The default device will be used." << std::endl;
+  } else {
     const ALCchar *devices = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
     const ALCchar *device = devices, *next = devices + 1;
-    size_t len = 0;
+    std::ostringstream oss;
+    oss << "OpenAL devices: ";
     while (device && *device != '\0' && next && *next != '\0') {
-      len = strlen(device);
+      oss << '"' << device << "\", ";
+      size_t len = strlen(device);
       device += (len + 1);
       next += (len + 2);
     }
+    getDebugStream() << oss.str() << std::endl;
   }
+
   const ALCchar *deviceName = nullptr;
   m_audioDevice = alcOpenDevice(deviceName);
   if (!m_audioDevice) {
@@ -42,12 +43,17 @@ Audio::Audio(Game &G) : G(G), sounds(m_sounds) {
     GlobalProperties::IsSoundEnabled = false;
   }
   deviceName = alcGetString(m_audioDevice, ALC_DEVICE_SPECIFIER);
-  getDebugStreamRaw() << " -- Device '" << deviceName << '\'' << std::endl;
-  
+
+  int alMajor, alMinor;
+  alcGetIntegerv(nullptr, ALC_MAJOR_VERSION, 1, &alMajor);
+  alcGetIntegerv(nullptr, ALC_MINOR_VERSION, 1, &alMinor);
+  getDebugStreamRaw() << "OpenAL " << alMajor << '.' << alMinor << " -- Device '" << deviceName <<
+    '\'' << std::endl;
+
   ALCint attrs[] = {
     0, 0
   };
-  
+
   m_audioContext = alcCreateContext(m_audioDevice, attrs);
   if (!alcMakeContextCurrent(m_audioContext)) {
     getDebugStream() << "Failed setting context on AL device '" << deviceName << "': " << alcGetError(m_audioDevice) << std::endl;
@@ -59,17 +65,17 @@ Audio::Audio(Game &G) : G(G), sounds(m_sounds) {
 Audio::~Audio() {
   if (!GlobalProperties::IsSoundEnabled)
     return;
-  
+
   alcMakeContextCurrent(nullptr);
   alcDestroyContext(m_audioContext);
   alcCloseDevice(m_audioDevice);
 }
 
-static ALfloat float3data[3], plrOrient[6];
-
 void Audio::updateAngle() {
-  const glm::vec3 &at = G.LP->camera.getLookAt(),
-          &up = G.LP->camera.getUp();
+  const glm::vec3
+    &at = G.LP->camera.getLookAt(),
+    &up = G.LP->camera.getUp();
+  ALfloat plrOrient[6];
   plrOrient[0] = at.x;
   plrOrient[1] = at.y;
   plrOrient[2] = at.z;
@@ -80,8 +86,10 @@ void Audio::updateAngle() {
 }
 
 void Audio::updatePos() {
-  const glm::vec3 &pos = G.LP->position,
-          &vel = G.LP->velocity;
+  const glm::vec3
+    &pos = G.LP->position,
+    &vel = G.LP->velocity;
+  ALfloat float3data[3];
   float3data[0] = pos.x;
   float3data[1] = pos.y;
   float3data[2] = pos.z;
@@ -108,7 +116,7 @@ void Audio::loadSoundAssets() {
 
 void Audio::addSound(const std::string &name, const std::string &path) {
   m_sounds.emplace(std::piecewise_construct,
-      std::forward_as_tuple(name), std::forward_as_tuple()).first->second.loadOgg(path);
+    std::forward_as_tuple(name), std::forward_as_tuple()).first->second.loadOgg(path);
 }
 
 void Audio::playSound(const std::string &name) {
