@@ -28,16 +28,16 @@ make -j$(nproc)
 
 ### Dependencies
 
-Diggler is written in C++14, so you need GCC 5 or more.
+Diggler is written in C++14, so you need GCC 5/clang 3.4 or more.
 
-You need GLM, OpenAL, OpenGL (ES 2.0), libepoxy, glfw3 and LuaJIT.
+You need GLM, OpenAL, OpenGL (ES 2.0), libepoxy, glfw3, LuaJIT, sqlite3 and libsodium.
 
 #### Linux
 
 You should already have OpenGL available thanks to Mesa or proprietary drivers.
 
-Arch: `pacman -S glm openal libepoxy glfw luajit`
+Arch: `pacman -S glm openal libepoxy glfw luajit sqlite libsodium`
 
-Debian (Jessie **w/ testing**, or up) & derivatives: `apt-get install libglm-dev libopenal-dev libepoxy-dev libglfw3-dev libx{i,randr}-dev libluajit-5.1-dev`
+Debian (Jessie **w/ testing**, or up) & derivatives: `apt-get install libglm-dev libopenal-dev libepoxy-dev libglfw3-dev libx{i,randr}-dev libluajit-5.1-dev libsqlite3-dev libsodium-dev`
 
-Fedora (tested on F24): `dnf install glm-devel openal-soft-devel libepoxy-devel glfw-devel luajit-devel`
+Fedora (tested on F24): `dnf install glm-devel openal-soft-devel libepoxy-devel glfw-devel luajit-devel sqlite-devel libsodium-devel`
