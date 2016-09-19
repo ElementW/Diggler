@@ -4,7 +4,6 @@
 #include "MsgType.hpp"
 
 #include <glm/vec3.hpp>
-#include <msgpack.hpp>
 
 #include "../../Chunk.hpp"
 #include "../../World.hpp"
