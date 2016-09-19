@@ -24,7 +24,7 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
 
     case MessageType::ChunkTransfer: {
       using S = ChunkTransferSubtype;
-      switch (static_cast<S>(msg.getSubtype())) {
+      switch (msg.getSubtype<S>()) {
         case S::Request: {
           ; // No-op
         } break;
@@ -47,7 +47,7 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
     } break;
     case MessageType::Chat: {
       using S = ChatSubtype;
-      switch (static_cast<S>(msg.getSubtype())) {
+      switch (msg.getSubtype<S>()) {
         case S::Send: {
           ; // No-op
         } break;
@@ -55,27 +55,27 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
           ChatAnnouncement ca;
           ca.readFromMsg(msg);
           // TODO better formatting abilities
-          if (ca.msg.type == msgpack::type::STR) {
-            GS.m_chatBox->addChatEntry(ca.msg.as<std::string>());
+          if (ca.msg.is<goodform::object>()) {
+            GS.m_chatBox->addChatEntry(ca.msg["plaintext"].get<std::string>());
           }
         } break;
         case S::PlayerTalk: {
           ChatPlayerTalk cpt;
           cpt.readFromMsg(msg);
           // TODO better formatting abilities
-          if (cpt.msg.type == msgpack::type::STR) {
+          if (cpt.msg.is<std::string>()) {
             std::string playerName;
-            if (cpt.player.display.type == msgpack::type::NIL) {
+            if (cpt.player.display.is<std::nullptr_t>()) {
               const Player *blabbermouth = GS.G->players.getBySessId(cpt.player.id);
               if (blabbermouth != nullptr) {
                 playerName = blabbermouth->name + "> ";
               } else {
                 playerName = "?> ";
               }
-            } else if (cpt.player.display.type == msgpack::type::STR) {
-              cpt.player.display.convert(playerName);
+            } else if (cpt.player.display.is<std::string>()) {
+              cpt.player.display.get<std::string>(playerName);
             }
-            GS.m_chatBox->addChatEntry(playerName + cpt.msg.as<std::string>());
+            GS.m_chatBox->addChatEntry(playerName + cpt.msg.get<std::string>());
           }
         } break;
       }
@@ -100,7 +100,7 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
     } break;
     case MessageType::PlayerUpdate: {
       using S = PlayerUpdateSubtype;
-      switch (static_cast<S>(msg.getSubtype())) {
+      switch (msg.getSubtype<S>()) {
         case S::Move: {
           PlayerUpdateMove pum;
           pum.readFromMsg(msg);
@@ -149,7 +149,7 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
     case MessageType::BlockUpdate: {
       // TODO handle that in Chunk's ChangeHelper
       using S = BlockUpdateSubtype;
-      switch (static_cast<S>(msg.getSubtype())) {
+      switch (msg.getSubtype<S>()) {
         case S::Notify: {
           BlockUpdateNotify bun;
           bun.readFromMsg(msg);

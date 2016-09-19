@@ -3,7 +3,7 @@
 
 #include "MsgType.hpp"
 
-#include <msgpack.hpp>
+#include <goodform/variant.hpp>
 
 #include "../../Player.hpp"
 
@@ -18,33 +18,30 @@ enum class ChatSubtype : uint8 {
 };
 
 struct ChatSend : public MsgType {
-  msgpack::zone z;
-  msgpack::object msg;
+  goodform::variant msg;
 
   void writeToMsg(OutMessage&) const override;
   void readFromMsg(InMessage&) override;
 };
 
 struct ChatAnnouncement : public MsgType {
-  msgpack::zone z;
   std::string announcementType;
   struct Origin {
     std::string name;
-    msgpack::object display;
+    goodform::variant display;
   } origin;
-  msgpack::object msg;
+  goodform::variant msg;
 
   void writeToMsg(OutMessage&) const override;
   void readFromMsg(InMessage&) override;
 };
 
 struct ChatPlayerTalk : public MsgType {
-  msgpack::zone z;
   struct ChatPlayer {
     PlayerGameID id;
-    msgpack::object display;
+    goodform::variant display;
   } player;
-  msgpack::object msg;
+  goodform::variant msg;
 
   void writeToMsg(OutMessage&) const override;
   void readFromMsg(InMessage&) override;

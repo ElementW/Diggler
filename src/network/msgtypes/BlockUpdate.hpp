@@ -3,7 +3,7 @@
 
 #include "MsgType.hpp"
 
-#include <msgpack.hpp>
+#include <goodform/variant.hpp>
 
 #include "../../content/Content.hpp"
 #include "../../World.hpp"
@@ -19,7 +19,6 @@ enum class BlockUpdateSubtype : uint8 {
 };
 
 struct BlockUpdateNotify : public MsgType {
-  msgpack::zone z;
   struct UpdateData {
     struct Updated {
       bool : 4, light : 1, extdata : 1, data : 1, id : 1;
@@ -29,7 +28,7 @@ struct BlockUpdateNotify : public MsgType {
     glm::ivec3 pos;
     BlockId id;
     BlockData data;
-    msgpack::object extdata;
+    goodform::variant extdata;
     LightData light;
     enum Cause : uint8 {
       Unspecified = 0,
@@ -44,12 +43,11 @@ struct BlockUpdateNotify : public MsgType {
 };
 
 struct BlockUpdatePlace : public MsgType {
-  msgpack::zone z;
   WorldId worldId;
   glm::ivec3 pos;
   BlockId id;
   BlockData data;
-  msgpack::object extdata;
+  goodform::variant extdata;
 
   void writeToMsg(OutMessage&) const override;
   void readFromMsg(InMessage&) override;

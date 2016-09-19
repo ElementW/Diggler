@@ -37,6 +37,7 @@ set(SRCS
   ${CSD}/network/msgtypes/Chat.cpp
   ${CSD}/network/msgtypes/ChunkTransfer.cpp
   ${CSD}/network/msgtypes/ConnectionParam.cpp
+  ${CSD}/network/msgtypes/PlayerJoin.cpp
   ${CSD}/network/msgtypes/PlayerUpdate.cpp
   ${CSD}/network/msgtypes/ServerInfo.cpp
   ${CSD}/network/ClientMessageHandler.cpp

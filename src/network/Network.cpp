@@ -8,6 +8,8 @@
 
 #include <enet/enet.h>
 
+#include <goodform/msgpack.hpp>
+
 #include "../crypto/Random.hpp"
 #include "msgtypes/ConnectionParam.hpp"
 
@@ -97,6 +99,23 @@ void InMessage::free() {
   m_data = nullptr;
 }
 
+void InMessage::readMsgpack(goodform::variant &var) {
+  uint32 len = readU32();
+  if (len > remaining()) {
+    throw std::runtime_error("Not enough bytes available for reported msgpack length");
+  }
+  InMemoryStream ims(getCursorPtr(len), len);
+  goodform::msgpack::deserialize(ims, var);
+  /*if (var.type() != goodform::variant_type::object) {
+    throw std::runtime_error("Read msgpack is not an object / map");
+  }*/
+}
+
+
+Channels InMessage::getChannel() const {
+  return m_chan;
+}
+
 
 OutMessage::OutMessage(MessageType t, uint8 subtype) :
   Message(t, subtype),
@@ -124,6 +143,19 @@ void OutMessage::fit(SizeT len) {
   m_allocated = targetSize;
 }
 
+void OutMessage::writeMsgpack(const goodform::variant &var) {
+  /*if (var.type() != goodform::variant_type::object) {
+    throw std::runtime_error("msgpack to write is not an object / map");
+  }*/
+  PosT pos = tell();
+  writeU32(0);
+  goodform::msgpack::serialize(var, *this);
+  PosT posWritten = tell();
+  seek(pos);
+  writeU32(static_cast<uint32>(posWritten - (pos + sizeof(uint32))));
+  seek(posWritten);
+}
+
 
 glm::vec3 InMessage::readVec3() {
   float x, y, z;
@@ -141,10 +173,6 @@ glm::ivec3 InMessage::readIVec3() {
   return glm::ivec3(x, y, z);
 }
 
-
-Channels InMessage::getChannel() const {
-  return m_chan;
-}
 
 Peer::Peer(Host &host, void *peer) :
   host(host),
@@ -210,7 +238,7 @@ void Host::create(Port port, uint maxconn) {
     host = enet_host_create(nullptr, 1, static_cast<size_t>(Channels::MAX), 0, 0);
   } else { // Server
     ENetAddress address;
-    address.host = ENET_HOST_ANY;
+    address.host = IN6ADDR_ANY_INIT; // ENET_HOST_ANY;
     address.port = port;
     host = enet_host_create(&address, maxconn, static_cast<size_t>(Channels::MAX), 0, 0);
   }
@@ -259,13 +287,13 @@ void Host::sendKeyExchange(Peer &p) {
   send(p, keMsg);
 }
 
-static void hexDump(char in, uint8 *buf, int len) {
+/*static void hexDump(char in, uint8 *buf, int len) {
   std::cout << in << ": " << std::setiosflags(std::ios::internal);
   for (int i=0; i < len; ++i) {
     std::cout << std::setfill('0') << std::setw(2) << std::hex << (int)buf[i] << ' ';
   }
   std::cout << std::dec << std::endl;
-}
+}*/
 
 bool Host::recv(InMessage &msg, Peer **peer, Timeout timeout) {
   ENetHost *const host = reinterpret_cast<ENetHost*>(this->host);
@@ -308,8 +336,9 @@ bool Host::recv(InMessage &msg, Peer **peer, Timeout timeout) {
         msg.fromData(rcvData, pktLen, pktChannel);
         rxBytes += event.packet->dataLength;
 
+        using CPS = MsgTypes::ConnectionParamSubtype;
         if (msg.getType() == MessageType::ConnectionParam &&
-            msg.getSubtype() == static_cast<int>(MsgTypes::ConnectionParamSubtype::DHKeyExchange)) {
+            msg.getSubtype<CPS>() == CPS::DHKeyExchange) {
           MsgTypes::ConnectionParamDHKeyExchange dhke; dhke.readFromMsg(msg);
           peerPtr->remotePk = dhke.pk;
           if (Crypto::DiffieHellman::scalarmult(peerPtr->connectionSk, peerPtr->remotePk,
@@ -367,7 +396,7 @@ void Host::send(Peer &peer, const OutMessage &msg, Tfer mode, Channels chan) {
     }
   }
 
-  hexDump('S', pktData, pktLen);
+  //hexDump('S', pktData, pktLen);
   enet_peer_send(reinterpret_cast<ENetPeer*>(peer.peer), static_cast<uint8>(chan), packet);
   enet_host_flush(host);
 }

@@ -1,5 +1,8 @@
-#ifndef STREAM_HPP
-#define STREAM_HPP
+#ifndef DIGGLER_IO_STREAM_HPP
+#define DIGGLER_IO_STREAM_HPP
+
+#include <goodform/io.hpp>
+
 #include "../Platform.hpp"
 
 namespace Diggler {
@@ -21,12 +24,20 @@ public:
 
   virtual PosT tell() const = 0;
   virtual void seek(OffT, Whence = Set) = 0;
-  inline void seek(PosT pos, Whence whence = Set) {
-    seek(static_cast<OffT>(pos), whence);
+  inline void seek(PosT pos) {
+    seek(static_cast<OffT>(pos), Whence::Set);
   }
 };
 
-class InStream : public virtual Stream {
+class SizedStream : public virtual SeekableStream {
+public:
+  virtual SizeT length() const = 0;
+  virtual SizeT remaining() const {
+    return length() - tell();
+  }
+};
+
+class InStream : public virtual Stream, public goodform::istream {
 public:
   virtual std::string readString();
   virtual std::u32string readString32();
@@ -42,9 +53,18 @@ public:
   virtual float readFloat();
   virtual double readDouble();
   virtual void readData(void *data, SizeT len) = 0;
+
+  // goodform::msgpack compatibility
+  bool good() {
+    return true;
+  }
+  goodform::istream& read(char *data, size_t size) {
+    readData(data, static_cast<SizeT>(size));
+    return *this;
+  }
 };
 
-class OutStream : public virtual Stream {
+class OutStream : public virtual Stream, public goodform::ostream {
 public:
   virtual void writeString(const std::string &str);
   virtual void writeString32(const std::u32string &str);
@@ -60,8 +80,17 @@ public:
   virtual void writeFloat(float f);
   virtual void writeDouble(double d);
   virtual void writeData(const void *data, SizeT len) = 0;
+
+  // goodform::msgpack compatibility
+  bool good() {
+    return true;
+  }
+  goodform::ostream& write(const char *data, size_t size) {
+    writeData(data, static_cast<SizeT>(size));
+    return *this;
+  }
 };
 
 }
 
-#endif
+#endif /* DIGGLER_IO_STREAM_HPP */

@@ -28,13 +28,15 @@ public:
   }
 };
 
-class InMemoryStream : public virtual MemoryStream, public virtual InStream {
+class InMemoryStream : public virtual MemoryStream, public SizedStream, public virtual InStream {
 protected:
   InMemoryStream() {}
 
 public:
   InMemoryStream(const void *data, SizeT len);
   virtual ~InMemoryStream() {}
+
+  SizeT length() const override;
 
   virtual void readData(void *data, SizeT len) override;
 };

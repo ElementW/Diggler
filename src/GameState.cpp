@@ -26,6 +26,7 @@
 #include "network/NetHelper.hpp"
 #include "Particles.hpp"
 
+#include "network/msgtypes/PlayerJoin.hpp"
 #include "network/msgtypes/PlayerUpdate.hpp"
 #include "network/msgtypes/BlockUpdate.hpp"
 #include "content/Registry.hpp"
@@ -461,9 +462,9 @@ bool GameState::connectLoop() {
   LocalPlayer &LP = *G->LP;
   LP.name = GlobalProperties::PlayerName;
 
-  Net::OutMessage join(Net::MessageType::PlayerJoin);
-  std::string strname(G->LP->name);
-  join.writeString(strname);
+  Net::MsgTypes::PlayerJoinRequest pjr;
+  pjr.name = G->LP->name;
+  Net::OutMessage join; pjr.writeToMsg(join);
   sendMsg(join, Net::Tfer::Rel);
 
   bool received = G->H.recv(m_msg, 5000);
@@ -471,21 +472,30 @@ bool GameState::connectLoop() {
     GW->showMessage("Connected but got no response", "after 5 seconds");
     return true;
   }
-  switch (m_msg.getType()) {
-    case Net::MessageType::PlayerJoin: {
+  bool msgGood = false;
+  if (m_msg.getType() == Net::MessageType::PlayerJoin) {
+    using PJS = Net::MsgTypes::PlayerJoinSubtype;
+    switch (m_msg.getSubtype<PJS>()) {
+    case PJS::Success:
+      msgGood = true;
       G->U = new Universe(G, true);
       LP.sessId = m_msg.readU32();
       LP.W = G->U->createWorld(m_msg.readI16());
-    } break;
-    case Net::MessageType::PlayerQuit: {
-      std::string desc = m_msg.readString();
-      GW->showMessage("Disconnected", desc);
+      break;
+    case PJS::Failure: {
+      // TODO be able to display a custom message
+      GW->showMessage("Disconnected", "while joining");
     } return true;
-    default: {
-      std::ostringstream sstm;
-      sstm << "Type: " << (int)m_msg.getType() << " Subtype: " << (int)m_msg.getSubtype();
-      GW->showMessage("Received unexpected packet", sstm.str());
-    } return true;
+    default:
+      break;
+    }
+  }
+  if (!msgGood) {
+    std::ostringstream sstm;
+    sstm << "Type: " << static_cast<int>(m_msg.getType()) <<
+      " Subtype: " << static_cast<int>(m_msg.getSubtype());
+    GW->showMessage("Received unexpected packet", sstm.str());
+    return true;
   }
 
   G->LS->initialize();

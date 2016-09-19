@@ -2,8 +2,11 @@
 #define NETWORK_HPP
 
 #include <exception>
+#include <type_traits>
 
 #include <glm/vec3.hpp>
+
+#include <goodform/variant.hpp>
 
 #include "../Platform.hpp"
 #include "../platform/PreprocUtils.hpp"
@@ -60,8 +63,7 @@ enum QuitReason : uint8 {
   Timeout,
   Kicked,
   Banned,
-  ServerShutdown,
-  UsernameAlreadyUsed
+  ServerShutdown
 };
 
 using EventType = uint32;
@@ -85,10 +87,9 @@ public:
 
   inline MessageType getType() const { return m_type; }
   inline uint8 getSubtype() const { return m_subtype; }
-
-  inline SizeT remaining() const {
-    return length() - tell();
-  }
+  template<typename T,
+           typename = std::enable_if_t<std::is_integral<std::underlying_type_t<T>>::value>>
+  inline T getSubtype() const { return static_cast<T>(m_subtype); }
 };
 
 class InMessage : public Message, public InMemoryStream {
@@ -113,6 +114,7 @@ public:
 
   glm::vec3 readVec3();
   glm::ivec3 readIVec3();
+  void readMsgpack(goodform::variant&);
 
   Channels getChannel() const;
 };
@@ -154,10 +156,7 @@ public:
     writeI32(vec.z);
   }
 
-  // msgpack::packer compatibility
-  inline void write(const char *buf, size_t len) {
-    writeData(buf, len);
-  }
+  void writeMsgpack(const goodform::variant&);
 };
 
 class Exception : public std::exception {

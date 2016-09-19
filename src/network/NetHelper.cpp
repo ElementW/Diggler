@@ -23,7 +23,9 @@ void Broadcast(Game &G, const OutMessage &msg, Tfer tfer, Channels chan) {
 
 void SendChat(Game *G, const std::string &str) {
   Net::MsgTypes::ChatSend cs;
-  cs.msg = msgpack::object(str, cs.z);
+  cs.msg = goodform::object {
+    {"plaintext", str}
+  };
 
   OutMessage msg;
   cs.writeToMsg(msg);

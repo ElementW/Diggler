@@ -1,5 +1,8 @@
 #include "BlockUpdate.hpp"
 
+#include <limits>
+#include <stdexcept>
+
 namespace Diggler {
 namespace Net {
 namespace MsgTypes {
@@ -7,14 +10,17 @@ namespace MsgTypes {
 void BlockUpdateNotify::writeToMsg(OutMessage &msg) const {
   msg.setType(MessageType::BlockUpdate, BlockUpdateSubtype::Notify);
 
-  msg.writeU16(updates.size());
+  if (updates.size() > std::numeric_limits<uint16>::max()) {
+    throw std::runtime_error("Too many block updates in a single message");
+  }
+  msg.writeU16(static_cast<uint16>(updates.size()));
   for (const UpdateData &upd : updates) {
     msg.writeU8(*reinterpret_cast<const uint8*>(&upd.updated));
     msg.writeI32(upd.worldId);
     msg.writeIVec3(upd.pos);
     msg.writeU16(upd.id);
     msg.writeU16(upd.data);
-    msgpack::pack(msg, upd.extdata);
+    msg.writeMsgpack(upd.extdata);
     msg.writeU16(upd.light);
     msg.writeU8(upd.cause);
   }
@@ -32,9 +38,7 @@ void BlockUpdateNotify::readFromMsg(InMessage &msg) {
     upd.pos = msg.readIVec3();
     upd.id = msg.readU16();
     upd.data = msg.readU16();
-    Stream::PosT offset = msg.tell();
-    upd.extdata = msgpack::unpack(z, static_cast<const char*>(msg.data()), msg.length(), offset);
-    msg.seek(static_cast<Stream::OffT>(offset));
+    msg.readMsgpack(upd.extdata);
     upd.light = msg.readU16();
     upd.cause = static_cast<UpdateData::Cause>(msg.readU8());
   }
@@ -48,7 +52,7 @@ void BlockUpdatePlace::writeToMsg(OutMessage &msg) const {
   msg.writeIVec3(pos);
   msg.writeU16(id);
   msg.writeU16(data);
-  msgpack::pack(msg, extdata);
+  msg.writeMsgpack(extdata);
 }
 
 void BlockUpdatePlace::readFromMsg(InMessage &msg) {
@@ -56,8 +60,7 @@ void BlockUpdatePlace::readFromMsg(InMessage &msg) {
   pos = msg.readIVec3();
   id = msg.readU16();
   data = msg.readU16();
-  Stream::PosT offset = msg.tell();
-  extdata = msgpack::unpack(z, static_cast<const char*>(msg.data()), msg.length(), offset);
+  msg.readMsgpack(extdata);
 }
 
 

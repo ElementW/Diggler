@@ -7,11 +7,11 @@ namespace MsgTypes {
 void ChatSend::writeToMsg(OutMessage &omsg) const {
   omsg.setType(MessageType::Chat, ChatSubtype::Send);
 
-  msgpack::pack(omsg, msg);
+  omsg.writeMsgpack(msg);
 }
 
 void ChatSend::readFromMsg(InMessage &imsg) {
-  msg = msgpack::unpack(z, static_cast<const char*>(imsg.data()), imsg.length());
+  imsg.readMsgpack(msg);
 }
 
 
@@ -20,17 +20,15 @@ void ChatAnnouncement::writeToMsg(OutMessage &omsg) const {
 
   omsg.writeString(announcementType);
   omsg.writeString(origin.name);
-  msgpack::pack(omsg, origin.display);
-  msgpack::pack(omsg, msg);
+  omsg.writeMsgpack(origin.display);
+  omsg.writeMsgpack(msg);
 }
 
 void ChatAnnouncement::readFromMsg(InMessage &imsg) {
   announcementType = imsg.readString();
   origin.name = imsg.readString();
-  Stream::PosT offset = imsg.tell();
-  origin.display = msgpack::unpack(z, static_cast<const char*>(imsg.data()),
-    imsg.length(), offset);
-  msg = msgpack::unpack(z, static_cast<const char*>(imsg.data()), imsg.length(), offset);
+  imsg.readMsgpack(origin.display);
+  imsg.readMsgpack(msg);
 }
 
 
@@ -38,16 +36,14 @@ void ChatPlayerTalk::writeToMsg(OutMessage &omsg) const {
   omsg.setType(MessageType::Chat, ChatSubtype::PlayerTalk);
 
   omsg.writeU32(player.id);
-  msgpack::pack(omsg, player.display);
-  msgpack::pack(omsg, msg);
+  omsg.writeMsgpack(player.display);
+  omsg.writeMsgpack(msg);
 }
 
 void ChatPlayerTalk::readFromMsg(InMessage &imsg) {
   player.id = imsg.readU32();
-  Stream::PosT offset = imsg.tell();
-  player.display = msgpack::unpack(z, static_cast<const char*>(imsg.data()),
-    imsg.length(), offset);
-  msg = msgpack::unpack(z, static_cast<const char*>(imsg.data()), imsg.length(), offset);
+  imsg.readMsgpack(player.display);
+  imsg.readMsgpack(msg);
 }
 
 }

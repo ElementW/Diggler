@@ -11,6 +11,7 @@
 #include "network/msgtypes/BlockUpdate.hpp"
 #include "network/msgtypes/Chat.hpp"
 #include "network/msgtypes/ChunkTransfer.hpp"
+#include "network/msgtypes/PlayerJoin.hpp"
 #include "network/msgtypes/PlayerUpdate.hpp"
 #include "network/Network.hpp"
 #include "network/NetHelper.hpp"
@@ -36,51 +37,67 @@ inline Player* Server::getPlayerByName(const std::string &name) {
 }
 
 void Server::handlePlayerJoin(InMessage &msg, Peer &peer) {
-  std::string name = msg.readString();
-  getOutputStream() << peer.peerHost() << " is joining as " << name << std::endl;
+  using PJS = MsgTypes::PlayerJoinSubtype;
+  if (msg.getSubtype<PJS>() != PJS::Request) {
+    return;
+  }
+
+  MsgTypes::PlayerJoinRequest pjr; pjr.readFromMsg(msg);
+  getOutputStream() << peer.peerHost() << " is joining as " << pjr.name << std::endl;
   
   // TODO: ban list
-  Player *possible = getPlayerByName(name);
+  Player *possible = getPlayerByName(pjr.name);
   if (possible != nullptr) {
-    // TODO: use kick() method
-    OutMessage kick(MessageType::PlayerQuit, QuitReason::UsernameAlreadyUsed);
-    kick.writeString("You are \faalready\f0 playing on this server");
-    H.send(peer, kick, Tfer::Rel);
-    getOutputStream() << peer.peerHost() << " tried to connect as " << name << ": name is taken" << endl;
+    MsgTypes::PlayerJoinFailure pjf;
+    pjf.failureReason = MsgTypes::PlayerJoinFailure::FailureReason::UsernameAlreadyUsed;
+    OutMessage pjfMsg; pjf.writeToMsg(pjfMsg);
+    //kick.writeString("You are \faalready\f0 playing on this server");
+    H.send(peer, pjfMsg, Tfer::Rel);
+    getOutputStream() << peer.peerHost() << " tried to connect as " << pjr.name << ": name is taken" << endl;
     return;
   }
 
   Player &plr = G.players.add();
-  plr.name = name;
+  plr.name = pjr.name;
   plr.sessId = FastRand();
   plr.peer = &peer;
   plr.W = G.U->getLoadWorld(0);
 
-  // Confirm successful join
-  OutMessage join(MessageType::PlayerJoin);
-  join.writeU32(plr.sessId);
-  join.writeI16(plr.W->id);
-  H.send(peer, join, Tfer::Rel);
-  
-  // Send the player list
-  for (Player &p : G.players) {
-    if (p.sessId == plr.sessId)
-      continue; // ok, he knows he's here
-    OutMessage playerMsg(MessageType::PlayerJoin);
-    playerMsg.writeU32(p.sessId);
-    playerMsg.writeString(p.name);
-    H.send(peer, playerMsg, Tfer::Rel);
+  /* Confirm successful join */ {
+    MsgTypes::PlayerJoinSuccess pjs;
+    pjs.sessId = plr.sessId;
+    pjs.wid = plr.W->id;
+    OutMessage join; pjs.writeToMsg(join);
+    H.send(peer, join, Tfer::Rel);
   }
-  
-  // Broadcast player's join
-  OutMessage broadcast(MessageType::PlayerJoin);
-  broadcast.writeU32(plr.sessId);
-  broadcast.writeString(plr.name);
-  for (Player &p : G.players) {
-    if (p.sessId == plr.sessId)
-      continue; // don't send broadcast to the player
-    H.send(*p.peer, broadcast, Tfer::Rel);
+
+  /* Send the player list */ {
+    MsgTypes::PlayerJoinBroadcast pjb;
+    pjb.joinReason = MsgTypes::PlayerJoinBroadcast::JoinReason::AlreadyPlaying;
+    for (Player &p : G.players) {
+      if (p.sessId == plr.sessId)
+        continue;
+      pjb.sessId = p.sessId;
+      pjb.name = p.name;
+      pjb.wid = p.W->id;
+      OutMessage playerMsg; pjb.writeToMsg(playerMsg);
+      H.send(peer, playerMsg, Tfer::Rel);
+    }
   }
+
+  /* Broadcast player's join */ {
+    MsgTypes::PlayerJoinBroadcast pjb;
+    pjb.sessId = plr.sessId;
+    pjb.name = plr.name;
+    pjb.wid = plr.W->id;
+    OutMessage broadcast; pjb.writeToMsg(broadcast);
+    for (Player &p : G.players) {
+      if (p.sessId == plr.sessId)
+        continue; // don't send broadcast to the player
+      H.send(*p.peer, broadcast, Tfer::Rel);
+    }
+  }
+
   getOutputStream() << plr.name << " joined from " << peer.peerHost() << endl;
   for (int x = -2; x < 2; ++x)
     for (int y = -2; y < 2; ++y)
@@ -114,7 +131,7 @@ void Server::handleDisconnect(Peer &peer) {
 void Server::handleChat(InMessage &msg, Player *plr) {
   using namespace Net::MsgTypes;
   using S = ChatSubtype;
-  switch (static_cast<S>(msg.getSubtype())) {
+  switch (msg.getSubtype<S>()) {
     case S::Send: {
       ChatSend cs;
       cs.readFromMsg(msg);
@@ -140,7 +157,7 @@ void Server::handleCommand(Player *plr, const std::string &command, const std::v
 void Server::handlePlayerUpdate(InMessage &msg, Player &plr) {
   using namespace Net::MsgTypes;
   using S = PlayerUpdateSubtype;
-  switch (static_cast<S>(msg.getSubtype())) {
+  switch (msg.getSubtype<S>()) {
   case S::Move: {
     PlayerUpdateMove pum;
     pum.readFromMsg(msg);
@@ -190,7 +207,7 @@ void Server::sendChunks(const std::list<ChunkRef> &cs, Player &P) {
 void Server::handlePlayerChunkRequest(InMessage &msg, Player &plr) {
   using namespace Net::MsgTypes;
   using S = ChunkTransferSubtype;
-  switch (static_cast<S>(msg.getSubtype())) {
+  switch (msg.getSubtype<S>()) {
     case S::Request: {
       // TODO: distance & tool check, i.e. legitimate update
       ChunkTransferRequest ctr;
@@ -213,7 +230,7 @@ void Server::handlePlayerMapUpdate(InMessage &msg, Player &plr) {
   // TODO: distance & tool check, i.e. legitimate update
   using namespace Net::MsgTypes;
   using S = BlockUpdateSubtype;
-  switch (static_cast<S>(msg.getSubtype())) {
+  switch (msg.getSubtype<S>()) {
     case S::Notify: {
       ; // No-op
     } break;

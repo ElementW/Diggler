@@ -18,7 +18,7 @@ void MemoryStream::seek(OffT pos, Whence whence) {
     if (pos < 0) {
       m_cursor = 0;
     } else if (pos >= static_cast<OffT>(m_length)) {
-      m_cursor = m_length - 1;
+      m_cursor = m_length;
     } else {
       m_cursor = static_cast<PosT>(pos);
     }
@@ -27,7 +27,7 @@ void MemoryStream::seek(OffT pos, Whence whence) {
     if (pos < -static_cast<OffT>(m_cursor)) {
       m_cursor = 0;
     } else if (pos >= static_cast<OffT>(m_length - m_cursor)) {
-      m_cursor = m_length - 1;
+      m_cursor = m_length;
     } else {
       m_cursor += static_cast<PosT>(pos);
     }
@@ -40,6 +40,10 @@ InMemoryStream::InMemoryStream(const void *data, SizeT len) :
   if (data == nullptr) {
     throw std::invalid_argument("data is nullptr");
   }
+}
+
+Stream::SizeT InMemoryStream::length() const {
+  return m_length;
 }
 
 void InMemoryStream::readData(void *data, SizeT len) {

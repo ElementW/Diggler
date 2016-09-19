@@ -3,7 +3,7 @@
 
 #include "MsgType.hpp"
 
-#include <msgpack.hpp>
+#include <goodform/variant.hpp>
 
 namespace Diggler {
 namespace Net {
@@ -15,17 +15,15 @@ enum class ServerInfoSubtype : uint8 {
 };
 
 struct ServerInfoRequest : public MsgType {
-  msgpack::zone z;
   std::vector<std::string> infos;
-  msgpack::object params;
+  goodform::variant params;
 
   void writeToMsg(OutMessage&) const override;
   void readFromMsg(InMessage&) override;
 };
 
 struct ServerInfoResponse : public MsgType {
-  msgpack::zone z;
-  msgpack::object infos;
+  goodform::variant infos;
 
   void writeToMsg(OutMessage&) const override;
   void readFromMsg(InMessage&) override;
