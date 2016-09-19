@@ -12,7 +12,6 @@
 #include "Audio.hpp"
 #include "Game.hpp"
 #include "network/NetHelper.hpp"
-#include "render/gl/VAO.hpp"
 
 namespace Diggler {
 
@@ -175,9 +174,6 @@ void LocalPlayer::update(float delta) {
 }
 
 void LocalPlayer::render(const glm::mat4 &transform) const {
-  static Render::gl::VBO vbo;
-  static Render::gl::VAO vao;
-  static bool vaoConfigured = false;
   const glm::f32vec3 min = aabbmin, max = aabbmax;
   struct Coord { float x, y, z; uint8 r, g, b; } pts[] = {
     { min.x, min.y, min.z, 0, 1, 0 },

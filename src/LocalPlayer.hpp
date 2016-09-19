@@ -6,6 +6,10 @@
 #include "Player.hpp"
 #include "World.hpp"
 
+// debugging
+#include "render/gl/VAO.hpp"
+#include "render/gl/VBO.hpp"
+
 namespace Diggler {
 
 class Game;
@@ -14,6 +18,11 @@ class LocalPlayer : public Player {
 private:
   bool goingForward, goingBackward, goingLeft, goingRight;
   bool hasGravity, hasNoclip, onGround, onRoad;
+
+  // debugging
+  mutable Render::gl::VBO vbo;
+  mutable Render::gl::VAO vao;
+  mutable bool vaoConfigured = false;
 
 public:
   float health;
