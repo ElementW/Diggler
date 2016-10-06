@@ -100,7 +100,7 @@ void Texture::setFiltering(Filter min, Filter mag) {
   PopBoundTex();
 }
 
-static GLenum getWrapGlConstant(Texture::Wrapping wrap) {
+static GLint getWrapGlConstant(Texture::Wrapping wrap) {
   switch (wrap) {
   case Texture::Wrapping::ClampEdge:
     return GL_CLAMP_TO_EDGE;
