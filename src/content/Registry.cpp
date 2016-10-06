@@ -1,4 +1,5 @@
 #include "Registry.hpp"
+
 #include "Content.hpp"
 #include "../GlobalProperties.hpp"
 
@@ -154,7 +155,13 @@ const TexturePacker::Coord* Registry::blockTexCoord(BlockId t, FaceDirection d,
     };
     return unk[rmod(pos.x, 2) + 2*(rmod(pos.y, 2)) + 4*(rmod(pos.z, 2))]; //&m_unknownBlockTex;
   }
-  const BlockDef &bdef = m_blocks.at(t);
+  const BlockDef *try_bdef;
+  try {
+    try_bdef = &m_blocks.at(t);
+  } catch (const std::out_of_range&) {
+    return &unk1;
+  }
+  const BlockDef &bdef = *try_bdef;
   using Type = BlockDef::Appearance::Look::Type;
   switch (bdef.appearance.look.type) {
     case Type::Cube: {
