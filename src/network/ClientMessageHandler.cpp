@@ -6,6 +6,7 @@
 #include "msgtypes/BlockUpdate.hpp"
 #include "msgtypes/Chat.hpp"
 #include "msgtypes/ChunkTransfer.hpp"
+#include "msgtypes/PlayerJoin.hpp"
 #include "msgtypes/PlayerUpdate.hpp"
 
 namespace Diggler {
@@ -81,10 +82,21 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
       }
     } break;
     case MessageType::PlayerJoin: {
-      Player &plr = GS.G->players.add();
-      plr.sessId = msg.readU32();
-      plr.name = msg.readString();
-      getDebugStream() << "Player " << plr.name << '(' << plr.sessId << ") joined the party!" << std::endl;
+      using S = PlayerJoinSubtype;
+      switch (msg.getSubtype<S>()) {
+        case S::Broadcast: {
+          PlayerJoinBroadcast pjb;
+          pjb.readFromMsg(msg);
+          Player &plr = GS.G->players.add();
+          plr.sessId = pjb.sessId;
+          plr.name = pjb.name;
+          getDebugStream() << "Player " << pjb.name <<
+            '(' << pjb.sessId << ") joined the party!" << std::endl;
+        } break;
+        default: {
+          // No-op
+        } break;
+      }
     } break;
     case MessageType::PlayerQuit: {
       uint32 id = msg.readU32();
