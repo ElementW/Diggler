@@ -4,9 +4,12 @@
 #include <goodform/variant.hpp>
 
 #include "../crypto/SHA256.hpp"
+#include "AssetContentMetadata.hpp"
 
 namespace Diggler {
 namespace Content {
+
+class AssetManager;
 
 class Asset {
 public:
@@ -20,13 +23,22 @@ public:
   };
 
 protected:
-  Crypto::SHA256::Digest m_hash;
+  friend class AssetManager;
+
+  Crypto::SHA256::Digest m_contentHash;
+  AssetContentMetadata &m_contentMetadata;
   Type m_type;
   goodform::object m_info;
 
+  Asset(AssetContentMetadata&);
+
 public:
-  const Crypto::SHA256::Digest& hash() const {
-    return m_hash;
+  const Crypto::SHA256::Digest& contentHash() const {
+    return m_contentHash;
+  }
+
+  const AssetContentMetadata& contentMetadata() const {
+    return m_contentMetadata;
   }
 
   Type type() const {
