@@ -65,6 +65,7 @@ set(SRCS
   ${CSD}/Universe.cpp
   ${CSD}/util/BitmapDumper.cpp
   ${CSD}/util/TexturePacker.cpp
+  ${CSD}/util/Tipsify.cpp
   ${CSD}/World.cpp
   PARENT_SCOPE
 )
