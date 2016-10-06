@@ -146,24 +146,33 @@ GameWindow::GameWindow(Game *G) : G(G) {
   getDebugStream() << bits << " stencil bits" << std::endl;*/
 
   getOutputStreamRaw() << "GLM " << GLM_VERSION_MAJOR << '.' << GLM_VERSION_MINOR << '.' << GLM_VERSION_PATCH << ' '
-#if GLM_ARCH & GLM_ARCH_AVX2
-  << "AVX2"
+#if GLM_ARCH & GLM_ARCH_AVX512_BIT
+  << "AVX512 "
 #endif
-#if GLM_ARCH & GLM_ARCH_AVX
-  << "AVX"
+#if GLM_ARCH & GLM_ARCH_AVX2_BIT
+  << "AVX2 "
 #endif
-#if GLM_ARCH & GLM_ARCH_SSE4
-  << "SSE4"
+#if GLM_ARCH & GLM_ARCH_AVX_BIT
+  << "AVX "
 #endif
-#if GLM_ARCH & GLM_ARCH_SSE3
-  << "SSE3"
+#if GLM_ARCH & GLM_ARCH_SSE42_BIT
+ << "SSE42 "
 #endif
-#if GLM_ARCH & GLM_ARCH_SSE2
-  << "SSE2"
+#if GLM_ARCH & GLM_ARCH_SSE41_BIT
+  << "SSE41 "
+#endif
+#if GLM_ARCH & GLM_ARCH_SSSE3_BIT
+ << "SSSE3 "
+#endif
+#if GLM_ARCH & GLM_ARCH_SSE3_BIT
+  << "SSE3 "
+#endif
+#if GLM_ARCH & GLM_ARCH_SSE2_BIT
+  << "SSE2 "
 #endif
   ;
 
-  getOutputStreamRaw() << " -- Epoxy GL" << (epoxy_is_desktop_gl() ? "" : "ES") << epoxy_gl_version() << std::endl;
+  getOutputStreamRaw() << "-- Epoxy GL" << (epoxy_is_desktop_gl() ? "" : "ES") << epoxy_gl_version() << std::endl;
 
   if (InstanceCount == 1) { // If we're the first instance
     const uint8 *GL_version = glGetString(GL_VERSION);
