@@ -12,6 +12,29 @@ struct SHA256 {
   constexpr static size_t DigestBytes = crypto_hash_sha256_BYTES;
 
   struct Digest : CryptoData<SHA256::DigestBytes> {
+    bool operator==(const Digest &o) const {
+      return memcmp(data, o.data, Length) == 0;
+    }
+
+    bool operator!=(const Digest &o) const {
+      return !operator==(o);
+    }
+
+    bool operator>(const Digest &o) const {
+      return memcmp(data, o.data, Length) > 0;
+    }
+
+    bool operator>=(const Digest &o) const {
+      return memcmp(data, o.data, Length) >= 0;
+    }
+
+    bool operator<(const Digest &o) const {
+      return memcmp(data, o.data, Length) < 0;
+    }
+
+    bool operator<=(const Digest &o) const {
+      return memcmp(data, o.data, Length) <= 0;
+    }
   };
 
   crypto_hash_sha256_state state;
