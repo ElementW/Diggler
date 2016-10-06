@@ -18,7 +18,7 @@ struct CryptoData {
   };
 
   bool operator==(const CryptoData<B> &o) const {
-    return sodium_memcmp(data, o.data, Length);
+    return sodium_memcmp(data, o.data, Length) == 0;
   }
 
   bool operator!=(const CryptoData<B> &o) const {
@@ -34,7 +34,7 @@ struct CryptoData {
   }
 
   void zerofill() {
-    memset(data, 0, Length);
+    sodium_memzero(data, Length);
   }
 
   std::string hex(bool caps = false) const {
