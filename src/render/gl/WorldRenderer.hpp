@@ -41,6 +41,16 @@ protected:
   void loadShader();
 
 public:
+  struct PointedHighlight : public WorldRenderer::PointedHighlight {
+    bool visible;
+    glm::vec4 color;
+    glm::vec3 center;
+    PointedHighlight() = default;
+    void setVisible(bool);
+    void setColor(uint8 r, uint8 g, uint8 b, uint8 a);
+    void setCenter(const glm::vec3&);
+  } pointedHighlight;
+
   GLWorldRenderer(Game*);
   ~GLWorldRenderer();
 

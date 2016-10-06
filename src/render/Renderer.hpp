@@ -21,6 +21,9 @@ protected:
 public:
   virtual ~Renderer() = 0;
 
+  virtual void beginFrame() = 0;
+  virtual void endFrame() = 0;
+
   struct Renderers {
     ParticlesRenderer *particles;
     WorldRenderer *world;

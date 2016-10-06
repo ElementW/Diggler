@@ -17,6 +17,16 @@ protected:
   }
 
 public:
+  struct PointedHighlight {
+    virtual ~PointedHighlight() {}
+    virtual void setVisible(bool) = 0;
+    virtual void setColor(uint8 r, uint8 g, uint8 b, uint8 a) = 0;
+    virtual void setCenter(const glm::vec3&) = 0;
+  } &pointedHighlight;
+
+  WorldRenderer(PointedHighlight &ph) :
+    pointedHighlight(ph) {
+  }
   virtual ~WorldRenderer() = 0;
 
   virtual void registerChunk(Chunk*) = 0;

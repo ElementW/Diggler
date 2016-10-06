@@ -16,6 +16,7 @@ namespace gl {
 using GLCoord = Chunk::Vertex;
 
 GLWorldRenderer::GLWorldRenderer(Game *G) :
+  WorldRenderer(pointedHighlight),
   G(G) {
   loadShader();
   TextureAtlas = G->CR->getAtlas();
@@ -142,6 +143,18 @@ void GLWorldRenderer::render(RenderParams &rp) {
   glVertexAttribPointer(att_color, 3, GL_FLOAT, GL_FALSE, sizeof(GLCoord), (GLvoid*)offsetof(GLCoord, r));
   glDrawElements(GL_TRIANGLES, indicesTpt, GL_UNSIGNED_SHORT, (GLvoid*)(indicesOpq*sizeof(GLshort)));
 }*/
+
+void GLWorldRenderer::PointedHighlight::setVisible(bool visible) {
+  this->visible = visible;
+}
+
+void GLWorldRenderer::PointedHighlight::setColor(uint8 r, uint8 g, uint8 b, uint8 a) {
+  color = glm::vec4(r / 255., g / 255., b / 255., a / 255.);
+}
+
+void GLWorldRenderer::PointedHighlight::setCenter(const glm::vec3 &pos) {
+  center = pos;
+}
 
 }
 }

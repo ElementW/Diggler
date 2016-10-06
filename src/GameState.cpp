@@ -103,6 +103,7 @@ GameState::GameState(GameWindow *GW, const std::string &servHost, int servPort) 
   }
 
   m_3dFbo = new Render::gl::FBO(w, h, Texture::PixelFormat::RGB, true);
+  m_3dFbo->tex->setWrapping(Texture::Wrapping::ClampEdge);
   m_3dRenderVBO = new Render::gl::VBO();
   m_clouds = new Clouds(G, 32, 32, 4);
   //m_sky = new Skybox(G, getAssetPath("alpine"));
@@ -138,6 +139,7 @@ GameState::Bloom::Bloom(Game &G) {
 
   extractor.fbo = new Render::gl::FBO(G.GW->getW()/scale, G.GW->getH()/scale, Texture::PixelFormat::RGBA);
   extractor.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
+  extractor.fbo->tex->setWrapping(Texture::Wrapping::ClampEdge);
   extractor.prog = G.PM->getSpecialProgram("bloomExtractor");
   extractor.att_coord = extractor.prog->att("coord");
   extractor.att_texcoord = extractor.prog->att("texcoord");
@@ -145,6 +147,7 @@ GameState::Bloom::Bloom(Game &G) {
 
   renderer.fbo = new Render::gl::FBO(G.GW->getW()/scale, G.GW->getH()/scale, Texture::PixelFormat::RGBA);
   renderer.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
+  renderer.fbo->tex->setWrapping(Texture::Wrapping::ClampEdge);
   renderer.prog = G.PM->getSpecialProgram("bloom");
   renderer.att_coord = renderer.prog->att("coord");
   renderer.att_texcoord = renderer.prog->att("texcoord");
@@ -293,7 +296,7 @@ void GameState::lockMouse() {
   glfwSetInputMode(*GW, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   double x, y;
   glfwGetCursorPos(*GW, &x, &y);
-  cX = (int)x; cY = (int)y;
+  cX = static_cast<int>(x); cY = static_cast<int>(y);
   m_mouseLocked = true;
 }
 
@@ -304,10 +307,12 @@ void GameState::unlockMouse() {
 
 
 void GameState::onMouseButton(int key, int action, int mods) {
+  (void) mods;
+
   if (!m_mouseLocked && action == GLFW_PRESS && !isMenuToggled) {
     lockMouse();
   }
-  
+
   if (action == GLFW_PRESS) {
     glm::ivec3 pointed, face;
     if (G->LP->raytracePointed(32, &pointed, &face)) {
@@ -331,10 +336,11 @@ void GameState::onMouseButton(int key, int action, int mods) {
 }
 
 void GameState::onCursorPos(double x, double y) {
-  if (!m_mouseLocked)
+  if (!m_mouseLocked) {
     return;
-  int cx = (int)x, dx = cx-cX, cy = (int)y, dy = cy-cY;
-  const float mousespeed = 0.003;
+  }
+  int cx = static_cast<int>(x), dx = cx-cX, cy = static_cast<int>(y), dy = cy-cY;
+  const float mousespeed = 0.003f;
 
   angles.x -= dx * mousespeed;
   angles.y -= dy * mousespeed;
@@ -533,175 +539,157 @@ void GameState::gameLoop() {
       frames = 0;
     }
 
-    if (G->LP->isAlive) {
-      if (T > nextNetUpdate) {
-        Net::MsgTypes::PlayerUpdateMove pum;
-        pum.position = LP->position;
-        if (LP->velocity != glm::vec3()) {
-          pum.velocity = LP->velocity;
-          pum.accel = LP->accel;
-        }
-        pum.angle = LP->angle;
-        Net::OutMessage msg; pum.writeToMsg(msg);
-        sendMsg(msg, Net::Tfer::Unrel, Net::Channels::Movement);
-        nextNetUpdate = T+1.0/G->PlayerPosUpdateFreq;
-      }
+    G->R->beginFrame();
+    frameStart = std::chrono::steady_clock::now();
 
+    if (T > nextNetUpdate) {
+      Net::MsgTypes::PlayerUpdateMove pum;
+      pum.position = LP->position;
+      if (LP->velocity != glm::vec3()) {
+        pum.velocity = LP->velocity;
+        pum.accel = LP->accel;
+      }
+      pum.angle = LP->angle;
+      Net::OutMessage msg; pum.writeToMsg(msg);
+      sendMsg(msg, Net::Tfer::Unrel, Net::Channels::Movement);
+      nextNetUpdate = T+1.0/G->PlayerPosUpdateFreq;
+    }
+
+    if (bloom.enable) {
+      m_3dFbo->bind();
       glClearColor(0.0, 0.0, 0.0, 1.0);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      frameStart = std::chrono::steady_clock::now();
-
-      if (bloom.enable) {
-        m_3dFbo->bind();
-        glClearColor(0.0, 0.0, 0.0, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      }
-
-      LP->update(deltaT);
-      if (LP->position.y < -32) {
-        LP->setDead(true, Player::DeathReason::Void, true);
-      }
-
-      glm::mat4 m_transform = LP->getPVMatrix();
-
-      /*** 3D PART ***/
-      // TODO: multiworld
-      WorldRef WR = G->U->getWorld(0);
-      World &W = *WR;
-      /*glm::mat4 cloudmat = glm::scale(glm::translate(m_transform, glm::vec3(0.f, W.cloudsHeight, 0.f)), glm::vec3(4*CX, 1, 4*CZ));
-      m_clouds->render(cloudmat);*/
-
-      glEnable(GL_DEPTH_TEST);
-      glEnable(GL_CULL_FACE);
-
-      Render::RenderParams rp;
-      rp.world = WR.get();
-      rp.transform = m_transform;
-      rp.frustum = G->LP->camera.frustum;
-      G->R->renderers.world->render(rp);
-      for (Player &p : G->players) {
-        p.update(deltaT);
-        if (G->LP->camera.frustum.sphereInFrustum(p.position, 2))
-          p.render(m_transform);
-      }
-      //W.renderTransparent(m_transform);
-
-      /*static ParticleEmitter pe(G);
-      pe.posAmpl = glm::vec3(1, 1, 1);
-      pe.pTemplate.color = glm::vec4(0, 0.4, 0.9, 1);
-      pe.pTemplate.size = 0.07;
-      pe.velAmpl = glm::vec3(0, 1, 0);
-      pe.pTemplate.accel = glm::vec3(0, -.7, 0);
-      pe.pTemplate.decay = 4;
-      pe.decayAmpl = 2;
-      
-      pe.setMaxCount(4*4*800);
-      pe.posAmpl = glm::vec3(2*16, 1, 2*16);
-      pe.pos = glm::vec3(2*16, 4*16+4, 2*16);
-      pe.pTemplate.vel = glm::vec3(0, -4, 0);
-      pe.velAmpl = glm::vec3(0, 2, 0); rain
-      
-      pe.update(deltaT);
-      Render::RenderParams rp;
-      rp.transform = m_transform;
-      G->R->PR->render(rp);*/
-
-      // TODO: replace harcoded 32 viewdistance
-      if (G->LP->raytracePointed(32, &m_pointedBlock, &m_pointedFacing)) {
-        m_highlightBox.program->bind();
-        m_highlightBox.vao.bind();
-
-        glUniform4f(m_highlightBox.uni_unicolor, 1.f, 1.f, 1.f, .1f);
-        glUniformMatrix4fv(m_highlightBox.uni_mvp, 1, GL_FALSE, glm::value_ptr(
-          glm::scale(glm::translate(m_transform, glm::vec3(m_pointedBlock)+glm::vec3(.5f)), glm::vec3(0.5f*1.03f))));
-        glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
-
-        m_highlightBox.vao.unbind();
-      }
-
-      glDisable(GL_CULL_FACE);
-      glDisable(GL_DEPTH_TEST);
-      LP->render(m_transform);
-
-      if (bloom.enable) {
-        m_3dFbo->unbind();
-        G->UIM->drawFullTexV(*m_3dFbo->tex);
-
-        m_3dFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
-        bloom.extractor.fbo->bind();
-        glViewport(0, 0, GW->getW()/bloom.scale, GW->getH()/bloom.scale);
-        glClearColor(0.f, 0.f, 0.f, 0.f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        bloom.extractor.prog->bind();
-        glEnableVertexAttribArray(bloom.extractor.att_coord);
-        glEnableVertexAttribArray(bloom.extractor.att_texcoord);
-        m_3dRenderVBO->bind();
-        glUniformMatrix4fv(bloom.extractor.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM1));
-        glVertexAttribPointer(bloom.extractor.att_coord, 2, GL_SHORT, GL_FALSE, sizeof(Coord2DTex), 0);
-        glVertexAttribPointer(bloom.extractor.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glDisableVertexAttribArray(bloom.extractor.att_texcoord);
-        glDisableVertexAttribArray(bloom.extractor.att_coord);
-        m_3dFbo->tex->setFiltering(Texture::Filter::Nearest, Texture::Filter::Nearest);
-
-        bloom.renderer.fbo->bind();
-        glClearColor(0.f, 0.f, 0.f, 0.f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        bloom.extractor.fbo->tex->bind();
-        bloom.renderer.prog->bind();
-        glEnableVertexAttribArray(bloom.renderer.att_coord);
-        glEnableVertexAttribArray(bloom.renderer.att_texcoord);
-        m_3dRenderVBO->bind();
-        glUniformMatrix4fv(bloom.renderer.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM1));
-        glUniform2f(bloom.renderer.uni_pixshift, 1.f/(GW->getW()/bloom.scale), 1.f/(GW->getH()/bloom.scale));
-        glVertexAttribPointer(bloom.renderer.att_coord, 2, GL_SHORT, GL_FALSE, sizeof(Coord2DTex), 0);
-        glVertexAttribPointer(bloom.renderer.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glDisableVertexAttribArray(bloom.renderer.att_texcoord);
-        glDisableVertexAttribArray(bloom.renderer.att_coord);
-        bloom.renderer.fbo->unbind();
-
-        // render to real surface
-        glViewport(0, 0, GW->getW(), GW->getH());
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        bloom.extractor.fbo->tex->bind();
-        bloom.extractor.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
-        bloom.renderer.prog->bind();
-        glEnableVertexAttribArray(bloom.renderer.att_coord);
-        glEnableVertexAttribArray(bloom.renderer.att_texcoord);
-        m_3dRenderVBO->bind();
-        glUniformMatrix4fv(bloom.renderer.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM1));
-        glVertexAttribPointer(bloom.renderer.att_coord, 2, GL_SHORT, GL_FALSE, sizeof(Coord2DTex), 0);
-        glVertexAttribPointer(bloom.renderer.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glDisableVertexAttribArray(bloom.renderer.att_texcoord);
-        glDisableVertexAttribArray(bloom.renderer.att_coord);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      }
-
-      /*** 2D PART ***/
-      G->UIM->drawFullRect(glm::vec4(1.f, 0.f, 0.f, 1-G->LP->health));
-      updateUI();
-      drawUI();
-    } else {
-      if (!G->LP->deathShown) {
-        G->LP->deathShown = true;
-        G->A->playSound("death");
-      }
-      if (!G->LP->deathSent) {
-        G->LP->deathSent = true;
-        Net::MsgTypes::PlayerUpdateDie pud;
-        pud.reason = G->LP->deathReason;
-        Net::OutMessage out; pud.writeToMsg(out);
-        sendMsg(out, Net::Tfer::Rel, Net::Channels::Life);
-      }
-      renderDeathScreen();
     }
+
+    LP->update(deltaT);
+
+    glm::mat4 m_transform = LP->getPVMatrix();
+
+    /*** 3D PART ***/
+    // TODO: multiworld
+    WorldRef WR = G->U->getWorld(0);
+    World &W = *WR;
+    /*glm::mat4 cloudmat = glm::scale(glm::translate(m_transform, glm::vec3(0.f, W.cloudsHeight, 0.f)), glm::vec3(4*CX, 1, 4*CZ));
+    m_clouds->render(cloudmat);*/
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
+    Render::RenderParams rp;
+    rp.world = WR.get();
+    rp.transform = m_transform;
+    rp.frustum = G->LP->camera.frustum;
+    G->R->renderers.world->render(rp);
+    for (Player &p : G->players) {
+      p.update(deltaT);
+      if (G->LP->camera.frustum.sphereInFrustum(p.position, 2))
+        p.render(m_transform);
+    }
+    //W.renderTransparent(m_transform);
+
+    /*static ParticleEmitter pe(G);
+    pe.posAmpl = glm::vec3(1, 1, 1);
+    pe.pTemplate.color = glm::vec4(0, 0.4, 0.9, 1);
+    pe.pTemplate.size = 0.07;
+    pe.velAmpl = glm::vec3(0, 1, 0);
+    pe.pTemplate.accel = glm::vec3(0, -.7, 0);
+    pe.pTemplate.decay = 4;
+    pe.decayAmpl = 2;
+
+    pe.setMaxCount(4*4*800);
+    pe.posAmpl = glm::vec3(2*16, 1, 2*16);
+    pe.pos = glm::vec3(2*16, 4*16+4, 2*16);
+    pe.pTemplate.vel = glm::vec3(0, -4, 0);
+    pe.velAmpl = glm::vec3(0, 2, 0); rain
+
+    pe.update(deltaT);
+    Render::RenderParams rp;
+    rp.transform = m_transform;
+    G->R->PR->render(rp);*/
+
+    // TODO: replace harcoded 32 viewdistance
+    if (G->LP->raytracePointed(32, &m_pointedBlock, &m_pointedFacing)) {
+      m_highlightBox.program->bind();
+      m_highlightBox.vao.bind();
+
+      glUniform4f(m_highlightBox.uni_unicolor, 1.f, 1.f, 1.f, .1f);
+      glUniformMatrix4fv(m_highlightBox.uni_mvp, 1, GL_FALSE, glm::value_ptr(
+        glm::scale(glm::translate(m_transform, glm::vec3(m_pointedBlock)+glm::vec3(.5f)), glm::vec3(0.5f*1.03f))));
+      glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
+
+      m_highlightBox.vao.unbind();
+    }
+
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    LP->render(m_transform);
+
+    if (bloom.enable) {
+      m_3dFbo->unbind();
+      G->UIM->drawFullTexV(*m_3dFbo->tex);
+
+      m_3dFbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
+      bloom.extractor.fbo->bind();
+      glViewport(0, 0, GW->getW()/bloom.scale, GW->getH()/bloom.scale);
+      glClearColor(0.f, 0.f, 0.f, 0.f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      bloom.extractor.prog->bind();
+      glEnableVertexAttribArray(bloom.extractor.att_coord);
+      glEnableVertexAttribArray(bloom.extractor.att_texcoord);
+      m_3dRenderVBO->bind();
+      glUniformMatrix4fv(bloom.extractor.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM1));
+      glVertexAttribPointer(bloom.extractor.att_coord, 2, GL_SHORT, GL_FALSE, sizeof(Coord2DTex), 0);
+      glVertexAttribPointer(bloom.extractor.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+      glDisableVertexAttribArray(bloom.extractor.att_texcoord);
+      glDisableVertexAttribArray(bloom.extractor.att_coord);
+      m_3dFbo->tex->setFiltering(Texture::Filter::Nearest, Texture::Filter::Nearest);
+
+      bloom.renderer.fbo->bind();
+      glClearColor(0.f, 0.f, 0.f, 0.f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      bloom.extractor.fbo->tex->bind();
+      bloom.renderer.prog->bind();
+      glEnableVertexAttribArray(bloom.renderer.att_coord);
+      glEnableVertexAttribArray(bloom.renderer.att_texcoord);
+      m_3dRenderVBO->bind();
+      glUniformMatrix4fv(bloom.renderer.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM1));
+      glUniform2f(bloom.renderer.uni_pixshift, 1.f/(GW->getW()/bloom.scale), 1.f/(GW->getH()/bloom.scale));
+      glVertexAttribPointer(bloom.renderer.att_coord, 2, GL_SHORT, GL_FALSE, sizeof(Coord2DTex), 0);
+      glVertexAttribPointer(bloom.renderer.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+      glDisableVertexAttribArray(bloom.renderer.att_texcoord);
+      glDisableVertexAttribArray(bloom.renderer.att_coord);
+      bloom.renderer.fbo->unbind();
+
+      // render to real surface
+      glViewport(0, 0, GW->getW(), GW->getH());
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+      bloom.extractor.fbo->tex->bind();
+      bloom.extractor.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
+      bloom.renderer.prog->bind();
+      glEnableVertexAttribArray(bloom.renderer.att_coord);
+      glEnableVertexAttribArray(bloom.renderer.att_texcoord);
+      m_3dRenderVBO->bind();
+      glUniformMatrix4fv(bloom.renderer.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM1));
+      glVertexAttribPointer(bloom.renderer.att_coord, 2, GL_SHORT, GL_FALSE, sizeof(Coord2DTex), 0);
+      glVertexAttribPointer(bloom.renderer.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+      glDisableVertexAttribArray(bloom.renderer.att_texcoord);
+      glDisableVertexAttribArray(bloom.renderer.att_coord);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    /*** 2D PART ***/
+    G->UIM->drawFullRect(glm::vec4(1.f, 0.f, 0.f, 1-G->LP->health));
+    updateUI();
+    drawUI();
 
     if (isMenuToggled)
       UI.EM->render();
 
+    G->R->endFrame();
     frameEnd = std::chrono::steady_clock::now();
     frameTime = std::chrono::duration_cast<std::chrono::duration<uint64, std::micro>>(frameEnd  - frameStart).count();
 
