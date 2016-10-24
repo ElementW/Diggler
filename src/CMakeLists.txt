@@ -44,6 +44,8 @@ set(SRCS
   ${CSD}/network/NetHelper.cpp
   ${CSD}/network/Network.cpp
   ${CSD}/Particles.cpp
+  ${CSD}/platform/FastRand.cpp
+  ${CSD}/platform/fs.cpp
   ${CSD}/Platform.cpp
   ${CSD}/Player.cpp
   ${CSD}/PlayerList.cpp
