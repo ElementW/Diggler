@@ -16,6 +16,8 @@ struct SecretKey : MlockedCryptoData<ScalarBytes> {
 };
 
 struct PublicKey : CryptoData<Bytes> {
+  using CryptoData<Bytes>::CryptoData;
+  using CryptoData<Bytes>::operator=;
 };
 
 struct SharedSecret : MlockedCryptoData<Bytes> {

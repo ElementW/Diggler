@@ -2,6 +2,7 @@
 #define DIGGLER_CRYPTO_CRYPTODATA_HPP
 
 #include <cstring>
+#include <stdexcept>
 #include <string>
 
 #include <sodium.h>
@@ -17,11 +18,44 @@ struct CryptoData {
     unsigned char data[Length], bytes[Length];
   };
 
+  CryptoData() = default;
+  CryptoData(const CryptoData&) = default;
+  CryptoData(CryptoData&&) = default;
+  CryptoData(const std::string &s) {
+    if (s.length() != Length) {
+      throw std::runtime_error("Invalid string length");
+    }
+    memcpy(data, s.data(), Length);
+  }
+
+  CryptoData& operator=(const CryptoData&) = default;
+  CryptoData& operator=(CryptoData&&) = default;
+
+  CryptoData& operator=(const std::string &s) {
+    if (s.length() != Length) {
+      throw std::runtime_error("Invalid string length");
+    }
+    memcpy(data, s.data(), Length);
+    return *this;
+  }
+
+  explicit operator std::string() const {
+    return std::string(reinterpret_cast<const char*>(data), Length);
+  }
+
   bool operator==(const CryptoData<B> &o) const {
     return sodium_memcmp(data, o.data, Length) == 0;
   }
 
   bool operator!=(const CryptoData<B> &o) const {
+    return !operator==(o);
+  }
+
+  bool operator==(const std::string &o) const {
+    return o.length() == Length and sodium_memcmp(data, o.data(), Length) == 0;
+  }
+
+  bool operator!=(const std::string &o) const {
     return !operator==(o);
   }
 
