@@ -67,7 +67,7 @@ public:
   };
 
   struct Vertex {
-    uint8 x, y, z, w;
+    float x, y, z;
     uint16 tx, ty;
     float r, g, b;
   };

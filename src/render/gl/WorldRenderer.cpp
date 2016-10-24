@@ -49,7 +49,7 @@ void GLWorldRenderer::registerChunk(Chunk *c) {
   ChunkEntry &ce = *(new ChunkEntry);
   setRendererData(c, reinterpret_cast<uintptr_t>(&ce));
   { VAO::Config cfg = ce.vao.configure();
-    cfg.vertexAttrib(ce.vbo, att_coord, 3, GL_BYTE, sizeof(GLCoord), 0);
+    cfg.vertexAttrib(ce.vbo, att_coord, 3, GL_FLOAT, sizeof(GLCoord), 0);
     //cfg.vertexAttrib(ce.vbo, att_wave, 1, GL_BYTE, sizeof(GLCoord), offsetof(GLCoord, w));
     cfg.vertexAttrib(ce.vbo, att_texcoord, 2, GL_UNSIGNED_SHORT, sizeof(GLCoord),
       offsetof(GLCoord, tx), true);

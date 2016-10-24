@@ -282,14 +282,12 @@ void Chunk::updateClient() {
 #endif
   mut.lock();
   Content::Registry &CR = *G->CR;
-  Vertex   vertex[CX * CY * CZ * 6 /* faces */ * 4 /* vertices */ / 2 /* face removing (HSR) makes a lower vert max */];
-  GLushort idxOpaque[CX * CY * CZ * 6 /* faces */ * 6 /* indices */ / 2 /* HSR */],
-           idxTransp[CX*CY*CZ*6*6/2];
-  uint v = 0, io = 0, it = 0;
+  Vertex vertex[CX * CY * CZ * 6 /* faces */ * 4 /* vertices */ / 2 /* face removing (HSR) makes a lower vert max */];
+  ushort idxOpaque[CX * CY * CZ * 6 /* faces */ * 6 /* indices */ / 2 /* HSR */],
+         idxTransp[CX*CY*CZ*6*6/2];
+  ushort v = 0, io = 0, it = 0;
 
-  bool hasWaves = G->RP->wavingLiquids;
-  BlockId bt, bu /*BlockUp*/, bn /*BlockNear*/;
-  bool mayDisp;
+  BlockId bt, bn /*BlockNear*/;
   const TexturePacker::Coord *tc;
   for(int8 x = 0; x < CX; x++) {
     for(int8 y = 0; y < CY; y++) {
@@ -331,21 +329,9 @@ void Chunk::updateClient() {
           vertex[v++] = {x,     y + 1, z,     tc->x, tc->y, tl.r, tl.g, tl.b};
           vertex[v++] = {x,     y + 1, z + 1, tc->u, tc->y, tr.r, tr.g, tr.b};
 #endif
-        // FIXME: dirtydirty workaround
-        const BlockId BlockTypeLava = 998;
-        const BlockId BlockTypeShock = 999;
 
-        uint8 w;
-        if (hasWaves) {
-          w = (bt == BlockTypeLava && getBlockId(x, y+1, z) != BlockTypeLava) ? 8 : 0;
-          bu = getBlockId(x, y+1, z);
-          mayDisp = (bt != BlockTypeLava) || (bt == BlockTypeLava && bu == BlockTypeLava);
-        } else {
-          w = 0;
-          mayDisp = false;
-        }
-
-        GLushort *index; uint i; bool transp = CR.isTransparent(bt);
+        GLushort *index; ushort i;
+        const bool transp = CR.isTransparent(bt);
         if (transp) {
           index = idxTransp;
           i = it;
@@ -356,81 +342,74 @@ void Chunk::updateClient() {
 
         // View from negative x
         bn = getBlockId(x - 1, y, z);
-        if ((mayDisp && bn == BlockTypeLava && getBlockId(x-1, y+1, z) != BlockTypeLava)
-          || CR.isFaceVisible(bt, bn)) {
+        if (CR.isFaceVisible(bt, bn)) {
           index[i++] = v; index[i++] = v+1; index[i++] = v+2;
           index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
           tc = CR.blockTexCoord(bt, FaceDirection::XDec, blockPos);
-          vertex[v++] = {x,     y,     z,     0, tc->x, tc->v, .6f, .6f, .6f};
-          vertex[v++] = {x,     y,     z + 1, 0, tc->u, tc->v, .6f, .6f, .6f};
-          vertex[v++] = {x,     y + 1, z,     w, tc->x, tc->y, .6f, .6f, .6f};
-          vertex[v++] = {x,     y + 1, z + 1, w, tc->u, tc->y, .6f, .6f, .6f};
+          vertex[v++] = {x, y,     z,     tc->x, tc->v, .6f, .6f, .6f};
+          vertex[v++] = {x, y,     z + 1, tc->u, tc->v, .6f, .6f, .6f};
+          vertex[v++] = {x, y + 1, z,     tc->x, tc->y, .6f, .6f, .6f};
+          vertex[v++] = {x, y + 1, z + 1, tc->u, tc->y, .6f, .6f, .6f};
         }
 
         // View from positive x
         bn = getBlockId(x + 1, y, z);
-        if ((mayDisp && bn == BlockTypeLava && getBlockId(x+1, y+1, z) != BlockTypeLava)
-          || CR.isFaceVisible(bt, bn)) {
+        if (CR.isFaceVisible(bt, bn)) {
           index[i++] = v; index[i++] = v+1; index[i++] = v+2;
           index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
           tc = CR.blockTexCoord(bt, FaceDirection::XInc, blockPos);
-          vertex[v++] = {x + 1, y,     z,     0, tc->u, tc->v, .6f, .6f, .6f};
-          vertex[v++] = {x + 1, y + 1, z,     w, tc->u, tc->y, .6f, .6f, .6f};
-          vertex[v++] = {x + 1, y,     z + 1, 0, tc->x, tc->v, .6f, .6f, .6f};
-          vertex[v++] = {x + 1, y + 1, z + 1, w, tc->x, tc->y, .6f, .6f, .6f};
+          vertex[v++] = {x + 1, y,     z,     tc->u, tc->v, .6f, .6f, .6f};
+          vertex[v++] = {x + 1, y + 1, z,     tc->u, tc->y, .6f, .6f, .6f};
+          vertex[v++] = {x + 1, y,     z + 1, tc->x, tc->v, .6f, .6f, .6f};
+          vertex[v++] = {x + 1, y + 1, z + 1, tc->x, tc->y, .6f, .6f, .6f};
         }
 
         // Negative Y
         bn = getBlockId(x, y - 1, z);
-        if ((hasWaves && bn == BlockTypeLava)
-          || CR.isFaceVisible(bt, bn)) {
+        if (CR.isFaceVisible(bt, bn)) {
           index[i++] = v; index[i++] = v+1; index[i++] = v+2;
           index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
-          float shade = (data->id[I(x,y,z)] == BlockTypeShock) ? 1.5f : .2f;;
           tc = CR.blockTexCoord(bt, FaceDirection::YDec, blockPos);
-          vertex[v++] = {x,     y,     z, 0, tc->u, tc->v, shade, shade, shade};
-          vertex[v++] = {x + 1, y,     z, 0, tc->u, tc->y, shade, shade, shade};
-          vertex[v++] = {x,     y, z + 1, 0, tc->x, tc->v, shade, shade, shade};
-          vertex[v++] = {x + 1, y, z + 1, 0, tc->x, tc->y, shade, shade, shade};
+          vertex[v++] = {x,     y,     z, tc->u, tc->v, .2f, .2f, .2f};
+          vertex[v++] = {x + 1, y,     z, tc->u, tc->y, .2f, .2f, .2f};
+          vertex[v++] = {x,     y, z + 1, tc->x, tc->v, .2f, .2f, .2f};
+          vertex[v++] = {x + 1, y, z + 1, tc->x, tc->y, .2f, .2f, .2f};
         }
 
         // Positive Y
         bn = getBlockId(x, y + 1, z);
-        if ((hasWaves && bt == BlockTypeLava && bu != BlockTypeLava)
-          || CR.isFaceVisible(bt, bn)) {
+        if (CR.isFaceVisible(bt, bn)) {
           index[i++] = v; index[i++] = v+1; index[i++] = v+2;
           index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
           tc = CR.blockTexCoord(bt, FaceDirection::YInc, blockPos);
-          vertex[v++] = {x,     y + 1,     z, w, tc->x, tc->v, .8f, .8f, .8f};
-          vertex[v++] = {x,     y + 1, z + 1, w, tc->u, tc->v, .8f, .8f, .8f};
-          vertex[v++] = {x + 1, y + 1,     z, w, tc->x, tc->y, .8f, .8f, .8f};
-          vertex[v++] = {x + 1, y + 1, z + 1, w, tc->u, tc->y, .8f, .8f, .8f};
+          vertex[v++] = {x,     y + 1,     z, tc->x, tc->v, .8f, .8f, .8f};
+          vertex[v++] = {x,     y + 1, z + 1, tc->u, tc->v, .8f, .8f, .8f};
+          vertex[v++] = {x + 1, y + 1,     z, tc->x, tc->y, .8f, .8f, .8f};
+          vertex[v++] = {x + 1, y + 1, z + 1, tc->u, tc->y, .8f, .8f, .8f};
         }
 
         // Negative Z
         bn = getBlockId(x, y, z - 1);
-        if ((mayDisp && bn == BlockTypeLava && getBlockId(x, y+1, z-1) != BlockTypeLava)
-          || CR.isFaceVisible(bt, bn)) {
+        if (CR.isFaceVisible(bt, bn)) {
           index[i++] = v; index[i++] = v+1; index[i++] = v+2;
           index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
           tc = CR.blockTexCoord(bt, FaceDirection::ZDec, blockPos);
-          vertex[v++] = {x,     y,     z, 0, tc->u, tc->v, .4f, .4f, .4f};
-          vertex[v++] = {x,     y + 1, z, w, tc->u, tc->y, .4f, .4f, .4f};
-          vertex[v++] = {x + 1, y,     z, 0, tc->x, tc->v, .4f, .4f, .4f};
-          vertex[v++] = {x + 1, y + 1, z, w, tc->x, tc->y, .4f, .4f, .4f};
+          vertex[v++] = {x,     y,     z, tc->u, tc->v, .4f, .4f, .4f};
+          vertex[v++] = {x,     y + 1, z, tc->u, tc->y, .4f, .4f, .4f};
+          vertex[v++] = {x + 1, y,     z, tc->x, tc->v, .4f, .4f, .4f};
+          vertex[v++] = {x + 1, y + 1, z, tc->x, tc->y, .4f, .4f, .4f};
         }
 
         // Positive Z
         bn = getBlockId(x, y, z + 1);
-        if ((mayDisp && bn == BlockTypeLava && getBlockId(x, y+1, z+1) != BlockTypeLava)
-          || CR.isFaceVisible(bt, bn)) {
+        if (CR.isFaceVisible(bt, bn)) {
           index[i++] = v; index[i++] = v+1; index[i++] = v+2;
           index[i++] = v+2; index[i++] = v+1; index[i++] = v+3;
           tc = CR.blockTexCoord(bt, FaceDirection::ZInc, blockPos);
-          vertex[v++] = {x,     y,     z + 1, 0, tc->x, tc->v, .4f, .4f, .4f};
-          vertex[v++] = {x + 1, y,     z + 1, 0, tc->u, tc->v, .4f, .4f, .4f};
-          vertex[v++] = {x,     y + 1, z + 1, w, tc->x, tc->y, .4f, .4f, .4f};
-          vertex[v++] = {x + 1, y + 1, z + 1, w, tc->u, tc->y, .4f, .4f, .4f};
+          vertex[v++] = {x,     y,     z + 1, tc->x, tc->v, .4f, .4f, .4f};
+          vertex[v++] = {x + 1, y,     z + 1, tc->u, tc->v, .4f, .4f, .4f};
+          vertex[v++] = {x,     y + 1, z + 1, tc->x, tc->y, .4f, .4f, .4f};
+          vertex[v++] = {x + 1, y + 1, z + 1, tc->u, tc->y, .4f, .4f, .4f};
         }
 
         if (transp) {
