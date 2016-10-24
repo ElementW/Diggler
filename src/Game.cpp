@@ -12,12 +12,24 @@
 namespace Diggler {
 
 Game::Game() :
+  C(nullptr),
   U(nullptr),
   players(this),
+  CR(nullptr),
+  LS(nullptr),
+
+  S(nullptr),
+
   GW(nullptr),
+  UIM(nullptr),
   LP(nullptr),
   PM(nullptr),
-  FM(*this) {
+  R(nullptr),
+  FM(*this),
+  RP(nullptr),
+  A(nullptr),
+  NS(nullptr),
+  KB(nullptr) {
 }
 
 void Game::init() {
@@ -82,7 +94,7 @@ Game::~Game() {
 
 void Game::updateTime(double time) {
   Time = time;
-  TimeMs = static_cast<int64>(time * 1000);
+  TimeMs = static_cast<uint64>(time * 1000);
 }
 
 }

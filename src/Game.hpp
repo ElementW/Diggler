@@ -46,6 +46,7 @@ private:
 
 public:
   // Shared
+  Config *C;
   double Time; uint64 TimeMs;
   Net::Host H;
   Universe *U;
@@ -59,7 +60,6 @@ public:
   Server *S;
 
   // Client
-  Config *C;
   GameWindow *GW;
   UI::Manager *UIM;
   LocalPlayer *LP;
