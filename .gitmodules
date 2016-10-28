@@ -13,3 +13,9 @@
 [submodule "ext/goodform"]
 	path = ext/goodform
 	url = https://github.com/ElementW/goodform.git
+[submodule "ext/torch7"]
+	path = ext/torch7
+	url = https://github.com/torch/torch7.git
+[submodule "ext/threads"]
+	path = ext/threads
+	url = https://github.com/torch/threads.git
