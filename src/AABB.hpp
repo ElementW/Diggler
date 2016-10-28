@@ -1,18 +1,17 @@
-#ifndef AABOX_HPP
-#define AABOX_HPP
+#ifndef DIGGLER_AABB_HPP
+#define DIGGLER_AABB_HPP
 
+#include <limits>
 #include <vector>
 
-#include <glm/glm.hpp>
-
-#include "Platform.hpp"
+#include "platform/types/vec3.hpp"
 
 namespace Diggler {
 
 ///
 /// @brief Axis-Aligned Bounding Box.
 ///
-template<typename Vec3 = typename glm::vec3>
+template<typename Vec3 = vec3>
 class AABB {
 public:
   using T = typename Vec3::value_type;
@@ -206,4 +205,4 @@ public:
 
 }
 
-#endif
+#endif /* DIGGLER_AABB_HPP */

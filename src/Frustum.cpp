@@ -4,22 +4,22 @@
 
 namespace Diggler {
 
-void Frustum::setCamInternals(float rad, float ratio, float nearD, float farD) {
+void Frustum::setCamInternals(vec3ct rad, vec3ct ratio, vec3ct nearD, vec3ct farD) {
   this->ratio = ratio;
   this->angle = rad;
   this->nearD = nearD;
   this->farD = farD;
 
   // Compute ALL the things
-  tang = (float)std::tan(rad * 0.5f);
+  tang = std::tan(rad * static_cast<vec3ct>(.5));
   nh = nearD * tang;
   nw = nh * ratio;
   fh = farD  * tang;
   fw = fh * ratio;
 }
 
-void Frustum::setCamDef(const glm::vec3 &p, const glm::vec3 &l, const glm::vec3 &u) {
-  glm::vec3 dir,nc,fc,X,Y, Z = glm::normalize(p - l);
+void Frustum::setCamDef(const vec3 &p, const vec3 &l, const vec3 &u) {
+  vec3 dir,nc,fc,X,Y, Z = glm::normalize(p - l);
 
   // X axis of camera with given "up" vector and Z axis
   X = glm::normalize(glm::cross(u, Z));
@@ -51,15 +51,15 @@ void Frustum::setCamDef(const glm::vec3 &p, const glm::vec3 &l, const glm::vec3 
   pl[FAR].set3Points(ftr,ftl,fbl);
 }
 
-bool Frustum::pointInFrustum(const glm::vec3& p) const {
+bool Frustum::pointInFrustum(const vec3& p) const {
   for(int i=0; i < 6; i++) {
-    if (pl[i].distance(p) < 0.f)
+    if (pl[i].distance(p) < static_cast<vec3ct>(0))
       return false;
   }
   return true;
 }
 
-bool Frustum::sphereInFrustum(const glm::vec3 &p, float radius) const {
+bool Frustum::sphereInFrustum(const vec3 &p, vec3ct radius) const {
   for(int i=0; i < 6; i++) {
     if (pl[i].distance(p) < -radius)
       return false;
