@@ -28,9 +28,9 @@ std::pair<std::vector<std::vector<int>>, std::vector<int>>
     A[I[i][1]].push_back(i);
     A[I[i][2]].push_back(i);
 
-    L[I[i][0]] += 1;
-    L[I[i][1]] += 1;
-    L[I[i][2]] += 1;
+    ++L[I[i][0]];
+    ++L[I[i][1]];
+    ++L[I[i][2]];
   }
 
   return std::make_pair(A, L);
@@ -52,12 +52,12 @@ int Skip_dead_end(const std::vector<int> &L, std::vector<int> &D, int i) {
     if (L[i] > 0) {
       return i;
     }
-    i += 1;
+    ++i;
   }
   return -1;
 }
 
-int Get_next_vertex(int i, int k, const std::map<int, bool> &N, const std::vector<int> &C, int s,
+int Get_next_vertex(const int i, int k, const std::map<int, bool> &N, const std::vector<int> &C, int s,
   const std::vector<int> &L, std::vector<int> &D) {
   int n = -1, p = -1, m = 0;
   for (auto iter = N.begin(); iter != N.end(); ++iter) {
@@ -92,7 +92,8 @@ std::vector<int[3]> Tipsify::tipsify(std::size_t vertexCount, const std::vector<
   }
   std::vector<int> C(vertexCount), D;
   std::vector<bool> E(I.size());
-  int f = 0, s = k + 1, i = 1, nf = 0;
+  const int i = 1;
+  int f = 0, s = k + 1, nf = 0;
   std::vector<int[3]> O(I.size());
   for (; f >= 0;) {
     std::map<int, bool> N;
@@ -106,11 +107,11 @@ std::vector<int[3]> Tipsify::tipsify(std::size_t vertexCount, const std::vector<
           L[v] = L[v] - 1;
           if (s - C[v] > k) {
             C[v] = s;
-            s += 1;
+            ++s;
           }
         }
         E[t] = true;
-        nf++;
+        ++nf;
       }
     }
     f = Get_next_vertex(i, k, N, C, s, L, D);
@@ -120,10 +121,12 @@ std::vector<int[3]> Tipsify::tipsify(std::size_t vertexCount, const std::vector<
 
 // FIFO cache
 struct Cache {
-  int size;
-  std::deque<int> data;
+  using DataT = std::deque<int>;
+  using SizeT = DataT::size_type;
+  SizeT size;
+  DataT data;
 
-  Cache(int size) : size(size) {}
+  Cache(SizeT size) : size(size) {}
   bool push(int val) {
     for (int i : data) {
       if (i == val) {
