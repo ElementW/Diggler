@@ -21,6 +21,11 @@ struct PublicKey : CryptoData<PublicKeyBytes> {
 struct SecretKey : MlockedCryptoData<SecretKeyBytes> {
 };
 
+struct KeyPair {
+  SecretKey sec;
+  PublicKey pub;
+};
+
 struct Signature : CryptoData<SignatureBytes> {
   using CryptoData<SignatureBytes>::CryptoData;
   using CryptoData<SignatureBytes>::operator=;
@@ -28,6 +33,10 @@ struct Signature : CryptoData<SignatureBytes> {
 
 inline void keypair(PublicKey &pk, SecretKey &sk) {
   crypto_sign_keypair(pk.bytes, sk.bytes);
+}
+
+inline void keypair(KeyPair &kp) {
+  crypto_sign_keypair(kp.pub.bytes, kp.sec.bytes);
 }
 
 inline void sign(const unsigned char *m, unsigned long long mlen, const SecretKey &sk,
