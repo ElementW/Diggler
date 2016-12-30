@@ -27,6 +27,10 @@ public:
   inline void seek(PosT pos) {
     seek(static_cast<OffT>(pos), Whence::Set);
   }
+
+  inline void rewind() {
+    seek(static_cast<OffT>(0));
+  }
 };
 
 class SizedStream : public virtual SeekableStream {
