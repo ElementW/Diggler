@@ -22,12 +22,26 @@ namespace proc {
   std::string getExecutableDirectory();
 }
 
+static constexpr const char* const_strrchr(char const * s, int c) {
+  return *s == static_cast<char>(c) && (!*s || !const_strrchr(s + 1, c))? s
+    : !*s ? nullptr
+    : const_strrchr(s + 1, c);
+}
+
+static constexpr const char *const_filename() {
+#ifdef __FILENAME__
+  return __FILENAME__;
+#else
+  return const_strrchr(__FILE__, '/') ? const_strrchr(__FILE__, '/') + 1 : __FILE__;
+#endif
+}
+
 /// @returns The system's error output stream
 std::ostream& getErrorStreamRaw();
 #ifdef IN_IDE_PARSER
 std::ostream& getErrorStream();
 #else
-#define getErrorStream() getErrorStreamRaw() << __FILENAME__ << ':' << __LINE__ << ' '
+#define getErrorStream() getErrorStreamRaw() << const_filename() << ':' << __LINE__ << ' '
 #endif
 
 /// @returns The system's debug output stream
@@ -35,7 +49,7 @@ std::ostream& getDebugStreamRaw();
 #ifdef IN_IDE_PARSER
 std::ostream& getDebugStream();
 #else
-#define getDebugStream() getDebugStreamRaw() << __FILENAME__ << ':' << __LINE__ << ' '
+#define getDebugStream() getDebugStreamRaw() << const_filename() << ':' << __LINE__ << ' '
 #endif
 
 /// @returns The system's output stream
@@ -43,7 +57,7 @@ std::ostream& getOutputStreamRaw();
 #ifdef IN_IDE_PARSER
 std::ostream& getOutputStream();
 #else
-#define getOutputStream() getOutputStreamRaw() << __FILENAME__ << ':' << __LINE__ << ' '
+#define getOutputStream() getOutputStreamRaw() << const_filename() << ':' << __LINE__ << ' '
 #endif
 
 extern const char *UserdataDirsName;
