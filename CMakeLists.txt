@@ -32,7 +32,7 @@ message(">> Path to topdir: ${PATH_TO_TOPDIR}")
 ### Compiler & build options
 # Disable narrow convert warnings and disable deprecated GLM degrees usage
 add_definitions(-DGLM_FORCE_RADIANS)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wno-narrowing -ffast-math")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -ffast-math")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall") # -Wextra")
 
 # Define __FILENAME__ as the currently compiled filename
