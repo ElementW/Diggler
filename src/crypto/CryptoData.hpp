@@ -4,6 +4,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include <sodium.h>
 
@@ -27,6 +28,18 @@ struct CryptoData {
     }
     memcpy(data, s.data(), Length);
   }
+  CryptoData(const std::vector<char> &v) {
+    if (v.size() != Length) {
+      throw std::runtime_error("Invalid vector length");
+    }
+    memcpy(data, v.data(), Length);
+  }
+  CryptoData(const std::vector<unsigned char> &v) {
+    if (v.size() != Length) {
+      throw std::runtime_error("Invalid vector length");
+    }
+    memcpy(data, v.data(), Length);
+  }
 
   CryptoData& operator=(const CryptoData&) = default;
   CryptoData& operator=(CryptoData&&) = default;
@@ -38,9 +51,33 @@ struct CryptoData {
     memcpy(data, s.data(), Length);
     return *this;
   }
+  CryptoData& operator=(const std::vector<char> &v) {
+    if (v.size() != Length) {
+      throw std::runtime_error("Invalid vector length");
+    }
+    memcpy(data, v.data(), Length);
+    return *this;
+  }
+  CryptoData& operator=(const std::vector<unsigned char> &v) {
+    if (v.size() != Length) {
+      throw std::runtime_error("Invalid vector length");
+    }
+    memcpy(data, v.data(), Length);
+    return *this;
+  }
 
   explicit operator std::string() const {
     return std::string(reinterpret_cast<const char*>(data), Length);
+  }
+  explicit operator std::vector<char>() const {
+    std::vector<char> ret(Length);
+    memcpy(ret.data(), data, Length);
+    return ret;
+  }
+  explicit operator std::vector<unsigned char>() const {
+    std::vector<unsigned char> ret(Length);
+    memcpy(ret.data(), data, Length);
+    return ret;
   }
 
   bool operator==(const CryptoData<B> &o) const {
@@ -54,8 +91,20 @@ struct CryptoData {
   bool operator==(const std::string &o) const {
     return o.length() == Length and sodium_memcmp(data, o.data(), Length) == 0;
   }
+  bool operator==(const std::vector<char> &o) const {
+    return o.size() == Length and sodium_memcmp(data, o.data(), Length) == 0;
+  }
+  bool operator==(const std::vector<unsigned char> &o) const {
+    return o.size() == Length and sodium_memcmp(data, o.data(), Length) == 0;
+  }
 
   bool operator!=(const std::string &o) const {
+    return !operator==(o);
+  }
+  bool operator!=(const std::vector<char> &o) const {
+    return !operator==(o);
+  }
+  bool operator!=(const std::vector<unsigned char> &o) const {
     return !operator==(o);
   }
 
