@@ -83,7 +83,7 @@ void InMessage::fromData(const void *data, SizeT len, Channels chan) {
   free();
   m_chan = chan;
   m_cursor = 0;
-  m_length = len;
+  m_length = len - HeaderSize;
   m_type = static_cast<MessageType>(bytes[0]);
   m_subtype = bytes[1];
   // m_data/bytes is guaranteed never to be written to, so we can const_cast it
