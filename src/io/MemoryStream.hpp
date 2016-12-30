@@ -7,7 +7,7 @@ namespace Diggler {
 
 class MemoryStream : public virtual SeekableStream {
 protected:
-  uint8 *m_data;
+  byte *m_data;
   SizeT m_length;
   PosT m_cursor;
 
@@ -19,6 +19,9 @@ public:
     return m_cursor;
   }
   virtual void seek(OffT, Whence = Set) override;
+  inline void seek(PosT pos) {
+    seek(static_cast<OffT>(pos), Whence::Set);
+  }
 
   virtual SizeT length() const {
     return m_length;
