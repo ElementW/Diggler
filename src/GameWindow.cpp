@@ -269,7 +269,7 @@ void GameWindow::run() {
 }
 
 void GameWindow::showMessage(const std::string &msg, const std::string &submsg) {
-  setNextState(std::move(std::make_unique<MessageState>(this, msg, submsg)));
+  setNextState(std::make_unique<MessageState>(this, msg, submsg));
 }
 
 }
