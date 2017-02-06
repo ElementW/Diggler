@@ -6,9 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../Texture.hpp"
-#include "../Program.hpp"
 #include "../render/Renderer.hpp"
-#include "../render/gl/VBO.hpp"
 #include "../Game.hpp"
 
 namespace Diggler {

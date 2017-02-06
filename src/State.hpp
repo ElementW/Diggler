@@ -6,6 +6,8 @@ namespace Diggler {
 
 class State {
 public:
+  virtual ~State() {}
+
   virtual void onMouseButton(int key, int action, int mods) {}
   virtual void onCursorPos(double x, double y) {}
   virtual void onMouseScroll(double x, double y) {}

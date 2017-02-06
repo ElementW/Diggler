@@ -15,10 +15,10 @@
 
 namespace Diggler {
 
-class Program;
 namespace Render {
 class PlayerRenderer;
 namespace gl {
+class Program;
 class VBO;
 }
 }
@@ -33,7 +33,7 @@ protected:
   uintptr_t rendererData;
 
   static struct Renderer {
-    const Program *prog;
+    const Render::gl::Program *prog;
     GLint att_coord,
         uni_mvp,
         uni_unicolor,

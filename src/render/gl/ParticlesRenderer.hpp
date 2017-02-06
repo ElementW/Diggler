@@ -3,7 +3,7 @@
 
 #include "../ParticlesRenderer.hpp"
 
-#include "../../Program.hpp"
+#include "Program.hpp"
 #include "VAO.hpp"
 #include "VBO.hpp"
 

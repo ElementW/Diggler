@@ -49,10 +49,7 @@ set(SRCS
   ${CSD}/Platform.cpp
   ${CSD}/Player.cpp
   ${CSD}/PlayerList.cpp
-  ${CSD}/Program.cpp
-  ${CSD}/ProgramManager.cpp
   ${CSD}/Server.cpp
-  ${CSD}/Shader.cpp
   ${CSD}/Skybox.cpp
   ${CSD}/SoundBuffer.cpp
   ${CSD}/Sound.cpp

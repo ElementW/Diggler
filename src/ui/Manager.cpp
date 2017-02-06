@@ -5,7 +5,7 @@
 
 #include "../render/gl/VBO.hpp"
 #include "../Texture.hpp"
-#include "../Program.hpp"
+#include "../render/gl/Program.hpp"
 #include "../Game.hpp"
 #include "../GameWindow.hpp"
 
@@ -13,7 +13,7 @@ namespace Diggler {
 namespace UI {
 
 struct Renderer {
-  const Program *prog;
+  const Render::gl::Program *prog;
   GLint att_texcoord, att_coord, uni_mvp, uni_unicolor;
 } R{}, RR{};
 

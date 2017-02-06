@@ -1,8 +1,12 @@
 #include "Program.hpp"
-#include "Platform.hpp"
+
 #include <thread>
 
+#include "../../Platform.hpp"
+
 namespace Diggler {
+namespace Render {
+namespace gl {
 
 Program::Program(Shader* vsh, Shader* fsh) : vsh(vsh), fsh(fsh), id(0) {
   
@@ -132,4 +136,6 @@ Program::~Program() {
   }
 }
 
+}
+}
 }

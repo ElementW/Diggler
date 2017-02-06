@@ -2,7 +2,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Game.hpp"
 #include "Platform.hpp"
-#include "Program.hpp"
+#include "render/gl/Program.hpp"
 #include "Texture.hpp"
 
 namespace Diggler {

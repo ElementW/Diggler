@@ -1,13 +1,15 @@
 #include "ProgramManager.hpp"
-#include "Platform.hpp"
 
 #include <sstream>
 
-#include "Game.hpp"
+#include "../../Game.hpp"
+#include "../../Platform.hpp"
 
 #define PROGRAM_MANAGER_DEBUG 0
 
 namespace Diggler {
+namespace Render {
+namespace gl {
 
 std::string ProgramManager::getShadersName(FlagsT flags) {
   if (flags & PM_3D)
@@ -47,7 +49,7 @@ const Program* ProgramManager::getProgram(FlagsT flags) {
   if (it != m_programs.end())
     return it->second;
   std::string shaderName = getShadersName(flags);
-  Program* prog = new Program(getAssetPath(shaderName + ".v.glsl"), getAssetPath(shaderName + ".f.glsl"));
+  Program *prog = new Program(getAssetPath(shaderName + ".v.glsl"), getAssetPath(shaderName + ".f.glsl"));
   std::vector<std::string> preludeLines;
   getPreludeLines(flags, preludeLines);
   prog->setPreludeLines(preludeLines);
@@ -94,4 +96,6 @@ ProgramManager::~ProgramManager() {
   }
 }
 
+}
+}
 }

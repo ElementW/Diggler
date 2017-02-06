@@ -7,7 +7,7 @@
 #include "Universe.hpp"
 #include "PlayerList.hpp"
 #include "LocalPlayer.hpp"
-#include "ProgramManager.hpp"
+#include "render/gl/ProgramManager.hpp"
 
 using std::shared_ptr;
 
@@ -63,7 +63,7 @@ public:
   GameWindow *GW;
   UI::Manager *UIM;
   LocalPlayer *LP;
-  ProgramManager *PM;
+  Render::gl::ProgramManager *PM;
   Render::Renderer *R;
   ptr<UI::FontManager> FM;
   struct RenderProperties {

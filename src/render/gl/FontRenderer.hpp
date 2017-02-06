@@ -3,7 +3,7 @@
 
 #include "../FontRenderer.hpp"
 
-#include "../../Program.hpp"
+#include "Program.hpp"
 #include "VAO.hpp"
 #include "VBO.hpp"
 

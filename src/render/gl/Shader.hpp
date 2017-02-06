@@ -1,10 +1,14 @@
-#ifndef SHADER_HPP
-#define SHADER_HPP
+#ifndef DIGGLER_RENDER_GL_SHADER_HPP
+#define DIGGLER_RENDER_GL_SHADER_HPP
+
 #include <string>
 #include <vector>
+
 #include <epoxy/gl.h>
 
 namespace Diggler {
+namespace Render {
+namespace gl {
 
 class Shader {
 private:
@@ -31,5 +35,7 @@ public:
 };
 
 }
+}
+}
 
-#endif
+#endif /* DIGGLER_RENDER_GL_SHADER_HPP */

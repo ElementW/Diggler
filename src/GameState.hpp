@@ -25,10 +25,14 @@ namespace Diggler {
 class Skybox;
 class KeyBindings;
 class Font;
-class Program;
 class Clouds;
 class Game;
 class Chatbox;
+namespace Render {
+namespace gl {
+class Program;
+}
+}
 namespace UI {
 class Text;
 }
@@ -49,7 +53,7 @@ private:
   glm::vec2 m_angles;
 
   Render::gl::FBO *m_3dFbo;
-  const Program *m_3dFboRenderer;
+  const Render::gl::Program *m_3dFboRenderer;
   GLuint m_3dFboRenderer_coord, m_3dFboRenderer_texcoord, m_3dFboRenderer_mvp;
 
   struct Bloom {
@@ -57,12 +61,12 @@ private:
     int scale;
     struct Extractor {
       Render::gl::FBO *fbo;
-      const Program *prog;
+      const Render::gl::Program *prog;
       GLuint att_coord, att_texcoord, uni_mvp;
     } extractor;
     struct Renderer {
       Render::gl::FBO *fbo;
-      const Program *prog;
+      const Render::gl::Program *prog;
       GLuint att_coord, att_texcoord, uni_pixshift, uni_mvp;
     } renderer;
     Bloom(Game&);
@@ -82,7 +86,7 @@ private:
   struct {
     Render::gl::VBO vbo;
     Render::gl::VAO vao;
-    const Program *program;
+    const Render::gl::Program *program;
     GLuint att_coord, uni_unicolor, uni_mvp;
   } m_highlightBox;
 

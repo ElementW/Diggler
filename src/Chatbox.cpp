@@ -8,7 +8,7 @@
 
 namespace Diggler {
 
-const Program *Chatbox::RenderProgram = nullptr;
+const Render::gl::Program *Chatbox::RenderProgram = nullptr;
 GLint Chatbox::RenderProgram_coord = -1;
 GLint Chatbox::RenderProgram_color = -1;
 GLint Chatbox::RenderProgram_mvp = -1;

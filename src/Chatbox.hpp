@@ -12,7 +12,11 @@
 
 namespace Diggler {
 
+namespace Render {
+namespace gl {
 class Program;
+}
+}
 
 class Game;
 
@@ -22,7 +26,7 @@ public:
   using time_point = std::chrono::time_point<system_clock>;
 
 private:
-  static const Program *RenderProgram;
+  static const Render::gl::Program *RenderProgram;
   static GLint RenderProgram_coord, RenderProgram_color, RenderProgram_mvp;
   
   bool m_isChatting;

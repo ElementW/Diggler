@@ -9,13 +9,18 @@
 namespace Diggler {
 
 class Game;
-class Program;
 class Texture;
+
+namespace Render {
+namespace gl {
+class Program;
+}
+}
 
 class Clouds {
 private:
   static struct Renderer {
-    const Program *prog;
+    const Render::gl::Program *prog;
     GLint att_coord, att_texcoord, uni_mvp, uni_texshift;
   } R;
   Texture **m_tex;

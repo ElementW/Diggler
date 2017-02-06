@@ -45,7 +45,7 @@ void Game::init() {
 }
 
 void Game::initClient() {
-  PM = new ProgramManager(*this);
+  PM = new Render::gl::ProgramManager(*this);
   LP = new LocalPlayer(this);
   RP = new RenderProperties; { // TODO move somewhere else?
     RP->bloom = true;

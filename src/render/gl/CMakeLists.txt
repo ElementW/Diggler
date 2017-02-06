@@ -5,7 +5,10 @@ set(SRCS
   ${CSD}/FeatureSupport.cpp
   ${CSD}/FontRenderer.cpp
   ${CSD}/ParticlesRenderer.cpp
+  ${CSD}/Program.cpp
+  ${CSD}/ProgramManager.cpp
   ${CSD}/Renderer.cpp
+  ${CSD}/Shader.cpp
   ${CSD}/Util.cpp
   ${CSD}/WorldRenderer.cpp
   PARENT_SCOPE

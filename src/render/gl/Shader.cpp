@@ -1,19 +1,24 @@
 #include "Shader.hpp"
-#include "Platform.hpp"
-#include <sstream>
+
 #include <algorithm>
+#include <memory>
+#include <sstream>
+
+#include "../../Platform.hpp"
 
 namespace Diggler {
+namespace Render {
+namespace gl {
 
 Shader::Shader(Type type) :
   m_preludeLines(nullptr),
   type(type) {
-  id = glCreateShader((GLenum)type);
+  id = glCreateShader(GLenum(type));
 }
 
 Shader::Shader(Shader::Type type, const std::string &path) :
   m_preludeLines(nullptr) {
-  id = glCreateShader((GLenum)type);
+  id = glCreateShader(GLenum(type));
   compileFromFile(path);
 }
 
@@ -55,14 +60,13 @@ bool Shader::compileFromString(const std::string &source, const std::string &pat
 }
 
 std::string Shader::getError() const {
-  GLint log_length = 0;
-  glGetShaderiv(id, GL_INFO_LOG_LENGTH, &log_length);
-  if (log_length < 1)
+  GLint logLength = 0;
+  glGetShaderiv(id, GL_INFO_LOG_LENGTH, &logLength);
+  if (logLength < 1)
     return "[empty error string]";
-  char* log = (char*)malloc(log_length);
-  glGetShaderInfoLog(id, log_length, NULL, log);
-  std::string ret(log);
-  free(log);
+  std::unique_ptr<char[]> log = std::make_unique<char[]>(logLength);
+  glGetShaderInfoLog(id, logLength, NULL, log.get());
+  std::string ret(log.get());
   return ret;
 }
 
@@ -70,4 +74,6 @@ GLuint Shader::getId() const {
   return id;
 }
 
+}
+}
 }

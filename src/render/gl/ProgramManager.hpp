@@ -1,7 +1,9 @@
-#ifndef PROGRAM_MANAGER_HPP
-#define PROGRAM_MANAGER_HPP
+#ifndef DIGGLER_RENDER_GL_PROGRAM_MANAGER_HPP
+#define DIGGLER_RENDER_GL_PROGRAM_MANAGER_HPP
+
 #include <unordered_map>
 #include <vector>
+
 #include "Program.hpp"
 
 #define PM_2D        0x0
@@ -18,12 +20,17 @@
 
 namespace Diggler {
 
+class Game;
+
+namespace Render {
+namespace gl {
+
 class ProgramManager {
 public:
   using FlagsT = uint32_t;
 
 private:
-  class Game &G;
+  Game &G;
   std::unordered_map<FlagsT, Program*> m_programs;
   std::vector<Program*> m_specialPrograms;
   static std::string getShadersName(FlagsT flags);
@@ -37,5 +44,7 @@ public:
 };
 
 }
+}
+}
 
-#endif
+#endif /* DIGGLER_RENDER_GL_PROGRAM_MANAGER_HPP */

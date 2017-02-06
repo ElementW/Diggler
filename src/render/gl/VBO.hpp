@@ -1,12 +1,11 @@
 #ifndef DIGGLER_RENDER_GL_VBO_HPP
 #define DIGGLER_RENDER_GL_VBO_HPP
 
-#include "../../Platform.hpp"
-
 #include <vector>
 
 #include <epoxy/gl.h>
 
+#include "../../platform/PreprocUtils.hpp"
 #include "FeatureSupport.hpp"
 #include "Util.hpp"
 
@@ -36,13 +35,7 @@ public:
     glDeleteBuffers(1, &m_id);
   }
 
-  // Copy
-  VBO(const VBO&) = delete;
-  VBO& operator=(const VBO&) = delete;
-
-  // Move
-  VBO(VBO&&) = default;
-  VBO& operator=(VBO&&) = default;
+  nocopymove(VBO);
 
 
   operator GLuint() const {

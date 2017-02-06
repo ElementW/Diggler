@@ -3,7 +3,7 @@
 
 #include <glm/glm.hpp>
 
-#include "Program.hpp"
+#include "render/gl/Program.hpp"
 
 namespace Diggler {
 

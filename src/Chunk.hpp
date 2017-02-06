@@ -4,11 +4,8 @@
 #include <memory>
 #include <mutex>
 
-#include <epoxy/gl.h>
 #include <glm/glm.hpp>
 
-#include "render/gl/VBO.hpp"
-#include "Program.hpp"
 #include "Texture.hpp"
 #include "content/Content.hpp"
 #include "network/Network.hpp"
