@@ -4,12 +4,6 @@
 #define BUILDINFO_TIME __TIME__
 #define BUILDINFO_DATE __DATE__
 
-#if defined(__LITTLE_ENDIAN__)
-  #define BUILDINFO_LITTLE_ENDIAN
-#else
-  #define BUILDINFO_BIG_ENDIAN
-#endif
-
 #if defined(WINDOWS) || defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64) // Windows
   #define BUILDINFO_PLATFORM "Windows"
   #define BUILDINFO_PLATFORM_WINDOWS
@@ -35,6 +29,22 @@
   #define BUILDINFO_PLATFORM_PTHREAD
   #define BUILDINFO_PLATFORM_MMAP
   #define BUILDINFO_PLATFORM_UNIXLIKE
+  #ifdef __FreeBSD__
+    #define BUILDINFO_PLATFORM "FreeBSD"
+    #define BUILDINFO_PLATFORM_FREEBSD
+  #endif
+  #ifdef __NetBSD__
+    #define BUILDINFO_PLATFORM "NetBSD"
+    #define BUILDINFO_PLATFORM_NETBSD
+  #endif
+  #ifdef __OpenBSD__
+    #define BUILDINFO_PLATFORM "OpenBSD"
+    #define BUILDINFO_PLATFORM_OPENBSD
+  #endif
+  #ifdef __DragonflyBSD__
+    #define BUILDINFO_PLATFORM "DragonflyBSD"
+    #define BUILDINFO_PLATFORM_DRAGONFLYBSD
+  #endif
 #elif (defined(__APPLE__) && defined(__MACH__)) // Mac
   #define BUILDINFO_PLATFORM "Mac"
   #define BUILDINFO_PLATFORM_MAC
