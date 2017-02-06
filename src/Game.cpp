@@ -33,7 +33,7 @@ Game::Game() :
 
 void Game::init() {
   CR = new Content::Registry;
-  AM = std::make_unique<Content::AssetManager>(this, "~/.config/Diggler/"); // FIXME proper path
+  AM = std::make_unique<Content::AssetManager>(this);
   MM = std::make_unique<Content::ModManager>(this);
   LS = new Scripting::Lua::State(this);
   if (GlobalProperties::IsClient) {
