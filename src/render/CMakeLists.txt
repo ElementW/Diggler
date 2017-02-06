@@ -1,9 +1,12 @@
-set(DIGGLER_RENDERER "gl" CACHE STRING "Graphics renderer to compile and use. Available: gl.")
+set(DIGGLER_ENABLE_GL_RENDERER TRUE CACHE BOOL "Enable OpenGL (ES) renderer")
+set(DIGGLER_ENABLE_VK_RENDERER TRUE CACHE BOOL "Enable Vulkan renderer")
 
-if(DIGGLER_RENDERER STREQUAL "gl")
+if(DIGGLER_ENABLE_GL_RENDERER)
   add_subdirectory("gl")
-else()
-  message(FATAL_ERROR "Unknown renderer")
+endif()
+
+if(DIGGLER_ENABLE_VK_RENDERER)
+  add_subdirectory("vk")
 endif()
 
 set(SRCS
