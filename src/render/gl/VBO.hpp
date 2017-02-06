@@ -55,10 +55,15 @@ public:
 
 
   void resize(uint size, GLenum usage = GL_STATIC_DRAW) {
+    if (size == 0) {
+      return;
+    }
     m_size = size;
     m_usage = usage;
     if (FeatureSupport::DSA_ARB) {
       glNamedBufferData(m_id, m_size, nullptr, m_usage);
+    } else if (FeatureSupport::DSA_EXT) {
+      glNamedBufferDataEXT(m_id, m_size, nullptr, m_usage);
     } else {
       BoundBufferSave<GL_ARRAY_BUFFER> save;
       glBindBuffer(GL_ARRAY_BUFFER, m_id);
@@ -68,15 +73,7 @@ public:
 
   void resizeGrow(uint size, GLenum usage = GL_STATIC_DRAW) {
     if (size > m_size || m_usage != usage) {
-      m_size = size;
-      m_usage = usage;
-      if (FeatureSupport::DSA_ARB) {
-          glNamedBufferData(m_id, m_size, nullptr, m_usage);
-      } else {
-        BoundBufferSave<GL_ARRAY_BUFFER> save;
-        glBindBuffer(GL_ARRAY_BUFFER, m_id);
-        glBufferData(GL_ARRAY_BUFFER, m_size, nullptr, m_usage);
-      }
+      resize(size, usage);
     }
   }
 
@@ -90,23 +87,16 @@ public:
   }
 
 
-  template <typename T> void setData(const std::vector<T>& data, GLenum usage = GL_STATIC_DRAW) {
-    m_size = data.size()*sizeof(T);
-    m_usage = usage;
-    if (FeatureSupport::DSA_ARB) {
-      glNamedBufferData(m_id, m_size, data.data(), m_usage);
-    } else {
-      BoundBufferSave<GL_ARRAY_BUFFER> save;
-      glBindBuffer(GL_ARRAY_BUFFER, m_id);
-      glBufferData(GL_ARRAY_BUFFER, m_size, data.data(), m_usage);
-    }
-  }
-
   template <typename T> void setData(const T *data, uint count, GLenum usage = GL_STATIC_DRAW) {
+    if (count == 0) {
+      return;
+    }
     m_size = count*sizeof(T);
     m_usage = usage;
     if (FeatureSupport::DSA_ARB) {
       glNamedBufferData(m_id, m_size, data, m_usage);
+    } else if (FeatureSupport::DSA_EXT) {
+      glNamedBufferDataEXT(m_id, m_size, data, m_usage);
     } else {
       BoundBufferSave<GL_ARRAY_BUFFER> save;
       glBindBuffer(GL_ARRAY_BUFFER, m_id);
@@ -114,72 +104,42 @@ public:
     }
   }
 
-
-  template <typename T> void setDataKeepSize(const std::vector<T>& data, GLenum usage = GL_STATIC_DRAW) {
-    const GLuint targetSize = data.size()*sizeof(T);
-    if (FeatureSupport::DSA_ARB) {
-      if (targetSize <= m_size && m_usage == usage) {
-        glNamedBufferSubData(m_id, 0, targetSize, data.data());
-      } else {
-        m_size = targetSize;
-        m_usage = usage;
-        glNamedBufferData(m_id, m_size, data.data(), m_usage);
-      }
-    } else {
-      BoundBufferSave<GL_ARRAY_BUFFER> save;
-      glBindBuffer(GL_ARRAY_BUFFER, m_id);
-      if (targetSize <= m_size && m_usage == usage) {
-        glBufferSubData(GL_ARRAY_BUFFER, 0, targetSize, data.data());
-      } else {
-        m_size = targetSize;
-        m_usage = usage;
-        glBufferData(GL_ARRAY_BUFFER, m_size, data.data(), m_usage);
-      }
-    }
+  template <typename T> void setData(const std::vector<T>& data, GLenum usage = GL_STATIC_DRAW) {
+    setData(data.data(), data.size(), usage);
   }
+
 
   template <typename T> void setDataKeepSize(const T *data, uint count, GLenum usage = GL_STATIC_DRAW) {
     const GLuint targetSize = count*sizeof(T);
-    if (FeatureSupport::DSA_ARB) {
-      if (targetSize <= m_size && m_usage == usage) {
-        glNamedBufferSubData(m_id, 0, targetSize, data);
-      } else {
-        m_size = targetSize;
-        m_usage = usage;
-        glNamedBufferData(m_id, m_size, data, m_usage);
-      }
+    if (targetSize <= m_size && m_usage == usage) {
+      setSubData(data, 0, count);
     } else {
-      BoundBufferSave<GL_ARRAY_BUFFER> save;
-      glBindBuffer(GL_ARRAY_BUFFER, m_id);
-      if (targetSize <= m_size && m_usage == usage) {
-        glBufferSubData(GL_ARRAY_BUFFER, 0, targetSize, data);
-      } else {
-        m_size = targetSize;
-        m_usage = usage;
-        glBufferData(GL_ARRAY_BUFFER, m_size, data, m_usage);
-      }
+      setData(data, count, usage);
     }
   }
 
-
-  template <typename T> void setSubData(const std::vector<T>& data, uint offset) {
-    if (FeatureSupport::DSA_ARB) {
-      glNamedBufferSubData(m_id, offset*sizeof(T), data.size()*sizeof(T), data.data());
-    } else {
-      BoundBufferSave<GL_ARRAY_BUFFER> save;
-      glBindBuffer(GL_ARRAY_BUFFER, m_id);
-      glBufferSubData(GL_ARRAY_BUFFER, offset*sizeof(T), data.size()*sizeof(T), data.data());
-    }
+  template <typename T> void setDataKeepSize(const std::vector<T>& data, GLenum usage = GL_STATIC_DRAW) {
+    setDataKeepSize(data.data(), data.size(), usage);
   }
+
 
   template <typename T> void setSubData(const T *data, uint offset, uint count) {
+    if (count == 0) {
+      return;
+    }
     if (FeatureSupport::DSA_ARB) {
       glNamedBufferSubData(m_id, offset*sizeof(T), count*sizeof(T), data);
+    } else if (FeatureSupport::DSA_EXT) {
+      glNamedBufferSubDataEXT(m_id, offset*sizeof(T), count*sizeof(T), data);
     } else {
       BoundBufferSave<GL_ARRAY_BUFFER> save;
       glBindBuffer(GL_ARRAY_BUFFER, m_id);
       glBufferSubData(GL_ARRAY_BUFFER, offset*sizeof(T), count*sizeof(T), data);
     }
+  }
+
+  template <typename T> void setSubData(const std::vector<T>& data, uint offset) {
+    setSubData(data.data(), data.size(), offset);
   }
 
 

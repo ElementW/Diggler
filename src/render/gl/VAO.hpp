@@ -134,6 +134,7 @@ public:
           glBindBuffer(GL_ARRAY_BUFFER, va.vboId);
           boundVbo = va.vboId;
         }
+        glEnableVertexAttribArray(va.index);
         glVertexAttribPointer(va.index, va.size, va.type, va.normalize, va.stride,
           reinterpret_cast<GLvoid*>(va.offset));
       }
@@ -141,9 +142,13 @@ public:
     }
   }
 
-  static void unbind() {
+  void unbind() const {
     if (FeatureSupport::VAO) {
       glBindVertexArray(0);
+    } else {
+      for (const VertexAttrib &va : m_vertexAttribs) {
+        glDisableVertexAttribArray(va.index);
+      }
     }
   }
 };

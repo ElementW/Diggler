@@ -1,5 +1,10 @@
 #include "Renderer.hpp"
 
+#include "FeatureSupport.hpp"
+#include "FontRenderer.hpp"
+#include "ParticlesRenderer.hpp"
+#include "WorldRenderer.hpp"
+
 namespace Diggler {
 namespace Render {
 namespace gl {
@@ -8,8 +13,15 @@ GLRenderer::GLRenderer(Game *G) :
   Renderer(G) {
   FeatureSupport::probe();
   getDebugStream() << "GLRenderer, using features: " << FeatureSupport::supported() << std::endl;
+  renderers.font = new GLFontRenderer(G);
   renderers.particles = new GLParticlesRenderer(G);
   renderers.world = new GLWorldRenderer(G);
+}
+
+GLRenderer::~GLRenderer() {
+  delete renderers.font;
+  delete renderers.particles;
+  delete renderers.world;
 }
 
 void GLRenderer::beginFrame() {

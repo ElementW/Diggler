@@ -1,19 +1,19 @@
 #ifndef TEXT_HPP
 #define TEXT_HPP
 
-#include <memory>
 #include <string>
 
 #include "Font.hpp"
 #include "Element.hpp"
+#include "../render/FontRendererFwd.hpp"
 
 namespace Diggler {
 namespace UI {
 
 class Text : public Element {
 private:
-  int m_scaleX, m_scaleY, m_elementCount;
-  Render::gl::VBO m_vbo;
+  int m_scaleX, m_scaleY;
+  Render::FontRendererTextBufferRef m_textBuf;
   std::string m_fontName;
   glm::mat4 m_matrix;
   std::string m_text;
@@ -23,11 +23,12 @@ private:
 
 public:
   struct Size { int x, y; };
-  
+
   Text(Manager*, const std::string &text = "", int scaleX = 1, int scaleY = 1);
   Text(Text&&) = default;
   Text& operator=(Text&&) = default;
-  
+  ~Text();
+
   void setText(const std::string &text);
   std::string getText() const;
   void setFont(const std::string &name);

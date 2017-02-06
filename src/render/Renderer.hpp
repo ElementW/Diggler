@@ -1,6 +1,7 @@
 #ifndef DIGGLER_RENDER_RENDERER_HPP
 #define DIGGLER_RENDER_RENDERER_HPP
 
+#include "FontRenderer.hpp"
 #include "ParticlesRenderer.hpp"
 #include "WorldRenderer.hpp"
 
@@ -25,6 +26,7 @@ public:
   virtual void endFrame() = 0;
 
   struct Renderers {
+    FontRenderer *font;
     ParticlesRenderer *particles;
     WorldRenderer *world;
   } renderers;

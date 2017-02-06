@@ -14,7 +14,8 @@ bool
   F::DSA_EXT,
   F::DSA,
   F::shader_image_load_store,
-  F::FBO_ARB;
+  F::FBO_ARB,
+  F::buffer_storage;
 
 void F::probe() {
   VAO = epoxy_has_gl_extension("GL_ARB_vertex_array_object") or
@@ -24,6 +25,7 @@ void F::probe() {
   DSA = DSA_ARB or DSA_EXT;
   shader_image_load_store = epoxy_has_gl_extension("GL_ARB_shader_image_load_store");
   FBO_ARB = epoxy_has_gl_extension("GL_ARB_framebuffer_object");
+  buffer_storage = epoxy_has_gl_extension("GL_ARB_buffer_storage");
 }
 
 #define feature(x) if(x){oss<<#x<<std::endl;}
@@ -35,6 +37,7 @@ std::string F::supported() {
   feature(DSA);
   feature(shader_image_load_store);
   feature(FBO_ARB);
+  feature(buffer_storage);
   return oss.str();
 }
 #undef feature

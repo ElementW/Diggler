@@ -25,7 +25,6 @@ Game::Game() :
   LP(nullptr),
   PM(nullptr),
   R(nullptr),
-  FM(*this),
   RP(nullptr),
   A(nullptr),
   NS(nullptr),
@@ -34,7 +33,7 @@ Game::Game() :
 
 void Game::init() {
   CR = new Content::Registry;
-  AM = std::make_unique<Content::AssetManager>(this);
+  AM = std::make_unique<Content::AssetManager>(this, "~/.config/Diggler/"); // FIXME proper path
   MM = std::make_unique<Content::ModManager>(this);
   LS = new Scripting::Lua::State(this);
   if (GlobalProperties::IsClient) {
@@ -55,6 +54,7 @@ void Game::initClient() {
     RP->fogEnd = 24;
   }
   R = new Render::gl::GLRenderer(this);
+  FM = std::make_unique<UI::FontManager>(*this);
   A = new Audio(*this);
   KB = new KeyBinds;
   PlayerPosUpdateFreq = 4;
@@ -79,6 +79,7 @@ void Game::finalize() {
 void Game::finalizeClient() {
   delete KB; KB = nullptr;
   delete A; A = nullptr;
+  FM.reset();
   delete R; R = nullptr;
   delete RP; RP = nullptr;
   delete LP; LP = nullptr;

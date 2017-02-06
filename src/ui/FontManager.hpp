@@ -1,15 +1,11 @@
-#ifndef FONT_MANAGER_HPP
-#define FONT_MANAGER_HPP
+#ifndef DIGGLER_UI_FONT_MANAGER_HPP
+#define DIGGLER_UI_FONT_MANAGER_HPP
 
 #include "../Platform.hpp"
 
 #include <map>
 #include <memory>
 
-#include <epoxy/gl.h>
-#include <glm/glm.hpp>
-
-#include "../render/gl/VBO.hpp"
 #include "Font.hpp"
 
 namespace Diggler {
@@ -41,4 +37,4 @@ public:
 }
 }
 
-#endif
+#endif /* DIGGLER_UI_FONT_MANAGER_HPP */

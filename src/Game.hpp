@@ -65,7 +65,7 @@ public:
   LocalPlayer *LP;
   ProgramManager *PM;
   Render::Renderer *R;
-  UI::FontManager FM;
+  ptr<UI::FontManager> FM;
   struct RenderProperties {
     bool bloom, wavingLiquids;
     float fogStart, fogEnd;

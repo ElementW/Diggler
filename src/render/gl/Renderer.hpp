@@ -3,10 +3,6 @@
 
 #include "../Renderer.hpp"
 
-#include "FeatureSupport.hpp"
-#include "ParticlesRenderer.hpp"
-#include "WorldRenderer.hpp"
-
 namespace Diggler {
 namespace Render {
 namespace gl {
@@ -14,6 +10,7 @@ namespace gl {
 class GLRenderer : public Renderer {
 public:
   GLRenderer(Game *G);
+  ~GLRenderer();
 
   void beginFrame() override;
   void endFrame() override;

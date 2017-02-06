@@ -1,9 +1,13 @@
-#ifndef CHATBOX_HPP
-#define CHATBOX_HPP
+#ifndef DIGGLER_CHATBOX_HPP
+#define DIGGLER_CHATBOX_HPP
+
 #include <chrono>
 #include <list>
+
 #include <glm/glm.hpp>
+
 #include "Platform.hpp"
+#include "render/gl/VBO.hpp"
 #include "ui/Text.hpp"
 
 namespace Diggler {
@@ -62,4 +66,4 @@ public:
 
 }
 
-#endif
+#endif /* DIGGLER_CHATBOX_HPP */

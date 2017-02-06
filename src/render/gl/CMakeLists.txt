@@ -3,6 +3,7 @@ set(SRCS
   ${SRCS}
   ${CSD}/FBO.cpp
   ${CSD}/FeatureSupport.cpp
+  ${CSD}/FontRenderer.cpp
   ${CSD}/ParticlesRenderer.cpp
   ${CSD}/Renderer.cpp
   ${CSD}/Util.cpp

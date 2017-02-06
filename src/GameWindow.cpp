@@ -190,8 +190,8 @@ GameWindow::GameWindow(Game *G) : G(G) {
   G->UIM = UIM;
   G->A->loadSoundAssets();
 
-  G->FM.loadFont(getAssetPath("04b08.png"), "04b08");
-  G->FM.setDefaultFont("04b08");
+  G->FM->loadFont(getAssetPath("04b08.png"), "04b08");
+  G->FM->setDefaultFont("04b08");
 
   glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
   glEnable(GL_BLEND);

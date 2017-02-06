@@ -389,7 +389,7 @@ void GameState::updateViewport() {
       glm::vec3(tw, tw, 0));
   }
 
-  int lineHeight = G->FM.getDefaultFont()->getHeight()*UIM.scale;
+  int lineHeight = G->FM->getDefaultFont()->getHeight()*UIM.scale;
 
   UI.FPS->setPos(16, 16);
 

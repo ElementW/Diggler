@@ -7,13 +7,12 @@
 
 #include "../Texture.hpp"
 #include "../Program.hpp"
+#include "../render/Renderer.hpp"
 #include "../render/gl/VBO.hpp"
 #include "../Game.hpp"
 
 namespace Diggler {
 namespace UI {
-
-Font::Renderer Font::R = {0};
 
 static const struct { float r, g, b; } ColorTable[16] = {
   {1.0f, 1.0f, 1.0f},
@@ -35,13 +34,6 @@ static const struct { float r, g, b; } ColorTable[16] = {
 };
 
 Font::Font(Game *G, const std::string& path) : G(G) {
-  if (!R.prog) {
-    R.prog = G->PM->getProgram(PM_2D | PM_TEXTURED | PM_COLORED);
-    R.att_coord = R.prog->att("coord");
-    R.att_texcoord = R.prog->att("texcoord");
-    R.att_color = R.prog->att("color");
-    R.uni_mvp = R.prog->uni("mvp");
-  }
   m_texture = new Texture(path, Texture::PixelFormat::RGBA);
   std::ifstream source(path + ".fdf", std::ios_base::binary);
   if (source.good()) {
@@ -62,18 +54,25 @@ Font::Font(Game *G, const std::string& path) : G(G) {
       texPos[i].right = (float)left / m_texture->w();
     }
   }
+
+  G->R->renderers.font->registerFont(*this);
 }
 
-struct Vertex { int16 x, y; float tx, ty; float r, g, b ,a; };
+using Vertex = Render::FontRenderer::TextBuffer::Vertex;
 
-#define eraseCurChar() elements -= 6;
+Render::FontRendererTextBufferRef Font::createTextBuffer() const {
+  return G->R->renderers.font->createTextBuffer();
+}
 
-int Font::updateVBO(Render::gl::VBO &vbo, const std::string &text, GLenum usage) const {
-  int elements = text.size()*6;
-  Vertex *verts = new Vertex[elements];
-  uint8 c, w; int line = 0, cx = 0, v = 0; float l, r;
+#define eraseCurChar() vertCount -= 6;
+
+void Font::updateTextBuffer(Render::FontRendererTextBufferRef &buf, const std::string &text) const {
+  uint vertCount = text.size()*6;
+  std::unique_ptr<Vertex[]> verts(new Vertex[vertCount]);
+  int16 c, w, line = 0, cx = 0, v = 0;
+  float l, r;
   float cr = 1.0f, cg = 1.0f, cb = 1.0f, ca = 1.0f;
-  for (uint i=0; i < text.size(); i++) {
+  for (size_t i = 0; i < text.size(); i++) {
     c = text[i];
     if (c == '\n') {
       eraseCurChar();
@@ -116,28 +115,11 @@ int Font::updateVBO(Render::gl::VBO &vbo, const std::string &text, GLenum usage)
     v += 6;
     cx += w;
   }
-  vbo.setData(verts, elements, usage);
-  delete[] verts;
-  return elements;
+  G->R->renderers.font->updateTextBuffer(buf, verts.get(), vertCount);
 }
 
-void Font::draw(const Render::gl::VBO &vbo, int count, const glm::mat4 &matrix) const {
-  R.prog->bind();
-  glEnableVertexAttribArray(R.att_coord);
-  glEnableVertexAttribArray(R.att_texcoord);
-  glEnableVertexAttribArray(R.att_color);
-
-  m_texture->bind();
-  vbo.bind();
-  glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(matrix));
-  glVertexAttribPointer(R.att_coord, 2, GL_SHORT, GL_FALSE, sizeof(Vertex), 0);
-  glVertexAttribPointer(R.att_texcoord, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, tx));
-  glVertexAttribPointer(R.att_color, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, r));
-  glDrawArrays(GL_TRIANGLES, 0, count);
-
-  glDisableVertexAttribArray(R.att_color);
-  glDisableVertexAttribArray(R.att_texcoord);
-  glDisableVertexAttribArray(R.att_coord);
+void Font::draw(const Render::FontRendererTextBufferRef &buf, const glm::mat4 &matrix) const {
+  G->R->renderers.font->render(*this, buf, matrix);
 }
 
 Font::Size Font::getSize(const std::string &text) const {
@@ -171,6 +153,8 @@ Font::~Font() {
   delete m_texture;
   if (texPos)
     delete[] texPos;
+
+   G->R->renderers.font->unregisterFont(*this);
 }
 
 }

@@ -85,10 +85,6 @@ void GLWorldRenderer::render(RenderParams &rp) {
   glUniform1f(uni_fogStart, G->RP->fogStart);
   glUniform1f(uni_fogEnd, G->RP->fogEnd);
   glUniform1f(uni_time, G->Time);
-  glEnableVertexAttribArray(att_coord);
-  glEnableVertexAttribArray(att_texcoord);
-  glEnableVertexAttribArray(att_color);
-  //glEnableVertexAttribArray(att_wave);
   TextureAtlas->bind();
 
   const static glm::vec3 cShift(Chunk::MidX, Chunk::MidY, Chunk::MidZ);
@@ -117,16 +113,11 @@ void GLWorldRenderer::render(RenderParams &rp) {
         glUniformMatrix4fv(uni_mvp, 1, GL_FALSE, glm::value_ptr(chunkTransform));
         ce.vao.bind();
         glDrawElements(GL_TRIANGLES, ce.indicesOpq, GL_UNSIGNED_SHORT, nullptr);
+        ce.vao.unbind();
         //lastVertCount += cc->vertices;
       }
     }
   }
-  VAO::unbind();
-
-  //glDisableVertexAttribArray(att_wave);
-  glDisableVertexAttribArray(att_color);
-  glDisableVertexAttribArray(att_texcoord);
-  glDisableVertexAttribArray(att_coord);
 }
 
 /*void GLWorldRenderer::renderTransparent(RenderParams &rp) {

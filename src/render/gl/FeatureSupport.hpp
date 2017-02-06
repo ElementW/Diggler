@@ -19,7 +19,8 @@ public:
     DSA_EXT /* Direct State Access, EXT version */,
     DSA /* Direct State Access, one or move of above */,
     shader_image_load_store,
-    FBO_ARB /* FrameBuffer Obects, ARB version */;
+    FBO_ARB /* FrameBuffer Obects, ARB version */,
+    buffer_storage;
 
   static void probe();
   static std::string supported();

@@ -1,7 +1,10 @@
 #include "Text.hpp"
+
 #include <glm/gtc/matrix_transform.hpp>
+
 #include "../Game.hpp"
 #include "../GameWindow.hpp"
+#include "../render/FontRenderer.hpp"
 
 namespace Diggler {
 namespace UI {
@@ -9,6 +12,9 @@ namespace UI {
 Text::Text(Manager *M, const std::string &text, int scaleX, int scaleY)
   : Element(M), m_scaleX(scaleX), m_scaleY(scaleY), m_text(text) {
   update();
+}
+
+Text::~Text() {
 }
 
 void Text::setText(const std::string &text) {
@@ -54,19 +60,22 @@ void Text::updateMatrix() {
 }
 
 void Text::updateText() {
-  m_elementCount = M->G->FM.getFont(m_fontName)->updateVBO(m_vbo, m_text);
+  if (!m_textBuf) {
+    m_textBuf = M->G->FM->getFont(m_fontName)->createTextBuffer();
+  }
+  M->G->FM->getFont(m_fontName)->updateTextBuffer(m_textBuf, m_text);
 }
 
 void Text::render() {
-  M->G->FM.getFont(m_fontName)->draw(m_vbo, m_elementCount, m_matrix);
+  M->G->FM->getFont(m_fontName)->draw(m_textBuf, m_matrix);
 }
 
 void Text::render(const glm::mat4 &matrix) const {
-  M->G->FM.getFont(m_fontName)->draw(m_vbo, m_elementCount, matrix);
+  M->G->FM->getFont(m_fontName)->draw(m_textBuf, matrix);
 }
 
 Text::Size Text::getSize() const {
-  Font::Size s = M->G->FM.getFont(m_fontName)->getSize(m_text);
+  Font::Size s = M->G->FM->getFont(m_fontName)->getSize(m_text);
   return Size { s.x*m_scaleX, s.y*m_scaleY };
 }
 
