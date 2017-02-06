@@ -29,10 +29,13 @@ static constexpr const char* const_strrchr(char const * s, int c) {
 }
 
 static constexpr const char *const_filename() {
-#ifdef __FILENAME__
+#if defined(__FILENAME__)
   return __FILENAME__;
+#elif defined(__FULL_FILENAME__)
+  return const_strrchr(__FULL_FILENAME__, '/') ? \
+         const_strrchr(__FULL_FILENAME__, '/') + 1 : __FULL_FILENAME__;
 #else
-  return const_strrchr(__FILE__, '/') ? const_strrchr(__FILE__, '/') + 1 : __FILE__;
+  return "<?>";
 #endif
 }
 
