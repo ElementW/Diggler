@@ -250,5 +250,3 @@ diggler.export("registerBlock", diggler.registerBlock)
 dofile(rtpath .. '/api/io.lua')
 dofile(rtpath .. '/api/registerBlock.lua')
 
-local m = diggler.loadMod('/media/source/Diggler/mods/TestMod')
-diggler.initMod(m)
