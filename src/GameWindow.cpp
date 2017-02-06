@@ -264,6 +264,7 @@ void GameWindow::run() {
     m_nextState = nullptr;
     UIM->clear();
     m_currentState->run();
+    m_currentState.reset();
   }
 }
 
