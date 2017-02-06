@@ -35,11 +35,12 @@ public:
   GLParticlesRenderer(Game*);
   ~GLParticlesRenderer();
 
-  void registerEmitter(ParticleEmitter*);
-  void updateParticleData(ParticleEmitter*, ParticleEmitter::ParticleRenderData *data, uint count);
-  void unregisterEmitter(ParticleEmitter*);
+  void registerEmitter(ParticleEmitter&) final override;
+  void updateParticleData(ParticleEmitter&, ParticleEmitter::ParticleRenderData *data,
+      size_t count) final override;
+  void unregisterEmitter(ParticleEmitter&) final override;
 
-  void render(RenderParams&);
+  void render(RenderParams&) final override;
 };
 
 }

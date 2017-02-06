@@ -8,16 +8,16 @@ namespace Diggler {
 
 ParticleEmitter::ParticleEmitter(Game *G) :
   G(G) {
-  G->R->renderers.particles->registerEmitter(this);
+  G->R->renderers.particles->registerEmitter(*this);
 }
 
 ParticleEmitter::~ParticleEmitter() {
-  G->R->renderers.particles->unregisterEmitter(this);
+  G->R->renderers.particles->unregisterEmitter(*this);
 }
 
-void ParticleEmitter::setMaxCount(uint count) {
+void ParticleEmitter::setMaxCount(decltype(maxCount) count) {
   particles.reserve(count);
-  for (uint i = maxCount; i < count; ++i) {
+  for (decltype(maxCount) i = maxCount; i < count; ++i) {
     particles[i].decay = -1;
   }
   maxCount = count;
@@ -33,9 +33,9 @@ void ParticleEmitter::emit(Particle &p) {
 }
 
 void ParticleEmitter::update(double delta) {
-  ParticleRenderData *data = new ParticleRenderData[maxCount];
+  std::unique_ptr<ParticleRenderData[]> data(new ParticleRenderData[maxCount]);
   float deltaF = delta;
-  for (uint i = 0; i < maxCount; ++i) {
+  for (decltype(maxCount) i = 0; i < maxCount; ++i) {
     Particle &p = particles[i];
     p.vel += p.accel * deltaF;
     p.pos += p.vel * deltaF;
@@ -44,8 +44,7 @@ void ParticleEmitter::update(double delta) {
       emit(p);
     data[i] = { p.pos.x, p.pos.y, p.pos.z, p.color.r, p.color.g, p.color.b, p.color.a, p.size };
   }
-  G->R->renderers.particles->updateParticleData(this, data, maxCount);
-  delete[] data;
+  G->R->renderers.particles->updateParticleData(*this, data.get(), maxCount);
 }
 
 }

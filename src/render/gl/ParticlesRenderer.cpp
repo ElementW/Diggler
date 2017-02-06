@@ -26,10 +26,7 @@ GLParticlesRenderer::GLParticlesRenderer(Game *G) :
 GLParticlesRenderer::~GLParticlesRenderer() {
 }
 
-void GLParticlesRenderer::registerEmitter(ParticleEmitter *pe) {
-  if (pe == nullptr) {
-    return;
-  }
+void GLParticlesRenderer::registerEmitter(ParticleEmitter &pe) {
   EmitterRenderData &rd = *(new EmitterRenderData);
   setRendererData(pe, reinterpret_cast<uintptr_t>(&rd));
   { VAO::Config cfg = rd.vao.configure();
@@ -42,19 +39,13 @@ void GLParticlesRenderer::registerEmitter(ParticleEmitter *pe) {
   }
 }
 
-void GLParticlesRenderer::updateParticleData(ParticleEmitter *pe,
-  ParticleEmitter::ParticleRenderData *data, uint count) {
-  if (pe == nullptr) {
-    return;
-  }
+void GLParticlesRenderer::updateParticleData(ParticleEmitter &pe,
+  ParticleEmitter::ParticleRenderData *data, size_t count) {
   EmitterRenderData &rd = *reinterpret_cast<EmitterRenderData*>(getRendererData(pe));
   rd.vbo.setDataKeepSize(data, count, GL_STREAM_DRAW);
 }
 
-void GLParticlesRenderer::unregisterEmitter(ParticleEmitter *pe) {
-  if (pe == nullptr) {
-    return;
-  }
+void GLParticlesRenderer::unregisterEmitter(ParticleEmitter &pe) {
   delete reinterpret_cast<EmitterRenderData*>(getRendererData(pe));
 }
 
@@ -69,7 +60,7 @@ void GLParticlesRenderer::render(RenderParams &rp) {
   glUniform4f(uni_unicolor, 1.f, 1.f, 1.f, 1.f);
 
   for (ParticleEmitter &pe : rp.world->emitters) {
-    EmitterRenderData &rd = *reinterpret_cast<EmitterRenderData*>(getRendererData(&pe));
+    EmitterRenderData &rd = *reinterpret_cast<EmitterRenderData*>(getRendererData(pe));
     rd.vao.bind();
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(pe.getMaxCount()));
   }

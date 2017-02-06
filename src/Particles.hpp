@@ -27,7 +27,7 @@ class ParticleEmitter {
 
   Game *G;
 
-  uint count, maxCount;
+  size_t count, maxCount;
   std::vector<Particle> particles;
 public:
   struct ParticleRenderData {
@@ -43,8 +43,8 @@ public:
   ParticleEmitter(Game*);
   ~ParticleEmitter();
 
-  void setMaxCount(uint);
-  uint getMaxCount() const {
+  void setMaxCount(decltype(maxCount));
+  decltype(maxCount) getMaxCount() const {
     return maxCount;
   }
 
