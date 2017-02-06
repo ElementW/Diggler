@@ -17,7 +17,7 @@ void MemoryStream::seek(OffT pos, Whence whence) {
   case Set:
     if (pos < 0) {
       m_cursor = 0;
-    } else if (pos >= static_cast<OffT>(m_length)) {
+    } else if (pos > static_cast<OffT>(m_length)) {
       throw std::out_of_range("Seeking beyond end of stream");
     } else {
       m_cursor = static_cast<PosT>(pos);
@@ -26,7 +26,7 @@ void MemoryStream::seek(OffT pos, Whence whence) {
   case Current:
     if (pos < -static_cast<OffT>(m_cursor)) {
       m_cursor = 0;
-    } else if (pos >= static_cast<OffT>(m_length - m_cursor)) {
+    } else if (pos > static_cast<OffT>(m_length - m_cursor)) {
       throw std::out_of_range("Seeking beyond end of stream");
     } else {
       m_cursor += static_cast<PosT>(pos);
