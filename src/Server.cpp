@@ -280,7 +280,7 @@ void Server::handlePlayerDeath(InMessage &msg, Player &plr) {
   PlayerUpdateDie pud;
   pud.readFromMsg(msg);
   pud.plrSessId = plr.sessId;
-  plr.setDead(false, pud.reason);
+  plr.setDead(false);
   OutMessage out; pud.writeToMsg(out);
   for (Player &p : G.players) {
     if (p.sessId != plr.sessId)

@@ -222,7 +222,7 @@ void LocalPlayer::forceCameraUpdate() {
   camera.setPosition(position + eyesPos);
 }
 
-void LocalPlayer::setDead(bool dead, DeathReason dr, bool send) {
+void LocalPlayer::setDead(bool dead, bool send) {
   if (dead) {
     if (isAlive) {
       deathShown = false;
@@ -234,7 +234,7 @@ void LocalPlayer::setDead(bool dead, DeathReason dr, bool send) {
     deathShown = false;
     deathSent = false;
   }
-  Player::setDead(dead, dr, send);
+  Player::setDead(dead);
 }
 
 void LocalPlayer::goForward(bool enable) {

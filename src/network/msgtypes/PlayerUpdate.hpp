@@ -29,7 +29,6 @@ struct PlayerUpdateMove : public MsgType {
 
 struct PlayerUpdateDie : public MsgType {
   Player::SessionID plrSessId;
-  Player::DeathReason reason;
 
   void writeToMsg(OutMessage&) const override;
   void readFromMsg(InMessage&) override;

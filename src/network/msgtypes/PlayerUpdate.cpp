@@ -59,12 +59,10 @@ void PlayerUpdateDie::writeToMsg(OutMessage &msg) const {
   msg.setType(MessageType::PlayerUpdate, PlayerUpdateSubtype::Die);
 
   msg.writeU32(plrSessId);
-  msg.writeU8(static_cast<uint8>(reason));
 }
 
 void PlayerUpdateDie::readFromMsg(InMessage &msg) {
   plrSessId = msg.readU32();
-  reason = static_cast<Player::DeathReason>(msg.readU8());
 }
 
 

@@ -141,7 +141,7 @@ bool ClientMessageHandler::handleMessage(InMessage &msg) {
               " is not on server" << std::endl;
             return true;
           }
-          plr->setDead(false, pud.reason);
+          plr->setDead(false);
         } break;
         case S::Respawn: {
           PlayerUpdateRespawn pur;

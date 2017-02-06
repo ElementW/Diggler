@@ -51,7 +51,7 @@ public:
   void setHasGravity(bool fall);
   void setHasNoclip(bool fly);
   void jump();
-  void setDead(bool, DeathReason = DeathReason::None, bool send = false);
+  void setDead(bool, bool send = false);
   bool raytracePointed(glm::ivec3 *pointed, glm::ivec3 *facing);
   bool raytracePointed(float range, glm::ivec3 *pointed, glm::ivec3 *facing);
 };

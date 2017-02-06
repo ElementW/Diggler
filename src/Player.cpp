@@ -80,9 +80,8 @@ void Player::render(const glm::mat4 &transform) const {
   glDisableVertexAttribArray(R.att_coord);
 }
 
-void Player::setDead(bool dead, DeathReason dr, bool send) {
+void Player::setDead(bool dead) {
   isAlive = !dead;
-  deathReason = dr;
 }
 
 }

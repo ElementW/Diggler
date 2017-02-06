@@ -46,19 +46,12 @@ protected:
 
 public:
   enum class Direction : uint8 {
-    North,	// To +Z
-    East,	// To +X
-    South,	// To -X
-    West	// To -Z
+    North, // To +Z
+    East,  // To +X
+    South, // To -X
+    West   // To -Z
   } direction;
-  enum class DeathReason : uint8 {
-    None,
-    Lava,
-    Shock,
-    Fall,
-    Explosion,
-    Void
-  } deathReason;
+
   Game *G;
   WorldRef W;
   glm::vec3 position, lastPosition, velocity, accel;
@@ -77,7 +70,7 @@ public:
   void setPosVel(const glm::vec3 &pos, const glm::vec3 &vel, const glm::vec3 &acc = glm::vec3());
   void update(const float &delta);
   void render(const glm::mat4 &transform) const;
-  void setDead(bool, DeathReason = DeathReason::None, bool send = false);
+  void setDead(bool);
 };
 
 }
