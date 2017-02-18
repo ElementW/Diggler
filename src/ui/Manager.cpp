@@ -3,6 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "../render/gl/VAO.hpp"
 #include "../render/gl/VBO.hpp"
 #include "../Texture.hpp"
 #include "../render/gl/Program.hpp"
@@ -53,6 +54,12 @@ void Manager::setup(Game *G) {
     1, 1, 1, 0
   };
   m_rectVbo->setData(verts, 6*4);
+  m_rectVao = std::make_unique<Render::gl::VAO>();
+  { Render::gl::VAO::Config cfg = m_rectVao->configure();
+    cfg.vertexAttrib(*m_rectVbo, RR.att_coord, 2, GL_UNSIGNED_BYTE, 4*sizeof(uint8));
+    cfg.vertexAttrib(*m_rectVbo, R.att_texcoord, 2, GL_UNSIGNED_BYTE, 4*sizeof(uint8), 2*sizeof(uint8));
+    cfg.commit();
+  }
 }
 
 
@@ -184,19 +191,16 @@ void Manager::setProjMat(const glm::mat4 &mat) {
 
 void Manager::drawRect(const glm::mat4 &mat, const glm::vec4 &color) const {
   RR.prog->bind();
-  glEnableVertexAttribArray(RR.att_coord);
-
-  m_rectVbo->bind();
+  m_rectVao->bind();
   Texture::unbind();
   glUniform4f(RR.uni_unicolor, color.r, color.g, color.b, color.a);
   glUniformMatrix4fv(RR.uni_mvp, 1, GL_FALSE, glm::value_ptr(mat));
-  glVertexAttribPointer(RR.att_coord, 2, GL_UNSIGNED_BYTE, GL_FALSE, 4*sizeof(uint8), 0);
   glDrawArrays(GL_TRIANGLES, 0, 6);
 
   // OpenGL needs to be stateless. Definitely. Wait for Vulkan.
   glUniform4f(RR.uni_unicolor, 1.f, 1.f, 1.f, 1.f);
 
-  glDisableVertexAttribArray(RR.att_coord);
+  m_rectVao->unbind();
 }
 
 void Manager::drawRect(const Element::Area &a, const glm::vec4 &color) const {
@@ -209,20 +213,15 @@ void Manager::drawFullRect(const glm::vec4 &color) const {
 
 void Manager::drawTex(const glm::mat4 &mat, const Texture &t, const glm::vec4 &color) const {
   R.prog->bind();
-  glEnableVertexAttribArray(R.att_coord);
-  glEnableVertexAttribArray(R.att_texcoord);
 
   t.bind();
-  m_rectVbo->bind();
+  m_rectVao->bind();
   glUniform4f(R.uni_unicolor, color.r, color.g, color.b, color.a);
   glUniformMatrix4fv(R.uni_mvp, 1, GL_FALSE, glm::value_ptr(mat));
-  glVertexAttribPointer(R.att_coord, 2, GL_UNSIGNED_BYTE, GL_FALSE, 4*sizeof(uint8), 0);
-  glVertexAttribPointer(R.att_texcoord, 2, GL_UNSIGNED_BYTE, GL_FALSE, 4*sizeof(uint8), (void*)(2*sizeof(uint8)));
   glDrawArrays(GL_TRIANGLES, 0, 6);
   glUniform4f(R.uni_unicolor, 1.f, 1.f, 1.f, 1.f);
 
-  glDisableVertexAttribArray(R.att_texcoord);
-  glDisableVertexAttribArray(R.att_coord);
+  m_rectVao->unbind();
 }
 
 void Manager::drawTex(const glm::mat4 &mat, const Texture &t) const {

@@ -48,7 +48,7 @@ void GLFontRenderer::unregisterFont(UI::Font&) {
 void GLFontRenderer::updateTextBuffer(TextBufferRef &buf, const TextBuffer::Vertex *vertices,
     uint vertexCount) {
   GLTextBuffer &glbuf = *reinterpret_cast<GLTextBuffer*>(buf.get());
-  glbuf.vbo.setDataKeepSize(vertices, vertexCount);
+  glbuf.vbo.setDataGrow(vertices, vertexCount);
   glbuf.vertexCount = static_cast<GLsizei>(vertexCount);
 }
 

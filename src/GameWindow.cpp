@@ -114,9 +114,10 @@ GameWindow::GameWindow(Game *G) : G(G) {
 
   m_w = 640; m_h = 480;
 
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-  //glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API /*GLFW_OPENGL_ES_API*/);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
   glfwWindowHint(GLFW_SAMPLES, 0); // Gimme aliasing everywhere
   //glfwWindowHint(GLFW_STENCIL_BITS, 8);
 

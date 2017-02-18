@@ -634,16 +634,17 @@ void GameState::gameLoop() {
       glClearColor(0.f, 0.f, 0.f, 0.f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+      if (!bloom.vao) {
+        bloom.vao = std::make_unique<Render::gl::VAO>();
+        Render::gl::VAO::Config cfg = bloom.vao->configure();
+        cfg.vertexAttrib(*m_3dRenderVBO, bloom.extractor.att_coord, 2, GL_SHORT, sizeof(Coord2DTex), 0);
+        cfg.vertexAttrib(*m_3dRenderVBO, bloom.extractor.att_texcoord, 2, GL_BYTE, sizeof(Coord2DTex), offsetof(Coord2DTex, u));
+        cfg.commit();
+      }
       bloom.extractor.prog->bind();
-      glEnableVertexAttribArray(bloom.extractor.att_coord);
-      glEnableVertexAttribArray(bloom.extractor.att_texcoord);
-      m_3dRenderVBO->bind();
+      bloom.vao->bind();
       glUniformMatrix4fv(bloom.extractor.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM1));
-      glVertexAttribPointer(bloom.extractor.att_coord, 2, GL_SHORT, GL_FALSE, sizeof(Coord2DTex), 0);
-      glVertexAttribPointer(bloom.extractor.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
       glDrawArrays(GL_TRIANGLES, 0, 6);
-      glDisableVertexAttribArray(bloom.extractor.att_texcoord);
-      glDisableVertexAttribArray(bloom.extractor.att_coord);
       m_3dFbo->tex->setFiltering(Texture::Filter::Nearest, Texture::Filter::Nearest);
 
       bloom.renderer.fbo->bind();
@@ -651,16 +652,9 @@ void GameState::gameLoop() {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       bloom.extractor.fbo->tex->bind();
       bloom.renderer.prog->bind();
-      glEnableVertexAttribArray(bloom.renderer.att_coord);
-      glEnableVertexAttribArray(bloom.renderer.att_texcoord);
-      m_3dRenderVBO->bind();
       glUniformMatrix4fv(bloom.renderer.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM1));
       glUniform2f(bloom.renderer.uni_pixshift, 1.f/(GW->getW()/bloom.scale), 1.f/(GW->getH()/bloom.scale));
-      glVertexAttribPointer(bloom.renderer.att_coord, 2, GL_SHORT, GL_FALSE, sizeof(Coord2DTex), 0);
-      glVertexAttribPointer(bloom.renderer.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
       glDrawArrays(GL_TRIANGLES, 0, 6);
-      glDisableVertexAttribArray(bloom.renderer.att_texcoord);
-      glDisableVertexAttribArray(bloom.renderer.att_coord);
       bloom.renderer.fbo->unbind();
 
       // render to real surface
@@ -668,16 +662,8 @@ void GameState::gameLoop() {
       glBlendFunc(GL_SRC_ALPHA, GL_ONE);
       bloom.extractor.fbo->tex->bind();
       bloom.extractor.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
-      bloom.renderer.prog->bind();
-      glEnableVertexAttribArray(bloom.renderer.att_coord);
-      glEnableVertexAttribArray(bloom.renderer.att_texcoord);
-      m_3dRenderVBO->bind();
-      glUniformMatrix4fv(bloom.renderer.uni_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM1));
-      glVertexAttribPointer(bloom.renderer.att_coord, 2, GL_SHORT, GL_FALSE, sizeof(Coord2DTex), 0);
-      glVertexAttribPointer(bloom.renderer.att_texcoord, 2, GL_BYTE, GL_FALSE, sizeof(Coord2DTex), (GLvoid*)offsetof(Coord2DTex, u));
       glDrawArrays(GL_TRIANGLES, 0, 6);
-      glDisableVertexAttribArray(bloom.renderer.att_texcoord);
-      glDisableVertexAttribArray(bloom.renderer.att_coord);
+      bloom.vao->unbind();
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 

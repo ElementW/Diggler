@@ -8,6 +8,7 @@ namespace Diggler {
 
 namespace Render {
 namespace gl {
+class VAO;
 class VBO;
 }
 }
@@ -19,6 +20,7 @@ namespace UI {
 class Manager {
 private:
   std::unique_ptr<Render::gl::VBO> m_rectVbo;
+  std::unique_ptr<Render::gl::VAO> m_rectVao;
   std::list<std::unique_ptr<Element>> m_elements;
   Element *m_hoveredElement;
   Element *m_focusedElement;

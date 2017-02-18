@@ -42,7 +42,7 @@ void GLParticlesRenderer::registerEmitter(ParticleEmitter &pe) {
 void GLParticlesRenderer::updateParticleData(ParticleEmitter &pe,
   ParticleEmitter::ParticleRenderData *data, size_t count) {
   EmitterRenderData &rd = *reinterpret_cast<EmitterRenderData*>(getRendererData(pe));
-  rd.vbo.setDataKeepSize(data, count, GL_STREAM_DRAW);
+  rd.vbo.setDataGrow(data, count, GL_STREAM_DRAW);
 }
 
 void GLParticlesRenderer::unregisterEmitter(ParticleEmitter &pe) {

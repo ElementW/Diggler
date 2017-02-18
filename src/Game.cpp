@@ -57,6 +57,7 @@ void Game::initClient() {
   FM = std::make_unique<UI::FontManager>(*this);
   A = new Audio(*this);
   KB = new KeyBinds;
+  LP = new LocalPlayer(this);
   PlayerPosUpdateFreq = 4;
 }
 
@@ -77,12 +78,12 @@ void Game::finalize() {
 }
 
 void Game::finalizeClient() {
+  delete LP; LP = nullptr;
   delete KB; KB = nullptr;
   delete A; A = nullptr;
   FM.reset();
   delete R; R = nullptr;
   delete RP; RP = nullptr;
-  delete LP; LP = nullptr;
   delete PM; PM = nullptr;
 }
 

@@ -59,6 +59,7 @@ private:
   struct Bloom {
     bool enable;
     int scale;
+    std::unique_ptr<Render::gl::VAO> vao;
     struct Extractor {
       Render::gl::FBO *fbo;
       const Render::gl::Program *prog;

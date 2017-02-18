@@ -102,7 +102,7 @@ public:
   }
 
 
-  template <typename T> void setDataKeepSize(const T *data, uint count, GLenum usage = GL_STATIC_DRAW) {
+  template <typename T> void setDataGrow(const T *data, uint count, GLenum usage = GL_STATIC_DRAW) {
     const GLuint targetSize = count*sizeof(T);
     if (targetSize <= m_size && m_usage == usage) {
       setSubData(data, 0, count);
@@ -111,8 +111,8 @@ public:
     }
   }
 
-  template <typename T> void setDataKeepSize(const std::vector<T>& data, GLenum usage = GL_STATIC_DRAW) {
-    setDataKeepSize(data.data(), data.size(), usage);
+  template <typename T> void setDataGrow(const std::vector<T>& data, GLenum usage = GL_STATIC_DRAW) {
+    setDataGrow(data.data(), data.size(), usage);
   }
 
 
