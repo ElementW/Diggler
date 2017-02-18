@@ -3,8 +3,18 @@
 
 #include <memory>
 
+#include "../platform/Types.hpp"
+
 namespace Diggler {
 namespace Render {
+
+enum class FontRendererTextBufferUsage : uint8 {
+  Static,
+  Dynamic,
+  Stream,
+
+  Default = Static
+};
 
 class FontRendererTextBuffer;
 

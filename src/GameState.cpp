@@ -161,8 +161,13 @@ GameState::Bloom::~Bloom() {
 }
 
 void GameState::setupUI() {
-  UI.FPS = G->UIM->add<UI::Text>(); UI.FPS->setScale(2, 2);
-  UI.DebugInfo = G->UIM->add<UI::Text>(); UI.DebugInfo->setVisible(false);
+  UI.FPS = G->UIM->add<UI::Text>();
+  UI.FPS->setScale(2, 2);
+
+  UI.DebugInfo = G->UIM->add<UI::Text>();
+  UI.DebugInfo->setUpdateFrequencyHint(Render::FontRendererTextBufferUsage::Stream);
+  UI.DebugInfo->setVisible(false);
+
   UI.EM = new EscMenu(G);
 
   m_chatBox = new Chatbox(G);

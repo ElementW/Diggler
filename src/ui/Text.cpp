@@ -9,12 +9,28 @@
 namespace Diggler {
 namespace UI {
 
-Text::Text(Manager *M, const std::string &text, int scaleX, int scaleY)
-  : Element(M), m_scaleX(scaleX), m_scaleY(scaleY), m_text(text) {
+Text::Text(Manager *M) :
+  Element(M) {
+}
+
+Text::Text(Manager *M, const std::string &text, int scaleX, int scaleY) :
+  Element(M),
+  m_scaleX(scaleX),
+  m_scaleY(scaleY),
+  m_textBufUsage(Render::FontRendererTextBufferUsage::Default),
+  m_text(text) {
   update();
 }
 
 Text::~Text() {
+}
+
+void Text::setUpdateFrequencyHint(Render::FontRendererTextBufferUsage usage) {
+  if (usage != m_textBufUsage) {
+    m_textBufUsage = usage;
+    m_textBuf.reset();
+    update();
+  }
 }
 
 void Text::setText(const std::string &text) {
@@ -61,17 +77,21 @@ void Text::updateMatrix() {
 
 void Text::updateText() {
   if (!m_textBuf) {
-    m_textBuf = M->G->FM->getFont(m_fontName)->createTextBuffer();
+    m_textBuf = M->G->FM->getFont(m_fontName)->createTextBuffer(m_textBufUsage);
   }
   M->G->FM->getFont(m_fontName)->updateTextBuffer(m_textBuf, m_text);
 }
 
 void Text::render() {
-  M->G->FM->getFont(m_fontName)->draw(m_textBuf, m_matrix);
+  if (m_textBuf) {
+    M->G->FM->getFont(m_fontName)->draw(m_textBuf, m_matrix);
+  }
 }
 
 void Text::render(const glm::mat4 &matrix) const {
-  M->G->FM->getFont(m_fontName)->draw(m_textBuf, matrix);
+  if (m_textBuf) {
+    M->G->FM->getFont(m_fontName)->draw(m_textBuf, matrix);
+  }
 }
 
 Text::Size Text::getSize() const {

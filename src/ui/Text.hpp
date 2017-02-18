@@ -13,6 +13,7 @@ namespace UI {
 class Text : public Element {
 private:
   int m_scaleX, m_scaleY;
+  Render::FontRendererTextBufferUsage m_textBufUsage;
   Render::FontRendererTextBufferRef m_textBuf;
   std::string m_fontName;
   glm::mat4 m_matrix;
@@ -24,13 +25,31 @@ private:
 public:
   struct Size { int x, y; };
 
-  Text(Manager*, const std::string &text = "", int scaleX = 1, int scaleY = 1);
+  Text(Manager*);
+  Text(Manager*, const std::string &text, int scaleX = 1, int scaleY = 1);
   Text(Text&&) = default;
   Text& operator=(Text&&) = default;
   ~Text();
 
+  /**
+   * Hints if frequent updates should be expected for this Text object
+   */
+  void setUpdateFrequencyHint(Render::FontRendererTextBufferUsage);
+
+  /**
+   * @param text Text to display
+   */
   void setText(const std::string &text);
+
+  /**
+   * @return Displayed text
+   */
   std::string getText() const;
+
+  /**
+   * Sets the font to use when displaying text
+   * @param name Font name
+   */
   void setFont(const std::string &name);
   void setPos(int x, int y);
   void setScale(int scaleX, int scaleY);

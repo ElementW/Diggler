@@ -8,8 +8,10 @@ namespace Diggler {
 namespace Render {
 namespace gl {
 
-GLFontRenderer::GLTextBuffer::GLTextBuffer(const GLFontRenderer &parent) :
-  parent(parent) {
+GLFontRenderer::GLTextBuffer::GLTextBuffer(const GLFontRenderer &parent,
+    FontRendererTextBufferUsage usage) :
+  parent(parent),
+  usage(usage) {
   { VAO::Config cfg = vao.configure();
     cfg.vertexAttrib(vbo, parent.att_coord, 2, GL_SHORT, sizeof(Vertex), 0);
     cfg.vertexAttrib(vbo, parent.att_texcoord, 2, GL_FLOAT, sizeof(Vertex), offsetof(Vertex, tx));
@@ -33,8 +35,8 @@ GLFontRenderer::GLFontRenderer(Game *G) :
 GLFontRenderer::~GLFontRenderer() {
 }
 
-GLFontRenderer::TextBufferRef GLFontRenderer::createTextBuffer() {
-  return std::make_unique<GLTextBuffer>(*this);
+GLFontRenderer::TextBufferRef GLFontRenderer::createTextBuffer(FontRendererTextBufferUsage use) {
+  return std::make_unique<GLTextBuffer>(*this, use);
 }
 
 void GLFontRenderer::registerFont(UI::Font&) {
@@ -45,10 +47,22 @@ void GLFontRenderer::unregisterFont(UI::Font&) {
 
 }
 
+static constexpr GLenum glUsage(FontRendererTextBufferUsage usage) {
+  switch (usage) {
+  case FontRendererTextBufferUsage::Static:
+    return GL_STATIC_DRAW;
+  case FontRendererTextBufferUsage::Dynamic:
+    return GL_DYNAMIC_DRAW;
+  case FontRendererTextBufferUsage::Stream:
+    return GL_STREAM_DRAW;
+  }
+  return GL_INVALID_ENUM;
+}
+
 void GLFontRenderer::updateTextBuffer(TextBufferRef &buf, const TextBuffer::Vertex *vertices,
     uint vertexCount) {
   GLTextBuffer &glbuf = *reinterpret_cast<GLTextBuffer*>(buf.get());
-  glbuf.vbo.setDataGrow(vertices, vertexCount);
+  glbuf.vbo.setDataGrow(vertices, vertexCount, glUsage(glbuf.usage));
   glbuf.vertexCount = static_cast<GLsizei>(vertexCount);
 }
 

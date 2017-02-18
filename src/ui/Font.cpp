@@ -62,6 +62,11 @@ Render::FontRendererTextBufferRef Font::createTextBuffer() const {
   return G->R->renderers.font->createTextBuffer();
 }
 
+Render::FontRendererTextBufferRef Font::createTextBuffer(
+    Render::FontRendererTextBufferUsage usage) const {
+  return G->R->renderers.font->createTextBuffer(usage);
+}
+
 #define eraseCurChar() vertCount -= 6;
 
 void Font::updateTextBuffer(Render::FontRendererTextBufferRef &buf, const std::string &text) const {

@@ -30,8 +30,9 @@ public:
     VBO vbo;
     VAO vao;
     GLsizei vertexCount;
+    FontRendererTextBufferUsage usage;
 
-    GLTextBuffer(const GLFontRenderer&);
+    GLTextBuffer(const GLFontRenderer&, FontRendererTextBufferUsage);
     ~GLTextBuffer() final override;
   };
 
@@ -41,7 +42,7 @@ public:
   void registerFont(UI::Font&) final override;
   void unregisterFont(UI::Font&) final override;
 
-  TextBufferRef createTextBuffer() final override;
+  TextBufferRef createTextBuffer(FontRendererTextBufferUsage) final override;
   void updateTextBuffer(TextBufferRef&, const TextBuffer::Vertex *vertices,
       uint vertexCount) final override;
 

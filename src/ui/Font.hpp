@@ -43,6 +43,7 @@ public:
   ~Font();
 
   Render::FontRendererTextBufferRef createTextBuffer() const;
+  Render::FontRendererTextBufferRef createTextBuffer(Render::FontRendererTextBufferUsage) const;
   void updateTextBuffer(Render::FontRendererTextBufferRef&, const std::string &text) const;
 
   void draw(const Render::FontRendererTextBufferRef&, const glm::mat4 &matrix) const;

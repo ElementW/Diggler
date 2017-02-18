@@ -47,7 +47,8 @@ public:
   virtual void registerFont(UI::Font&) = 0;
   virtual void unregisterFont(UI::Font&) = 0;
 
-  virtual TextBufferRef createTextBuffer() = 0;
+  virtual TextBufferRef createTextBuffer(
+      FontRendererTextBufferUsage = FontRendererTextBufferUsage::Default) = 0;
   virtual void updateTextBuffer(TextBufferRef&, const TextBuffer::Vertex *vertices,
       uint vertexCount) = 0;
 
