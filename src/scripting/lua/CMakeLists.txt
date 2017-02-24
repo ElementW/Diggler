@@ -1,7 +1,5 @@
 set(CSD ${CMAKE_CURRENT_SOURCE_DIR})
-set(SRCS
-  ${SRCS}
+diggler_add_sources(
   ${CSD}/api/content/Registry.cpp
   ${CSD}/State.cpp
-  PARENT_SCOPE
 )

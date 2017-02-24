@@ -8,8 +8,3 @@ endif()
 if(DIGGLER_ENABLE_VK_RENDERER)
   add_subdirectory("vk")
 endif()
-
-set(SRCS
-  ${SRCS}
-  PARENT_SCOPE
-)

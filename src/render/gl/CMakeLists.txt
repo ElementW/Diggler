@@ -1,6 +1,5 @@
 set(CSD ${CMAKE_CURRENT_SOURCE_DIR})
-set(SRCS
-  ${SRCS}
+diggler_add_sources(
   ${CSD}/FBO.cpp
   ${CSD}/FeatureSupport.cpp
   ${CSD}/FontRenderer.cpp
@@ -11,5 +10,4 @@ set(SRCS
   ${CSD}/Shader.cpp
   ${CSD}/Util.cpp
   ${CSD}/WorldRenderer.cpp
-  PARENT_SCOPE
 )

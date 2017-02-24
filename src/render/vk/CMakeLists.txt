@@ -1,5 +1,2 @@
-set(CSD ${CMAKE_CURRENT_SOURCE_DIR})
-set(SRCS
-  ${SRCS}
-  PARENT_SCOPE
+diggler_add_sources(
 )

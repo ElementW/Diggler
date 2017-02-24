@@ -1,4 +1,4 @@
-if(NOT DEFINED SRCS)
+if(NOT DEFINED DIGGLER_USED_ROOT_CMAKELISTS)
   message(FATAL_ERROR "Please compile using the repo's root CMakeLists.txt")
 endif()
 
@@ -6,8 +6,7 @@ add_subdirectory("render")
 add_subdirectory("scripting")
 
 set(CSD ${CMAKE_CURRENT_SOURCE_DIR})
-set(SRCS
-  ${SRCS}
+diggler_add_sources(
   ${CSD}/AABB.cpp
   ${CSD}/Audio.cpp
   ${CSD}/Camera.cpp
@@ -66,5 +65,4 @@ set(SRCS
   ${CSD}/util/TexturePacker.cpp
   ${CSD}/util/Tipsify.cpp
   ${CSD}/World.cpp
-  PARENT_SCOPE
 )

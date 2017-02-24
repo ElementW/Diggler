@@ -115,9 +115,18 @@ include_directories(BEFORE
 #add_custom_target(files SOURCES ${FILELIST})
 
 # Add diggler executable target
-set(SRCS ";")
+set_property(GLOBAL PROPERTY DIGGLER_SOURCE_FILES "")
+macro(diggler_add_sources)
+  get_property(SRCS GLOBAL PROPERTY DIGGLER_SOURCE_FILES)
+  list(APPEND SRCS ${ARGV})
+  set_property(GLOBAL PROPERTY DIGGLER_SOURCE_FILES "${SRCS}")
+endmacro(diggler_add_sources)
+
+set(DIGGLER_USED_ROOT_CMAKELISTS TRUE)
+
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src")
 
+get_property(SRCS GLOBAL PROPERTY DIGGLER_SOURCE_FILES)
 add_executable(diggler ${SRCS})
 
 target_link_libraries(diggler
