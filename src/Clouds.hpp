@@ -1,7 +1,7 @@
-#ifndef CLOUDS_HPP
-#define CLOUDS_HPP
+#ifndef DIGGLER_CLOUDS_HPP
+#define DIGGLER_CLOUDS_HPP
 
-#include <epoxy/gl.h>
+#include "render/gl/OpenGL.hpp"
 #include <glm/glm.hpp>
 
 #include "render/gl/VBO.hpp"
@@ -37,4 +37,4 @@ public:
 
 }
 
-#endif
+#endif /* DIGGLER_CLOUDS_HPP */

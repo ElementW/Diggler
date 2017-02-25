@@ -3,6 +3,8 @@ diggler_add_sources(
   ${CSD}/FBO.cpp
   ${CSD}/FeatureSupport.cpp
   ${CSD}/FontRenderer.cpp
+  ${CSD}/OpenGL.cpp
+  ${CSD}/OpenGL.${DIGGLER_GL_LOADER}.cpp
   ${CSD}/ParticlesRenderer.cpp
   ${CSD}/Program.cpp
   ${CSD}/ProgramManager.cpp

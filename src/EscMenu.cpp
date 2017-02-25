@@ -1,7 +1,9 @@
 #include "EscMenu.hpp"
-#include <epoxy/gl.h>
+
+#include "render/gl/OpenGL.hpp"
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
 #include "Game.hpp"
 #include "ui/Text.hpp"
 #include "ui/Button.hpp"

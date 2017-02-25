@@ -51,8 +51,9 @@ bool Shader::compileFromString(const std::string &source, const std::string &pat
   const char *src = srcStr.c_str();
   glShaderSource(id, 1, &src, nullptr);
   glCompileShader(id);
+  GLint compiled;
   glGetShaderiv(id, GL_COMPILE_STATUS, &compiled);
-  if (!compiled) {
+  if (!GLboolean(compiled)) {
     getErrorStream() << "Compile error in " << path << "\n" << getError() << std::endl;
     return false;
   }

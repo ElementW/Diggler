@@ -22,8 +22,10 @@ const char* getErrorString(GLenum code) {
       return "GL_OUT_OF_MEMORY";
     case GL_INVALID_FRAMEBUFFER_OPERATION:
       return "GL_INVALID_FRAMEBUFFER_OPERATION";
+#ifdef GL_TABLE_TOO_LARGE
     case GL_TABLE_TOO_LARGE:
       return "GL_TABLE_TOO_LARGE";
+#endif
     case GL_FRAMEBUFFER_COMPLETE:
       return "GL_FRAMEBUFFER_COMPLETE";
     case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
@@ -36,6 +38,8 @@ const char* getErrorString(GLenum code) {
       return "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
     case GL_FRAMEBUFFER_UNSUPPORTED:
       return "GL_FRAMEBUFFER_UNSUPPORTED";
+    default:
+      break;
   }
   return "";
 }

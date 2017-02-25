@@ -117,25 +117,29 @@ Registry::Registry() :
     br.commit();
   }
 
-  m_texturePacker = new TexturePacker(64*8, 64*8);
-  m_texturePacker->freezeTexUpdate(true);
+  if (GlobalProperties::IsClient) {
+    m_texturePacker = new TexturePacker(64*8, 64*8);
+    m_texturePacker->freezeTexUpdate(true);
 
-  // Valve checkerboard! :)
-  unk1 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\xFF\x00\xFF\xFF\x00\xFF\x00\x00\x00");
-  unk2 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\x00\x00\xFF\x00\x00\xFF\x00\x00\x00");
-  unk3 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\x00\xFF\x00\x00\xFF\x00\x00\x00\x00");
-  unk4 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\xFF\x00\x00\xFF\x00\x00\x00\x00\x00");
-  unk5 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\x00\xFF\xFF\x00\xFF\xFF\x00\x00\x00");
-  unk6 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\xFF\xFF\x00\xFF\xFF\x00\x00\x00\x00");
-  unk7 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00");
-  unk8 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\x00\x0F\x00\x00\x0F\x00\x00\x00\x00");
+    // Valve checkerboard! :)
+    unk1 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\xFF\x00\xFF\xFF\x00\xFF\x00\x00\x00");
+    unk2 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\x00\x00\xFF\x00\x00\xFF\x00\x00\x00");
+    unk3 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\x00\xFF\x00\x00\xFF\x00\x00\x00\x00");
+    unk4 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\xFF\x00\x00\xFF\x00\x00\x00\x00\x00");
+    unk5 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\x00\xFF\xFF\x00\xFF\xFF\x00\x00\x00");
+    unk6 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\xFF\xFF\x00\xFF\xFF\x00\x00\x00\x00");
+    unk7 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF\x00\x00\x00");
+    unk8 = m_texturePacker->add(2, 2, 3, (uint8*)"\x00\x00\x00\x00\x0F\x00\x00\x0F\x00\x00\x00\x00");
 
-  m_texturePacker->freezeTexUpdate(false);
-  m_atlas = m_texturePacker->getAtlas();
+    m_texturePacker->freezeTexUpdate(false);
+    m_atlas = m_texturePacker->getAtlas();
+  }
 }
 
 Registry::~Registry() {
-  delete m_texturePacker;
+  if (GlobalProperties::IsClient) {
+    delete m_texturePacker;
+  }
 }
 
 TexturePacker::Coord Registry::addTexture(const std::string &texName,

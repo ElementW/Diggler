@@ -40,9 +40,9 @@ Texture::Texture(const std::string &path, PixelFormat format) {
   case PixelFormat::RGBA:
     stbiFormat = STBI_rgb_alpha;
     break;
-  case PixelFormat::Monochrome8:
+/*  case PixelFormat::Monochrome8:
     stbiFormat = STBI_grey;
-    break;
+    break;*/
   }
   int width, height, channels;
   unsigned char *ptr = nullptr;
@@ -89,7 +89,7 @@ GLenum getFilterGlConstant(Texture::Filter filter) {
   case Texture::Filter::Nearest:
     return GL_NEAREST;
   }
-  return 0;
+  return GL_INVALID_ENUM;
 }
 
 void Texture::setFiltering(Filter min, Filter mag) {
@@ -100,7 +100,7 @@ void Texture::setFiltering(Filter min, Filter mag) {
   PopBoundTex();
 }
 
-static GLint getWrapGlConstant(Texture::Wrapping wrap) {
+static GLenum getWrapGlConstant(Texture::Wrapping wrap) {
   switch (wrap) {
   case Texture::Wrapping::ClampEdge:
     return GL_CLAMP_TO_EDGE;
@@ -111,7 +111,7 @@ static GLint getWrapGlConstant(Texture::Wrapping wrap) {
   case Texture::Wrapping::MirroredRepeat:
     return GL_MIRRORED_REPEAT;
   }
-  return 0;
+  return GL_INVALID_ENUM;
 }
 
 void Texture::setWrapping(Wrapping s, Wrapping t) {
@@ -130,9 +130,9 @@ void Texture::setPlaceholder() {
   case PixelFormat::RGBA:
     pxLength = 4;
     break;
-  case PixelFormat::Monochrome8:
+/*  case PixelFormat::Monochrome8:
     pxLength = 1;
-    break;
+    break;*/
   }
   unsigned char *white = new unsigned char[m_w * m_h * pxLength];
   memset(white, 255, m_w * m_h * pxLength);
@@ -148,11 +148,11 @@ static GLenum getGlTexFormat(Texture::PixelFormat fmt) {
   case Texture::PixelFormat::RGBA:
     return  GL_RGBA;
     break;
-  case Texture::PixelFormat::Monochrome8:
+/*  case Texture::PixelFormat::Monochrome8:
     return GL_R8;
-    break;
+    break;*/
   }
-  return 0;
+  return GL_INVALID_ENUM;
 }
 
 void Texture::setTexture(uint w, uint h, const uint8_t *data, PixelFormat format) {
@@ -223,9 +223,9 @@ uint Texture::requiredBufferSize() {
   case PixelFormat::RGBA:
     texelSize = 4;
     break;
-  case PixelFormat::Monochrome8:
+/*  case PixelFormat::Monochrome8:
     texelSize = 1;
-    break;
+    break; */
   }
   return m_w * m_h * texelSize;
 }

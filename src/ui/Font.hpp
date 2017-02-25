@@ -3,7 +3,7 @@
 
 #include "../Platform.hpp"
 
-#include <epoxy/gl.h>
+#include "../render/gl/OpenGL.hpp"
 #include <glm/glm.hpp>
 
 #include "../render/FontRendererFwd.hpp"

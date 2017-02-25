@@ -11,7 +11,7 @@ class Program {
 private:
   Shader *vsh, *fsh;
   GLuint id;
-  GLint linked = GL_FALSE;
+  GLboolean linked;
   bool mustDestroy = false;
   std::string fshPath, vshPath;
 

@@ -1,7 +1,9 @@
-#ifndef TEXTURE_HPP
-#define TEXTURE_HPP
-#include <epoxy/gl.h>
+#ifndef DIGGLER_TEXTURE_HPP
+#define DIGGLER_TEXTURE_HPP
+
 #include <string>
+
+#include "render/gl/OpenGL.hpp"
 
 namespace Diggler {
 class Texture {
@@ -9,7 +11,7 @@ public:
   enum class PixelFormat {
     RGB,
     RGBA,
-    Monochrome8
+    // Monochrome8
   };
   enum class Filter {
     Nearest,
@@ -72,4 +74,4 @@ public:
 };
 }
 
-#endif
+#endif /* DIGGLER_TEXTURE_HPP */

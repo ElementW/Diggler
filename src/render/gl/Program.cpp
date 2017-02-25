@@ -8,7 +8,11 @@ namespace Diggler {
 namespace Render {
 namespace gl {
 
-Program::Program(Shader* vsh, Shader* fsh) : vsh(vsh), fsh(fsh), id(0) {
+Program::Program(Shader* vsh, Shader* fsh) :
+  vsh(vsh),
+  fsh(fsh),
+  id(0),
+  linked(GL_FALSE) {
   
 }
 
@@ -34,7 +38,9 @@ bool Program::link() {
   glAttachShader(id, vsh->getId());
   glAttachShader(id, fsh->getId());
   glLinkProgram(id);
-  glGetProgramiv(id, GL_LINK_STATUS, &linked);
+  GLint linkStatus;
+  glGetProgramiv(id, GL_LINK_STATUS, &linkStatus);
+  linked = GLboolean(linkStatus);
   if (!linked) {
     getErrorStream() << id << ':' << getError() << std::endl;
     return false;

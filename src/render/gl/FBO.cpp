@@ -3,18 +3,6 @@
 #include "FeatureSupport.hpp"
 #include "Util.hpp"
 
-#ifdef IN_IDE_PARSER
-  void glCheck();
-#else
-  #define glCheck() { GLenum glErr = glGetError(); \
-    if (glErr) { \
-      getDebugStream() << getErrorString(glErr) << std::endl; \
-    } glErr = glCheckFramebufferStatus(GL_FRAMEBUFFER); if (glErr != GL_FRAMEBUFFER_COMPLETE) { \
-      getDebugStream() << getErrorString(glErr) << std::endl; \
-    } \
-  }
-#endif
-
 namespace Diggler {
 namespace Render {
 namespace gl {
@@ -34,8 +22,13 @@ FBO::FBO(int w, int h, Texture::PixelFormat format, bool stencil) : m_hasStencil
   glGenRenderbuffers(1, &rboId);
   glBindRenderbuffer(GL_RENDERBUFFER, rboId);
   if (stencil) {
-    glRenderbufferStorage(GL_RENDERBUFFER, FeatureSupport::FBO_ARB ? GL_DEPTH24_STENCIL8 :
-      GL_DEPTH24_STENCIL8_OES, w, h);
+#ifdef GL_DEPTH24_STENCIL8_OES
+    const GLenum depth24stencil8 = FeatureSupport::FBO_ARB ? GL_DEPTH24_STENCIL8 :
+        GL_DEPTH24_STENCIL8_OES;
+#else
+    constexpr GLenum depth24stencil8 = GL_DEPTH24_STENCIL8;
+#endif
+    glRenderbufferStorage(GL_RENDERBUFFER, depth24stencil8, w, h);
   } else {
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
   }
@@ -53,7 +46,14 @@ FBO::FBO(int w, int h, Texture::PixelFormat format, bool stencil) : m_hasStencil
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
   }
 
-  glCheck();
+  GLenum glErr = glGetError();
+  if (glErr != GL_NO_ERROR) {
+    getDebugStream() << getErrorString(glErr) << std::endl;
+  }
+  glErr = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+  if (glErr != GL_FRAMEBUFFER_COMPLETE) {
+    getDebugStream() << getErrorString(glErr) << std::endl;
+  }
 }
 
 void FBO::resize(int w, int h) {

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include <epoxy/gl.h>
+#include "OpenGL.hpp"
 
 namespace Diggler {
 namespace Render {
@@ -13,13 +13,12 @@ namespace gl {
 class Shader {
 private:
   GLuint id;
-  GLint compiled = GL_FALSE;
   const std::vector<std::string> *m_preludeLines;
 
 public:
-  enum class Type : GLenum {
-    FRAGMENT = GL_FRAGMENT_SHADER,
-    VERTEX = GL_VERTEX_SHADER
+  enum class Type : unsigned int {
+    FRAGMENT = static_cast<unsigned int>(GL_FRAGMENT_SHADER),
+    VERTEX = static_cast<unsigned int>(GL_VERTEX_SHADER)
   } type;
   Shader(Type type);
   Shader(Type type, const std::string& path);

@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include "OpenGL.hpp"
+
 namespace Diggler {
 namespace Render {
 namespace gl {
@@ -18,14 +20,14 @@ bool
   F::buffer_storage;
 
 void F::probe() {
-  VAO = epoxy_has_gl_extension("GL_ARB_vertex_array_object") or
-        epoxy_has_gl_extension("GL_OES_vertex_array_object");
-  DSA_ARB = epoxy_has_gl_extension("GL_ARB_direct_state_access");
-  DSA_EXT = epoxy_has_gl_extension("GL_EXT_direct_state_access");
+  VAO = OpenGL::hasExtension("GL_ARB_vertex_array_object") or
+        OpenGL::hasExtension("GL_OES_vertex_array_object");
+  DSA_ARB = OpenGL::hasExtension("GL_ARB_direct_state_access");
+  DSA_EXT = OpenGL::hasExtension("GL_EXT_direct_state_access");
   DSA = DSA_ARB or DSA_EXT;
-  shader_image_load_store = epoxy_has_gl_extension("GL_ARB_shader_image_load_store");
-  FBO_ARB = epoxy_has_gl_extension("GL_ARB_framebuffer_object");
-  buffer_storage = epoxy_has_gl_extension("GL_ARB_buffer_storage");
+  shader_image_load_store = OpenGL::hasExtension("GL_ARB_shader_image_load_store");
+  FBO_ARB = OpenGL::hasExtension("GL_ARB_framebuffer_object");
+  buffer_storage = OpenGL::hasExtension("GL_ARB_buffer_storage");
 }
 
 #define feature(x) if(x){oss<<#x<<std::endl;}

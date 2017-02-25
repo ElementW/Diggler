@@ -1,13 +1,13 @@
-#ifndef PLAYER_HPP
-#define PLAYER_HPP
+#ifndef DIGGLER_PLAYER_HPP
+#define DIGGLER_PLAYER_HPP
 #include "Platform.hpp"
 
 #include <functional>
 #include <list>
 #include <memory>
 
+#include "render/gl/OpenGL.hpp"
 #include <glm/glm.hpp>
-#include <epoxy/gl.h>
 
 #include "platform/PreprocUtils.hpp"
 #include "network/Network.hpp"
@@ -75,4 +75,4 @@ public:
 
 }
 
-#endif
+#endif /* DIGGLER_PLAYER_HPP */

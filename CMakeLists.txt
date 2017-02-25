@@ -92,16 +92,15 @@ endif()
 
 find_package(Optional REQUIRED)
 
-pkg_search_module(EPOXY REQUIRED epoxy)
 pkg_search_module(GLFW REQUIRED glfw3)
 pkg_search_module(SQLITE3 REQUIRED sqlite3)
 pkg_search_module(LIBSODIUM REQUIRED libsodium)
 include_directories(BEFORE
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
   ${ETC_INCLUDE_DIRS}
   ${LUA_INCLUDE_DIR}
   ${LZFX_INCLUDE_DIRS}
   ${ENET_INCLUDE_DIRS}
-  ${EPOXY_INCLUDE_DIRS}
   ${GLFW_INCLUDE_DIRS}
   ${LIBSODIUM_INCLUDE_DIRS}
   ${SQLITE3_INCLUDE_DIRS}
@@ -114,27 +113,64 @@ include_directories(BEFORE
 #file(GLOB_RECURSE FILELIST "*.h" "*.hpp" "*.cpp")
 #add_custom_target(files SOURCES ${FILELIST})
 
-# Add diggler executable target
+### Allow subdirs to add params to the `diggler` target
+# Sources
 set_property(GLOBAL PROPERTY DIGGLER_SOURCE_FILES "")
-macro(diggler_add_sources)
+function(diggler_add_sources)
   get_property(SRCS GLOBAL PROPERTY DIGGLER_SOURCE_FILES)
   list(APPEND SRCS ${ARGV})
   set_property(GLOBAL PROPERTY DIGGLER_SOURCE_FILES "${SRCS}")
-endmacro(diggler_add_sources)
+endfunction(diggler_add_sources)
+
+# Definitions
+set_property(GLOBAL PROPERTY DIGGLER_DEFINITIONS "")
+function(diggler_add_definition)
+  get_property(DEFS GLOBAL PROPERTY DIGGLER_DEFINITIONS)
+  list(APPEND DEFS "${ARGV0}")
+  set_property(GLOBAL PROPERTY DIGGLER_DEFINITIONS "${DEFS}")
+endfunction(diggler_add_definition)
+
+# Include directories
+set_property(GLOBAL PROPERTY DIGGLER_INCLUDE_DIRECTORIES "")
+function(diggler_include_directories)
+  get_property(INCDIRS GLOBAL PROPERTY DIGGLER_INCLUDE_DIRECTORIES)
+  list(APPEND INCDIRS ${ARGV})
+  set_property(GLOBAL PROPERTY DIGGLER_INCLUDE_DIRECTORIES "${INCDIRS}")
+endfunction(diggler_include_directories)
+
+# Link libraries
+set_property(GLOBAL PROPERTY DIGGLER_LINK_LIBRARIES "")
+function(diggler_link_libraries)
+  get_property(LIBS GLOBAL PROPERTY DIGGLER_LINK_LIBRARIES)
+  list(APPEND LIBS ${ARGV})
+  set_property(GLOBAL PROPERTY DIGGLER_LINK_LIBRARIES "${LIBS}")
+endfunction(diggler_link_libraries)
 
 set(DIGGLER_USED_ROOT_CMAKELISTS TRUE)
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src")
 
+### Create target and apply parameters
+# Include directories
+get_property(INCDIRS GLOBAL PROPERTY DIGGLER_INCLUDE_DIRECTORIES)
+include_directories(BEFORE ${INCDIRS})
+
+# Sources
 get_property(SRCS GLOBAL PROPERTY DIGGLER_SOURCE_FILES)
 add_executable(diggler ${SRCS})
 
+# Definitions
+get_property(DEFS GLOBAL PROPERTY DIGGLER_DEFINITIONS)
+target_compile_definitions(diggler PUBLIC ${DEFS})
+
+# Link libraries
+get_property(LIBS GLOBAL PROPERTY DIGGLER_LINK_LIBRARIES)
 target_link_libraries(diggler
+  ${LIBS}
   ${ETC_LIBRARIES}
   ${LUA_LIBRARY}
   ${LZFX_LIBRARIES}
   ${ENET_LIBRARIES}
-  ${EPOXY_LIBRARIES}
   ${GLFW_LIBRARIES}
   ${LIBSODIUM_LIBRARIES}
   ${SQLITE3_LIBRARIES}

@@ -5,7 +5,7 @@
 
 #include <vector>
 
-#include <epoxy/gl.h>
+#include "OpenGL.hpp"
 
 #include "../../Texture.hpp"
 

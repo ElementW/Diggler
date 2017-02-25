@@ -3,7 +3,7 @@
 
 #include "../../Platform.hpp"
 
-#include <epoxy/gl.h>
+#include "OpenGL.hpp"
 
 namespace Diggler {
 namespace Render {
@@ -43,8 +43,10 @@ constexpr GLenum getBinding(GLenum bufferT) {
       return GL_RENDERBUFFER_BINDING;
     case GL_VERTEX_ARRAY:
       return GL_VERTEX_ARRAY_BINDING;
+    default:
+      break;
   }
-  return 0;
+  return GL_INVALID_ENUM;
 }
 
 template<GLenum BufferT, GLenum BoundBufferT = getBinding(BufferT)>

@@ -1,9 +1,7 @@
 #ifndef DIGGLER_RENDER_GL_FEATURE_SUPPORT_HPP
 #define DIGGLER_RENDER_GL_FEATURE_SUPPORT_HPP
 
-#include "../../Platform.hpp"
-
-#include <epoxy/gl.h>
+#include "../../platform/Types.hpp"
 
 namespace Diggler {
 namespace Render {

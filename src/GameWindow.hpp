@@ -1,10 +1,16 @@
 #ifndef GAME_WINDOW_HPP
 #define GAME_WINDOW_HPP
+
 #include <memory>
+
 #include <alc.h>
-#include <epoxy/gl.h>
+
+#include "render/gl/OpenGL.hpp"
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+
 #include <glm/detail/type_mat.hpp>
+
 #include "Platform.hpp"
 #include "ui/Manager.hpp"
 
