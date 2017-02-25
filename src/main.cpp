@@ -5,9 +5,9 @@
 #include <chrono>
 #include <sys/signal.h>
 
+#include "ConnectingState.hpp"
 #include "Game.hpp"
 #include "GameWindow.hpp"
-#include "GameState.hpp"
 #include "MessageState.hpp"
 #include "GlobalProperties.hpp"
 #include "Server.hpp"
@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
 
       /*/GW.setNextState(std::make_shared<UITestState>(&GW));/*/
       if (networkSuccess)
-        GW.setNextState(std::move(std::make_unique<GameState>(&GW, host, port)));
+        GW.setNextState(std::make_unique<ConnectingState>(&GW, host, port));
       else
         GW.showMessage("Network init failed!");
       /**/

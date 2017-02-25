@@ -15,6 +15,7 @@ diggler_add_sources(
   ${CSD}/Chunk.cpp
   ${CSD}/Clouds.cpp
   ${CSD}/Config.cpp
+  ${CSD}/ConnectingState.cpp
   ${CSD}/content/AssetManager.cpp
   ${CSD}/content/ModManager.cpp
   ${CSD}/content/Registry.cpp

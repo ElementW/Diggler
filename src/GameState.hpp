@@ -45,9 +45,6 @@ public:
 private:
   Net::ClientMessageHandler CMH;
 
-  std::string m_serverHost;
-  int m_serverPort;
-
   glm::vec3 m_lookat;
   glm::vec2 m_angles;
 
@@ -107,11 +104,6 @@ private:
   Net::InMessage m_msg;
   float nextNetUpdate;
 
-  struct ConnectingUI {
-    UI::Text *Connecting;
-    UI::Text *Dot;
-  };
-
   bool isMenuToggled = false;
 
   struct {
@@ -137,7 +129,7 @@ public:
   std::list<ChunkRef> holdChunksInMem;
 
 public:
-  GameState(GameWindow *W, const std::string &servHost, int servPort);
+  GameState(GameWindow *W);
   ~GameState();
 
   void onMouseButton(int key, int action, int mods);

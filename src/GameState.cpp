@@ -35,11 +35,9 @@ using std::unique_ptr;
 
 namespace Diggler {
 
-GameState::GameState(GameWindow *GW, const std::string &servHost, int servPort) :
+GameState::GameState(GameWindow *GW) :
   GW(GW),
   CMH(*this),
-  m_serverHost(servHost),
-  m_serverPort(servPort),
   bloom(*GW->G) {
   G = GW->G;
   int w = GW->getW(),
@@ -409,113 +407,8 @@ void GameState::sendMsg(Net::OutMessage &msg, Net::Tfer mode, Net::Channels chan
 }
 
 void GameState::run() {
-  if (connectLoop()) return;
-
   setupUI();
   gameLoop();
-}
-
-bool GameState::connectLoop() {
-  std::string &serverHost = m_serverHost;
-  int serverPort = m_serverPort;
-  bool finished = false, success = false; Game *G = this->G;
-  std::string failureStr;
-  m_networkThread = std::thread([G, &success, &finished, &serverHost, serverPort, &failureStr]() {
-    try {
-      G->H.create();
-      G->NS = &G->H.connect(serverHost, serverPort, 5000);
-      success = true;
-    } catch (const Net::Exception &e) {
-      success = false;
-      failureStr = e.what();
-    }
-    finished = true;
-  });
-  glDisable(GL_CULL_FACE);
-  glDisable(GL_DEPTH_TEST);
-  ConnectingUI cUI {
-    G->UIM->create<UI::Text>("Connecting"),
-    G->UIM->create<UI::Text>(".")
-  };
-  double T; glm::mat4 mat;
-
-  while (!finished && !GW->shouldClose()) { // Infinite loop \o/
-    T = glfwGetTime();
-    G->updateTime(T);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    UI::Text::Size sz = cUI.Connecting->getSize();
-    mat = glm::scale(glm::translate(*G->UIM->PM, glm::vec3(GW->getW()/2-sz.x, GW->getH()/2, 0.f)),
-      glm::vec3(2.f, 2.f, 1.f));
-    cUI.Connecting->render(mat);
-    for (int i=0; i < 6; ++i) {
-      mat = glm::scale(glm::translate(*G->UIM->PM,
-        glm::vec3(GW->getW()/2 - 1 + sin(T*3+0.3*i)*sz.x, GW->getH()/2-sz.y, 0.f)),
-        glm::vec3(2.f, 2.f, 1.f));
-      cUI.Dot->render(mat);
-    }
-
-    glfwSwapBuffers(*GW);
-    glfwPollEvents();
-  }
-  if (GW->shouldClose())
-    GW->setVisible(false);
-  m_networkThread.join();
-  delete cUI.Connecting; delete cUI.Dot;
-
-  if (GW->shouldClose())
-    return true;
-  if (!success) {
-    GW->showMessage("Could not connect to server", failureStr);
-    return true;
-  }
-
-  LocalPlayer &LP = *G->LP;
-  LP.name = GlobalProperties::PlayerName;
-
-  Net::MsgTypes::PlayerJoinRequest pjr;
-  pjr.name = G->LP->name;
-  Net::OutMessage join; pjr.writeToMsg(join);
-  sendMsg(join, Net::Tfer::Rel);
-
-  bool received = G->H.recv(m_msg, 5000);
-  if (!received) {
-    GW->showMessage("Connected but got no response", "after 5 seconds");
-    return true;
-  }
-  bool msgGood = false;
-  if (m_msg.getType() == Net::MessageType::PlayerJoin) {
-    using PJS = Net::MsgTypes::PlayerJoinSubtype;
-    switch (m_msg.getSubtype<PJS>()) {
-    case PJS::Success:
-      msgGood = true;
-      G->U = new Universe(G, true);
-      LP.sessId = m_msg.readU32();
-      LP.W = G->U->createWorld(m_msg.readI16());
-      break;
-    case PJS::Failure: {
-      // TODO be able to display a custom message
-      GW->showMessage("Disconnected", "while joining");
-    } return true;
-    default:
-      break;
-    }
-  }
-  if (!msgGood) {
-    std::ostringstream sstm;
-    sstm << "Type: " << static_cast<int>(m_msg.getType()) <<
-      " Subtype: " << static_cast<int>(m_msg.getSubtype());
-    GW->showMessage("Received unexpected packet", sstm.str());
-    return true;
-  }
-
-  G->LS->initialize();
-  const std::string gameLuaRuntimePath(getAssetsDirectory() + "/lua");
-  G->LS->setGameLuaRuntimePath(gameLuaRuntimePath);
-  G->LS->dofile(gameLuaRuntimePath + "/Diggler.lua");
-
-  getDebugStream() << "Joined as " << LP.name << '/' << LP.sessId << std::endl;
-  return false;
 }
 
 void GameState::gameLoop() {
