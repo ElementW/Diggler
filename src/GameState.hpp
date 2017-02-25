@@ -38,12 +38,11 @@ class Text;
 }
 
 class GameState : public State {
-private:
-  friend class Net::ClientMessageHandler;
-
+public:
   GameWindow *GW;
   Game *G;
 
+private:
   Net::ClientMessageHandler CMH;
 
   std::string m_serverHost;
@@ -93,7 +92,9 @@ private:
 
   KeyBindings *m_keybinds;
 
+public:
   Chatbox *m_chatBox;
+private:
   bool m_chatIgnFirstKey;
 
   bool m_mouseLocked; int cX, cY;
@@ -131,6 +132,7 @@ private:
   void lockMouse();
   void unlockMouse();
 
+public:
   // TODO: REMOVEME!!!
   std::list<ChunkRef> holdChunksInMem;
 

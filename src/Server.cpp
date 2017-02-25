@@ -11,6 +11,7 @@
 #include "network/msgtypes/BlockUpdate.hpp"
 #include "network/msgtypes/Chat.hpp"
 #include "network/msgtypes/ChunkTransfer.hpp"
+#include "network/msgtypes/Content.hpp"
 #include "network/msgtypes/PlayerJoin.hpp"
 #include "network/msgtypes/PlayerUpdate.hpp"
 #include "network/Network.hpp"
@@ -126,6 +127,22 @@ void Server::handlePlayerQuit(Peer &peer, QuitReason reason) {
 
 void Server::handleDisconnect(Peer &peer) {
   handlePlayerQuit(peer, QuitReason::Timeout);
+}
+
+void Server::handleContentMessage(Net::InMessage &msg, Net::Peer &peer) {
+  using namespace Net::MsgTypes;
+  using S = ContentSubtype;
+  switch (msg.getSubtype<MsgTypes::ContentSubtype>()) {
+  case S::ModListRequest: {
+    ContentModListResponse cmlr;
+    // cmlr.modsIds // TODO fill in
+    OutMessage omsg;
+    cmlr.writeToMsg(omsg);
+    H.send(peer, omsg);
+  } break;
+  default:
+    break;
+  }
 }
 
 void Server::handleChat(InMessage &msg, Player *plr) {
@@ -428,14 +445,18 @@ void Server::run() {
       case MessageType::NetDisconnect:
         handleDisconnect(peer);
         break;
-      
+
       case MessageType::PlayerJoin:
         handlePlayerJoin(msg, peer);
         break;
       case MessageType::PlayerQuit:
         handlePlayerQuit(peer);
         break;
-      
+
+      case MessageType::Content:
+        handleContentMessage(msg, peer);
+        break;
+
       default:
         break;
       }

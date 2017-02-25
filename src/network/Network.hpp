@@ -50,6 +50,7 @@ enum class MessageType : uint8 {
   PlayerJoin = 1,
   PlayerUpdate,
   PlayerQuit,
+  Content,
   ChunkTransfer,
   BlockUpdate,
   Chat,

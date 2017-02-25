@@ -25,6 +25,8 @@ private:
   void handlePlayerQuit(Net::Peer&, Net::QuitReason reason = Net::QuitReason::Quit);
   void handleDisconnect(Net::Peer&);
 
+  void handleContentMessage(Net::InMessage&, Net::Peer&);
+
   void handleChat(Net::InMessage&, Player*);
 
   void handlePlayerUpdate(Net::InMessage&, Player&);

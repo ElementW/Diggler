@@ -32,10 +32,18 @@ diggler_add_sources(
   ${CSD}/LocalPlayer.cpp
   ${CSD}/main.cpp
   ${CSD}/MessageState.cpp
+  ${CSD}/network/client/BlockUpdateHandler.cpp
+  ${CSD}/network/client/ChatHandler.cpp
+  ${CSD}/network/client/ChunkTransferHandler.cpp
+  ${CSD}/network/client/ContentHandler.cpp
+  ${CSD}/network/client/PlayerJoinHandler.cpp
+  ${CSD}/network/client/PlayerQuitHandler.cpp
+  ${CSD}/network/client/PlayerUpdateHandler.cpp
   ${CSD}/network/msgtypes/BlockUpdate.cpp
   ${CSD}/network/msgtypes/Chat.cpp
   ${CSD}/network/msgtypes/ChunkTransfer.cpp
   ${CSD}/network/msgtypes/ConnectionParam.cpp
+  ${CSD}/network/msgtypes/Content.cpp
   ${CSD}/network/msgtypes/PlayerJoin.cpp
   ${CSD}/network/msgtypes/PlayerUpdate.cpp
   ${CSD}/network/msgtypes/ServerInfo.cpp

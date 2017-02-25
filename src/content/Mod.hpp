@@ -4,11 +4,19 @@
 #include <string>
 
 #include "../Platform.hpp"
+#include "../crypto/Sign.hpp"
 
 namespace Diggler {
 namespace Content {
 
-using ModId = byte[32];
+union ModId {
+  struct Parts {
+    byte uniqueId[32]; // 32 bytes
+    Crypto::Sign::PublicKey creatorPk; // 32 bytes
+    Crypto::Sign::Signature signature; // 64 bytes
+  } parts;
+  byte bytes[128];
+};
 
 class Mod {
 public:
