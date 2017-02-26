@@ -1,10 +1,12 @@
 #include "Chatbox.hpp"
-#include "Game.hpp"
-#include "GameWindow.hpp"
-#include <GLFW/glfw3.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include "Game.hpp"
+#include "GameWindow.hpp"
+#include "render/gl/ProgramManager.hpp"
 
 namespace Diggler {
 
@@ -15,7 +17,7 @@ GLint Chatbox::RenderProgram_mvp = -1;
 
 Chatbox::Chatbox(Game *G) : m_isChatting(false), G(G),
   m_posX(0), m_posY(0) {
-  m_chatText = G->UIM->create<UI::Text>("", 2, 2);
+  m_chatText = G->UIM->addManual<UI::Text>("", 2, 2);
   if (RenderProgram == nullptr) {
     RenderProgram = G->PM->getProgram(PM_2D | PM_COLORED);
     RenderProgram_coord = RenderProgram->att("coord");
@@ -34,7 +36,6 @@ Chatbox::Chatbox(Game *G) : m_isChatting(false), G(G),
 }
 
 Chatbox::~Chatbox() {
-  delete m_chatText;
 }
 
 void Chatbox::setPosition(int x, int y) {
@@ -56,12 +57,11 @@ void Chatbox::addChatEntry(const std::string &text) {
   m_chatEntries.emplace_back();
   ChatEntry &entry = m_chatEntries.back();
   entry.date = system_clock::now();
-  entry.text = G->UIM->create<UI::Text>(text);
+  entry.text = G->UIM->addManual<UI::Text>(text);
   entry.height = entry.text->getSize().y;
 }
 
 Chatbox::ChatEntry::~ChatEntry() {
-  delete text;
 }
 
 void Chatbox::handleChar(char32 unichar) {

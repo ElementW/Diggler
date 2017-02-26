@@ -21,13 +21,17 @@ class Manager {
 private:
   std::unique_ptr<Render::gl::VBO> m_rectVbo;
   std::unique_ptr<Render::gl::VAO> m_rectVao;
-  std::list<std::unique_ptr<Element>> m_elements;
-  Element *m_hoveredElement;
-  Element *m_focusedElement;
+  std::list<std::weak_ptr<Element>> m_elements;
+  std::weak_ptr<Element> m_hoveredElement;
+  std::weak_ptr<Element> m_focusedElement;
   glm::mat4 m_projMatrix, m_projMat1, m_projMat1V;
   
   friend GameWindow;
   void setProjMat(const glm::mat4&);
+  void add(std::weak_ptr<Element>);
+  template<class T, typename... Args> std::shared_ptr<T> create(Args&&... args) {
+    return std::make_shared<T>(this, std::forward<Args>(args)...);
+  }
 
 public:
   const glm::mat4 *PM, *PM1;
@@ -43,21 +47,23 @@ public:
   void onKey(int key, int scancode, int action, int mods);
   void onChar(char32 unichar);
   void onResize(int w, int h);
-  
-  template<class T, typename... Args> T* add(Args&&... args) {
-    T *obj = new T(this, std::forward<Args>(args)...);
-    m_elements.emplace_back(reinterpret_cast<Element*>(obj));
+
+  template<class T, typename... Args> std::shared_ptr<T> add(Args&&... args) {
+    std::shared_ptr<T> obj = create<T>(std::forward<Args>(args)...);
+    add(obj);
     return obj;
   }
-  void add(Element*);
-  template<class T, typename... Args> T* create(Args&&... args) {
-    return new T(this, std::forward<Args>(args)...);
-  }
-  void remove(Element*);
-  void clear();
 
-  Element* getFocused() const;
-  void setFocused(Element*);
+  template<class T, typename... Args> std::shared_ptr<T> addManual(Args&&... args) {
+    std::shared_ptr<T> obj = create<T>(std::forward<Args>(args)...);
+    obj->m_isManual = true;
+    add(obj);
+    return obj;
+  }
+
+  std::weak_ptr<Element> getFocused() const;
+  void setFocused(const std::weak_ptr<Element>&);
+  void setFocused(decltype(nullptr));
 
   // Utility
 

@@ -8,6 +8,7 @@
 #include "Game.hpp"
 #include "GameState.hpp"
 #include "GlobalProperties.hpp"
+#include "LocalPlayer.hpp"
 #include "network/msgtypes/PlayerJoin.hpp"
 #include "ui/Manager.hpp"
 #include "ui/Text.hpp"
@@ -29,8 +30,8 @@ ConnectingState::~ConnectingState() {
 }
 
 void ConnectingState::setupUI() {
-  txtConnecting = W->G->UIM->create<UI::Text>("Connecting");
-  txtDot = W->G->UIM->create<UI::Text>(".");
+  txtConnecting = W->G->UIM->addManual<UI::Text>("Connecting");
+  txtDot = W->G->UIM->addManual<UI::Text>(".");
   updateViewport();
 }
 
@@ -85,7 +86,6 @@ void ConnectingState::run() {
   if (W->shouldClose())
     W->setVisible(false);
   networkThread.join();
-  delete txtConnecting; delete txtDot;
 
   if (W->shouldClose())
     return;

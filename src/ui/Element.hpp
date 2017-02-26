@@ -33,7 +33,7 @@ public:
   };
 
 private:
-  bool m_isCursorOver, m_hasFocus, m_isVisible;
+  bool m_isCursorOver, m_hasFocus, m_isVisible, m_isManual;
 
 protected:
   Area m_area;

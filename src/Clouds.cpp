@@ -1,8 +1,11 @@
 #include "Clouds.hpp"
+
 #include <glm/gtc/type_ptr.hpp>
+
 #include "Game.hpp"
 #include "Platform.hpp"
 #include "render/gl/Program.hpp"
+#include "render/gl/ProgramManager.hpp"
 #include "Texture.hpp"
 
 namespace Diggler {

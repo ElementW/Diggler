@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <list>
+#include <memory>
 
 #include <glm/glm.hpp>
 
@@ -34,7 +35,7 @@ private:
   struct ChatEntry {
     time_point date;
     int height;
-    UI::Text *text;
+    std::shared_ptr<UI::Text> text;
     
     ~ChatEntry();
   };
@@ -42,7 +43,7 @@ private:
   // TODO: Update when libstdc++ supports locale codecvt facets
   //std::u32string m_chatString;
   std::string m_chatString;
-  UI::Text *m_chatText;
+  std::shared_ptr<UI::Text> m_chatText;
   struct Vertex {
     float x, y, r, g, b, a;
   };

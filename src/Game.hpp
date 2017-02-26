@@ -3,11 +3,8 @@
 
 #include <memory>
 
-#include "ui/FontManager.hpp"
 #include "Universe.hpp"
 #include "PlayerList.hpp"
-#include "LocalPlayer.hpp"
-#include "render/gl/ProgramManager.hpp"
 
 using std::shared_ptr;
 
@@ -21,6 +18,9 @@ class Registry;
 
 namespace Render {
 class Renderer;
+namespace gl {
+class ProgramManager;
+}
 }
 
 namespace Scripting {
@@ -30,6 +30,7 @@ class State;
 }
 
 namespace UI {
+class FontManager;
 class Manager;
 }
 
@@ -37,6 +38,7 @@ class Audio;
 class Config;
 class GameWindow;
 class KeyBinds;
+class LocalPlayer;
 class Server;
 
 class Game final {

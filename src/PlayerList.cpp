@@ -1,6 +1,9 @@
 #include "PlayerList.hpp"
+
 #include <stdexcept>
+
 #include "Game.hpp"
+#include "LocalPlayer.hpp"
 
 namespace Diggler {
 

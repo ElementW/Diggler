@@ -12,7 +12,7 @@ Button::Button(Manager *M, const Area &area, const std::string &label) : Element
   color = {0.4, 0.4, 0.4, 1.0};
   m_displayedColor = &color;
 
-  m_text.reset(M->create<Text>("", 2, 2));
+  m_text = M->addManual<Text>("", 2, 2);
   m_text->setMatrix(PM);
   m_text->setArea(area);
   setLabel(label);

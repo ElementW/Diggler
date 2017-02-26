@@ -12,6 +12,7 @@
 #include "Audio.hpp"
 #include "Game.hpp"
 #include "network/NetHelper.hpp"
+#include "render/gl/ProgramManager.hpp"
 
 namespace Diggler {
 

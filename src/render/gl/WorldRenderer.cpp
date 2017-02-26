@@ -8,6 +8,7 @@
 #include "../../Chunk.hpp"
 #include "../../Game.hpp"
 #include "../../World.hpp"
+#include "ProgramManager.hpp"
 
 namespace Diggler {
 namespace Render {

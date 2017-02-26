@@ -13,6 +13,7 @@
 #include "GameState.hpp"
 #include "MessageState.hpp"
 #include "Audio.hpp"
+#include "ui/FontManager.hpp"
 
 namespace Diggler {
 
@@ -279,7 +280,6 @@ void GameWindow::run() {
   while (m_nextState != nullptr && !glfwWindowShouldClose(m_window)) {
     m_currentState = std::move(m_nextState);
     m_nextState = nullptr;
-    UIM->clear();
     m_currentState->run();
     m_currentState.reset();
   }

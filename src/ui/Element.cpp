@@ -14,6 +14,7 @@ Element::Element(Manager *M) :
   m_isCursorOver(false),
   m_hasFocus(false),
   m_isVisible(true),
+  m_isManual(false),
   m_area({0, 0, 0, 0}), M(M) {
   PM = M->PM;
   G = M->G;

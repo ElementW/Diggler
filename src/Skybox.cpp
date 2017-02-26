@@ -1,6 +1,9 @@
 #include "Skybox.hpp"
-#include "Texture.hpp"
+
 #include <glm/gtc/type_ptr.hpp>
+
+#include "render/gl/ProgramManager.hpp"
+#include "Texture.hpp"
 
 namespace Diggler {
 

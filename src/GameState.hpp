@@ -111,9 +111,9 @@ private:
   } debugInfo;
 
   struct {
-    UI::Text *FPS;
+    std::shared_ptr<UI::Text> FPS;
 
-    UI::Text *DebugInfo;
+    std::shared_ptr<UI::Text> DebugInfo;
 
     class EscMenu *EM;
   } UI;

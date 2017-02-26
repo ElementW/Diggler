@@ -7,8 +7,9 @@
 #include <AL/alext.h>
 
 #include "Game.hpp"
-#include "Sound.hpp"
 #include "GlobalProperties.hpp"
+#include "LocalPlayer.hpp"
+#include "Sound.hpp"
 
 #define AUDIO_GC_DEBUG 0
 

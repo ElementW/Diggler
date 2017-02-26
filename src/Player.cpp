@@ -1,10 +1,14 @@
-#include "Texture.hpp"
 #include "Player.hpp"
-#include "Game.hpp"
-#include "GlobalProperties.hpp"
+
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
+
+#include "Game.hpp"
+#include "GlobalProperties.hpp"
+#include "LocalPlayer.hpp"
+#include "render/gl/ProgramManager.hpp"
+#include "render/gl/VBO.hpp"
 
 namespace Diggler {
 

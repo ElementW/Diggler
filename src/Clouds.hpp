@@ -4,6 +4,7 @@
 #include "render/gl/OpenGL.hpp"
 #include <glm/glm.hpp>
 
+#include "platform/Types.hpp"
 #include "render/gl/VBO.hpp"
 
 namespace Diggler {

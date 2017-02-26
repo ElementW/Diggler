@@ -15,8 +15,10 @@
 #include "GlobalProperties.hpp"
 #include "Game.hpp"
 #include "render/gl/FBO.hpp"
+#include "render/gl/ProgramManager.hpp"
 #include "render/Renderer.hpp"
 #include "scripting/lua/State.hpp"
+#include "ui/FontManager.hpp"
 #include "Clouds.hpp"
 #include "Chatbox.hpp"
 #include "CaveGenerator.hpp"
@@ -25,6 +27,7 @@
 #include "Audio.hpp"
 #include "network/NetHelper.hpp"
 #include "Particles.hpp"
+#include "LocalPlayer.hpp"
 
 #include "network/msgtypes/PlayerJoin.hpp"
 #include "network/msgtypes/PlayerUpdate.hpp"
@@ -431,7 +434,7 @@ void GameState::gameLoop() {
     T = glfwGetTime(); deltaT = T - lastT;
     G->updateTime(T);
     if (T > fpsT) {
-      char str[10]; std::sprintf(str, "FPS: %d", frames);
+      char str[10]; std::snprintf(str, 10, "FPS: %-4d", frames);
       UI.FPS->setText(std::string(str));
       fpsT = T+1;
       frames = 0;

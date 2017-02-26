@@ -6,8 +6,11 @@
 #include "content/Registry.hpp"
 #include "GlobalProperties.hpp"
 #include "KeyBinds.hpp"
+#include "LocalPlayer.hpp"
+#include "render/gl/ProgramManager.hpp"
 #include "render/gl/Renderer.hpp"
 #include "scripting/lua/State.hpp"
+#include "ui/FontManager.hpp"
 
 namespace Diggler {
 

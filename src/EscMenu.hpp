@@ -1,6 +1,8 @@
 #ifndef ESC_MENU_HPP
 #define ESC_MENU_HPP
 
+#include <memory>
+
 #include <glm/glm.hpp>
 
 #include "render/gl/Program.hpp"
@@ -20,9 +22,9 @@ private:
     double start, duration;
     bool active;
   } m_transition;
-  UI::Text *txt_quit;
+  std::shared_ptr<UI::Text> txt_quit;
   glm::mat4 matrix;
-  UI::Button *m_button;
+  std::shared_ptr<UI::Button> m_button;
 
 public:
   EscMenu(Game *G);

@@ -12,7 +12,7 @@ class Text;
 
 class Button : public Element {
 private:
-  std::unique_ptr<Text> m_text;
+  std::shared_ptr<Text> m_text;
   std::string m_label;
   Color *m_displayedColor;
   void update();

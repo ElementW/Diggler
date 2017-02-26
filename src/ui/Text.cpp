@@ -5,6 +5,7 @@
 #include "../Game.hpp"
 #include "../GameWindow.hpp"
 #include "../render/FontRenderer.hpp"
+#include "../ui/FontManager.hpp"
 
 namespace Diggler {
 namespace UI {

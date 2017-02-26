@@ -15,7 +15,7 @@ class ConnectingState : public State {
 private:
   GameWindow *W;
 
-  UI::Text *txtConnecting, *txtDot;
+  std::shared_ptr<UI::Text> txtConnecting, txtDot;
 
   std::string m_serverHost;
   int m_serverPort;

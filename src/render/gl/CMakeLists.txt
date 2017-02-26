@@ -11,5 +11,6 @@ diggler_add_sources(
   ${CSD}/Renderer.cpp
   ${CSD}/Shader.cpp
   ${CSD}/Util.cpp
+  ${CSD}/VBO.cpp
   ${CSD}/WorldRenderer.cpp
 )

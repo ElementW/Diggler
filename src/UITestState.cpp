@@ -12,8 +12,9 @@ UITestState::~UITestState() {
 }
 
 void UITestState::run() {
-  UI::Button *b1 = GW->G->UIM->add<UI::Button>(UI::Element::Area { 0, 0, 320, 60 });
-  UI::Button *b2 = GW->G->UIM->add<UI::Button>(UI::Element::Area { 320, 60, 320, 60 });
+  std::shared_ptr<UI::Button>
+    b1 = GW->G->UIM->add<UI::Button>(UI::Element::Area { 0, 0, 320, 60 }),
+    b2 = GW->G->UIM->add<UI::Button>(UI::Element::Area { 320, 60, 320, 60 });
 
   while (!glfwWindowShouldClose(*GW)) { // Infinite loop \o/
     glClearColor(sin(glfwGetTime()*4)*0.1+0.5, 0, 0, 1);

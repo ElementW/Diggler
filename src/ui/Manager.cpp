@@ -7,6 +7,7 @@
 #include "../render/gl/VBO.hpp"
 #include "../Texture.hpp"
 #include "../render/gl/Program.hpp"
+#include "../render/gl/ProgramManager.hpp"
 #include "../Game.hpp"
 #include "../GameWindow.hpp"
 
@@ -19,8 +20,6 @@ struct Renderer {
 } R{}, RR{};
 
 Manager::Manager() :
-  m_hoveredElement(nullptr),
-  m_focusedElement(nullptr),
   scale(2) {
   PM = &m_projMatrix;
   m_projMat1 = glm::ortho(0.f, 1.f, 0.f, 1.f);
@@ -64,17 +63,25 @@ void Manager::setup(Game *G) {
 
 
 void Manager::onCursorPos(double x, double y) {
-  Element *hovered = nullptr;
-  for (std::unique_ptr<Element> &e : m_elements) {
-    if (!e->cursorPassesThrough() && e->m_isVisible && e->m_area.isIn(x, G->GW->getH()-y)) {
-      hovered = e.get();
+  std::shared_ptr<Element> hovered;
+  for (std::weak_ptr<Element> &elmPtr : m_elements) {
+    std::shared_ptr<Element> elm = elmPtr.lock();
+    if (!elm) {
+      continue;
+    }
+    if (!elm->m_isManual &&
+        !elm->cursorPassesThrough() &&
+        elm->m_isVisible &&
+        elm->m_area.isIn(x, G->GW->getH()-y)) {
+      hovered = std::move(elm);
       break;
     }
   }
-  if (hovered != m_hoveredElement) {
-    if (m_hoveredElement) {
-      m_hoveredElement->m_isCursorOver = false;
-      m_hoveredElement->onCursorLeave(x, y);
+  auto lastHoveredElement = m_hoveredElement.lock();
+  if (hovered != lastHoveredElement) {
+    if (lastHoveredElement) {
+      lastHoveredElement->m_isCursorOver = false;
+      lastHoveredElement->onCursorLeave(x, y);
     }
     if (hovered) {
       hovered->m_isCursorOver = true;
@@ -82,13 +89,14 @@ void Manager::onCursorPos(double x, double y) {
     }
     m_hoveredElement = hovered;
   }
-  if (m_hoveredElement) {
-    m_hoveredElement->onCursorMove(x, y);
+  if (hovered) {
+    hovered->onCursorMove(x, y);
   }
 }
 
 void Manager::onMouseButton(int key, int action, int mods) {
-  if (m_hoveredElement) {
+  auto hoveredElement = m_hoveredElement.lock();
+  if (hoveredElement) {
     double x, y;
     glfwGetCursorPos(*G->GW, &x, &y);
     Element::MouseButton btn = Element::MouseButton::Unknown;
@@ -104,84 +112,86 @@ void Manager::onMouseButton(int key, int action, int mods) {
       break;
     }
     if (action == GLFW_PRESS) {
-      m_hoveredElement->onMouseDown(x, y, btn);
+      hoveredElement->onMouseDown(x, y, btn);
       setFocused(m_hoveredElement);
     } else if (action == GLFW_RELEASE) {
-      m_hoveredElement->onMouseUp(x, y, btn);
+      hoveredElement->onMouseUp(x, y, btn);
       setFocused(m_hoveredElement);
     }
   }
 }
 
 void Manager::onMouseScroll(double x, double y) {
-  if (m_hoveredElement) {
-    setFocused(m_hoveredElement);
-    m_focusedElement->onMouseScroll(x, y);
+  auto hoveredElement = m_hoveredElement.lock();
+  if (hoveredElement) {
+    setFocused(hoveredElement);
+    hoveredElement->onMouseScroll(x, y);
   }
 }
 
 void Manager::onKey(int key, int scancode, int action, int mods) {
-  if (m_focusedElement) {
+  auto focusedElement = m_focusedElement.lock();
+  if (focusedElement) {
     //TODO
   }
 }
 
 void Manager::onChar(char32 unichar) {
-  if (m_focusedElement) {
+  auto focusedElement = m_focusedElement.lock();
+  if (focusedElement) {
     //TODO
   }
 }
 
 void Manager::onResize(int w, int h) {
   setProjMat(glm::ortho(0.0f, (float)w, 0.0f, (float)h));
-  for (std::unique_ptr<Element> &e : m_elements) {
-    e->onMatrixChange();
+  for (std::weak_ptr<Element> &elmPtr : m_elements) {
+    std::shared_ptr<Element> elm = elmPtr.lock();
+    if (!elm) {
+      elm->onMatrixChange();
+    }
   }
 }
 
-
-void Manager::clear() {
-  m_hoveredElement = nullptr;
-  m_focusedElement = nullptr;
-  m_elements.clear();
+void Manager::add(std::weak_ptr<Element> elm) {
+  m_elements.emplace_back(elm);
 }
 
-void Manager::add(Element *e) {
-  m_elements.emplace_back(e);
-}
-
-void Manager::remove(Element *e) {
-  if (e == m_hoveredElement) {
-    m_hoveredElement = nullptr;
-  }
-  if (e == m_focusedElement) {
-    m_focusedElement = nullptr;
-  }
-  m_elements.remove_if([&e](std::unique_ptr<Element> &l) -> bool { return l.get() == e; });
-}
-
-Element* Manager::getFocused() const {
+std::weak_ptr<Element> Manager::getFocused() const {
   return m_focusedElement;
 }
 
-void Manager::setFocused(Element *e) {
-  if (e != m_hoveredElement) {
-    if (m_hoveredElement) {
-      m_hoveredElement->m_hasFocus = false;
-      m_hoveredElement->onFocusLost();
+void Manager::setFocused(const std::weak_ptr<Element> &elmPtr) {
+  auto elm = elmPtr.lock();
+  auto hoveredElement = m_hoveredElement.lock();
+  if (elm != hoveredElement) {
+    if (hoveredElement) {
+      hoveredElement->m_hasFocus = false;
+      hoveredElement->onFocusLost();
     }
-    if (e) {
-      e->m_hasFocus = true;
-      e->onFocus();
+    if (elm) {
+      elm->m_hasFocus = true;
+      elm->onFocus();
     }
-    m_focusedElement = e;
+    m_focusedElement = elm;
   }
 }
 
+void Manager::setFocused(decltype(nullptr)) {
+  setFocused(std::shared_ptr<Element>());
+}
+
 void Manager::render() {
-  for (std::unique_ptr<Element> &e : m_elements) {
-    if (e->m_isVisible)
-      e->render();
+  for (auto it = m_elements.cbegin(); it != m_elements.cend();) {
+    auto elm = it->lock();
+    if (!elm) {
+      it = m_elements.erase(it);
+      continue;
+    }
+    if (!elm->m_isManual && elm->m_isVisible) {
+      elm->render();
+    }
+    ++it;
   }
 }
 

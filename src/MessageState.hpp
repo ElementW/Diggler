@@ -10,7 +10,7 @@ class MessageState : public State {
 private:
   GameWindow *W;
   std::string msg, subMsg;
-  UI::Text *txtMsg, *txtSubMsg;
+  std::shared_ptr<UI::Text> txtMsg, txtSubMsg;
 
   void setupUI();
 
