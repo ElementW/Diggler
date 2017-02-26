@@ -11,7 +11,10 @@ namespace Diggler {
 namespace UI {
 
 Text::Text(Manager *M) :
-  Element(M) {
+  Element(M),
+  m_scaleX(1),
+  m_scaleY(1),
+  m_textBufUsage(Render::FontRendererTextBufferUsage::Default) {
 }
 
 Text::Text(Manager *M, const std::string &text, int scaleX, int scaleY) :
@@ -30,7 +33,6 @@ void Text::setUpdateFrequencyHint(Render::FontRendererTextBufferUsage usage) {
   if (usage != m_textBufUsage) {
     m_textBufUsage = usage;
     m_textBuf.reset();
-    update();
   }
 }
 
