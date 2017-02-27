@@ -7,13 +7,12 @@ namespace Diggler {
 namespace UI {
 
 Button::Button(Manager *M, const Area &area, const std::string &label) : Element(M) {
-  m_area = area;
-  
+  setArea(area);
+
   color = {0.4, 0.4, 0.4, 1.0};
   m_displayedColor = &color;
 
   m_text = M->addManual<Text>("", 2, 2);
-  m_text->setMatrix(PM);
   m_text->setArea(area);
   setLabel(label);
 }
@@ -27,11 +26,7 @@ std::string Button::getLabel() const {
   return m_label;
 }
 
-void Button::onMatrixChange() {
-  m_text->onMatrixChange();
-}
-
-void Button::onAreaChange(const Area &newArea) {
+void Button::onRenderAreaChange(const Area &newArea) {
   m_text->setArea(newArea);
 }
 
@@ -47,9 +42,9 @@ void Button::onCursorEnter(int x, int y) {
 void Button::onCursorLeave(int x, int y) {
 }
 
-void Button::render() {
-  M->drawRect(m_area, glm::vec4(1, 1, 1, isCursorOver() ? 0.5 : 0.3));
-  m_text->render();
+void Button::render(const glm::mat4 &matrix) const {
+  M->drawRect(matrix, glm::vec4(1, 1, 1, isCursorOver() ? 0.5 : 0.3));
+  m_text->render(matrix);
 }
 
 void Button::update() {

@@ -5,7 +5,8 @@
 #include "../Game.hpp"
 #include "../GameWindow.hpp"
 #include "../render/FontRenderer.hpp"
-#include "../ui/FontManager.hpp"
+#include "FontManager.hpp"
+#include "Manager.hpp"
 
 namespace Diggler {
 namespace UI {
@@ -15,6 +16,7 @@ Text::Text(Manager *M) :
   m_scaleX(1),
   m_scaleY(1),
   m_textBufUsage(Render::FontRendererTextBufferUsage::Default) {
+  updateMatrix();
 }
 
 Text::Text(Manager *M, const std::string &text, int scaleX, int scaleY) :
@@ -23,7 +25,8 @@ Text::Text(Manager *M, const std::string &text, int scaleX, int scaleY) :
   m_scaleY(scaleY),
   m_textBufUsage(Render::FontRendererTextBufferUsage::Default),
   m_text(text) {
-  update();
+  updateText();
+  updateMatrix();
 }
 
 Text::~Text() {
@@ -38,7 +41,7 @@ void Text::setUpdateFrequencyHint(Render::FontRendererTextBufferUsage usage) {
 
 void Text::setText(const std::string &text) {
   m_text = text;
-  update();
+  updateText();
 }
 
 std::string Text::getText() const {
@@ -47,11 +50,7 @@ std::string Text::getText() const {
 
 void Text::setFont(const std::string &name) {
   m_fontName = name;
-  update();
-}
-
-void Text::setPos(int x, int y) {
-  setArea(Area {x, y, 0, 0});
+  updateText();
 }
 
 void Text::setScale(int scaleX, int scaleY) {
@@ -60,22 +59,8 @@ void Text::setScale(int scaleX, int scaleY) {
   updateMatrix();
 }
 
-void Text::onMatrixChange() {
-  updateMatrix();
-}
-
-void Text::onAreaChanged() {
-  updateMatrix();
-}
-
-void Text::update() {
-  updateText();
-  updateMatrix();
-}
-
 void Text::updateMatrix() {
-  m_matrix = glm::translate(*PM, glm::vec3(m_area.x, m_area.y, 0.f));
-  m_matrix = glm::scale(m_matrix, glm::vec3(m_scaleX, m_scaleY, 1.f));
+  m_matrix = glm::scale(glm::mat4(), glm::vec3(m_scaleX, m_scaleY, 1.f));
 }
 
 void Text::updateText() {
@@ -85,15 +70,9 @@ void Text::updateText() {
   M->G->FM->getFont(m_fontName)->updateTextBuffer(m_textBuf, m_text);
 }
 
-void Text::render() {
-  if (m_textBuf) {
-    M->G->FM->getFont(m_fontName)->draw(m_textBuf, m_matrix);
-  }
-}
-
 void Text::render(const glm::mat4 &matrix) const {
   if (m_textBuf) {
-    M->G->FM->getFont(m_fontName)->draw(m_textBuf, matrix);
+    M->G->FM->getFont(m_fontName)->draw(m_textBuf, matrix * m_matrix);
   }
 }
 

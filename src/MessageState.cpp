@@ -1,10 +1,13 @@
 #include "MessageState.hpp"
-#include "ui/Text.hpp"
+
+#include <glm/gtc/matrix_transform.hpp>
+
+#include "Audio.hpp"
 #include "Game.hpp"
 #include "GlobalProperties.hpp"
 #include "Sound.hpp"
-#include "Audio.hpp"
-#include <glm/gtc/matrix_transform.hpp>
+#include "ui/Manager.hpp"
+#include "ui/Text.hpp"
 
 namespace Diggler {
 

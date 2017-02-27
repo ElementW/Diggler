@@ -56,7 +56,7 @@ public:
 
   template<class T, typename... Args> std::shared_ptr<T> addManual(Args&&... args) {
     std::shared_ptr<T> obj = create<T>(std::forward<Args>(args)...);
-    obj->m_isManual = true;
+    obj->setManual();
     add(obj);
     return obj;
   }
@@ -67,10 +67,12 @@ public:
 
   // Utility
 
-  void drawRect(const Element::Area&, const glm::vec4 &color) const;
+  void drawRect(const glm::mat4&, const Element::Area&, const glm::vec4 &color) const;
+  void drawRect(const glm::mat4&, int w, int h, const glm::vec4 &color) const;
   void drawRect(const glm::mat4&, const glm::vec4 &color) const;
   void drawFullRect(const glm::vec4 &color) const;
-  void drawTex(const Element::Area&, const Texture&) const;
+  void drawTex(const glm::mat4&, const Element::Area&, const Texture&) const;
+  void drawTex(const glm::mat4&, int w, int h, const Texture&) const;
   void drawTex(const glm::mat4&, const Texture&) const;
   void drawTex(const glm::mat4&, const Texture&, const glm::vec4 &color) const;
   void drawFullTexV(const Texture&) const;

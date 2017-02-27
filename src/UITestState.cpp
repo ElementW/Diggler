@@ -1,7 +1,9 @@
 #include "UITestState.hpp"
-#include "ui/Button.hpp"
+
 #include "Game.hpp"
 #include "GameWindow.hpp"
+#include "ui/Button.hpp"
+#include "ui/Manager.hpp"
 
 namespace Diggler {
 

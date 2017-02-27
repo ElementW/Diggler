@@ -22,6 +22,9 @@ private:
   Text(const Text&) = delete;
   Text& operator=(const Text&) = delete;
 
+  void updateMatrix();
+  void updateText();
+
 public:
   struct Size { int x, y; };
 
@@ -51,16 +54,10 @@ public:
    * @param name Font name
    */
   void setFont(const std::string &name);
-  void setPos(int x, int y);
   void setScale(int scaleX, int scaleY);
   Size getSize() const;
-  void render();
-  void render(const glm::mat4 &matrix) const;
-  void onAreaChanged();
-  void onMatrixChange();
-  void update();
-  void updateMatrix();
-  void updateText();
+  void render(const glm::mat4&) const override;
+  using Element::render;
 };
 
 }

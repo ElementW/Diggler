@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 
 #include "Platform.hpp"
+#include "render/gl/VAO.hpp"
 #include "render/gl/VBO.hpp"
 #include "ui/Text.hpp"
 
@@ -48,6 +49,7 @@ private:
     float x, y, r, g, b, a;
   };
   Render::gl::VBO m_vbo;
+  Render::gl::VAO m_vao;
   int m_posX, m_posY;
 
 public:

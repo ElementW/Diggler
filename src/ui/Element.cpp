@@ -1,10 +1,13 @@
 #include "Element.hpp"
+
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "Manager.hpp"
 
 namespace Diggler {
 namespace UI {
 
-bool Element::Area::isIn(int x, int y) {
+bool Element::Area::isIn(int x, int y) const {
   return x >= this->x && x <= (this->x + this->w) &&
          y >= this->y && y <= (this->y + this->h);
 }
@@ -14,19 +17,32 @@ Element::Element(Manager *M) :
   m_isCursorOver(false),
   m_hasFocus(false),
   m_isVisible(true),
-  m_isManual(false),
-  m_area({0, 0, 0, 0}), M(M) {
-  PM = M->PM;
+  m_manualRender(false),
+  m_manualInput(false),
+  m_renderArea({0, 0, 0, 0}),
+  m_inputArea({0, 0, 0, 0}),
+  M(M) {
   G = M->G;
 }
 
 Element::~Element() {
 }
 
-void Element::onAreaChange(const Area&) {
+void Element::setManual(bool render, bool input) {
+  m_manualRender = render;
+  m_manualInput = input;
 }
 
-void Element::onAreaChanged() {
+void Element::onRenderAreaChange(const Area&) {
+}
+
+void Element::onRenderAreaChanged() {
+}
+
+void Element::onInputAreaChange(const Area&) {
+}
+
+void Element::onInputAreaChanged() {
 }
 
 void Element::onFocus() {
@@ -41,7 +57,7 @@ void Element::onMouseDown(int, int, MouseButton) {
 void Element::onMouseUp(int, int, MouseButton) {
 }
 
-void Element::onMouseScroll(double x, double y) {
+void Element::onMouseScroll(double, double) {
 }
 
 void Element::onCursorMove(int, int) {
@@ -53,12 +69,8 @@ void Element::onCursorEnter(int, int) {
 void Element::onCursorLeave(int, int) {
 }
 
-void Element::onMatrixChange() {
-}
-
-void Element::setMatrix(const glm::mat4 *m) {
-  PM = m ? m : M->PM;
-  onMatrixChange();
+void Element::render() const {
+  render(glm::translate(*M->PM, glm::vec3(m_renderArea.x, m_renderArea.y, 0)));
 }
 
 }

@@ -63,16 +63,19 @@ void Manager::setup(Game *G) {
 
 
 void Manager::onCursorPos(double x, double y) {
+  y = G->GW->getH() - y;
+
   std::shared_ptr<Element> hovered;
   for (std::weak_ptr<Element> &elmPtr : m_elements) {
     std::shared_ptr<Element> elm = elmPtr.lock();
     if (!elm) {
       continue;
     }
-    if (!elm->m_isManual &&
-        !elm->cursorPassesThrough() &&
+    const Element::Area &a = elm->inputArea();
+    if (!elm->m_manualInput &&
         elm->m_isVisible &&
-        elm->m_area.isIn(x, G->GW->getH()-y)) {
+        a.isIn(x, y) &&
+        !elm->cursorPassesThrough(x - a.x, y - a.y)) {
       hovered = std::move(elm);
       break;
     }
@@ -81,16 +84,19 @@ void Manager::onCursorPos(double x, double y) {
   if (hovered != lastHoveredElement) {
     if (lastHoveredElement) {
       lastHoveredElement->m_isCursorOver = false;
-      lastHoveredElement->onCursorLeave(x, y);
+      const Element::Area &a = lastHoveredElement->inputArea();
+      lastHoveredElement->onCursorLeave(x - a.x, y - a.y);
     }
     if (hovered) {
       hovered->m_isCursorOver = true;
-      hovered->onCursorEnter(x, y);
+      const Element::Area &a = hovered->inputArea();
+      hovered->onCursorEnter(x - a.x, y - a.y);
     }
     m_hoveredElement = hovered;
   }
   if (hovered) {
-    hovered->onCursorMove(x, y);
+    const Element::Area &a = hovered->inputArea();
+    hovered->onCursorMove(x - a.x, y - a.y);
   }
 }
 
@@ -111,11 +117,12 @@ void Manager::onMouseButton(int key, int action, int mods) {
       btn = Element::MouseButton::Right;
       break;
     }
+    const Element::Area &a = hoveredElement->inputArea();
     if (action == GLFW_PRESS) {
-      hoveredElement->onMouseDown(x, y, btn);
+      hoveredElement->onMouseDown(x - a.x, y - a.y, btn);
       setFocused(m_hoveredElement);
     } else if (action == GLFW_RELEASE) {
-      hoveredElement->onMouseUp(x, y, btn);
+      hoveredElement->onMouseUp(x - a.x, y - a.y, btn);
       setFocused(m_hoveredElement);
     }
   }
@@ -145,12 +152,6 @@ void Manager::onChar(char32 unichar) {
 
 void Manager::onResize(int w, int h) {
   setProjMat(glm::ortho(0.0f, (float)w, 0.0f, (float)h));
-  for (std::weak_ptr<Element> &elmPtr : m_elements) {
-    std::shared_ptr<Element> elm = elmPtr.lock();
-    if (!elm) {
-      elm->onMatrixChange();
-    }
-  }
 }
 
 void Manager::add(std::weak_ptr<Element> elm) {
@@ -188,7 +189,7 @@ void Manager::render() {
       it = m_elements.erase(it);
       continue;
     }
-    if (!elm->m_isManual && elm->m_isVisible) {
+    if (!elm->m_manualRender && elm->m_isVisible) {
       elm->render();
     }
     ++it;
@@ -213,8 +214,12 @@ void Manager::drawRect(const glm::mat4 &mat, const glm::vec4 &color) const {
   m_rectVao->unbind();
 }
 
-void Manager::drawRect(const Element::Area &a, const glm::vec4 &color) const {
-  return drawRect(glm::scale(glm::translate(m_projMatrix, glm::vec3(a.x, a.y, 0)), glm::vec3(a.w, a.h, 0)), color);
+void Manager::drawRect(const glm::mat4 &m, const Element::Area &a, const glm::vec4 &color) const {
+  return drawRect(glm::scale(glm::translate(m, glm::vec3(a.x, a.y, 0)), glm::vec3(a.w, a.h, 0)), color);
+}
+
+void Manager::drawRect(const glm::mat4 &m, int w, int h, const glm::vec4 &color) const {
+  return drawRect(glm::scale(m, glm::vec3(w, h, 0)), color);
 }
 
 void Manager::drawFullRect(const glm::vec4 &color) const {
@@ -238,8 +243,12 @@ void Manager::drawTex(const glm::mat4 &mat, const Texture &t) const {
   drawTex(mat, t, glm::vec4(1.f));
 }
 
-void Manager::drawTex(const Element::Area &a, const Texture &t) const {
-  drawTex(glm::scale(glm::translate(*PM, glm::vec3(a.x, a.y, 0)), glm::vec3(a.w, a.h, 0)), t);
+void Manager::drawTex(const glm::mat4 &m, const Element::Area &a, const Texture &t) const {
+  drawTex(glm::scale(glm::translate(m, glm::vec3(a.x, a.y, 0)), glm::vec3(a.w, a.h, 0)), t);
+}
+
+void Manager::drawTex(const glm::mat4 &m, int w, int h, const Texture &t) const {
+  drawTex(glm::scale(m, glm::vec3(w, h, 0)), t);
 }
 
 void Manager::drawFullTexV(const Texture &t) const {

@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 
 #include "render/gl/Program.hpp"
+#include "ui/Element.hpp"
 
 namespace Diggler {
 
@@ -15,23 +16,32 @@ class Button;
 class Text;
 }
 
-class EscMenu {
+class EscMenu : public UI::Element {
 private:
   Game *G;
-  struct {
+  mutable struct {
     double start, duration;
     bool active;
   } m_transition;
-  std::shared_ptr<UI::Text> txt_quit;
-  glm::mat4 matrix;
+  std::shared_ptr<UI::Text> txtMenuTitle;
   std::shared_ptr<UI::Button> m_button;
+  struct MenuEntryImpl;
+  struct MenuEntry {
+    std::string text;
+    std::unique_ptr<MenuEntryImpl> impl;
+  };
+  std::vector<MenuEntry> entries;
 
 public:
-  EscMenu(Game *G);
+  EscMenu(UI::Manager*);
   ~EscMenu();
-  
-  void setVisible(bool);
-  void render();
+
+  void addMenuEntry(const std::string &text);
+
+  void setVisible(bool) override;
+
+  void render(const glm::mat4&) const override;
+  using UI::Element::render;
 };
 
 }

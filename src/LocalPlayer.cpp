@@ -89,7 +89,7 @@ void LocalPlayer::update(float delta) {
 
   glm::ivec3 &min = aabbmin, &max = aabbmax;
   min.x = floor(position.x - extents.x + std::min(0.f, velocity.x*delta));
-  min.y = floor(position.y - extents.y + std::min(0.f, velocity.y*delta));
+  min.y = floor(position.y - extents.y + std::min(0.f, velocity.y*delta)) - 1;
   min.z = floor(position.z - extents.z + std::min(0.f, velocity.z*delta));
   max.x =  ceil(position.x + extents.x + std::max(0.f, velocity.x*delta));
   max.y =  ceil(position.y + extents.y + std::max(0.f, velocity.y*delta));
@@ -157,15 +157,16 @@ void LocalPlayer::update(float delta) {
         }
       }
       if (pdelta != 1.0f) {
+        //pnorm = glm::normalize(pnorm);
         float remainingtime = 1.f - pdelta;
-        float dotprod = glm::dot(velocity, pnorm) * remainingtime;
-        velocity.x = pnorm.y * pnorm.z * dotprod;
-        //velocity.y = pnorm.x * pnorm.z * dotprod;
-        velocity.z = pnorm.x * pnorm.y * dotprod;
+        float dotprod = glm::dot(dtvel, pnorm) * remainingtime;
+        velocity.x = (pnorm.y * pnorm.z * dotprod) / delta;
+        velocity.y = (pnorm.x * pnorm.z * dotprod) / delta;
+        velocity.z = (pnorm.x * pnorm.y * dotprod) / delta;
         getDebugStream() << dotprod << ' ' << pdelta << std::endl;
       }
       //getDebugStream() << "--" << std::endl;
-      velocity *= pdelta;
+      //velocity *= pdelta;
       position += velocity * delta;
     }
 #endif

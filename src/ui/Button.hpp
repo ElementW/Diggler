@@ -25,14 +25,14 @@ public:
   void setLabel(const std::string &label);
   std::string getLabel() const;
 
-  void onMatrixChange();
-  void onAreaChange(const Area &newArea);
-  void onMouseDown(int x, int y, MouseButton button);
-  void onMouseUp(int x, int y, MouseButton button);
-  void onCursorEnter(int x, int y);
-  void onCursorLeave(int x, int y);
+  void onRenderAreaChange(const Area &newArea) override;
+  void onMouseDown(int x, int y, MouseButton button) override;
+  void onMouseUp(int x, int y, MouseButton button) override;
+  void onCursorEnter(int x, int y) override;
+  void onCursorLeave(int x, int y) override;
 
-  void render();
+  void render(const glm::mat4&) const override;
+  using Element::render;
 };
 
 }

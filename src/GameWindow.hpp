@@ -12,12 +12,15 @@
 #include <glm/detail/type_mat.hpp>
 
 #include "Platform.hpp"
-#include "ui/Manager.hpp"
 
 namespace Diggler {
 
 class Game;
 class State;
+
+namespace UI {
+class Manager;
+}
 
 class GameWindow {
 private:

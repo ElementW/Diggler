@@ -104,18 +104,14 @@ private:
   Net::InMessage m_msg;
   float nextNetUpdate;
 
-  bool isMenuToggled = false;
-
   struct {
     bool show;
   } debugInfo;
 
   struct {
     std::shared_ptr<UI::Text> FPS;
-
     std::shared_ptr<UI::Text> DebugInfo;
-
-    class EscMenu *EM;
+    std::shared_ptr<class EscMenu> EM;
   } UI;
 
   uint64 frameTime;

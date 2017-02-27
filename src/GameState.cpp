@@ -19,6 +19,7 @@
 #include "render/Renderer.hpp"
 #include "scripting/lua/State.hpp"
 #include "ui/FontManager.hpp"
+#include "ui/Manager.hpp"
 #include "Clouds.hpp"
 #include "Chatbox.hpp"
 #include "CaveGenerator.hpp"
@@ -47,7 +48,6 @@ GameState::GameState(GameWindow *GW) :
       h = GW->getH();
 
   // Initialized in setupUI
-  UI.EM = nullptr;
   m_chatBox = nullptr;
 
   float coords[6*3*2*3] = {
@@ -163,13 +163,15 @@ GameState::Bloom::~Bloom() {
 
 void GameState::setupUI() {
   UI.FPS = G->UIM->add<UI::Text>();
+  UI.FPS->setUpdateFrequencyHint(Render::FontRendererTextBufferUsage::Dynamic);
   UI.FPS->setScale(2, 2);
 
   UI.DebugInfo = G->UIM->add<UI::Text>();
   UI.DebugInfo->setUpdateFrequencyHint(Render::FontRendererTextBufferUsage::Stream);
   UI.DebugInfo->setVisible(false);
 
-  UI.EM = new EscMenu(G);
+  UI.EM = G->UIM->add<EscMenu>();
+  UI.EM->setVisible(false);
 
   m_chatBox = new Chatbox(G);
 
@@ -177,7 +179,6 @@ void GameState::setupUI() {
 }
 
 GameState::~GameState() {
-  delete UI.EM;
   delete m_clouds;
   delete m_crossHair.tex;
   delete m_chatBox;
@@ -259,6 +260,7 @@ void GameState::onKey(int key, int scancode, int action, int mods) {
       break;
     }
   } else {
+    bool isMenuToggled = UI.EM->isVisible();
     if (key == G->KB->gameMenu && action == GLFW_PRESS) {
       isMenuToggled = !isMenuToggled;
       UI.EM->setVisible(isMenuToggled);
@@ -315,7 +317,7 @@ void GameState::unlockMouse() {
 void GameState::onMouseButton(int key, int action, int mods) {
   (void) mods;
 
-  if (!m_mouseLocked && action == GLFW_PRESS && !isMenuToggled) {
+  if (!m_mouseLocked && action == GLFW_PRESS && !UI.EM->isVisible()) {
     lockMouse();
   }
 
@@ -398,8 +400,9 @@ void GameState::updateViewport() {
   int lineHeight = G->FM->getDefaultFont()->getHeight()*UIM.scale;
 
   UI.FPS->setPos(16, 16);
-
   UI.DebugInfo->setPos(0, h-(lineHeight+UI.DebugInfo->getSize().y));
+  const int menuWidth = G->UIM->scale*128;
+  UI.EM->setArea(UI::Element::Area(w - menuWidth, 0, menuWidth, h));
 
   m_chatBox->setPosition(4, 64);
   updateUI();
@@ -573,9 +576,6 @@ void GameState::gameLoop() {
     updateUI();
     drawUI();
 
-    if (isMenuToggled)
-      UI.EM->render();
-
     G->R->endFrame();
     frameEnd = std::chrono::steady_clock::now();
     frameTime = std::chrono::duration_cast<std::chrono::duration<uint64, std::micro>>(frameEnd  - frameStart).count();
@@ -641,7 +641,7 @@ void GameState::drawUI() {
   G->UIM->drawTex(m_crossHair.mat, *m_crossHair.tex);
   // TODO render weapon
 
-  G->UIM->drawTex(UI::Element::Area{0,0,128,128}, *G->CR->getAtlas());
+  G->UIM->drawTex(*G->UIM->PM, UI::Element::Area{0,0,128,128}, *G->CR->getAtlas());
 }
 
 bool GameState::processNetwork() {

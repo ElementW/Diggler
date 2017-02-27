@@ -1,7 +1,5 @@
 #include "ClientMessageHandler.hpp"
 
-#include "../Chatbox.hpp"
-#include "../Game.hpp"
 #include "../GameState.hpp"
 #include "client/BlockUpdateHandler.hpp"
 #include "client/ContentHandler.hpp"

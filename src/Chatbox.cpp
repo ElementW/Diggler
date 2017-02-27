@@ -7,6 +7,7 @@
 #include "Game.hpp"
 #include "GameWindow.hpp"
 #include "render/gl/ProgramManager.hpp"
+#include "ui/Manager.hpp"
 
 namespace Diggler {
 
@@ -18,6 +19,7 @@ GLint Chatbox::RenderProgram_mvp = -1;
 Chatbox::Chatbox(Game *G) : m_isChatting(false), G(G),
   m_posX(0), m_posY(0) {
   m_chatText = G->UIM->addManual<UI::Text>("", 2, 2);
+  m_chatText->setPos(0, 0);
   if (RenderProgram == nullptr) {
     RenderProgram = G->PM->getProgram(PM_2D | PM_COLORED);
     RenderProgram_coord = RenderProgram->att("coord");
@@ -33,6 +35,11 @@ Chatbox::Chatbox(Game *G) : m_isChatting(false), G(G),
     {0.f, 100.f, 0.f, 0.f, 0.f, .5f}
   };
   m_vbo.setData(verts, 6);
+  { Render::gl::VAO::Config cfg = m_vao.configure();
+    cfg.vertexAttrib(m_vbo, RenderProgram_coord, 2, GL_FLOAT, sizeof(Vertex), 0);
+    cfg.vertexAttrib(m_vbo, RenderProgram_color, 4, GL_FLOAT, sizeof(Vertex), offsetof(Vertex, r));
+    cfg.commit();
+  }
 }
 
 Chatbox::~Chatbox() {
@@ -87,16 +94,11 @@ void Chatbox::handleKey(int key, int scancode, int action, int mods) {
 void Chatbox::render() {
   if (m_isChatting) {
     RenderProgram->bind();
-    m_vbo.bind();
-    glEnableVertexAttribArray(RenderProgram_coord);
-    glEnableVertexAttribArray(RenderProgram_color);
+    m_vao.bind();
     glUniformMatrix4fv(RenderProgram_mvp, 1, GL_FALSE, glm::value_ptr(*G->UIM->PM));
-    glVertexAttribPointer(RenderProgram_coord, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
-    glVertexAttribPointer(RenderProgram_color, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, r));
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    glDisableVertexAttribArray(RenderProgram_color);
-    glDisableVertexAttribArray(RenderProgram_coord);
-    
+    m_vao.unbind();
+
     m_chatText->render();
   }
   

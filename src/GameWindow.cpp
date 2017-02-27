@@ -14,6 +14,7 @@
 #include "MessageState.hpp"
 #include "Audio.hpp"
 #include "ui/FontManager.hpp"
+#include "ui/Manager.hpp"
 
 namespace Diggler {
 
