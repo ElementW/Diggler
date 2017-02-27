@@ -15,6 +15,7 @@
 #include "Audio.hpp"
 #include "ui/FontManager.hpp"
 #include "ui/Manager.hpp"
+#include "render/gl/Debug.hpp"
 
 namespace Diggler {
 
@@ -23,87 +24,6 @@ int GameWindow::InstanceCount = 0;
 static void glfwErrorCallback(int error, const char *description) {
   getErrorStream() << "GLFW Error " << error << ": " << description << std::endl;
 }
-
-#ifdef DEBUG
-static void APIENTRY glDebugCallback(GLenum source, GLenum type, GLuint id,
-  GLenum severity, GLsizei length, const GLchar *message, const void *userParam) {
-  const char *sourceStr = "???";
-  switch (source) {
-  case GL_DEBUG_SOURCE_API:
-    sourceStr = "API";
-    break;
-  case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
-    sourceStr = "WIN";
-    break;
-  case GL_DEBUG_SOURCE_SHADER_COMPILER:
-    sourceStr = "SHC";
-    break;
-  case GL_DEBUG_SOURCE_THIRD_PARTY:
-    sourceStr = "3PT";
-    break;
-  case GL_DEBUG_SOURCE_APPLICATION:
-    sourceStr = "APP";
-    break;
-  case GL_DEBUG_SOURCE_OTHER:
-    sourceStr = "OTH";
-    break;
-  default:
-    break;
-  }
-  const char *typeStr = "???";
-  switch (type) {
-  case GL_DEBUG_TYPE_ERROR:
-    typeStr = "ERR";
-    break;
-  case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-    typeStr = "DEP";
-    break;
-  case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-    typeStr = "UND";
-    break;
-  case GL_DEBUG_TYPE_PORTABILITY:
-    typeStr = "PRT";
-    break;
-  case GL_DEBUG_TYPE_PERFORMANCE:
-    typeStr = "PRF";
-    break;
-  case GL_DEBUG_TYPE_MARKER:
-    typeStr = "MKR";
-    break;
-  case GL_DEBUG_TYPE_PUSH_GROUP:
-    typeStr = "GP+";
-    break;
-  case GL_DEBUG_TYPE_POP_GROUP:
-    typeStr = "GP-";
-    break;
-  case GL_DEBUG_TYPE_OTHER:
-    typeStr = "OTH";
-    break;
-  default:
-    break;
-  }
-  const char *severityStr = "??";
-  switch (severity) {
-  case GL_DEBUG_SEVERITY_HIGH:
-    severityStr = "HI";
-    break;
-  case GL_DEBUG_SEVERITY_MEDIUM:
-    severityStr = "MD";
-    break;
-  case GL_DEBUG_SEVERITY_LOW:
-    severityStr = "LO";
-    break;
-  case GL_DEBUG_SEVERITY_NOTIFICATION:
-    severityStr = "NT";
-    break;
-  default:
-    break;
-  }
-  char line[3 + 1 + 3 + 1 + 2 + 2 + 1];
-  std::snprintf(line, sizeof(line)/sizeof(line[0]), "%3s %3s %2s] ", sourceStr, typeStr, severityStr);
-  getDebugStreamRaw() << line << message << std::endl;
-}
-#endif
 
 GameWindow::GameWindow(Game *G) : G(G) {
   if (InstanceCount++ == 0) {
@@ -143,8 +63,7 @@ GameWindow::GameWindow(Game *G) : G(G) {
   Render::gl::OpenGL::init();
 
 #ifdef DEBUG
-  glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-  glDebugMessageCallback(glDebugCallback, nullptr);
+  Render::gl::Debug::enable();
 #endif
   glfwSetFramebufferSizeCallback(m_window, GLFWHandler::resize);
   glfwSetCursorPosCallback(m_window, GLFWHandler::cursorPos);

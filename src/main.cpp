@@ -13,6 +13,7 @@
 #include "Server.hpp"
 #include "network/Network.hpp"
 #include "Config.hpp"
+#include "util/Log.hpp"
 
 #include "UITestState.hpp"
 
@@ -57,6 +58,7 @@ struct default_destruct final {
 
 int main(int argc, char **argv) {
   InitRand();
+  Util::InitLogging();
 
   string host = GlobalProperties::DefaultServerHost;
   int    port = GlobalProperties::DefaultServerPort;

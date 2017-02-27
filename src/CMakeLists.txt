@@ -71,6 +71,11 @@ diggler_add_sources(
   ${CSD}/ui/Text.cpp
   ${CSD}/Universe.cpp
   ${CSD}/util/BitmapDumper.cpp
+  ${CSD}/util/Log.cpp
+  ${CSD}/util/logging/AnsiConsoleLogger.cpp
+  ${CSD}/util/logging/Logger.cpp
+  ${CSD}/util/logging/LogInput.cpp
+  ${CSD}/util/logging/StdoutLogger.cpp
   ${CSD}/util/TexturePacker.cpp
   ${CSD}/util/Tipsify.cpp
   ${CSD}/World.cpp
