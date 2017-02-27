@@ -1,8 +1,15 @@
 #include "SoundBuffer.hpp"
-#include "Platform.hpp"
+
 #include <stb_vorbis.h>
 
+#include "util/Log.hpp"
+
 namespace Diggler {
+
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "SoundBuffer";
 
 inline ALenum alGetFormat(short channels, short samples) {
   bool stereo = (channels > 1);
@@ -60,7 +67,7 @@ void SoundBuffer::loadOgg(const std::string &path) {
   int error = 0;
   stb_vorbis *stream = stb_vorbis_open_filename(const_cast<char*>(path.c_str()), &error, nullptr);
   if (stream == nullptr) {
-    getDebugStream() << "Could not load " << path << " : " << error << std::endl;
+    Log(Error, TAG) << "Could not load " << path << " : " << error;
     return;
   }
 

@@ -4,11 +4,17 @@
 #include <memory>
 #include <sstream>
 
-#include "../../Platform.hpp"
+#include "../../platform/fs.hpp"
+#include "../../util/Log.hpp"
 
 namespace Diggler {
 namespace Render {
 namespace gl {
+
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "Shader";
 
 Shader::Shader(Type type) :
   m_preludeLines(nullptr),
@@ -54,7 +60,7 @@ bool Shader::compileFromString(const std::string &source, const std::string &pat
   GLint compiled;
   glGetShaderiv(id, GL_COMPILE_STATUS, &compiled);
   if (!GLboolean(compiled)) {
-    getErrorStream() << "Compile error in " << path << "\n" << getError() << std::endl;
+    Log(Error, TAG) << "Compile error in " << path << "\n" << getError();
     return false;
   }
   return true;

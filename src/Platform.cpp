@@ -2,6 +2,13 @@
 
 #include <cmath>
 
+#include "util/Log.hpp"
+
+using Diggler::Util::Log;
+using namespace Diggler::Util::Logging::LogLevels;
+
+static const char *TAG = "Platform";
+
 const char *Diggler::UserdataDirsName = "Diggler";
 
 static struct PathCache {
@@ -48,7 +55,7 @@ std::string Diggler::proc::getExecutableDirectory() {
     if (last_slash_idx != std::string::npos) {
       pathCache.executableDir = filename.substr(0, last_slash_idx);
     } else {
-      getErrorStream() << "Ill-formed executable path: " << filename << std::endl;
+      Log(Warning, TAG) << "Ill-formed executable path: " << filename;
       pathCache.executableDir = filename;
     }
   }
@@ -105,18 +112,6 @@ std::string getAssetPath(const std::string &name) {
 
 std::string getAssetPath(const std::string &type, const std::string &name) {
   return proc::getExecutableDirectory() + "/assets/" + type + '/' + name;
-}
-
-std::ostream& getErrorStreamRaw() {
-  return std::cerr;
-}
-
-std::ostream& getDebugStreamRaw() {
-  return std::cout;
-}
-
-std::ostream& getOutputStreamRaw() {
-  return std::cout;
 }
 
 float rmod(float x, float y) {

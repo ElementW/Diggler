@@ -1,11 +1,17 @@
 #include "FBO.hpp"
 
+#include "../../util/Log.hpp"
 #include "FeatureSupport.hpp"
 #include "Util.hpp"
 
 namespace Diggler {
 namespace Render {
 namespace gl {
+
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "FBO";
 
 FBO::FBO(int w, int h, Texture::PixelFormat format, bool stencil) : m_hasStencil(stencil) {
   BoundBufferSave<GL_RENDERBUFFER> saveRbo;
@@ -48,11 +54,11 @@ FBO::FBO(int w, int h, Texture::PixelFormat format, bool stencil) : m_hasStencil
 
   GLenum glErr = glGetError();
   if (glErr != GL_NO_ERROR) {
-    getDebugStream() << getErrorString(glErr) << std::endl;
+    Log(Error, TAG) << getErrorString(glErr);
   }
   glErr = glCheckFramebufferStatus(GL_FRAMEBUFFER);
   if (glErr != GL_FRAMEBUFFER_COMPLETE) {
-    getDebugStream() << getErrorString(glErr) << std::endl;
+    Log(Error, TAG) << getErrorString(glErr);
   }
 }
 

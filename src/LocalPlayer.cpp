@@ -13,8 +13,14 @@
 #include "Game.hpp"
 #include "network/NetHelper.hpp"
 #include "render/gl/ProgramManager.hpp"
+#include "util/Log.hpp"
 
 namespace Diggler {
+
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "LocalPlayer";
 
 static float Acceleration = 18.0f;
 
@@ -163,9 +169,8 @@ void LocalPlayer::update(float delta) {
         velocity.x = (pnorm.y * pnorm.z * dotprod) / delta;
         velocity.y = (pnorm.x * pnorm.z * dotprod) / delta;
         velocity.z = (pnorm.x * pnorm.y * dotprod) / delta;
-        getDebugStream() << dotprod << ' ' << pdelta << std::endl;
+        Log(Debug, TAG) << dotprod << ' ' << pdelta;
       }
-      //getDebugStream() << "--" << std::endl;
       //velocity *= pdelta;
       position += velocity * delta;
     }

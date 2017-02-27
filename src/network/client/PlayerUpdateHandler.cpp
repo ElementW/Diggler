@@ -2,6 +2,7 @@
 
 #include "../../Game.hpp"
 #include "../../GameState.hpp"
+#include "../../util/Log.hpp"
 #include "../msgtypes/PlayerUpdate.hpp"
 
 namespace Diggler {
@@ -9,6 +10,10 @@ namespace Net {
 namespace Client {
 
 using namespace Net::MsgTypes;
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "CNH:PlayerUpdate";
 
 bool PlayerUpdateHandler::handle(GameState &GS, InMessage &msg) {
   using S = PlayerUpdateSubtype;
@@ -17,13 +22,13 @@ bool PlayerUpdateHandler::handle(GameState &GS, InMessage &msg) {
       PlayerUpdateMove pum;
       pum.readFromMsg(msg);
       if (!pum.plrSessId) {
-        getOutputStream() << "PlayerUpdateMove without player session ID" << std::endl;
+        Log(Debug, TAG) << "Move without player session ID";
         return true;
       }
       Player *plr = GS.G->players.getBySessId(*pum.plrSessId);
       if (!plr) {
-        getOutputStream() << "PlayerUpdateMove: sess#" << *pum.plrSessId <<
-          " is not on server" << std::endl;
+        Log(Debug, TAG) <<"Move: sess#" << *pum.plrSessId <<
+            " is not on server";
         return true;
       }
       glm::vec3 pos = pum.position ? *pum.position : plr->position,
@@ -37,8 +42,8 @@ bool PlayerUpdateHandler::handle(GameState &GS, InMessage &msg) {
       pud.readFromMsg(msg);
       Player *plr = GS.G->players.getBySessId(pud.plrSessId);
       if (!plr) {
-        getOutputStream() << "PlayerUpdateDie: sess#" << pud.plrSessId <<
-          " is not on server" << std::endl;
+        Log(Debug, TAG) << "Die: sess#" << pud.plrSessId <<
+            " is not on server";
         return true;
       }
       plr->setDead(false);
@@ -48,8 +53,8 @@ bool PlayerUpdateHandler::handle(GameState &GS, InMessage &msg) {
       pur.readFromMsg(msg);
       Player *plr = GS.G->players.getBySessId(pur.plrSessId);
       if (!plr) {
-        getOutputStream() << "PlayerUpdateRespawn: sess#" << pur.plrSessId <<
-          " is not on server" << std::endl;
+        Log(Debug, TAG) << "Respawn: sess#" << pur.plrSessId <<
+            " is not on server";
         return true;
       }
       plr->setDead(false);

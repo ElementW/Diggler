@@ -1,12 +1,22 @@
 #include "World.hpp"
-#include "Universe.hpp"
+
 #include <cstring>
+
 #include <glm/gtc/matrix_transform.hpp>
+
 #include <lzfx.h>
-#include "Game.hpp"
+
 #include "CaveGenerator.hpp"
+#include "Game.hpp"
+#include "Universe.hpp"
+#include "util/Log.hpp"
 
 namespace Diggler {
+
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "World";
 
 World::World(Game *G, WorldId id, bool remote) :
   G(G), id(id), isRemote(remote) {
@@ -66,8 +76,8 @@ void World::emergerProc(int emergerId) {
     auto genEnd = std::chrono::high_resolution_clock::now();
     auto genDelta = std::chrono::duration_cast<std::chrono::milliseconds>(genEnd - genStart);
     glm::ivec3 cp = c->getWorldChunkPos();
-    getOutputStream() << "Map gen for " << id << '.' << cp.x << ',' << cp.y << ',' << cp.z <<
-      " took " << genDelta.count() << "ms, thread #" << emergerId << std::endl;
+    Log(Verbose, TAG) << "Map gen for " << id << '.' << cp.x << ',' << cp.y << ',' << cp.z <<
+      " took " << genDelta.count() << "ms, thread #" << emergerId;
 
     c.reset(); // Release ref ownership
   }
@@ -314,8 +324,8 @@ void World::write(OutStream &msg) const {
     int rz = lzfx_compress(chunkData, dataSize, compressed, &compressedSize);
     const glm::ivec3 &pos = pair.first;
     if (rz < 0) {
-      getErrorStream() << "Failed compressing Chunk[" << pos.x << ',' << pos.y <<
-        ' ' << pos.z << ']' << std::endl;
+      Log(Error, TAG) << "Failed compressing Chunk[" << pos.x << ',' << pos.y <<
+          ' ' << pos.z << ']';
     } else {
       msg.writeI16(pos.x);
       msg.writeI16(pos.y);
@@ -342,17 +352,17 @@ void World::read(InStream &M) {
     int rz = lzfx_decompress(compressedData, compressedSize, c.data, &outLen);
     if (rz < 0 || outLen != targetDataSize) {
       if (rz < 0) {
-        getErrorStream() << "Chunk[" << x << ',' << y << ' ' << z <<
-          "] LZFX decompression failed" << std::endl;
+        Log(Error, TAG) << "Chunk[" << x << ',' << y << ' ' << z <<
+            "] LZFX decompression failed";
       } else {
-        getErrorStream() << "Chunk[" << x << ',' << y << ' ' << z <<
-          "] has bad size " << outLen << '/' << targetDataSize << std::endl;
+        Log(Error, TAG) << "Chunk[" << x << ',' << y << ' ' << z <<
+            "] has bad size " << outLen << '/' << targetDataSize;
       }
       // TODO: re-request?
     }
     delete[] compressedData;
   }
-  getDebugStream() << "MapRead: read " << bytesRead << std::endl;
+  Log(Debug, TAG) << "MapRead: read " << bytesRead;
 }
 
 }

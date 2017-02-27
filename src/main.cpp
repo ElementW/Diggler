@@ -19,6 +19,11 @@
 
 namespace Diggler {
 
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "main()";
+
 using std::string;
 
 static bool InitNetwork() {
@@ -76,8 +81,7 @@ int main(int argc, char **argv) {
       try {
         port = std::stoi(argv[++i]);
       } catch (const std::logic_error &e) {
-        getErrorStream() << "Failed to parse port number, keeping default (" <<
-          port << ')' << std::endl;
+        Log(Error, TAG) << "Failed to parse port number, keeping default (" << port << ')';
       }
 
     } else if (strcmp(argv[i], "--nosound") == 0) {
@@ -85,11 +89,11 @@ int main(int argc, char **argv) {
     } else if ((strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--name") == 0)
       && argc > i) {
       if (strlen(argv[i+1]) > GlobalProperties::PlayerNameMaxLen) {
-        getErrorStream() << "Specified nickname is too long, using random one." << std::endl;
+        Log(Warning, TAG) << "Specified nickname is too long, using random one.";
       } else {
         GlobalProperties::PlayerName = argv[++i];
-        getDebugStream() << "Player's name set to " << GlobalProperties::PlayerName << std::endl;
-        }
+        Log(Info, TAG) << "Player's name set to " << GlobalProperties::PlayerName;
+      }
     } else {
       // For now, assume it's the server address
       host = argv[i];
@@ -99,13 +103,11 @@ int main(int argc, char **argv) {
         try {
           port = std::stoi(portStr);
         } catch (const std::logic_error &e) {
-          getErrorStream() << "Failed to parse port number, keeping default (" <<
-            port << ')' << std::endl;
+          Log(Error, TAG) << "Failed to parse port number, keeping default (" << port << ')';
         }
         if (port > 65535) {
           port = GlobalProperties::DefaultServerPort;
-          getErrorStream() << "Port number too high, defaulting to" <<
-            port << std::endl;
+          Log(Warning, TAG) << "Port number too high, defaulting to" << port;
         }
         host = host.substr(0, colonPos);
       }
@@ -148,7 +150,7 @@ int main(int argc, char **argv) {
   }
   if (GlobalProperties::IsServer) {
     if (!networkSuccess) {
-      getErrorStream() << "Network init failed!" << std::endl;
+      Log(Failure, TAG) << "Network init failed!";
       return 1;
     }
     Server S(*G, port);

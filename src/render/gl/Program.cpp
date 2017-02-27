@@ -3,10 +3,16 @@
 #include <thread>
 
 #include "../../Platform.hpp"
+#include "../../util/Log.hpp"
 
 namespace Diggler {
 namespace Render {
 namespace gl {
+
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "Program";
 
 Program::Program(Shader* vsh, Shader* fsh) :
   vsh(vsh),
@@ -21,8 +27,6 @@ Program::Program(const std::string& vshPath, const std::string& fshPath)
   vsh = new Shader(Shader::Type::VERTEX);
   fsh = new Shader(Shader::Type::FRAGMENT);
   mustDestroy = true;
-  
-  //getDebugStream() << id << ':' << vsh->getError() << fsh->getError()<< std::endl;
 }
 
 void Program::setPreludeLines(const std::vector<std::string> &lines) {
@@ -42,7 +46,7 @@ bool Program::link() {
   glGetProgramiv(id, GL_LINK_STATUS, &linkStatus);
   linked = GLboolean(linkStatus);
   if (!linked) {
-    getErrorStream() << id << ':' << getError() << std::endl;
+    Log(Error, TAG) << id << ':' << getError();
     return false;
   }
 
@@ -92,15 +96,15 @@ GLuint Program::getId() const {
 
 GLint Program::att(const std::string &name) const {
   if (!linked) {
-    getErrorStream() << id << ":Not linked, failed attrib " << name << std::endl;
+    Log(Error, TAG) << id << ": Not linked, failed attrib " << name;
     return 0;
   }
   GLint loc = glGetAttribLocation(id, name.c_str());
   if (loc == -1) {
 #if DEBUG
-    getErrorStream() << vshPath << ":Couldn't bind attrib " << name << std::endl;
+    Log(Error, TAG) << vshPath << ": Couldn't bind attrib " << name;
 #else
-    getErrorStream() << id << ":Couldn't bind attrib " << name << std::endl;
+    Log(Error, TAG) << id << ":Couldn't bind attrib " << name;
 #endif
     return 0;
   }
@@ -109,15 +113,15 @@ GLint Program::att(const std::string &name) const {
 
 GLint Program::uni(const std::string &name) const {
   if (!linked) {
-    getErrorStream() << id << ":Not linked, failed uniform " << name << std::endl;
+    Log(Error, TAG) << id << ": Not linked, failed uniform " << name;
     return 0;
   }
   GLint loc = glGetUniformLocation(id, name.c_str());
   if (loc == -1) {
 #if DEBUG
-    getErrorStream() << vshPath << ":Couldn't bind uniform " << name << std::endl;
+    Log(Error, TAG) << vshPath << ": Couldn't bind uniform " << name;
 #else
-    getErrorStream() << id << ":Couldn't bind uniform " << name << std::endl;
+    Log(Error, TAG) << id << ":C ouldn't bind uniform " << name;
 #endif
     return 0;
   }

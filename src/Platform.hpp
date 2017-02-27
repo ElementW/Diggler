@@ -39,30 +39,6 @@ static constexpr const char *const_filename() {
 #endif
 }
 
-/// @returns The system's error output stream
-std::ostream& getErrorStreamRaw();
-#ifdef IN_IDE_PARSER
-std::ostream& getErrorStream();
-#else
-#define getErrorStream() getErrorStreamRaw() << const_filename() << ':' << __LINE__ << ' '
-#endif
-
-/// @returns The system's debug output stream
-std::ostream& getDebugStreamRaw();
-#ifdef IN_IDE_PARSER
-std::ostream& getDebugStream();
-#else
-#define getDebugStream() getDebugStreamRaw() << const_filename() << ':' << __LINE__ << ' '
-#endif
-
-/// @returns The system's output stream
-std::ostream& getOutputStreamRaw();
-#ifdef IN_IDE_PARSER
-std::ostream& getOutputStream();
-#else
-#define getOutputStream() getOutputStreamRaw() << const_filename() << ':' << __LINE__ << ' '
-#endif
-
 extern const char *UserdataDirsName;
 
 std::string getConfigDirectory();

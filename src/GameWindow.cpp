@@ -16,13 +16,19 @@
 #include "ui/FontManager.hpp"
 #include "ui/Manager.hpp"
 #include "render/gl/Debug.hpp"
+#include "util/Log.hpp"
 
 namespace Diggler {
+
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "GameWindow";
 
 int GameWindow::InstanceCount = 0;
 
 static void glfwErrorCallback(int error, const char *description) {
-  getErrorStream() << "GLFW Error " << error << ": " << description << std::endl;
+  Log(Error, TAG) << "GLFW Error " << error << ": " << description;
 }
 
 GameWindow::GameWindow(Game *G) : G(G) {
@@ -34,8 +40,8 @@ GameWindow::GameWindow(Game *G) : G(G) {
       err << "GLFW init failed (" << glfwStatus << ')';
       throw std::runtime_error(err.str());
     }
-    getOutputStreamRaw() << "GLFW linked " << GLFW_VERSION_MAJOR << '.' << GLFW_VERSION_MINOR <<
-        '.' << GLFW_VERSION_REVISION << ", using " << glfwGetVersionString() << std::endl;
+    Log(Info, TAG) << "GLFW linked " << GLFW_VERSION_MAJOR << '.' << GLFW_VERSION_MINOR <<
+        '.' << GLFW_VERSION_REVISION << ", using " << glfwGetVersionString();
   }
 
   GLFWHandler::getInstance().setWindow(this, m_window);
@@ -76,7 +82,7 @@ GameWindow::GameWindow(Game *G) : G(G) {
   glGetIntegerv(GL_STENCIL_BITS, &bits);
   getDebugStream() << bits << " stencil bits" << std::endl;*/
 
-  getOutputStreamRaw() << "GLM " << GLM_VERSION_MAJOR << '.' << GLM_VERSION_MINOR << '.' << GLM_VERSION_PATCH << ' '
+  Log(Info, TAG) << "GLM " << GLM_VERSION_MAJOR << '.' << GLM_VERSION_MINOR << '.' << GLM_VERSION_PATCH << ' '
 #if GLM_ARCH & GLM_ARCH_AVX512_BIT
   << "AVX512 "
 #endif
@@ -104,19 +110,18 @@ GameWindow::GameWindow(Game *G) : G(G) {
   ;
 
   auto glver = Render::gl::OpenGL::version();
-  getOutputStreamRaw() << "-- " <<
-                          Render::gl::OpenGL::loaderName() << ' ' <<
-                          Render::gl::OpenGL::loaderVersion() << " -- GL" <<
-                          (glver.isGLES ? "ES" : "") << ' ' <<
-                          glver.major << '.' << glver.minor <<
-                          (glver.isCore ? " Core" : "") <<
-                          (glver.isForward ? " FC" : "") << ' ' << std::endl;
+  Log(Info, TAG) << Render::gl::OpenGL::loaderName() << ' ' <<
+                    Render::gl::OpenGL::loaderVersion() << " -- GL" <<
+                    (glver.isGLES ? "ES" : "") << ' ' <<
+                    glver.major << '.' << glver.minor <<
+                    (glver.isCore ? " Core" : "") <<
+                    (glver.isForward ? " FC" : "");
 
   if (InstanceCount == 1) { // If we're the first instance
-    const uint8 *GL_version = glGetString(GL_VERSION);
+    const char *GL_version = reinterpret_cast<const char*>(glGetString(GL_VERSION));
     //const uint8 *GL_vendor = glGetString(GL_VENDOR);
-    const uint8 *GL_renderer = glGetString(GL_RENDERER);
-    getOutputStreamRaw() << "GL " << GL_version << " / " << GL_renderer << std::endl;
+    const char *GL_renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+    Log(Info, TAG) << "GL " << GL_version << " / " << GL_renderer;
   }
 
   UIM = new UI::Manager;

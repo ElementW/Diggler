@@ -12,11 +12,17 @@
 #include "network/msgtypes/PlayerJoin.hpp"
 #include "ui/Manager.hpp"
 #include "ui/Text.hpp"
+#include "util/Log.hpp"
 
 // TODO: move elsewhere
 #include "scripting/lua/State.hpp"
 
 namespace Diggler {
+
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "ConnectingState";
 
 ConnectingState::ConnectingState(GameWindow *W, const std::string &servHost, int servPort) :
   W(W),
@@ -140,7 +146,7 @@ void ConnectingState::run() {
   G->LS->setGameLuaRuntimePath(gameLuaRuntimePath);
   G->LS->dofile(gameLuaRuntimePath + "/Diggler.lua");
 
-  getDebugStream() << "Joined as " << LP.name << '/' << LP.sessId << std::endl;
+  Log(Info, TAG) << "Joined as " << LP.name << '/' << LP.sessId;
 
   W->setNextState(std::make_unique<GameState>(W));
 }

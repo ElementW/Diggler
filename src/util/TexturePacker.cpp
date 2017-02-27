@@ -6,8 +6,10 @@
 #include <thread>
 
 #include <stb_image.h>
-#include "BitmapDumper.hpp"
+
 #include "../Texture.hpp"
+#include "BitmapDumper.hpp"
+#include "Log.hpp"
 
 using namespace std;
 
@@ -17,6 +19,11 @@ using namespace std;
 #endif
 
 namespace Diggler {
+
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "TexturePacker";
 
 // https://gist.github.com/fairlight1337/4935ae72bcbcc1ba5c72
 static void HSVtoRGB(float h, float s, float v, float &r, float &g, float &b) {
@@ -81,7 +88,7 @@ TexturePacker::Coord TexturePacker::add(const std::string& path) {
   int width, height, channels;
   unsigned char *ptr = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
   if (!ptr || !width || !height) {
-    getErrorStream() << "Could not load '" << path << "': " << stbi_failure_reason() << std::endl;
+    Log(Error, TAG) << "Could not load '" << path << "': " << stbi_failure_reason();
     if (!m_defaultTexture) {
       m_defaultTexture.reset(new uint8[8*8*4]);
       uint i = 0;
@@ -120,7 +127,7 @@ TexturePacker::Coord TexturePacker::add(const std::string& path) {
     return add(8, 8, 4, m_defaultTexture.get());
   }
   if (width % 4 != 0 || height % 4 != 0) {
-    getDebugStream() << path << " is bad: " << width << 'x' << height << std::endl;
+    Log(Error, TAG) << path << " is bad: " << width << 'x' << height;
     stbi_image_free(ptr);
     return Coord { 0, 0, 0, 0 };
   }

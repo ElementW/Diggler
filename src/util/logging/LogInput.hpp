@@ -31,7 +31,9 @@ public:
   LogInput& operator=(LogInput&&) = delete;
 
   LogInput& operator<<(const char*);
+  LogInput& operator<<(const char32_t*);
   LogInput& operator<<(const std::string&);
+  LogInput& operator<<(const std::u32string&);
 
   LogInput& operator<<(bool);
   LogInput& operator<<(char);

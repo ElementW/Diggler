@@ -3,6 +3,7 @@
 #include <stb_image.h>
 #include <cstdio>
 #include <cerrno>
+#include "util/Log.hpp"
 #include <cstring>
 #define PushBoundTex() GLint currentBoundTex; glGetIntegerv(GL_TEXTURE_BINDING_2D, &currentBoundTex);
 #define PopBoundTex() glBindTexture(GL_TEXTURE_2D, currentBoundTex);
@@ -10,6 +11,11 @@
 #define TEXTURE_LOAD_DEBUG 0
 
 namespace Diggler {
+
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "World";
 
 Texture::Texture(uint w, uint h, Texture::PixelFormat format) :
   m_w(w),
@@ -61,9 +67,9 @@ Texture::Texture(const std::string &path, PixelFormat format) {
   } else {
     m_w = 64; m_h = 64;
     if (fp == nullptr)
-      getErrorStream() << "Failed to open \"" << path << "\" : " << std::strerror(errno) << std::endl;
+      Log(Error, TAG) << "Failed to open \"" << path << "\" : " << std::strerror(errno);
     else
-      getErrorStream() << "Failed to load image \"" << path << "\" : " << stbi_failure_reason() << std::endl;
+      Log(Error, TAG) << "Failed to load image \"" << path << "\" : " << stbi_failure_reason();
     setPlaceholder();
   }
   PopBoundTex();

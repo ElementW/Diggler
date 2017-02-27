@@ -1,5 +1,6 @@
 #include "Renderer.hpp"
 
+#include "../../util/Log.hpp"
 #include "FeatureSupport.hpp"
 #include "FontRenderer.hpp"
 #include "ParticlesRenderer.hpp"
@@ -9,10 +10,15 @@ namespace Diggler {
 namespace Render {
 namespace gl {
 
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "GLRenderer";
+
 GLRenderer::GLRenderer(Game *G) :
   Renderer(G) {
   FeatureSupport::probe();
-  getDebugStream() << "GLRenderer, using features: " << FeatureSupport::supported() << std::endl;
+  Log(Verbose, TAG) << "GLRenderer, using features: " << FeatureSupport::supported();
   renderers.font = new GLFontRenderer(G);
   renderers.particles = new GLParticlesRenderer(G);
   renderers.world = new GLWorldRenderer(G);

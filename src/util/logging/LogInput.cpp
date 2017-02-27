@@ -8,6 +8,8 @@
 #include <glm/detail/type_vec3.hpp>
 #include <glm/detail/type_vec4.hpp>
 
+#include "../Encoding.hpp"
+
 namespace Diggler {
 namespace Util {
 namespace Logging {
@@ -32,8 +34,18 @@ LogInput& LogInput::operator<<(const char *s) {
   return *this;
 }
 
+LogInput& LogInput::operator<<(const char32_t *s) {
+  buf.append(Encoding::toUtf8(s));
+  return *this;
+}
+
 LogInput& LogInput::operator<<(const std::string &s) {
   buf.append(s);
+  return *this;
+}
+
+LogInput& LogInput::operator<<(const std::u32string &s) {
+  buf.append(Encoding::toUtf8(s));
   return *this;
 }
 

@@ -1,12 +1,18 @@
 #include "Registry.hpp"
 
-#include "Content.hpp"
 #include "../GlobalProperties.hpp"
+#include "../util/Log.hpp"
+#include "Content.hpp"
 
 #define PRINT_BLOCK_REGISTRATIONS 1
 
 namespace Diggler {
 namespace Content {
+
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "Registry";
 
 Registry::BlockRegistration::BlockRegistration(Registry &registry,
   const Registry::BlockNameMap::iterator &it) :
@@ -33,8 +39,7 @@ Registry::BlockRegistration::BlockRegistration(Registry::BlockRegistration &&o) 
 BlockId Registry::BlockRegistration::commit() {
   state = Committed;
 #if PRINT_BLOCK_REGISTRATIONS
-  getDebugStream() << "Registered block " << it->first << " with id " <<
-    it->second->first << std::endl;
+  Log(Info, TAG) << "Registered block " << it->first << " with id " << it->second->first;
 #endif
   return it->second->first;
 }

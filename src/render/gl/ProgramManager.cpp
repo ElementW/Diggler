@@ -4,12 +4,18 @@
 
 #include "../../Game.hpp"
 #include "../../Platform.hpp"
+#include "../../util/Log.hpp"
 
 #define PROGRAM_MANAGER_DEBUG 0
 
 namespace Diggler {
 namespace Render {
 namespace gl {
+
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "ProgramManager";
 
 std::string ProgramManager::getShadersName(FlagsT flags) {
   if (flags & PM_3D)
@@ -54,13 +60,13 @@ const Program* ProgramManager::getProgram(FlagsT flags) {
   getPreludeLines(flags, preludeLines);
   prog->setPreludeLines(preludeLines);
   if (!prog->link()) {
-    getErrorStream() << "Link failed on " << shaderName << std::endl;
+    Log(Error, TAG) << "Link failed on " << shaderName;
     if (preludeLines.size() > 0) {
       std::ostringstream oss;
       for (const std::string &line : preludeLines) {
         oss << line << std::endl;
       }
-      getErrorStream() << "Prelude: " << oss.str();
+      Log(Error, TAG) << "Prelude: " << oss.str();
     }
     /*FIXME: use in debug? GLint sz;
     glGetShaderiv(prog->getVShId(), GL_SHADER_SOURCE_LENGTH, &sz);=

@@ -11,12 +11,18 @@
 #include <goodform/msgpack.hpp>
 
 #include "../crypto/Random.hpp"
+#include "../util/Log.hpp"
 #include "msgtypes/ConnectionParam.hpp"
 
 #include <iomanip>
 
 namespace Diggler {
 namespace Net {
+
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "Network";
 
 static bool InitDone = false;
 
@@ -346,7 +352,7 @@ bool Host::recv(InMessage &msg, Peer **peer, Timeout timeout) {
             // TODO: properly handle key exchange failure
             throw std::runtime_error("DH key exchange failed");
           }
-          getDebugStream() << "hello DH! " << peerPtr->sharedSecret.hex() << std::endl;
+          Log(Debug, TAG) << "hello DH! " << peerPtr->sharedSecret.hex();
         } else {
           return true;
         }

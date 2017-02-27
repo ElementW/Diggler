@@ -19,6 +19,7 @@
 #include "scripting/lua/State.hpp"
 #include "VersionInfo.hpp"
 #include "CaveGenerator.hpp"
+#include "util/Log.hpp"
 
 using std::cout;
 using std::endl;
@@ -26,6 +27,11 @@ using std::endl;
 using namespace Diggler::Net;
 
 namespace Diggler {
+
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "Server";
 
 inline Player* Server::getPlayerByPeer(const Peer &peer) {
   return G.players.getByPeer(peer);
@@ -44,7 +50,7 @@ void Server::handlePlayerJoin(InMessage &msg, Peer &peer) {
   }
 
   MsgTypes::PlayerJoinRequest pjr; pjr.readFromMsg(msg);
-  getOutputStream() << peer.peerHost() << " is joining as " << pjr.name << std::endl;
+  Log(Info, TAG) << peer.peerHost() << " is joining as " << pjr.name;
   
   // TODO: ban list
   Player *possible = getPlayerByName(pjr.name);
@@ -54,7 +60,7 @@ void Server::handlePlayerJoin(InMessage &msg, Peer &peer) {
     OutMessage pjfMsg; pjf.writeToMsg(pjfMsg);
     //kick.writeString("You are \faalready\f0 playing on this server");
     H.send(peer, pjfMsg, Tfer::Rel);
-    getOutputStream() << peer.peerHost() << " tried to connect as " << pjr.name << ": name is taken" << endl;
+    Log(Verbose, TAG) << peer.peerHost() << " tried to connect as " << pjr.name << ": name is taken";
     return;
   }
 
@@ -99,7 +105,7 @@ void Server::handlePlayerJoin(InMessage &msg, Peer &peer) {
     }
   }
 
-  getOutputStream() << plr.name << " joined from " << peer.peerHost() << endl;
+  Log(Verbose, TAG) << plr.name << " joined from " << peer.peerHost();
   for (int x = -2; x < 2; ++x)
     for (int y = -2; y < 2; ++y)
       for (int z = -2; z < 2; ++z)
@@ -118,10 +124,10 @@ void Server::handlePlayerQuit(Peer &peer, QuitReason reason) {
         continue; // dont send broadcast to the player
       H.send(*p.peer, broadcast, Tfer::Rel);
     }
-    getOutputStream() << plr.name << " disconnected" << endl;
+    Log(Verbose, TAG) << plr.name << " disconnected";
     G.players.remove(plr);
   } else {
-    getOutputStream() << peer.peerHost() << " disconnected" << endl;
+    Log(Verbose, TAG) << peer.peerHost() << " disconnected";
   }
 }
 
@@ -168,7 +174,7 @@ void Server::handleChat(InMessage &msg, Player *plr) {
 }
 
 void Server::handleCommand(Player *plr, const std::string &command, const std::vector<std::string> &args) {
-  getDebugStream() << "Command \"" << command << '"' << std::endl;
+  Log(Verbose, TAG) << "Command \"" << command << '"';
 }
 
 void Server::handlePlayerUpdate(InMessage &msg, Player &plr) {
@@ -323,23 +329,22 @@ void Server::handlePlayerDeath(InMessage &msg, Player &plr) {
 Server::Server(Game &G, uint16 port) : G(G) {
   G.init();
 
-  getOutputStream() << "Diggler v" << VersionString << " Server, port " << port << ", "
-    << std::thread::hardware_concurrency() << " HW threads supported" << endl;
+  Log(Info, TAG) << "Diggler v" << VersionString << " Server, port " << port << ", " <<
+      std::thread::hardware_concurrency() << " HW threads supported";
 
   if (port >= 49152) {
-    getErrorStream() << "Warning: port is within the Ephemeral Port Range as defined by IANA!" <<
-      std::endl << "  Nothing wrong with that, but for compatibility's sake please avoid this range." <<
-      std::endl;
+    Log(Warning, TAG) << "port is within the Ephemeral Port Range as defined by IANA!\n" <<
+        "Nothing wrong with that, but for compatibility's sake please avoid this range.";
   }
 
   try {
     H.create(port);
   } catch (Net::Exception &e) {
-    getErrorStream() << "Couldn't open port " << port << " for listening" << endl <<
-      "Make sure no other server instance is running" << endl;
+    Log(Error, TAG) << "Couldn't open port " << port << " for listening\n" <<
+        "Make sure no other server instance is running";
     if (port <= 1024) {
-      getErrorStream() << "The selected port is in range 1-1024, which typically require root "
-        "privileges. Make sure you have permission to bind to this port." << endl;
+      Log(Warning, TAG) << "The selected port is in range 1-1024, which typically require root "
+        "privileges. Make sure you have permission to bind to this port.";
     }
     throw "Server init failed";
   }
@@ -440,7 +445,7 @@ void Server::run() {
       }
       switch (msg.getType()) {
       case MessageType::NetConnect:
-        getOutputStream() << peer.peerHost() << " NEWCONN" << std::endl;
+        Log(Debug, TAG) << peer.peerHost() << " NEWCONN";
         break;
       case MessageType::NetDisconnect:
         handleDisconnect(peer);
@@ -464,7 +469,7 @@ void Server::run() {
   }
   continueUpdate = false;
   upd.join();
-  getDebugStream() << "chunk updater thread joined" << std::endl;
+  Log(Debug, TAG) << "chunk updater thread joined";
 }
 
 bool Server::isPlayerOnline(const std::string &playername) const {

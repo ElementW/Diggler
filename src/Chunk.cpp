@@ -16,6 +16,7 @@
 #include "content/Registry.hpp"
 #include "network/msgtypes/BlockUpdate.hpp"
 #include "render/Renderer.hpp"
+#include "util/Log.hpp"
 
 #if CHUNK_INMEM_COMPRESS
   #include <cstdlib>
@@ -24,6 +25,11 @@
 #define SHOW_CHUNK_UPDATES 1
 
 namespace Diggler {
+
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "Chunk";
 
 constexpr float Chunk::CullSphereRadius;
 constexpr float Chunk::MidX, Chunk::MidY, Chunk::MidZ;
@@ -435,8 +441,7 @@ void Chunk::write(OutStream &os) const {
   compressedSize = dataSize;
   int rz = lzfx_compress(chunkData, dataSize, compressed, &compressedSize);
   if (rz < 0) {
-    getErrorStream() << "Failed compressing Chunk[" << wcx << ',' << wcy <<
-      ' ' << wcz << ']' << std::endl;
+    Log(Error, TAG) << "Failed compressing Chunk[" << wcx << ',' << wcy << ' ' << wcz << ']';
   } else {
     os.writeU16(compressedSize);
     os.writeData(compressed, compressedSize);
@@ -456,16 +461,16 @@ void Chunk::read(InStream &is) {
   int rz = lzfx_decompress(compressedData, compressedSize, data, &outLen);
   if (rz < 0 || outLen != targetDataSize) {
     if (rz < 0) {
-      getErrorStream() << "Chunk[" << wcx << ',' << wcy << ' ' << wcz <<
-        "] LZFX decompression failed" << std::endl;
+      Log(Error, TAG) << "Chunk[" << wcx << ',' << wcy << ' ' << wcz <<
+          "] LZFX decompression failed";
     } else {
-      getErrorStream() << "Chunk[" << wcx << ',' << wcy << ' ' << wcz <<
-        "] has bad size " << outLen << '/' << targetDataSize << std::endl;
+      Log(Error, TAG) << "Chunk[" << wcx << ',' << wcy << ' ' << wcz <<
+          "] has bad size " << outLen << '/' << targetDataSize;
     }
   }
   if (is.readU32() != MurmurHash2(data, outLen, 0xFA0C778C)) {
-    getErrorStream() << "Chunk[" << wcx << ',' << wcy << ' ' << wcz <<
-        "] decompression gave bad chunk content" << std::endl;
+    Log(Error, TAG) << "Chunk[" << wcx << ',' << wcy << ' ' << wcz <<
+        "] decompression gave bad chunk content";
   }
 
   delete[] compressedData;

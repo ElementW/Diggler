@@ -10,10 +10,16 @@
 #include "GlobalProperties.hpp"
 #include "LocalPlayer.hpp"
 #include "Sound.hpp"
+#include "util/Log.hpp"
 
 #define AUDIO_GC_DEBUG 0
 
 namespace Diggler {
+
+using Util::Log;
+using namespace Util::Logging::LogLevels;
+
+static const char *TAG = "Audio";
 
 Audio::Audio(Game &G) : G(G), sounds(m_sounds) {
   if (!GlobalProperties::IsSoundEnabled)
@@ -21,8 +27,8 @@ Audio::Audio(Game &G) : G(G), sounds(m_sounds) {
 
   ALboolean enumeration = alcIsExtensionPresent(nullptr, "ALC_ENUMERATION_EXT");
   if (enumeration == AL_FALSE) {
-    getDebugStream() <<
-      "OpenAL device enumeration unsupported. The default device will be used." << std::endl;
+    Log(Info, TAG) <<
+        "OpenAL device enumeration unsupported. The default device will be used.";
   } else {
     const ALCchar *devices = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
     const ALCchar *device = devices, *next = devices + 1;
@@ -34,13 +40,13 @@ Audio::Audio(Game &G) : G(G), sounds(m_sounds) {
       device += (len + 1);
       next += (len + 2);
     }
-    getDebugStream() << oss.str() << std::endl;
+    Log(Info, TAG) << oss.str();
   }
 
   const ALCchar *deviceName = nullptr;
   m_audioDevice = alcOpenDevice(deviceName);
   if (!m_audioDevice) {
-    getDebugStream() << "Failed opening AL device '" << deviceName << "': " << alcGetError(m_audioDevice) << std::endl;
+    Log(Error, TAG) << "Failed opening AL device '" << deviceName << "': " << alcGetError(m_audioDevice);
     GlobalProperties::IsSoundEnabled = false;
   }
   deviceName = alcGetString(m_audioDevice, ALC_DEVICE_SPECIFIER);
@@ -48,8 +54,7 @@ Audio::Audio(Game &G) : G(G), sounds(m_sounds) {
   int alMajor, alMinor;
   alcGetIntegerv(nullptr, ALC_MAJOR_VERSION, 1, &alMajor);
   alcGetIntegerv(nullptr, ALC_MINOR_VERSION, 1, &alMinor);
-  getDebugStreamRaw() << "OpenAL " << alMajor << '.' << alMinor << " -- Device '" << deviceName <<
-    '\'' << std::endl;
+  Log(Info, TAG) << "OpenAL " << alMajor << '.' << alMinor << " -- Device '" << deviceName << '\'';
 
   ALCint attrs[] = {
     0, 0
@@ -57,7 +62,8 @@ Audio::Audio(Game &G) : G(G), sounds(m_sounds) {
 
   m_audioContext = alcCreateContext(m_audioDevice, attrs);
   if (!alcMakeContextCurrent(m_audioContext)) {
-    getDebugStream() << "Failed setting context on AL device '" << deviceName << "': " << alcGetError(m_audioDevice) << std::endl;
+    Log(Error, TAG) << "Failed setting context on AL device '" << deviceName << "': " <<
+        alcGetError(m_audioDevice);
     alcCloseDevice(m_audioDevice);
     GlobalProperties::IsSoundEnabled = false;
   }
