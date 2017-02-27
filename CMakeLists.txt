@@ -35,6 +35,10 @@ add_definitions(-DGLM_FORCE_RADIANS)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -ffast-math")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall") # -Wextra")
 
+# Compile as Position Independent Executable, enabling ASLR
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -pie")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -pie")
+
 # Define __FILENAME__ as the currently compiled filename
 string(FIND "${CMAKE_GENERATOR}" "Makefiles" GENERATOR_MAKEFILES)
 if (NOT "${GENERATOR_MAKEFILES}" EQUAL "-1")
