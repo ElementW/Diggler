@@ -8,8 +8,8 @@ namespace Diggler {
 namespace UI {
 
 bool Element::Area::isIn(int x, int y) const {
-  return x >= this->x && x <= (this->x + this->w) &&
-         y >= this->y && y <= (this->y + this->h);
+  return x >= this->x && x < (this->x + this->w) &&
+         y >= this->y && y < (this->y + this->h);
 }
 
 
