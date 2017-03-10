@@ -14,7 +14,7 @@ GLint Skybox::RenderProgram_uni_mvp = -1;
 
 Skybox::Skybox(Game *G, const std::string &skyName) : G(G) {
   if (RenderProgram == nullptr) {
-    RenderProgram = G->PM->getProgram(PM_3D | PM_TEXTURED);
+    RenderProgram = G->PM->getProgram("3d", "texture0", "texcoord0");
     RenderProgram_attrib_coord = RenderProgram->att("coord");
     RenderProgram_attrib_texcoord = RenderProgram->att("texcoord");
     RenderProgram_uni_mvp = RenderProgram->uni("mvp");

@@ -26,7 +26,7 @@ GLFontRenderer::GLTextBuffer::~GLTextBuffer() {
 
 GLFontRenderer::GLFontRenderer(Game *G) :
   G(G) {
-  prog = G->PM->getProgram(PM_2D | PM_TEXTURED | PM_COLORED);
+  prog = G->PM->getProgram("2d", "texture0", "texcord0", "color0");
   att_coord = prog->att("coord");
   att_texcoord = prog->att("texcoord");
   att_color = prog->att("color");

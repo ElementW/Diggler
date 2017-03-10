@@ -30,14 +30,14 @@ Manager::Manager() :
 void Manager::setup(Game *G) {
   this->G = G;
   if (R.prog == nullptr) {
-    R.prog = G->PM->getProgram(PM_2D | PM_TEXTURED);
+    R.prog = G->PM->getProgram("2d", "texture0", "texcoord0");
     R.att_texcoord = R.prog->att("texcoord");
     R.att_coord = R.prog->att("coord");
     R.uni_mvp = R.prog->uni("mvp");
     R.uni_unicolor = R.prog->uni("unicolor");
   }
   if (RR.prog == nullptr) {
-    RR.prog = G->PM->getProgram(PM_2D);
+    RR.prog = G->PM->getProgram("2d");
     RR.att_coord = RR.prog->att("coord");
     RR.uni_mvp = RR.prog->uni("mvp");
     RR.uni_unicolor = RR.prog->uni("unicolor");

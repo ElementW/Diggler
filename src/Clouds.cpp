@@ -14,7 +14,7 @@ Clouds::Renderer Clouds::R = {0};
 
 Clouds::Clouds(Game *G, int w, int h, int layers) : m_layers(layers), G(G) {
   if (R.prog == nullptr) {
-    R.prog = G->PM->getProgram(PM_3D | PM_FOG | PM_TEXTURED | PM_TEXSHIFT | PM_DISCARD);
+    R.prog = G->PM->getProgram("3d", "fog0", "texture0", "tecoord0", "texshift0", "discard");
     R.att_coord = R.prog->att("coord");
     R.att_texcoord = R.prog->att("texcoord");
     R.uni_texshift = R.prog->uni("texshift");

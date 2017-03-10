@@ -210,7 +210,7 @@ void LocalPlayer::render(const glm::mat4 &transform) const {
     { min.x, min.y, max.z, 0, 1, 0 },
   };
   vbo.setDataGrow(pts, sizeof(pts)/sizeof(Coord), GL_STREAM_DRAW);
-  const Render::gl::Program &P = *G->PM->getProgram(PM_3D | PM_COLORED);
+  const Render::gl::Program &P = *G->PM->getProgram("3d", "color0");
   if (!vaoConfigured) {
     vaoConfigured = true;
     Render::gl::VAO::Config cfg = vao.configure();

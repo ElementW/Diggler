@@ -21,7 +21,7 @@ Chatbox::Chatbox(Game *G) : m_isChatting(false), G(G),
   m_chatText = G->UIM->addManual<UI::Text>("", 2, 2);
   m_chatText->setPos(0, 0);
   if (RenderProgram == nullptr) {
-    RenderProgram = G->PM->getProgram(PM_2D | PM_COLORED);
+    RenderProgram = G->PM->getProgram("2d", "color0");
     RenderProgram_coord = RenderProgram->att("coord");
     RenderProgram_color = RenderProgram->att("color");
     RenderProgram_mvp = RenderProgram->uni("mvp");

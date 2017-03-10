@@ -35,7 +35,7 @@ public:
 
   /**
    * Set shaders' prelude lines
-   * @see Shader::setDefines(const std::vector<std::string>&);
+   * @see Shader::setPreludeLines(const std::vector<std::string>&);
    */
   void setPreludeLines(const std::vector<std::string>&);
 

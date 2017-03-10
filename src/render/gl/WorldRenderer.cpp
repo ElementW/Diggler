@@ -28,10 +28,10 @@ GLWorldRenderer::~GLWorldRenderer() {
 
 void GLWorldRenderer::loadShader() {
   bool w = G->RP->wavingLiquids;
-  ProgramManager::FlagsT flags = PM_3D | PM_TEXTURED | PM_COLORED | PM_FOG;
+  std::set<std::string> enables = { "texture0", "texcoord0", "color0", "fog0" };
   if (w)
-    flags |= PM_WAVE;
-  prog = G->PM->getProgram(flags);
+    enables.insert("wave");
+  prog = G->PM->getProgram("3d", enables);
   att_coord = prog->att("coord");
   att_color = prog->att("color");
   att_texcoord = prog->att("texcoord");

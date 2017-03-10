@@ -22,7 +22,7 @@ Player::Player(Game *G) :
   peer(nullptr) {
   if (GlobalProperties::IsClient) {
     if (R.prog == nullptr) {
-      R.prog = G->PM->getProgram(PM_3D | PM_FOG);
+      R.prog = G->PM->getProgram("3d", "fog0");
       R.att_coord = R.prog->att("coord");
       R.uni_mvp = R.prog->uni("mvp");
       R.uni_unicolor = R.prog->uni("unicolor");

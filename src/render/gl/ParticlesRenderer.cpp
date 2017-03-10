@@ -13,7 +13,7 @@ using GLParticle = ParticleEmitter::ParticleRenderData;
 
 GLParticlesRenderer::GLParticlesRenderer(Game *G) :
   G(G) {
-  prog = G->PM->getProgram(PM_3D | PM_POINTSIZE | PM_COLORED | PM_FOG);
+  prog = G->PM->getProgram("3d", "pointSize", "color0", "fog0");
   att_coord = prog->att("coord");
   att_color = prog->att("color");
   //att_texcoord = prog->att("texcoord");

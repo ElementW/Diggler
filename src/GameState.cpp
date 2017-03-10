@@ -94,7 +94,7 @@ GameState::GameState(GameWindow *GW) :
     1.0f,-1.0f, 1.0f, 
   };
   m_highlightBox.vbo.setData(coords, 6*3*2*3);
-  m_highlightBox.program = G->PM->getProgram(PM_3D);
+  m_highlightBox.program = G->PM->getProgram("3d");
   m_highlightBox.att_coord = m_highlightBox.program->att("coord");
   m_highlightBox.uni_unicolor = m_highlightBox.program->uni("unicolor");
   m_highlightBox.uni_mvp = m_highlightBox.program->uni("mvp");
@@ -108,7 +108,7 @@ GameState::GameState(GameWindow *GW) :
   m_3dRenderVBO = new Render::gl::VBO();
   m_clouds = new Clouds(G, 32, 32, 4);
   //m_sky = new Skybox(G, getAssetPath("alpine"));
-  m_3dFboRenderer = G->PM->getProgram(PM_2D | PM_TEXTURED); //getSpecialProgram("effect3dRender");
+  m_3dFboRenderer = G->PM->getProgram("2d", "texture0", "texcoord0"); //getSpecialProgram("effect3dRender");
   m_3dFboRenderer_coord = m_3dFboRenderer->att("coord");
   m_3dFboRenderer_texcoord = m_3dFboRenderer->att("texcoord");
   m_3dFboRenderer_mvp = m_3dFboRenderer->uni("mvp");
@@ -141,7 +141,7 @@ GameState::Bloom::Bloom(Game &G) {
   extractor.fbo = new Render::gl::FBO(G.GW->getW()/scale, G.GW->getH()/scale, Texture::PixelFormat::RGBA);
   extractor.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
   extractor.fbo->tex->setWrapping(Texture::Wrapping::ClampEdge);
-  extractor.prog = G.PM->getSpecialProgram("bloomExtractor");
+  extractor.prog = G.PM->getProgram("bloomExtractor");
   extractor.att_coord = extractor.prog->att("coord");
   extractor.att_texcoord = extractor.prog->att("texcoord");
   extractor.uni_mvp = extractor.prog->uni("mvp");
@@ -149,7 +149,7 @@ GameState::Bloom::Bloom(Game &G) {
   renderer.fbo = new Render::gl::FBO(G.GW->getW()/scale, G.GW->getH()/scale, Texture::PixelFormat::RGBA);
   renderer.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
   renderer.fbo->tex->setWrapping(Texture::Wrapping::ClampEdge);
-  renderer.prog = G.PM->getSpecialProgram("bloom");
+  renderer.prog = G.PM->getProgram("bloom");
   renderer.att_coord = renderer.prog->att("coord");
   renderer.att_texcoord = renderer.prog->att("texcoord");
   renderer.uni_mvp = renderer.prog->uni("mvp");
