@@ -4,14 +4,14 @@
 
 namespace Diggler {
 
-void Frustum::setCamInternals(vec3ct rad, vec3ct ratio, vec3ct nearD, vec3ct farD) {
+void Frustum::setCamInternals(vec3vt rad, vec3vt ratio, vec3vt nearD, vec3vt farD) {
   this->ratio = ratio;
   this->angle = rad;
   this->nearD = nearD;
   this->farD = farD;
 
   // Compute ALL the things
-  tang = std::tan(rad * static_cast<vec3ct>(.5));
+  tang = std::tan(rad * static_cast<vec3vt>(.5));
   nh = nearD * tang;
   nw = nh * ratio;
   fh = farD  * tang;
@@ -53,13 +53,13 @@ void Frustum::setCamDef(const vec3 &p, const vec3 &l, const vec3 &u) {
 
 bool Frustum::pointInFrustum(const vec3& p) const {
   for(int i=0; i < 6; i++) {
-    if (pl[i].distance(p) < static_cast<vec3ct>(0))
+    if (pl[i].distance(p) < static_cast<vec3vt>(0))
       return false;
   }
   return true;
 }
 
-bool Frustum::sphereInFrustum(const vec3 &p, vec3ct radius) const {
+bool Frustum::sphereInFrustum(const vec3 &p, vec3vt radius) const {
   for(int i=0; i < 6; i++) {
     if (pl[i].distance(p) < -radius)
       return false;
