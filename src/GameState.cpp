@@ -612,6 +612,7 @@ void GameState::updateUI() {
             maxChunkMem += Chunk::AllocaSize;
           }
         }
+    constexpr auto CX = Chunk::CX, CY = Chunk::CY, CZ = Chunk::CZ;
     std::ostringstream oss;
     oss << std::setprecision(3) <<
       "HP: " << LP.health << std::endl <<
@@ -625,7 +626,7 @@ void GameState::updateUI() {
         std::endl <<
       "Pointing at: " << LP.W->getBlockId(m_pointedBlock.x, m_pointedBlock.y, m_pointedBlock.z) <<
         " @ " << m_pointedBlock.x << ' ' << m_pointedBlock.y << ' ' << m_pointedBlock.z <<
-      " C: " << divrd(m_pointedBlock.x, CX) << ' ' << divrd(m_pointedBlock.y, CZ) << ' ' <<
+      " C: " << divrd(m_pointedBlock.x, CX) << ' ' << divrd(m_pointedBlock.y, CY) << ' ' <<
         divrd(m_pointedBlock.z, CZ) << std::endl <<
       "RX: " << G->H.getRxBytes() << std::endl <<
       "TX: " << G->H.getTxBytes() << std::endl <<

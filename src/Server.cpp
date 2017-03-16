@@ -253,6 +253,7 @@ void Server::handlePlayerMapUpdate(InMessage &msg, Player &plr) {
   // TODO: distance & tool check, i.e. legitimate update
   using namespace Net::MsgTypes;
   using S = BlockUpdateSubtype;
+  constexpr auto CX = Chunk::CX, CY = Chunk::CY, CZ = Chunk::CZ;
   switch (msg.getSubtype<S>()) {
     case S::Notify: {
       ; // No-op

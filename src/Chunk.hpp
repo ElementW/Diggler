@@ -30,9 +30,6 @@ struct BlockUpdateNotify;
 }
 }
 
-
-constexpr int CX = 16, CY = 16, CZ = 16;
-
 class Chunk {
 private:
   friend World;
@@ -41,6 +38,15 @@ private:
   uintptr_t rendererData;
 
 public:
+  constexpr static int
+    CX = 16, /**< Chunk size along X axis, in blocks. */
+    CY = 16, /**< Chunk size along Y axis, in blocks. */
+    CZ = 16; /**< Chunk size along Z axis, in blocks. */
+  constexpr static float CullSphereRadius =
+    (CZ > (CX > CY ? CX : CY) ? CZ : (CX > CY ? CX : CY));
+    // * 1.4142135623f; but we're already at 2x the radius (i.e. diameter)
+  constexpr static float MidX = CX/2.f, MidY = CY/2.f, MidZ = CZ/2.f;
+
   const int wcx, wcy, wcz;
 
   struct Data {
@@ -56,11 +62,11 @@ public:
   constexpr static int AllocaSize = sizeof(Data);
 
   enum class State : uint8 {
-    Unavailable,
-    Generating,
-    Loading,
-    Ready,
-    Evicted
+    Unavailable, /**< The Chunk is unavailable right now. */
+    Generating, /**< The Chunk is generating. */
+    Loading, /**< The Chunk is loading from storage or network. */
+    Ready, /**< The Chunk is loaded properly and ready to use. */
+    Evicted /**< The Chunk has been evicted from memory. */
   };
 
   struct Vertex {
@@ -93,10 +99,6 @@ public:
   void imcUncompress();
 #endif
 
-  constexpr static float CullSphereRadius =
-    (CZ > (CX > CY ? CX : CY) ? CZ : (CX > CY ? CX : CY));
-    // * 1.4142135623f; but we're already at 2x the radius (i.e. diameter)
-  constexpr static float MidX = CX/2.f, MidY = CY/2.f, MidZ = CZ/2.f;
   uint blkMem;
   State getState();
 
@@ -125,6 +127,10 @@ public:
 
   /* ============ Getters ============ */
 
+  /**
+   * @brief Get the World in which this Chunk resides.
+   * @return Reference to belonging World.
+   */
   inline WorldRef getWorld() const {
     return W;
   }
@@ -133,27 +139,45 @@ public:
     return glm::ivec3(wcx, wcy, wcz);
   }
 
-  ///
-  /// @returns The block ID at specified location.
-  ///
+  /**
+   * @brief Get the block ID at specified location.
+   * @param x X block coordinate within the Chunk.
+   * @param y Y block coordinate within the Chunk.
+   * @param z Z block coordinate within the Chunk.
+   * @return The block ID at specified location.
+   */
   BlockId getBlockId(int x, int y, int z);
 
-  ///
-  /// @returns Block's data integer.
-  ///
+  /**
+   * @brief Get the block data at specified location.
+   * @param x X block coordinate within the Chunk.
+   * @param y Y block coordinate within the Chunk.
+   * @param z Z block coordinate within the Chunk.
+   * @return Block's data integer.
+   */
   BlockData getBlockData(int x, int y, int z);
 
-  ///
-  /// @returns `true` if block has extdata, `false` otherwise.
-  ///
+  /**
+   * @brief Get if the block has extdata.
+   * @param x X block coordinate within the Chunk.
+   * @param y Y block coordinate within the Chunk.
+   * @param z Z block coordinate within the Chunk.
+   * @return `true` if block has extdata, `false` otherwise.
+   */
   bool blockHasExtdata(int x, int y, int z);
-  ///
-  /// @brief Gets a block's extdata.
-  /// Gets a block's extdata store,  to save advanced state values.
-  /// @returns Block's extdata.
-  /// @throws NoExtdataOnBlock if the targeted block doesn't have extdata
-  ///
-  // TODO msgpack::object& getBlockExtdata(int x, int y, int z);
+
+#if 0
+  /**
+   * @brief Gets a block's extdata.
+   * Gets a block's extdata store,  to save advanced state values.
+   * @param x
+   * @param y
+   * @param z
+   * @return Block's extdata.
+   * @throws NoExtdataOnBlock if the targeted block doesn't have extdata
+   */
+  goodform::object& getBlockExtdata(int x, int y, int z);
+#endif
 
   bool isDirty() const {
     return dirty;
@@ -161,19 +185,32 @@ public:
 
   /* ============ Setters ============ */
 
-  ///
-  /// @brief Sets the block at specified location, replacing its ID and data.
-  ///
+  /**
+   * @brief Set the block at specified location, replacing its ID and data.
+   * @param x X block coordinate within the Chunk.
+   * @param y Y block coordinate within the Chunk.
+   * @param z Z block coordinate within the Chunk.
+   * @param id Block ID to set.
+   * @param data Block data to set.
+   */
   void setBlock(int x, int y, int z, BlockId id, BlockData data = 0);
 
-  ///
-  /// @brief Sets the block ID at specified location, keeping its (meta)data.
-  ///
+  /**
+   * @brief Set the block ID at specified location, keeping its (meta)data.
+   * @param x X block coordinate within the Chunk.
+   * @param y Y block coordinate within the Chunk.
+   * @param z Z block coordinate within the Chunk.
+   * @param id Block ID to set.
+   */
   void setBlockId(int x, int y, int z, BlockId id);
 
-  ///
-  /// @brief Sets the block data at specified location, keeping its ID.
-  ///
+  /**
+   * @brief Set the block data at specified location, keeping its ID.
+   * @param x X block coordinate within the Chunk.
+   * @param y Y block coordinate within the Chunk.
+   * @param z Z block coordinate within the Chunk.
+   * @param data Block data to set.
+   */
   void setBlockData(int x, int y, int z, BlockData data);
 
   // Copies extdata tree
@@ -183,10 +220,10 @@ public:
 
   void notifyChange(int x, int y, int z);
 
-  ///
-  /// @brief Marks chunk as dirty.
-  /// Marks chunk as dirty so it is re-rendered.
-  ///
+  /**
+   * @brief Marks chunk as dirty.
+   * Marks chunk as dirty so it is re-rendered.
+   */
   void markAsDirty();
 
   void updateClient();

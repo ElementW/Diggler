@@ -83,10 +83,10 @@ public:
   ///
   ChunkRef getChunk(int cx, int cy, int cz);
   inline ChunkRef getChunkAtCoords(int x, int y, int z) {
-    return getChunk(divrd(x, CX), divrd(y, CY), divrd(z, CZ));
+    return getChunk(divrd(x, Chunk::CX), divrd(y, Chunk::CY), divrd(z, Chunk::CZ));
   }
   inline ChunkRef getChunkAtCoords(const glm::ivec3 &v) {
-    return getChunk(divrd(v.x, CX), divrd(v.y, CY), divrd(v.z, CZ));
+    return getChunk(divrd(v.x, Chunk::CX), divrd(v.y, Chunk::CY), divrd(v.z, Chunk::CZ));
   }
 
   ///
@@ -97,10 +97,10 @@ public:
   ///
   ChunkRef getLoadChunk(int cx, int cy, int cz);
   inline ChunkRef getLoadChunkAtCoords(int x, int y, int z) {
-    return getLoadChunk(divrd(x, CX), divrd(y, CY), divrd(z, CZ));
+    return getLoadChunk(divrd(x, Chunk::CX), divrd(y, Chunk::CY), divrd(z, Chunk::CZ));
   }
   inline ChunkRef getLoadChunkAtCoords(const glm::ivec3 &v) {
-    return getLoadChunk(divrd(v.x, CX), divrd(v.y, CY), divrd(v.z, CZ));
+    return getLoadChunk(divrd(v.x, Chunk::CX), divrd(v.y, Chunk::CY), divrd(v.z, Chunk::CZ));
   }
 
   ///

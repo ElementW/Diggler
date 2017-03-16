@@ -34,9 +34,9 @@ static const char *TAG = "Chunk";
 constexpr float Chunk::CullSphereRadius;
 constexpr float Chunk::MidX, Chunk::MidY, Chunk::MidZ;
 
-static constexpr int CXY = CX*CY;
+static constexpr int CXY = Chunk::CX*Chunk::CY;
 static constexpr int I(int x, int y, int z) {
-  return x + y*CX + z*CXY;
+  return x + y*Chunk::CX + z*CXY;
 }
 
 void Chunk::Data::clear() {

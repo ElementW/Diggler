@@ -276,7 +276,7 @@ void LocalPlayer::jump() {
 
 bool LocalPlayer::raytracePointed(glm::ivec3 *pointed, glm::ivec3 *facing) {
   // TODO: renderdistance
-  return raytracePointed(CX*2, pointed, facing);
+  return raytracePointed(Chunk::CX*2, pointed, facing);
 }
 
 bool LocalPlayer::raytracePointed(float range, glm::ivec3 *pointed, glm::ivec3 *facing) {

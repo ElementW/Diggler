@@ -69,6 +69,7 @@ void CaveGenerator::Generate(WorldRef wr, const GenConf &gc, ChunkRef cr) {
       c.setBlock(x, y, CZ-1, Content::BlockUnknownId);
     }*/
 
+  constexpr auto CX = Chunk::CX, CY = Chunk::CY, CZ = Chunk::CZ;
   const glm::ivec3 cp = c.getWorldChunkPos() * glm::ivec3(CX, CY, CZ);
   for (int ly = 0; ly < CY; ++ly) {
     int y = cp.y + ly;

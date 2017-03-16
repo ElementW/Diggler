@@ -109,6 +109,8 @@ ChunkRef World::getLoadChunk(int cx, int cy, int cz) {
 }
 
 
+constexpr auto CX = Chunk::CX, CY = Chunk::CY, CZ = Chunk::CZ;
+
 bool World::setBlock(int x, int y, int z, BlockId id, BlockData data) {
   iterator it = find(glm::ivec3(divrd(x, CX), divrd(y, CY), divrd(z, CZ)));
   if (it != end()) {

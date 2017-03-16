@@ -13,6 +13,7 @@ using namespace Net::MsgTypes;
 bool BlockUpdateHandler::handle(GameState &GS, InMessage &msg) {
   // TODO handle that in Chunk's ChangeHelper
   using S = BlockUpdateSubtype;
+  constexpr auto CX = Chunk::CX, CY = Chunk::CY, CZ = Chunk::CZ;
   switch (msg.getSubtype<S>()) {
     case S::Notify: {
       BlockUpdateNotify bun;

@@ -100,7 +100,7 @@ void GLWorldRenderer::render(RenderParams &rp) {
         c->imcCompress();
 #endif
       ChunkEntry &ce = *reinterpret_cast<ChunkEntry*>(getRendererData(c.get()));
-      glm::vec3 translate(pos.x * CX, pos.y * CY, pos.z * CZ);
+      glm::vec3 translate(pos.x * Chunk::CX, pos.y * Chunk::CY, pos.z * Chunk::CZ);
       if (rp.frustum.sphereInFrustum(translate + cShift, Chunk::CullSphereRadius)) {
         chunkTransform = glm::translate(rp.transform, translate);
 #if SHOW_CHUNK_UPDATES
