@@ -25,6 +25,7 @@ AUTOLINK_SUPPORT       = YES
 BUILTIN_STL_SUPPORT    = YES
 
 INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/src
+RECURSIVE              = YES
 
 DOCSET_FEEDNAME        = "Doxygen generated docs"
 
