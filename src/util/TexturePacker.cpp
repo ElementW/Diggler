@@ -7,6 +7,8 @@
 
 #include <stb_image.h>
 
+#include "../Game.hpp"
+#include "../render/Renderer.hpp"
 #include "../Texture.hpp"
 #include "BitmapDumper.hpp"
 #include "Log.hpp"
@@ -19,9 +21,9 @@ using namespace std;
 #endif
 
 namespace Diggler {
+namespace Util {
 
-using Util::Log;
-using namespace Util::Logging::LogLevels;
+using namespace Logging::LogLevels;
 
 static const char *TAG = "TexturePacker";
 
@@ -67,20 +69,18 @@ static void HSVtoRGB(float h, float s, float v, float &r, float &g, float &b) {
   b += m;
 }
 
-TexturePacker::TexturePacker(uint w, uint h) :
+TexturePacker::TexturePacker(Game &G, uint w, uint h) :
   atlasWidth(w), atlasHeight(h), m_freezeTexUpdate(false) {
   if (w <= 2 || h <= 2)
     throw std::invalid_argument("Bad dimensions");
 
-  atlasData = new uint8[w * h * 4];
-  memset(atlasData, 0, w * h * 4);
-  atlasTex = new Texture(w, h, Texture::PixelFormat::RGBA);
+  atlasData = std::make_unique<uint8[]>(w * h * 4);
+  memset(atlasData.get(), 0, w * h * 4);
+  atlasTex = G.R->textureManager->createTexture(w, h, PixelFormat::RGBA);
   updateTex();
 }
 
 TexturePacker::~TexturePacker() {
-  delete atlasTex;
-  delete[] atlasData;
 }
 
 TexturePacker::Coord TexturePacker::add(const std::string& path) {
@@ -223,8 +223,10 @@ TexturePacker::Coord TexturePacker::add(int width, int height, int channels, con
 void TexturePacker::updateTex() {
   if (m_freezeTexUpdate)
     return;
-  atlasTex->setTexture(atlasData, Texture::PixelFormat::RGBA);
-   BitmapDumper::dumpAsPpm(atlasWidth, atlasHeight, atlasData, "/tmp/diggler_atlas.ppm");
+  auto atlasCopy = std::make_unique<uint8[]>(atlasWidth * atlasHeight * 4);
+  std::memcpy(atlasCopy.get(), atlasData.get(), atlasWidth * atlasHeight * 4);
+  atlasTex->setTexture(std::move(atlasCopy), PixelFormat::RGBA);
+  // BitmapDumper::dumpAsPpm(atlasWidth, atlasHeight, atlasData, "/tmp/diggler_atlas.ppm");
 }
 
 void TexturePacker::freezeTexUpdate(bool f) {
@@ -233,8 +235,5 @@ void TexturePacker::freezeTexUpdate(bool f) {
     updateTex();
 }
 
-const Texture* TexturePacker::getAtlas() {
-  return atlasTex;
 }
-
 }

@@ -135,6 +135,10 @@ public:
     return W;
   }
 
+  /**
+   * @brief Get this Chunk's position in the World.
+   * @return Chunk's position in the World.
+   */
   inline glm::ivec3 getWorldChunkPos() const {
     return glm::ivec3(wcx, wcy, wcz);
   }
@@ -231,8 +235,8 @@ public:
 
   /* ============ Serialization ============ */
 
-  void write(OutStream&) const;
-  void read(InStream&);
+  void write(IO::OutStream&) const;
+  void read(IO::InStream&);
 };
 
 using ChunkRef = std::shared_ptr<Chunk>;

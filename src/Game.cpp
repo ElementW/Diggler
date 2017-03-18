@@ -35,7 +35,6 @@ Game::Game() :
 }
 
 void Game::init() {
-  CR = new Content::Registry;
   AM = std::make_unique<Content::AssetManager>(this);
   MM = std::make_unique<Content::ModManager>(this);
   LS = new Scripting::Lua::State(this);
@@ -57,6 +56,7 @@ void Game::initClient() {
     RP->fogEnd = 24;
   }
   R = new Render::gl::GLRenderer(this);
+  CR = new Content::Registry(*this);
   FM = std::make_unique<UI::FontManager>(*this);
   A = new Audio(*this);
   KB = new KeyBinds;
@@ -65,6 +65,7 @@ void Game::initClient() {
 }
 
 void Game::initServer() {
+  CR = new Content::Registry(*this);
 }
 
 void Game::finalize() {

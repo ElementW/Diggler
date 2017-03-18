@@ -6,7 +6,10 @@
 // https://bugzilla.redhat.com/show_bug.cgi?id=130601
 #ifndef _SYS_SYSMACROS_H
   #define _SYS_SYSMACROS_H 1
-#else
+  #define _SYS_SYSMACROS_H_OUTER 1
+#endif
+
+#ifdef major
   #undef major
   #undef minor
   #undef makedev

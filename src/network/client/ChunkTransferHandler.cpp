@@ -22,7 +22,7 @@ bool ChunkTransferHandler::handle(GameState &GS, InMessage &msg) {
       for (const ChunkTransferResponse::ChunkData &cd : ctr.chunks) {
         ChunkRef c = GS.G->U->getLoadWorld(cd.worldId)->getNewEmptyChunk(
           cd.chunkPos.x, cd.chunkPos.y, cd.chunkPos.z);
-        InMemoryStream ims(cd.data, cd.dataLength);
+        IO::InMemoryStream ims(cd.data, cd.dataLength);
         c->read(ims);
         GS.holdChunksInMem.push_back(c);
       }

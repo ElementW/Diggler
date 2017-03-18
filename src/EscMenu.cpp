@@ -13,6 +13,7 @@
 namespace Diggler {
 
 struct EscMenu::MenuEntryImpl {
+  Area inputArea;
   std::shared_ptr<UI::Text> txtText;
 };
 
@@ -29,9 +30,35 @@ EscMenu::~EscMenu() {
 
 }
 
+void EscMenu::refresh() {
+  int y = inputArea().h;
+  y -= txtMenuTitle->getSize().y;
+
+  for (const MenuEntry &me : entries) {
+    const int dec = (me.impl->txtText->getSize().y * 3) / 2;
+    y -= dec;
+    me.impl->inputArea = Area(0, y, inputArea().w, dec);
+  }
+}
+
 void EscMenu::addMenuEntry(const std::string &text) {
   entries.emplace_back(MenuEntry { text, std::make_unique<MenuEntryImpl>() });
   entries.back().impl->txtText = G->UIM->addManual<UI::Text>(text, 2, 2);
+  refresh();
+}
+
+void EscMenu::onCursorMove(int x, int y) {
+  cursorIn = true;
+  cursorX = x;
+  cursorY = y;
+}
+
+void EscMenu::onCursorLeave(int, int) {
+  cursorIn = false;
+}
+
+void EscMenu::onInputAreaChanged() {
+  refresh();
 }
 
 void EscMenu::setVisible(bool v) {
@@ -71,7 +98,12 @@ void EscMenu::render(const glm::mat4 &baseMatrix) const {
   txtMenuTitle->render(matrix);
 
   for (const MenuEntry &me : entries) {
-    y -= (me.impl->txtText->getSize().y * 3) / 2;
+    if (cursorIn and me.impl->inputArea.isIn(cursorX, cursorY)) {
+      G->UIM->drawRect(baseMatrix, me.impl->inputArea,
+          glm::vec4(1.f, 0.f, 0.f, 0.8f));
+    }
+    const int height = me.impl->txtText->getSize().y;
+    y -= (height * 3) / 2;
     matrix = glm::translate(baseMatrix, glm::vec3(pxScroll, y, 0));
     me.impl->txtText->render(matrix);
   }

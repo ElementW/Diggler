@@ -13,14 +13,14 @@ using namespace Util::Logging::LogLevels;
 
 static const char *TAG = "FBO";
 
-FBO::FBO(int w, int h, Texture::PixelFormat format, bool stencil) : m_hasStencil(stencil) {
+FBO::FBO(int w, int h, PixelFormat format, bool stencil) : m_hasStencil(stencil) {
   BoundBufferSave<GL_RENDERBUFFER> saveRbo;
   BoundBufferSave<GL_FRAMEBUFFER> saveFbo;
 
   glGetError(); // Flush previous errors
 
   // Set up texture to render color to
-  tex = new Texture(w, h, format);
+  tex = std::make_unique<Texture>(w, h, format);
   glGenFramebuffers(1, &id);
   glBindFramebuffer(GL_FRAMEBUFFER, id);
 
@@ -71,12 +71,13 @@ void FBO::resize(int w, int h) {
   else
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
 
-  tex->resize(w, h);
+  auto format = tex->pixelFormat();
+  tex->setTexture(w, h, std::make_unique<uint8[]>(w * h * PixelFormatByteSize(format)), format);
 }
 
 FBO::~FBO() {
   glDeleteFramebuffers(1, &id);
-  delete tex;
+  tex.reset();
   glDeleteRenderbuffers(1, &rboId);
 }
 

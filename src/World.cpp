@@ -311,7 +311,7 @@ void World::refresh() {
       c->markAsDirty();
 }
 
-void World::write(OutStream &msg) const {
+void World::write(IO::OutStream &msg) const {
   const void *chunkData = nullptr;
   const uint dataSize = Chunk::AllocaSize;
   uint compressedSize;
@@ -339,7 +339,7 @@ void World::write(OutStream &msg) const {
   delete[] compressed;
 }
 
-void World::read(InStream &M) {
+void World::read(IO::InStream &M) {
   int bytesRead = 0;
   uint size = M.readU16();
   for (uint n=0; n < size; ++n) {

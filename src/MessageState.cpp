@@ -6,6 +6,7 @@
 #include "Game.hpp"
 #include "GlobalProperties.hpp"
 #include "Sound.hpp"
+#include "render/Renderer.hpp"
 #include "ui/Manager.hpp"
 #include "ui/Text.hpp"
 
@@ -43,11 +44,14 @@ void MessageState::run() {
     W->G->A->playSound("click-quiet");
   }
   while (!glfwWindowShouldClose(*W)) {
+    W->G->R->beginFrame();
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+
     W->G->UIM->render();
-    
+
+    W->G->R->endFrame();
+
     glfwSwapBuffers(*W);
     glfwPollEvents();
   }

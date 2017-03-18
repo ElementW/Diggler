@@ -29,7 +29,6 @@ protected:
           uni_fogStart,
           uni_fogEnd,
           uni_time;
-  const Texture *TextureAtlas;
 
   struct ChunkEntry {
     VAO vao;

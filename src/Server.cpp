@@ -209,7 +209,7 @@ void Server::schedSendChunk(ChunkRef C, Player &P) {
 void Server::sendChunks(const std::list<ChunkRef> &cs, Player &P) {
   using namespace Net::MsgTypes;
   ChunkTransferResponse ctr;
-  std::vector<OutMemoryStream> chunkBufs(cs.size());
+  std::vector<IO::OutMemoryStream> chunkBufs(cs.size());
   size_t i = 0;
   for (const ChunkRef &cr : cs) {
     ctr.chunks.emplace_back();

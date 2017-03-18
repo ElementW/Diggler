@@ -17,8 +17,8 @@ public:
     Variability variability;
     struct Texture {
       Diggler::Texture *tex;
-      TexturePacker::Coord coord;
-      std::vector<TexturePacker::Coord> divCoords;
+      Util::TexturePacker::Coord coord;
+      std::vector<Util::TexturePacker::Coord> divCoords;
       struct Repeat {
         uint8 xdiv, ydiv;
       } repeat;

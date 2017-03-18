@@ -6,13 +6,17 @@
 #include "Platform.hpp"
 #include "render/gl/Program.hpp"
 #include "render/gl/ProgramManager.hpp"
+#include "render/Renderer.hpp"
 #include "Texture.hpp"
 
 namespace Diggler {
 
 Clouds::Renderer Clouds::R = {0};
 
-Clouds::Clouds(Game *G, int w, int h, int layers) : m_layers(layers), G(G) {
+Clouds::Clouds(Game *G, int w, int h, int layers) :
+  m_tex(layers),
+  m_layers(layers),
+  G(G) {
   if (R.prog == nullptr) {
     R.prog = G->PM->getProgram("3d", "fog0", "texture0", "tecoord0", "texshift0", "discard");
     R.att_coord = R.prog->att("coord");
@@ -21,21 +25,19 @@ Clouds::Clouds(Game *G, int w, int h, int layers) : m_layers(layers), G(G) {
     R.uni_mvp = R.prog->uni("mvp");
   }
 
-  m_tex = new Texture*[m_layers];
-  uint8 *data = new uint8[w * h * 4];
   for (int i=0; i < m_layers; i++) {
+    std::unique_ptr<uint8[]> data = std::make_unique<uint8[]>(w * h * 4);
     for (int x=0; x < w; x++) {
       for (int y=0; y < h; y++) {
         data[(x+y*w)*4+0] = data[(x+y*w)*4+1] = data[(x+y*w)*4+2] = 255;
         data[(x+y*w)*4+3] = (FastRand(0, 255) > 230) ? 180 : 0;
       }
     }
-    m_tex[i] = new Texture(w, h, data, Texture::PixelFormat::RGBA);
+    m_tex[i] = G->R->textureManager->createTexture(w, h, PixelFormat::RGBA, std::move(data));
   }
-  delete[] data;
 
   Coord coords[m_layers * 6];
-  for (int i=0; i < m_layers; i++) {
+  for (int i = 0; i < m_layers; ++i) {
     coords[i*6+2] = {0, i, 0, 0, 0};
     
     coords[i*6+1] = coords[i*6+3] = {0, i, 1, 0, 1};
@@ -69,10 +71,6 @@ void Clouds::render(const glm::mat4 &transform) {
 }
 
 Clouds::~Clouds() {
-  for (int i=0; i < m_layers; i++) {
-    delete m_tex[i];
-  }
-  delete[] m_tex;
 }
 
 }

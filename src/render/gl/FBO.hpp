@@ -3,11 +3,11 @@
 
 #include "../../Platform.hpp"
 
+#include <memory>
 #include <vector>
 
 #include "OpenGL.hpp"
-
-#include "../../Texture.hpp"
+#include "Texture.hpp"
 
 namespace Diggler {
 namespace Render {
@@ -18,10 +18,10 @@ private:
   bool m_hasStencil;
 
 public:
-  Texture *tex;
+  std::unique_ptr<Texture> tex;
   GLuint id, rboId;
 
-  FBO(int w = 640, int h = 480, Texture::PixelFormat format = Texture::PixelFormat::RGB, bool stencil = false);
+  FBO(int w = 640, int h = 480, PixelFormat format = PixelFormat::RGB, bool stencil = false);
   ~FBO();
 
   operator GLuint() const { return id; }

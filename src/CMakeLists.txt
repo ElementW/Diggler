@@ -2,6 +2,7 @@ if(NOT DEFINED DIGGLER_USED_ROOT_CMAKELISTS)
   message(FATAL_ERROR "Please compile using the repo's root CMakeLists.txt")
 endif()
 
+add_subdirectory("content")
 add_subdirectory("render")
 add_subdirectory("scripting")
 
@@ -16,9 +17,6 @@ diggler_add_sources(
   ${CSD}/Clouds.cpp
   ${CSD}/Config.cpp
   ${CSD}/ConnectingState.cpp
-  ${CSD}/content/AssetManager.cpp
-  ${CSD}/content/ModManager.cpp
-  ${CSD}/content/Registry.cpp
   ${CSD}/EscMenu.cpp
   ${CSD}/Frustum.cpp
   ${CSD}/Game.cpp
@@ -71,12 +69,14 @@ diggler_add_sources(
   ${CSD}/ui/Text.cpp
   ${CSD}/Universe.cpp
   ${CSD}/util/BitmapDumper.cpp
+  ${CSD}/util/ColorUtil.cpp
   ${CSD}/util/Encoding.cpp
   ${CSD}/util/Log.cpp
   ${CSD}/util/logging/AnsiConsoleLogger.cpp
   ${CSD}/util/logging/Logger.cpp
   ${CSD}/util/logging/LogInput.cpp
   ${CSD}/util/logging/StdoutLogger.cpp
+  ${CSD}/util/StringUtil.cpp
   ${CSD}/util/TexturePacker.cpp
   ${CSD}/util/Tipsify.cpp
   ${CSD}/World.cpp

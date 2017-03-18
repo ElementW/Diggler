@@ -3,6 +3,7 @@
 
 #include "FontRenderer.hpp"
 #include "ParticlesRenderer.hpp"
+#include "TextureManager.hpp"
 #include "WorldRenderer.hpp"
 
 namespace Diggler {
@@ -26,10 +27,12 @@ public:
   virtual void endFrame() = 0;
 
   struct Renderers {
-    FontRenderer *font;
-    ParticlesRenderer *particles;
-    WorldRenderer *world;
+    std::unique_ptr<FontRenderer> font;
+    std::unique_ptr<ParticlesRenderer> particles;
+    std::unique_ptr<WorldRenderer> world;
   } renderers;
+
+  std::unique_ptr<TextureManager> textureManager;
 };
 
 inline Renderer::~Renderer() {}

@@ -19,7 +19,7 @@ Skybox::Skybox(Game *G, const std::string &skyName) : G(G) {
     RenderProgram_attrib_texcoord = RenderProgram->att("texcoord");
     RenderProgram_uni_mvp = RenderProgram->uni("mvp");
   }
-  m_top = new Texture(skyName + "_up.png");
+  /* m_top = new Texture(skyName + "_up.png");
   m_bottom = new Texture(skyName + "_down.png");
   m_n = new Texture(skyName + "_north.png");
   m_n->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
@@ -28,7 +28,7 @@ Skybox::Skybox(Game *G, const std::string &skyName) : G(G) {
   m_w = new Texture(skyName + "_west.png");
   m_w->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
   m_s = new Texture(skyName + "_south.png");
-  m_s->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
+  m_s->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear); */
   Coord coords[6*6] = {
     // Top
     { -1,  1, -1, 0, 0 },

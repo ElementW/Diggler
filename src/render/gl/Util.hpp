@@ -49,6 +49,18 @@ constexpr GLenum getBinding(GLenum bufferT) {
   return GL_INVALID_ENUM;
 }
 
+struct Bound2DTextureSave {
+  GLuint texture;
+
+  Bound2DTextureSave() {
+    getUInteger(GL_TEXTURE_BINDING_2D, texture);
+  }
+
+  inline ~Bound2DTextureSave() {
+    glBindTexture(GL_TEXTURE_2D, texture);
+  }
+};
+
 template<GLenum BufferT, GLenum BoundBufferT = getBinding(BufferT)>
 struct BoundBufferSave {
   GLuint buffer;

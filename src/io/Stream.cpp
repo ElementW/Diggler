@@ -1,7 +1,29 @@
 #include "Stream.hpp"
+
 #include <stdexcept>
 
+/*
+ * Streams are complex things. They exhibit one or a combination of the following properties:
+ * - Input / Output / Both
+ *   +  Input example : a hardware RNG byte stream.
+ *   + Output example : an outgoing UNIX pipe.
+ * - Tellable : an offset from an index 0 is known.
+ *   +  Input example : a crypto-hash-chain-based PRNG stream.
+ *   + Output example :
+ * - Sized : the amount of data is known. Implies Tellable.
+ *   +  Input example : a non-buffered incoming file.
+ *   + Output example :
+ * - Forward relative seekable : can skip data reading.
+ * - Backward relative seekable : can go back.
+ * - Forward absolute seekable : can go forward anywhere in the stream. Implies Tellable.
+ * - Backward absolute seekable : can go back anywhere in the stream. Implies Tellable.
+ */
+
 namespace Diggler {
+namespace IO {
+
+Stream::~Stream() {
+}
 
 void OutStream::writeString(const std::string &str) {
   if (str.size() > UINT16_MAX)
@@ -132,4 +154,14 @@ double InStream::readDouble() {
   return val;
 }
 
+void InStream::skip(SizeT len) {
+  byte discard[1024];
+  while (len > 0) {
+    SizeT readLen = len > 1024 ? 1024 : len;
+    readData(discard, readLen);
+    len -= readLen;
+  }
+}
+
+}
 }

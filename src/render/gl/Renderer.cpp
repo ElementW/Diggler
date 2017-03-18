@@ -1,9 +1,11 @@
 #include "Renderer.hpp"
 
 #include "../../util/Log.hpp"
+#include "DelegateGL.hpp"
 #include "FeatureSupport.hpp"
 #include "FontRenderer.hpp"
 #include "ParticlesRenderer.hpp"
+#include "TextureManager.hpp"
 #include "WorldRenderer.hpp"
 
 namespace Diggler {
@@ -17,26 +19,26 @@ static const char *TAG = "GLRenderer";
 
 GLRenderer::GLRenderer(Game *G) :
   Renderer(G) {
+  DelegateGL::GLThreadId = std::this_thread::get_id();
   FeatureSupport::probe();
   Log(Verbose, TAG) << "GLRenderer, using features: " << FeatureSupport::supported();
-  renderers.font = new GLFontRenderer(G);
-  renderers.particles = new GLParticlesRenderer(G);
-  renderers.world = new GLWorldRenderer(G);
+  renderers.font = std::make_unique<GLFontRenderer>(G);
+  renderers.particles = std::make_unique<GLParticlesRenderer>(G);
+  renderers.world = std::make_unique<GLWorldRenderer>(G);
+  textureManager = std::make_unique<TextureManager>(*G);
 }
 
 GLRenderer::~GLRenderer() {
-  delete renderers.font;
-  delete renderers.particles;
-  delete renderers.world;
 }
 
 void GLRenderer::beginFrame() {
+  DelegateGL::execute();
   glClearColor(0.0, 0.0, 0.0, 1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void GLRenderer::endFrame() {
-
+  DelegateGL::execute();
 }
 
 }

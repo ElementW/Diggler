@@ -10,6 +10,7 @@
 #include "GlobalProperties.hpp"
 #include "LocalPlayer.hpp"
 #include "network/msgtypes/PlayerJoin.hpp"
+#include "render/Renderer.hpp"
 #include "ui/Manager.hpp"
 #include "ui/Text.hpp"
 #include "util/Log.hpp"
@@ -75,6 +76,8 @@ void ConnectingState::run() {
   while (!finished && !W->shouldClose()) { // Infinite loop \o/
     const double T = glfwGetTime();
     G->updateTime(T);
+
+    G->R->beginFrame();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     txtConnecting->render(textMat);
@@ -85,6 +88,8 @@ void ConnectingState::run() {
         glm::vec3(2.f, 2.f, 1.f));
       txtDot->render(mat);
     }
+
+    G->R->endFrame();
 
     glfwSwapBuffers(*W);
     glfwPollEvents();

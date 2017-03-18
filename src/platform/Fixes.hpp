@@ -1,11 +1,11 @@
 #ifndef DIGGLER_PLATFORM_FIXES
 #define DIGGLER_PLATFORM_FIXES
 
-#ifdef _GNU_SOURCE
+#if defined(__linux__)
+  // No way to detect glibc without importing one of its headers,
+  // assume glibc by default on Linux. :(
   #include "Fixes.glibc.hpp"
-#endif
-
-#ifdef _WIN32
+#elif defined(_WIN32)
   #include "Fixes.windows.hpp"
 #endif
 

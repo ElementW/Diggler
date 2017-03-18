@@ -31,9 +31,6 @@ using namespace Util::Logging::LogLevels;
 
 static const char *TAG = "Chunk";
 
-constexpr float Chunk::CullSphereRadius;
-constexpr float Chunk::MidX, Chunk::MidY, Chunk::MidZ;
-
 static constexpr int CXY = Chunk::CX*Chunk::CY;
 static constexpr int I(int x, int y, int z) {
   return x + y*Chunk::CX + z*CXY;
@@ -294,7 +291,7 @@ void Chunk::updateClient() {
   ushort v = 0, io = 0, it = 0;
 
   BlockId bt, bn /*BlockNear*/;
-  const TexturePacker::Coord *tc;
+  const Util::TexturePacker::Coord *tc;
   for(int8 x = 0; x < CX; x++) {
     for(int8 y = 0; y < CY; y++) {
       for(int8 z = 0; z < CZ; z++) {
@@ -432,7 +429,7 @@ void Chunk::updateClient() {
   mut.unlock();
 }
 
-void Chunk::write(OutStream &os) const {
+void Chunk::write(IO::OutStream &os) const {
   const uint dataSize = Chunk::AllocaSize;
   uint compressedSize;
   byte *compressed = new byte[dataSize];
@@ -451,7 +448,7 @@ void Chunk::write(OutStream &os) const {
   delete[] compressed;
 }
 
-void Chunk::read(InStream &is) {
+void Chunk::read(IO::InStream &is) {
   uint compressedSize = is.readU16();
   const uint targetDataSize = Chunk::AllocaSize;
   byte *compressedData = new byte[compressedSize];

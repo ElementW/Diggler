@@ -22,6 +22,8 @@ enum class FaceDirection : uint8_t {
   ZDec = 5
 };
 
+class Game;
+
 namespace Content {
 
 class Registry {
@@ -57,9 +59,9 @@ private:
   friend class Registration;
 
   // Client
-  TexturePacker *m_texturePacker;
-  const Texture *m_atlas;
-  std::unordered_map<std::string, TexturePacker::Coord> m_textureCoords;
+  Util::TexturePacker *m_texturePacker;
+  std::shared_ptr<Texture> m_atlas;
+  std::unordered_map<std::string, Util::TexturePacker::Coord> m_textureCoords;
 
   // Shared
   BlockIdMap m_blocks;
@@ -74,16 +76,18 @@ private:
   BlockRegistration registerBlock(BlockId id, const char *name);
 
 public:
-  Registry();
+  Registry(Game&);
   ~Registry();
 
   bool isTransparent(BlockId id) const;
   bool isFaceVisible(BlockId id1, BlockId id2) const;
   bool canEntityGoThrough(BlockId id/* , Entity& ent*/) const;
 
-  TexturePacker::Coord addTexture(const std::string &texName, const std::string &path);
-  const TexturePacker::Coord* blockTexCoord(BlockId, FaceDirection, const glm::ivec3&) const;
-  const Texture* getAtlas() const;
+  Util::TexturePacker::Coord addTexture(const std::string &texName, const std::string &path);
+  const Util::TexturePacker::Coord* blockTexCoord(BlockId, FaceDirection, const glm::ivec3&) const;
+  std::shared_ptr<Texture> getAtlas() const {
+    return m_atlas;
+  }
 
   BlockRegistration registerBlock(const char *name);
   void registerMapgen(/* TODO */);

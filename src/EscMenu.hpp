@@ -30,7 +30,9 @@ private:
     std::string text;
     std::unique_ptr<MenuEntryImpl> impl;
   };
+  bool cursorIn; int cursorX, cursorY;
   std::vector<MenuEntry> entries;
+  void refresh();
 
 public:
   EscMenu(UI::Manager*);
@@ -38,6 +40,9 @@ public:
 
   void addMenuEntry(const std::string &text);
 
+  void onCursorMove(int x, int y) override;
+  void onCursorLeave(int x, int y) override;
+  void onInputAreaChanged() override;
   void setVisible(bool) override;
 
   void render(const glm::mat4&) const override;

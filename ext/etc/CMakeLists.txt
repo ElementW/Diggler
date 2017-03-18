@@ -12,7 +12,12 @@ include_directories(${ETC_INCLUDE_DIRS})
 add_library(stb_c_lexer STATIC stb_c_lexer.c)
 
 add_library(stb_image STATIC stb_image.c)
-target_compile_definitions(stb_image PUBLIC -DSTBI_ONLY_PNG -DSTBI_ONLY_JPEG)
+target_compile_definitions(stb_image PUBLIC
+  -DSTBI_ONLY_PNG
+  -DSTBI_ONLY_JPEG
+  # -DSTBI_NO_STDIO
+  -DSTBI_NO_LINEAR
+)
 
 add_library(stb_perlin STATIC stb_perlin.c)
 

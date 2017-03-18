@@ -20,7 +20,6 @@ GLWorldRenderer::GLWorldRenderer(Game *G) :
   WorldRenderer(pointedHighlight),
   G(G) {
   loadShader();
-  TextureAtlas = G->CR->getAtlas();
 }
 
 GLWorldRenderer::~GLWorldRenderer() {
@@ -86,7 +85,7 @@ void GLWorldRenderer::render(RenderParams &rp) {
   glUniform1f(uni_fogStart, G->RP->fogStart);
   glUniform1f(uni_fogEnd, G->RP->fogEnd);
   glUniform1f(uni_time, G->Time);
-  TextureAtlas->bind();
+  G->CR->getAtlas()->bind();
 
   const static glm::vec3 cShift(Chunk::MidX, Chunk::MidY, Chunk::MidZ);
   glm::mat4 chunkTransform;

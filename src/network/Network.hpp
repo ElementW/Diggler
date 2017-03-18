@@ -69,7 +69,7 @@ enum QuitReason : uint8 {
 
 using EventType = uint32;
 
-class Message : public virtual MemoryStream {
+class Message : public virtual IO::MemoryStream {
 protected:
   friend class Host;
   MessageType m_type;
@@ -93,7 +93,7 @@ public:
   inline T getSubtype() const { return static_cast<T>(m_subtype); }
 };
 
-class InMessage : public Message, public InMemoryStream {
+class InMessage : public Message, public IO::InMemoryStream {
 protected:
   friend class Host;
   Channels m_chan;
@@ -120,7 +120,7 @@ public:
   Channels getChannel() const;
 };
 
-class OutMessage : public Message, public OutMemoryStream {
+class OutMessage : public Message, public IO::OutMemoryStream {
 protected:
   friend class Host;
   mutable uint8 *m_actualData;

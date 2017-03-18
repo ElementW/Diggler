@@ -173,8 +173,8 @@ public:
 
   /* ============ Serialization ============ */
 
-  void write(OutStream&) const;
-  void read(InStream&);
+  void write(IO::OutStream&) const;
+  void read(IO::InStream&);
   void send(Net::OutMessage&) const;
   void recv(Net::InMessage&);
 };

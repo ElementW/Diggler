@@ -1,13 +1,17 @@
-#ifndef DIGGLER_TEXTURE_PACKER_HPP
-#define DIGGLER_TEXTURE_PACKER_HPP
-
-#include "../Platform.hpp"
+#ifndef DIGGLER_UTIL_TEXTURE_PACKER_HPP
+#define DIGGLER_UTIL_TEXTURE_PACKER_HPP
 
 #include <memory>
+#include <vector>
+
+#include "../platform/Types.hpp"
+#include "../Texture.hpp"
 
 namespace Diggler {
 
-class Texture;
+class Game;
+
+namespace Util {
 
 class TexturePacker {
 public:
@@ -20,9 +24,9 @@ public:
 private:
   std::unique_ptr<uint8[]> m_defaultTexture;
 
-  uint8 *atlasData;
+  std::unique_ptr<uint8[]> atlasData;
 
-  Texture *atlasTex;
+  std::shared_ptr<Texture> atlasTex;
   bool m_freezeTexUpdate;
   void updateTex();
 
@@ -31,16 +35,19 @@ private:
   TexturePacker& operator=(const TexturePacker&) = delete;
 
 public:
-  TexturePacker(uint w, uint h);
+  TexturePacker(Game&, uint w, uint h);
   ~TexturePacker();
 
   Coord add(const std::string &path);
   Coord add(int width, int height, int channels, const uint8* data);
 
   void freezeTexUpdate(bool);
-  const Texture* getAtlas();
+  const std::shared_ptr<Texture> getAtlas() {
+    return atlasTex;
+  }
 };
 
 }
+}
 
-#endif /* DIGGLER_TEXTURE_PACKER */
+#endif /* DIGGLER_UTIL_TEXTURE_PACKER */

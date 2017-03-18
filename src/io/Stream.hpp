@@ -6,15 +6,25 @@
 #include "../Platform.hpp"
 
 namespace Diggler {
+namespace IO {
 
 class Stream {
 public:
   using SizeT = uint64;
   using PosT = SizeT;
   using OffT = int64;
+
+  virtual ~Stream();
+
+  virtual bool eos() const = 0;
 };
 
-class SeekableStream : public virtual Stream {
+class TellableStream : public virtual Stream {
+public:
+  virtual PosT tell() const = 0;
+};
+
+class SeekableStream : public virtual TellableStream {
 public:
   enum Whence {
     Set,
@@ -22,7 +32,6 @@ public:
     // End
   };
 
-  virtual PosT tell() const = 0;
   virtual void seek(OffT, Whence = Set) = 0;
   inline void seek(PosT pos) {
     seek(static_cast<OffT>(pos), Whence::Set);
@@ -33,8 +42,12 @@ public:
   }
 };
 
-class SizedStream : public virtual SeekableStream {
+class SizedStream : public virtual TellableStream {
 public:
+  virtual bool eos() const override {
+    return remaining() == 0;
+  }
+
   virtual SizeT length() const = 0;
   virtual SizeT remaining() const {
     return length() - tell();
@@ -57,14 +70,22 @@ public:
   virtual float readFloat();
   virtual double readDouble();
   virtual void readData(void *data, SizeT len) = 0;
+  virtual void skip(SizeT len);
 
   // goodform::msgpack compatibility
   bool good() {
-    return true;
+    return not eos();
   }
   goodform::istream& read(char *data, size_t size) {
     readData(data, static_cast<SizeT>(size));
     return *this;
+  }
+};
+
+class InSeekableStream : public virtual InStream, public virtual SeekableStream {
+public:
+  virtual void skip(SizeT len) {
+    seek(len, Whence::Current);
   }
 };
 
@@ -95,6 +116,10 @@ public:
   }
 };
 
+class OutSeekableStream : public virtual OutStream, public virtual SeekableStream {
+};
+
+}
 }
 
 #endif /* DIGGLER_IO_STREAM_HPP */

@@ -11,29 +11,29 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "KeyBinds.hpp"
-#include "GlobalProperties.hpp"
+#include "Audio.hpp"
+#include "CaveGenerator.hpp"
+#include "Chatbox.hpp"
+#include "Clouds.hpp"
+#include "content/Registry.hpp"
+#include "content/texture/TextureLoader.hpp"
+#include "EscMenu.hpp"
 #include "Game.hpp"
+#include "GlobalProperties.hpp"
+#include "KeyBinds.hpp"
+#include "LocalPlayer.hpp"
+#include "network/msgtypes/BlockUpdate.hpp"
+#include "network/msgtypes/PlayerJoin.hpp"
+#include "network/msgtypes/PlayerUpdate.hpp"
+#include "network/NetHelper.hpp"
+#include "Particles.hpp"
 #include "render/gl/FBO.hpp"
 #include "render/gl/ProgramManager.hpp"
 #include "render/Renderer.hpp"
 #include "scripting/lua/State.hpp"
+#include "Skybox.hpp"
 #include "ui/FontManager.hpp"
 #include "ui/Manager.hpp"
-#include "Clouds.hpp"
-#include "Chatbox.hpp"
-#include "CaveGenerator.hpp"
-#include "Skybox.hpp"
-#include "EscMenu.hpp"
-#include "Audio.hpp"
-#include "network/NetHelper.hpp"
-#include "Particles.hpp"
-#include "LocalPlayer.hpp"
-
-#include "network/msgtypes/PlayerJoin.hpp"
-#include "network/msgtypes/PlayerUpdate.hpp"
-#include "network/msgtypes/BlockUpdate.hpp"
-#include "content/Registry.hpp"
 
 using std::unique_ptr;
 
@@ -103,7 +103,7 @@ GameState::GameState(GameWindow *GW) :
     cfg.commit();
   }
 
-  m_3dFbo = new Render::gl::FBO(w, h, Texture::PixelFormat::RGB, true);
+  m_3dFbo = new Render::gl::FBO(w, h, PixelFormat::RGB, true);
   m_3dFbo->tex->setWrapping(Texture::Wrapping::ClampEdge);
   m_3dRenderVBO = new Render::gl::VBO();
   m_clouds = new Clouds(G, 32, 32, 4);
@@ -124,7 +124,8 @@ GameState::GameState(GameWindow *GW) :
   };
   m_3dRenderVBO->setData(renderQuad, 6*sizeof(Coord2DTex));
 
-  m_crossHair.tex = new Texture(getAssetPath("crosshair.png"), Texture::PixelFormat::RGBA);
+  m_crossHair.tex = Content::Texture::TextureLoader::load(*G, Content::Image::ImageFormats::PNG,
+      getAssetPath("crosshair.png"), PixelFormat::RGBA)->texture;
 
   //"\f0H\f1e\f2l\f3l\f4l\f5o \f6d\f7e\f8m\f9b\faa\fbz\fcz\fde\fes\ff,\n\f0ye see,it werks purrfektly :D\n(and also; it's optimized)"
 
@@ -138,7 +139,7 @@ GameState::Bloom::Bloom(Game &G) {
   enable = true;
   scale = 4;
 
-  extractor.fbo = new Render::gl::FBO(G.GW->getW()/scale, G.GW->getH()/scale, Texture::PixelFormat::RGBA);
+  extractor.fbo = new Render::gl::FBO(G.GW->getW()/scale, G.GW->getH()/scale, PixelFormat::RGBA);
   extractor.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
   extractor.fbo->tex->setWrapping(Texture::Wrapping::ClampEdge);
   extractor.prog = G.PM->getProgram("bloomExtractor");
@@ -146,7 +147,7 @@ GameState::Bloom::Bloom(Game &G) {
   extractor.att_texcoord = extractor.prog->att("texcoord");
   extractor.uni_mvp = extractor.prog->uni("mvp");
 
-  renderer.fbo = new Render::gl::FBO(G.GW->getW()/scale, G.GW->getH()/scale, Texture::PixelFormat::RGBA);
+  renderer.fbo = new Render::gl::FBO(G.GW->getW()/scale, G.GW->getH()/scale, PixelFormat::RGBA);
   renderer.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
   renderer.fbo->tex->setWrapping(Texture::Wrapping::ClampEdge);
   renderer.prog = G.PM->getProgram("bloom");
@@ -180,7 +181,6 @@ void GameState::setupUI() {
 
 GameState::~GameState() {
   delete m_clouds;
-  delete m_crossHair.tex;
   delete m_chatBox;
   //delete m_sky;
 }

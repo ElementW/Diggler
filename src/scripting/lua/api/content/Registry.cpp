@@ -32,7 +32,7 @@ void Diggler_Content_Registry_registerBlock(struct Diggler_Game *cG,
                height = (tex.coord.v - tex.coord.y) / cTex.repeatYdiv;
         for (int16 y = cTex.repeatYdiv - 1; y >= 0; --y) {
           for (int16 x = cTex.repeatXdiv - 1; x >= 0; --x) {
-            tex.divCoords.emplace_back(TexturePacker::Coord {
+            tex.divCoords.emplace_back(Util::TexturePacker::Coord {
               static_cast<uint16>(tex.coord.x + width * x),
               static_cast<uint16>(tex.coord.y + height * y),
               static_cast<uint16>(tex.coord.x + width * (x + 1)),

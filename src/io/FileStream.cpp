@@ -1,6 +1,7 @@
 #include "FileStream.hpp"
 
 namespace Diggler {
+namespace IO {
 
 inline std::ios::seekdir getSeekDir(SeekableStream::Whence whence) {
   switch (whence) {
@@ -20,6 +21,14 @@ InFileStream::InFileStream(const std::string &path) {
 
 InFileStream::~InFileStream() {
   strm.close();
+}
+
+InFileStream::SizeT InFileStream::length() const {
+  auto pos = strm.tellg();
+  strm.seekg(0, decltype(strm)::end);
+  auto size = strm.tellg();
+  strm.seekg(pos, decltype(strm)::beg);
+  return size;
 }
 
 void InFileStream::readData(void *data, SizeT len) {
@@ -55,4 +64,5 @@ void OutFileStream::seek(OffT off, Whence whence) {
   strm.seekp(off, getSeekDir(whence));
 }
 
+}
 }

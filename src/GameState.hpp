@@ -76,7 +76,7 @@ private:
   Skybox *m_sky;
 
   struct CrossHair {
-    Texture *tex;
+    std::shared_ptr<Texture> tex;
     glm::mat4 mat;
   } m_crossHair;
 

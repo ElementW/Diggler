@@ -105,10 +105,10 @@ bool Registry::canEntityGoThrough(BlockId id/* , Entity& ent*/) const {
        (t == BlockType::TransBlue && team == Player::Team::Blue);*/
 }
 
-using Coord = TexturePacker::Coord;
+using Coord = Util::TexturePacker::Coord;
 static Coord unk1, unk2, unk3, unk4, unk5, unk6, unk7, unk8;
 #define AddTex(b, t) Coord b = m_texturePacker->add(getAssetPath("blocks", t));
-Registry::Registry() :
+Registry::Registry(Game &G) :
   m_atlas(nullptr),
   m_nextMaxBlockId(Content::BlockUnknownId + 1) {
   { Registry::BlockRegistration br(registerBlock(Content::BlockAirId, "air"));
@@ -123,7 +123,7 @@ Registry::Registry() :
   }
 
   if (GlobalProperties::IsClient) {
-    m_texturePacker = new TexturePacker(64*8, 64*8);
+    m_texturePacker = new Util::TexturePacker(G, 64*8, 64*8);
     m_texturePacker->freezeTexUpdate(true);
 
     // Valve checkerboard! :)
@@ -147,16 +147,16 @@ Registry::~Registry() {
   }
 }
 
-TexturePacker::Coord Registry::addTexture(const std::string &texName,
+Util::TexturePacker::Coord Registry::addTexture(const std::string &texName,
   const std::string &path) {
-  const TexturePacker::Coord coord = m_texturePacker->add(path);
+  const Util::TexturePacker::Coord coord = m_texturePacker->add(path);
   m_textureCoords.emplace(std::piecewise_construct,
     std::forward_as_tuple(texName),
     std::forward_as_tuple(coord));
   return coord;
 }
 
-const TexturePacker::Coord* Registry::blockTexCoord(BlockId t, FaceDirection d,
+const Util::TexturePacker::Coord* Registry::blockTexCoord(BlockId t, FaceDirection d,
   const glm::ivec3 &pos) const {
   if (t == Content::BlockUnknownId) {
     const Coord *unk[] = {
@@ -212,10 +212,6 @@ const TexturePacker::Coord* Registry::blockTexCoord(BlockId t, FaceDirection d,
       ;
   }
   return nullptr;
-}
-
-const Texture* Registry::getAtlas() const {
-  return m_atlas;
 }
 
 Registry::BlockRegistration Registry::registerBlock(BlockId id, const char *name) {

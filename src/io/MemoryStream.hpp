@@ -4,6 +4,7 @@
 #include "Stream.hpp"
 
 namespace Diggler {
+namespace IO {
 
 class MemoryStream : public virtual SeekableStream {
 protected:
@@ -53,9 +54,14 @@ public:
   OutMemoryStream(SizeT prealloc = 0);
   virtual ~OutMemoryStream();
 
+  virtual bool eos() const override {
+    return false;
+  }
+
   virtual void writeData(const void *data, SizeT len) override;
 };
 
+}
 }
 
 #endif /* DIGGLER_MEMORY_STREAM_HPP */

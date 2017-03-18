@@ -23,7 +23,7 @@ private:
   friend class Render::FontRenderer;
   uintptr_t rendererData;
 
-  Texture *m_texture;
+  std::shared_ptr<Texture> m_texture;
   struct CoordInfo {
     float x1, y1, x2, y2;
   } *m_coords;
@@ -49,7 +49,7 @@ public:
   void draw(const Render::FontRendererTextBufferRef&, const glm::mat4 &matrix) const;
   Size getSize(const std::string &text) const;
   int getHeight() const;
-  const Texture* texture() const {
+  const std::shared_ptr<Texture> texture() const {
     return m_texture;
   }
 };

@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 namespace Diggler {
+namespace IO {
 
 MemoryStream::MemoryStream(void *data, SizeT len) :
   m_data(static_cast<uint8*>(data)),
@@ -88,5 +89,7 @@ void OutMemoryStream::writeData(const void *data, SizeT len) {
     m_length = m_cursor + len;
   }
   m_cursor += len;
+}
+
 }
 }

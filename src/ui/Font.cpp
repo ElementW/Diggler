@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "../content/texture/TextureLoader.hpp"
 #include "../Texture.hpp"
 #include "../render/Renderer.hpp"
 #include "../Game.hpp"
@@ -32,7 +33,8 @@ static const struct { float r, g, b; } ColorTable[16] = {
 };
 
 Font::Font(Game *G, const std::string& path) : G(G) {
-  m_texture = new Texture(path, Texture::PixelFormat::RGBA);
+  m_texture = Content::Texture::TextureLoader::load(*G, Content::Image::ImageFormats::PNG, path,
+      PixelFormat::RGBA)->texture;
   std::ifstream source(path + ".fdf", std::ios_base::binary);
   if (source.good()) {
     source.seekg(0, std::ios_base::end);
@@ -44,12 +46,18 @@ Font::Font(Game *G, const std::string& path) : G(G) {
     std::fill_n(widths, 95, 6);
     source.read((char*)widths, size);
     source.read((char*)&height, 1);
+
+    int totalWidths = 0;
+    for (uint8 i = 0; i < 95; ++i) {
+      totalWidths += widths[i];
+    }
+
     int left = 0;
-    for (uint8 i=0; i < 95; i++) {
+    for (uint8 i = 0; i < 95; ++i) {
       texPos[i].width = widths[i];
-      texPos[i].left = (float)left / m_texture->w();
+      texPos[i].left = (float)left / totalWidths;
       left += widths[i];
-      texPos[i].right = (float)left / m_texture->w();
+      texPos[i].right = (float)left / totalWidths;
     }
   }
 
@@ -153,7 +161,6 @@ int Font::getHeight() const {
 }
 
 Font::~Font() {
-  delete m_texture;
   if (texPos)
     delete[] texPos;
 
