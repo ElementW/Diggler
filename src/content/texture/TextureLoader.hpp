@@ -21,10 +21,6 @@ public:
 
     std::shared_ptr<Image::ImageLoader::Loading> imageLoading;
     std::shared_ptr<Diggler::Texture> texture;
-
-    decltype(LoadParams::onDimensionsKnown) onDimensionsKnown;
-    decltype(LoadParams::onDecoded) onDecoded;
-    decltype(LoadParams::onFullyLoaded) onFullyLoaded;
   };
 
   static std::shared_ptr<Loading> load(Game&, Image::Format, const std::string &path,
