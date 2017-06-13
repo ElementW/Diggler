@@ -30,7 +30,7 @@ enum class Endianness : uint8_t {
     defined(__ARMEB__) || \
     defined(__THUMBEB__) || \
     defined(__AARCH64EB__) || \
-    defined(_MIBSEB) || defined(__MIBSEB) || defined(__MIBSEB__)
+    defined(_MIPSEB) || defined(__MIPSEB) || defined(__MIPSEB__)
 
 constexpr Endianness SystemEndianness = Endianness::Big;
 
