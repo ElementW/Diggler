@@ -14,6 +14,7 @@
 #include "network/Network.hpp"
 #include "Config.hpp"
 #include "util/Log.hpp"
+#include "util/MemoryTracker.hpp"
 
 #include "UITestState.hpp"
 
@@ -62,6 +63,7 @@ struct default_destruct final {
 };
 
 int main(int argc, char **argv) {
+  Util::MemoryTracker::init();
   InitRand();
   Util::InitLogging();
 

@@ -173,7 +173,8 @@ target_link_libraries(diggler
   ${SQLITE3_LIBRARIES}
   ${OPENAL_LIBRARY}
   ${GOODFORM_LIBRARY}
-  pthread)
+  pthread
+)
 
 add_custom_command(TARGET diggler PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E create_symlink "${PATH_TO_TOPDIR}/assets"

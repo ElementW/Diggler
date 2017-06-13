@@ -1,0 +1,8 @@
+#ifndef DIGGLER_UTIL_JEMALLOC_HPP
+#define DIGGLER_UTIL_JEMALLOC_HPP
+#ifdef DIGGLER_ENABLE_JEMALLOC
+
+#include <jemalloc/jemalloc.h>
+
+#endif /* DIGGLER_ENABLE_JEMALLOC */
+#endif /* DIGGLER_UTIL_JEMALLOC_HPP */

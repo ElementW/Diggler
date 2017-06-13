@@ -5,6 +5,7 @@ endif()
 add_subdirectory("content")
 add_subdirectory("render")
 add_subdirectory("scripting")
+add_subdirectory("util")
 
 set(CSD ${CMAKE_CURRENT_SOURCE_DIR})
 diggler_add_sources(
@@ -68,16 +69,5 @@ diggler_add_sources(
   ${CSD}/UITestState.cpp
   ${CSD}/ui/Text.cpp
   ${CSD}/Universe.cpp
-  ${CSD}/util/BitmapDumper.cpp
-  ${CSD}/util/ColorUtil.cpp
-  ${CSD}/util/Encoding.cpp
-  ${CSD}/util/Log.cpp
-  ${CSD}/util/logging/AnsiConsoleLogger.cpp
-  ${CSD}/util/logging/Logger.cpp
-  ${CSD}/util/logging/LogInput.cpp
-  ${CSD}/util/logging/StdoutLogger.cpp
-  ${CSD}/util/StringUtil.cpp
-  ${CSD}/util/TexturePacker.cpp
-  ${CSD}/util/Tipsify.cpp
   ${CSD}/World.cpp
 )

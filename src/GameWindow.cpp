@@ -17,6 +17,7 @@
 #include "ui/Manager.hpp"
 #include "render/gl/Debug.hpp"
 #include "util/Log.hpp"
+#include "util/MemoryTracker.hpp"
 
 namespace Diggler {
 
@@ -32,6 +33,7 @@ static void glfwErrorCallback(int error, const char *description) {
 }
 
 GameWindow::GameWindow(Game *G) : G(G) {
+  Util::MemoryTracker::ScopedCategory sc("GLFW");
   if (InstanceCount++ == 0) {
     glfwSetErrorCallback(glfwErrorCallback);
     int glfwStatus = glfwInit();
@@ -124,21 +126,23 @@ GameWindow::GameWindow(Game *G) : G(G) {
     Log(Info, TAG) << "GL " << GL_version << " / " << GL_renderer;
   }
 
-  UIM = new UI::Manager;
-  UIM->onResize(m_w, m_h);
+  { Util::MemoryTracker::ScopedCategory sc(nullptr);
+    UIM = new UI::Manager;
+    UIM->onResize(m_w, m_h);
 
-  G->init();
-  UIM->setup(G);
-  G->GW = this;
-  G->UIM = UIM;
-  G->A->loadSoundAssets();
+    G->init();
+    UIM->setup(G);
+    G->GW = this;
+    G->UIM = UIM;
+    G->A->loadSoundAssets();
 
-  G->FM->loadFont(getAssetPath("04b08.png"), "04b08");
-  G->FM->setDefaultFont("04b08");
+    G->FM->loadFont(getAssetPath("04b08.png"), "04b08");
+    G->FM->setDefaultFont("04b08");
 
-  glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  }
 }
 
 GameWindow::~GameWindow() {
@@ -146,10 +150,12 @@ GameWindow::~GameWindow() {
   m_nextState.reset();
   delete UIM;
 
-  glfwDestroyWindow(m_window);
-  
-  if (--InstanceCount == 0) {
-    glfwTerminate();
+  { Util::MemoryTracker::ScopedCategory sc("GLFW");
+    glfwDestroyWindow(m_window);
+
+    if (--InstanceCount == 0) {
+      glfwTerminate();
+    }
   }
 }
 

@@ -34,6 +34,7 @@
 #include "Skybox.hpp"
 #include "ui/FontManager.hpp"
 #include "ui/Manager.hpp"
+#include "util/MemoryTracker.hpp"
 
 using std::unique_ptr;
 
@@ -631,6 +632,10 @@ void GameState::updateUI() {
       "RX: " << G->H.getRxBytes() << std::endl <<
       "TX: " << G->H.getTxBytes() << std::endl <<
       "Frame time: " << frameTime;
+    oss << std::endl;
+    for (auto stats : Util::MemoryTracker::categoryStats()) {
+      oss << stats.name << ' ' << stats.bytesUsed << std::endl;
+    }
     UI.DebugInfo->setText(oss.str());
   }
 }
