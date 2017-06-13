@@ -109,7 +109,7 @@ void Server::handlePlayerJoin(InMessage &msg, Peer &peer) {
   for (int x = -2; x < 2; ++x)
     for (int y = -2; y < 2; ++y)
       for (int z = -2; z < 2; ++z)
-        schedSendChunk(G.U->getWorld(0)->getLoadChunk(x, y, z), plr);
+        schedSendChunk(G.U->getWorld(0)->getChunk(x, y, z, true), plr);
 }
 
 void Server::handlePlayerQuit(Peer &peer, QuitReason reason) {
@@ -238,7 +238,7 @@ void Server::handlePlayerChunkRequest(InMessage &msg, Player &plr) {
       for (const ChunkTransferRequest::ChunkData &cd : ctr.chunks) {
         WorldRef wld = G.U->getWorld(cd.worldId);
         if (wld) {
-          schedSendChunk(wld->getLoadChunk(cd.chunkPos.x, cd.chunkPos.y, cd.chunkPos.z), plr);
+          schedSendChunk(wld->getChunk(cd.chunkPos.x, cd.chunkPos.y, cd.chunkPos.z, true), plr);
         }
       }
     } break;
@@ -371,7 +371,7 @@ void Server::start() {
   for (int x = -2; x < 2; ++x)
     for (int y = -2; y < 2; ++y)
       for (int z = -2; z < 2; ++z)
-        holdChunksInMem.emplace_back(G.U->getWorld(0)->getLoadChunk(x, y, z));
+        holdChunksInMem.emplace_back(G.U->getWorld(0)->getChunk(x, y, z, true));
 }
 
 void Server::stop() {

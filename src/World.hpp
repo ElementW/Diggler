@@ -4,6 +4,7 @@
 #include "Chunk.hpp"
 
 #include <condition_variable>
+#include <functional>
 #include <map>
 #include <mutex>
 #include <queue>
@@ -75,72 +76,63 @@ public:
 
   ChunkRef getNewEmptyChunk(int cx, int cy, int cz);
 
-  ///
-  /// @brief Gets a chunk.
-  /// Gets a chunk of chunk-coordinates `cx, cy, cz`. Returns an empty reference
-  /// if the chunk isn't ready.
-  /// @returns `ChunkRef` to the chunk.
-  ///
-  ChunkRef getChunk(int cx, int cy, int cz);
-  inline ChunkRef getChunkAtCoords(int x, int y, int z) {
-    return getChunk(divrd(x, Chunk::CX), divrd(y, Chunk::CY), divrd(z, Chunk::CZ));
+  /**
+   * @brief Gets a chunk.
+   * Gets the chunk at chunk-coordinates @p cx, @p cy, @p cz.
+   * Returns an empty reference if the chunk isn't ready and @p load is `false`. In such cases,
+   * the chunk is added to the load queue.
+   * @param x Chunk coordinate X axis.
+   * @param y Chunk coordinate Y axis.
+   * @param z Chunk coordinate Z axis.
+   * @param load If the chunk must be loaded.
+   * @returns `ChunkRef` to the chunk.
+   */
+  ChunkRef getChunk(int cx, int cy, int cz, bool load = false);
+  inline ChunkRef getChunkAtCoords(int x, int y, int z, bool load = false) {
+    return getChunk(divrd(x, Chunk::CX), divrd(y, Chunk::CY), divrd(z, Chunk::CZ), load);
   }
-  inline ChunkRef getChunkAtCoords(const glm::ivec3 &v) {
-    return getChunk(divrd(v.x, Chunk::CX), divrd(v.y, Chunk::CY), divrd(v.z, Chunk::CZ));
-  }
-
-  ///
-  /// @brief Gets a chunk.
-  /// Gets a chunk of chunk-coordinates `cx, cy, cz`, even if it isn't loaded yet,
-  /// and add said chunk to the load queue.
-  /// @returns `ChunkRef` to the chunk.
-  ///
-  ChunkRef getLoadChunk(int cx, int cy, int cz);
-  inline ChunkRef getLoadChunkAtCoords(int x, int y, int z) {
-    return getLoadChunk(divrd(x, Chunk::CX), divrd(y, Chunk::CY), divrd(z, Chunk::CZ));
-  }
-  inline ChunkRef getLoadChunkAtCoords(const glm::ivec3 &v) {
-    return getLoadChunk(divrd(v.x, Chunk::CX), divrd(v.y, Chunk::CY), divrd(v.z, Chunk::CZ));
+  inline ChunkRef getChunkAtCoords(const glm::ivec3 &v, bool load = false) {
+    return getChunk(divrd(v.x, Chunk::CX), divrd(v.y, Chunk::CY), divrd(v.z, Chunk::CZ), load);
   }
 
-  ///
-  /// @returns The block ID at specified location.
-  ///
+  /**
+   * @returns The block ID at specified location.
+   */
   BlockId getBlockId(int x, int y, int z);
 
-  ///
-  /// @returns Block's data integer.
-  /// @note If the block has extdata, 0 is returned.
-  ///
+  /**
+   * @returns Block's data integer.
+   * @note If the block has extdata, 0 is returned.
+   */
   BlockData getBlockData(int x, int y, int z);
 
-  ///
-  /// @returns `true` if block has extdata, `false` otherwise.
-  ///
+  /**
+   * @returns `true` if block has extdata, `false` otherwise.
+   */
   bool blockHasExtdata(int x, int y, int z);
 
-  ///
-  /// @brief Gets a block's extdata.
-  /// Gets a block's extdata store, used to save advanced state values.
-  /// @returns Block's extdata.
-  ///
+  /**
+   * @brief Gets a block's extdata.
+   * Gets a block's extdata store, used to save advanced state values.
+   * @returns Block's extdata.
+   */
   // TODO msgpack::object&& getBlockExtdata(int x, int y, int z);
 
   /* ============ Setters ============ */
 
-  ///
-  /// @brief Sets the block at specified location, replacing its ID and data.
-  ///
+  /**
+   * @brief Sets the block at specified location, replacing its ID and data.
+   */
   bool setBlock(int x, int y, int z, BlockId id, BlockData data = 0);
 
-  ///
-  /// @brief Sets the block ID at specified location, keeping its (meta)data.read()
-  ///
+  /**
+   * @brief Sets the block ID at specified location, keeping its (meta)data.read()
+   */
   bool setBlockId(int x, int y, int z, BlockId id);
 
-  ///
-  /// @brief Sets the block data at specified location, keeping its ID.
-  ///
+  /**
+   * @brief Sets the block data at specified location, keeping its ID.
+   */
   bool setBlockData(int x, int y, int z, BlockData data);
 
   // Copies extdata tree
@@ -157,10 +149,10 @@ public:
     glm::vec3 hitPoint,
     glm::vec3 hitNormal)>;
 
-  ///
-  /// @brief Fires a ray through the voxels and determines what block and facing block is hit.
-  /// @todo Documentation
-  ///
+  /**
+   * @brief Fires a ray through the voxels and determines what block and facing block is hit.
+   * @todo Documentation
+   */
   bool raytrace(glm::vec3 pos, glm::vec3 dir, float range, glm::ivec3 *pointed, glm::ivec3 *norm);
   bool raytrace(glm::vec3 from, glm::vec3 to, glm::ivec3 *pointed, glm::ivec3 *facing) {
     return raytrace(from, to-from, glm::length(to-from), pointed, facing);
