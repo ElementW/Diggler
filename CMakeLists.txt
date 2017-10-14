@@ -69,12 +69,6 @@ find_package(OpenGL REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(LuaJIT REQUIRED)
 
-find_package(goodform REQUIRED)
-if(NOT goodform_FOUND)
-  message(FATAL_ERROR "Bundled goodform not found. Have you checked out submodules?
-git submodule update --init")
-endif()
-
 find_package(Optional REQUIRED)
 
 pkg_search_module(GLFW REQUIRED glfw3)
@@ -90,7 +84,6 @@ include_directories(BEFORE
   ${LIBSODIUM_INCLUDE_DIRS}
   ${SQLITE3_INCLUDE_DIRS}
   ${OPENAL_INCLUDE_DIR}
-  ${GOODFORM_INCLUDE_DIR}
   ${OPTIONAL_INCLUDE_DIR}
 )
 
@@ -160,7 +153,6 @@ target_link_libraries(diggler
   ${LIBSODIUM_LIBRARIES}
   ${SQLITE3_LIBRARIES}
   ${OPENAL_LIBRARY}
-  ${GOODFORM_LIBRARY}
   pthread
 )
 

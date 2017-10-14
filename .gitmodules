@@ -1,6 +1,3 @@
-[submodule "assets/lua/lds"]
-	path = assets/lua/lds
-	url = https://github.com/neomantra/lds.git
 [submodule "ext/StackTracePlus"]
 	path = ext/StackTracePlus
 	url = https://github.com/ignacio/StackTracePlus.git
@@ -19,3 +16,12 @@
 [submodule "ext/threads"]
 	path = ext/threads
 	url = https://github.com/torch/threads.git
+[submodule "assets/lua/modules/bitser"]
+	path = assets/lua/modules/bitser
+	url = https://github.com/gvx/bitser.git
+[submodule "assets/lua/modules/cdata"]
+	path = assets/lua/modules/cdata
+	url = https://github.com/excessive/cdata.git
+[submodule "assets/lua/modules/lds"]
+	path = assets/lua/modules/lds
+	url = https://github.com/neomantra/lds.git

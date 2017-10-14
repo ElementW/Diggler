@@ -3,8 +3,6 @@
 
 #include "MsgType.hpp"
 
-#include <goodform/variant.hpp>
-
 #include "../../content/Content.hpp"
 #include "../../World.hpp"
 
@@ -28,7 +26,7 @@ struct BlockUpdateNotify : public MsgType {
     glm::ivec3 pos;
     BlockId id;
     BlockData data;
-    goodform::variant extdata;
+    //goodform::variant extdata;
     LightData light;
     enum Cause : uint8 {
       Unspecified = 0,
@@ -47,7 +45,7 @@ struct BlockUpdatePlace : public MsgType {
   glm::ivec3 pos;
   BlockId id;
   BlockData data;
-  goodform::variant extdata;
+  //goodform::variant extdata;
 
   void writeToMsg(OutMessage&) const override;
   void readFromMsg(InMessage&) override;

@@ -6,8 +6,6 @@
 
 #include <glm/vec3.hpp>
 
-#include <goodform/variant.hpp>
-
 #include "../Platform.hpp"
 #include "../platform/PreprocUtils.hpp"
 #include "../crypto/DiffieHellman.hpp"
@@ -115,7 +113,6 @@ public:
 
   glm::vec3 readVec3();
   glm::ivec3 readIVec3();
-  void readMsgpack(goodform::variant&);
 
   Channels getChannel() const;
 };
@@ -156,8 +153,6 @@ public:
     writeI32(vec.y);
     writeI32(vec.z);
   }
-
-  void writeMsgpack(const goodform::variant&);
 };
 
 class Exception : public std::exception {
