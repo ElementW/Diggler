@@ -5,6 +5,10 @@
 
 #include "platform/types/vec3.hpp"
 
+// The following, courtesy of the Windows developer experience™
+#undef NEAR
+#undef FAR
+
 namespace Diggler {
 
 class Frustum {

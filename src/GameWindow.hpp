@@ -11,6 +11,7 @@
 
 #include <glm/detail/type_mat.hpp>
 
+#include "StateMachine.hpp"
 #include "Platform.hpp"
 
 namespace Diggler {
@@ -22,7 +23,7 @@ namespace UI {
 class Manager;
 }
 
-class GameWindow {
+class GameWindow : public StateMachine {
 private:
   static int InstanceCount;
 
@@ -59,7 +60,7 @@ public:
 
   void updateViewport();
 
-  void setNextState(std::unique_ptr<State> &&next);
+  void setNextState(std::unique_ptr<State> &&next) override;
   void run();
 
   void showMessage(const std::string &msg, const std::string &submsg = "");

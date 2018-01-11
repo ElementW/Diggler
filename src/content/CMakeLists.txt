@@ -6,6 +6,8 @@ add_subdirectory("texture")
 
 set(CSD ${CMAKE_CURRENT_SOURCE_DIR})
 diggler_add_sources(
+  #${CSD}/Asset.cpp
+  #${CSD}/AssetContentMetadata.cpp
   ${CSD}/AssetManager.cpp
   ${CSD}/ModManager.cpp
   ${CSD}/Registry.cpp

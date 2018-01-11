@@ -3,7 +3,7 @@
 
 #include "MsgType.hpp"
 
-#include <goodform/variant.hpp>
+#include <meiose/variant.hpp>
 
 namespace Diggler {
 namespace Net {
@@ -16,14 +16,14 @@ enum class ServerInfoSubtype : uint8 {
 
 struct ServerInfoRequest : public MsgType {
   std::vector<std::string> infos;
-  goodform::variant params;
+  meiose::variant params;
 
   void writeToMsg(OutMessage&) const override;
   void readFromMsg(InMessage&) override;
 };
 
 struct ServerInfoResponse : public MsgType {
-  goodform::variant infos;
+  meiose::variant infos;
 
   void writeToMsg(OutMessage&) const override;
   void readFromMsg(InMessage&) override;

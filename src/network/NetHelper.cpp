@@ -1,5 +1,7 @@
 #include "NetHelper.hpp"
 
+#include <meiose/variant.hpp>
+
 #include "msgtypes/Chat.hpp"
 #include "../Game.hpp"
 #include "../Player.hpp"
@@ -23,7 +25,7 @@ void Broadcast(Game &G, const OutMessage &msg, Tfer tfer, Channels chan) {
 
 void SendChat(Game *G, const std::string &str) {
   Net::MsgTypes::ChatSend cs;
-  cs.msg = goodform::object {
+  cs.msg = meiose::variant::map {
     {"plaintext", str}
   };
 

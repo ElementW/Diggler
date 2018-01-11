@@ -1,7 +1,7 @@
 #ifndef DIGGLER_CONTENT_ASSET_HPP
 #define DIGGLER_CONTENT_ASSET_HPP
 
-#include <goodform/variant.hpp>
+#include <memory>
 
 #include "../crypto/SHA256.hpp"
 #include "AssetContentMetadata.hpp"
@@ -26,11 +26,10 @@ protected:
   friend class AssetManager;
 
   Crypto::SHA256::Digest m_contentHash;
-  AssetContentMetadata &m_contentMetadata;
+  std::shared_ptr<AssetContentMetadata> m_contentMetadata;
   Type m_type;
-  goodform::object m_info;
 
-  Asset(AssetContentMetadata&);
+  Asset(const std::shared_ptr<AssetContentMetadata>&);
 
 public:
   const Crypto::SHA256::Digest& contentHash() const {
@@ -38,15 +37,11 @@ public:
   }
 
   const AssetContentMetadata& contentMetadata() const {
-    return m_contentMetadata;
+    return *m_contentMetadata;
   }
 
   Type type() const {
     return m_type;
-  }
-
-  const goodform::object& info() const {
-    return m_info;
   }
 };
 

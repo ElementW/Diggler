@@ -8,13 +8,39 @@
 
 #include <enet/enet.h>
 
-#include <goodform/msgpack.hpp>
+#include <meiose/msgpack.hpp>
+#include <meiose/variant.hpp>
 
 #include "../crypto/Random.hpp"
 #include "../util/Log.hpp"
 #include "msgtypes/ConnectionParam.hpp"
 
 #include <iomanip>
+
+struct membuf : std::streambuf {
+  membuf(char* begin, char* end) {
+    setg(begin, begin, end);
+  }
+  membuf(void* begin, void* end) :
+    membuf(reinterpret_cast<char*>(begin), reinterpret_cast<char*>(end)) {}
+  membuf(const void* begin, const void* end) :
+    membuf(const_cast<void*>(begin), const_cast<void*>(end)) {}
+};
+class omsgbuf : public std::streambuf {
+protected:
+  Diggler::Net::OutMessage &omsg;
+public:
+  omsgbuf(Diggler::Net::OutMessage &o) : omsg(o) {}
+protected:
+  std::streamsize xsputn(const char_type* s, std::streamsize n) override {
+    omsg.writeData(s, n);
+    return n;
+  }
+  int_type overflow(int_type ch) override {
+    omsg.writeI8(ch);
+    return 1;
+  }
+};
 
 namespace Diggler {
 namespace Net {
@@ -105,16 +131,15 @@ void InMessage::free() {
   m_data = nullptr;
 }
 
-void InMessage::readMsgpack(goodform::variant &var) {
+void InMessage::readMsgpack(meiose::variant &var) {
   uint32 len = readU32();
   if (len > remaining()) {
     throw std::runtime_error("Not enough bytes available for reported msgpack length");
   }
-  InMemoryStream ims(getCursorPtr(len), len);
-  goodform::msgpack::deserialize(ims, var);
-  /*if (var.type() != goodform::variant_type::object) {
-    throw std::runtime_error("Read msgpack is not an object / map");
-  }*/
+  const void *start = getCursorPtr(len);
+  membuf sbuf(start, getCursorPtr());
+  std::istream in(&sbuf);
+  meiose::msgpack::read(in, var);
 }
 
 
@@ -149,13 +174,12 @@ void OutMessage::fit(SizeT len) {
   m_allocated = targetSize;
 }
 
-void OutMessage::writeMsgpack(const goodform::variant &var) {
-  /*if (var.type() != goodform::variant_type::object) {
-    throw std::runtime_error("msgpack to write is not an object / map");
-  }*/
+void OutMessage::writeMsgpack(const meiose::variant &var) {
   PosT pos = tell();
   writeU32(0);
-  goodform::msgpack::serialize(var, *this);
+  omsgbuf sbuf(*this);
+  std::ostream out(&sbuf);
+  meiose::msgpack::write(out, var);
   PosT posWritten = tell();
   seek(pos);
   writeU32(static_cast<uint32>(posWritten - (pos + sizeof(uint32))));

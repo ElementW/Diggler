@@ -35,6 +35,8 @@
 
 #define LZFX_HSIZE (1 << (LZFX_HLOG))
 
+#include <stdint.h>
+
 /* We need this for memset */
 #ifdef __cplusplus
 # include <cstring>
@@ -105,7 +107,7 @@ int lzfx_compress(const void *const ibuf, const unsigned int ilen,
     int lit;    /* # of bytes in current literal run */
 
 #if defined (WIN32) && defined (_M_X64)
-    unsigned _int64 off; /* workaround for missing POSIX compliance */
+    uint64_t off; /* workaround for missing POSIX compliance */
 #else
     unsigned long off;
 #endif

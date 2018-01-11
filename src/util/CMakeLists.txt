@@ -37,10 +37,12 @@ else()
 endif()
 
 if (DIGGLER_ENABLE_JEMALLOC)
+  find_package(Jemalloc REQUIRED)
+
   diggler_add_definition(
     -DDIGGLER_ENABLE_JEMALLOC=1
   )
   diggler_link_libraries(
-    jemalloc
+    ${JEMALLOC_LIBRARIES}
   )
 endif()

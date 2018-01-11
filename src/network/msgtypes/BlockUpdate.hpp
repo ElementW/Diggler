@@ -3,6 +3,8 @@
 
 #include "MsgType.hpp"
 
+#include <meiose/variant.hpp>
+
 #include "../../content/Content.hpp"
 #include "../../World.hpp"
 
@@ -26,7 +28,7 @@ struct BlockUpdateNotify : public MsgType {
     glm::ivec3 pos;
     BlockId id;
     BlockData data;
-    //goodform::variant extdata;
+    meiose::variant extdata;
     LightData light;
     enum Cause : uint8 {
       Unspecified = 0,
@@ -45,7 +47,7 @@ struct BlockUpdatePlace : public MsgType {
   glm::ivec3 pos;
   BlockId id;
   BlockData data;
-  //goodform::variant extdata;
+  meiose::variant extdata;
 
   void writeToMsg(OutMessage&) const override;
   void readFromMsg(InMessage&) override;

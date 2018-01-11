@@ -20,10 +20,13 @@ MessageState::MessageState(GameWindow *W, const std::string &msg, const std::str
 MessageState::~MessageState() {
 }
 
-void MessageState::setupUI() {
+void MessageState::onStart() {
   txtMsg = W->G->UIM->add<UI::Text>(msg, 2, 2);
   txtSubMsg = W->G->UIM->add<UI::Text>(subMsg);
   updateViewport();
+  if (GlobalProperties::IsSoundEnabled) {
+    W->G->A->playSound("click-quiet");
+  }
 }
 
 void MessageState::updateViewport() {
@@ -38,23 +41,16 @@ void MessageState::onResize(int w, int h) {
   updateViewport();
 }
 
-void MessageState::run() {
-  setupUI();
-  if (GlobalProperties::IsSoundEnabled) {
-    W->G->A->playSound("click-quiet");
-  }
-  while (!glfwWindowShouldClose(*W)) {
-    W->G->R->beginFrame();
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void MessageState::onLogicTick() {}
 
-    W->G->UIM->render();
+void MessageState::onFrameTick() {
+  W->G->R->beginFrame();
+  glClearColor(0.0, 0.0, 0.0, 1.0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    W->G->R->endFrame();
+  W->G->UIM->render();
 
-    glfwSwapBuffers(*W);
-    glfwPollEvents();
-  }
+  W->G->R->endFrame();
 }
 
 }

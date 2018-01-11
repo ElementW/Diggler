@@ -16,12 +16,15 @@ private:
 
 public:
   MessageState(GameWindow *W, const std::string &msg, const std::string &submsg = "");
-  ~MessageState();
-  
+  ~MessageState() override;
+
+  void onStart() override;
+  void onLogicTick() override;
+  void onFrameTick() override;
+
   //void onMouseButton(int key, int action, int mods);
   //void onCursorPos(double x, double y);
-  void onResize(int w, int h);
-  void run();
+  void onResize(int w, int h) override;
   
   void updateViewport();
 };

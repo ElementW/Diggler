@@ -3,7 +3,6 @@
 #include <memory>
 #include <thread>
 #include <chrono>
-#include <sys/signal.h>
 
 #include "ConnectingState.hpp"
 #include "Game.hpp"

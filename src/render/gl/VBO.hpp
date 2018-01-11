@@ -6,6 +6,7 @@
 #include "OpenGL.hpp"
 
 #include "../../platform/PreprocUtils.hpp"
+#include "../../platform/Types.hpp"
 
 namespace Diggler {
 namespace Render {

@@ -114,6 +114,8 @@ private:
     std::shared_ptr<class EscMenu> EM;
   } UI;
 
+  int fpsCounter;
+  double fpsNextSampling;
   uint64 frameTime;
 
   void setupUI();
@@ -128,12 +130,17 @@ public:
   GameState(GameWindow *W);
   ~GameState();
 
-  void onMouseButton(int key, int action, int mods);
-  void onCursorPos(double x, double y);
-  void onMouseScroll(double x, double y);
-  void onKey(int key, int scancode, int action, int mods);
-  void onChar(char32 unichar);
-  void onResize(int w, int h);
+  void onStart() override;
+  void onLogicTick() override;
+  void onFrameTick() override;
+  void onStop() override;
+
+  void onMouseButton(int key, int action, int mods) override;
+  void onCursorPos(double x, double y) override;
+  void onMouseScroll(double x, double y) override;
+  void onKey(int key, int scancode, int action, int mods) override;
+  void onChar(char32 unichar) override;
+  void onResize(int w, int h) override;
   void run();
 
   void updateViewport();

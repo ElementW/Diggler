@@ -11,6 +11,10 @@
 #include "../crypto/DiffieHellman.hpp"
 #include "../io/MemoryStream.hpp"
 
+namespace meiose {
+class variant;
+}
+
 namespace Diggler {
 namespace Net {
 
@@ -113,6 +117,7 @@ public:
 
   glm::vec3 readVec3();
   glm::ivec3 readIVec3();
+  void readMsgpack(meiose::variant&);
 
   Channels getChannel() const;
 };
@@ -153,6 +158,7 @@ public:
     writeI32(vec.y);
     writeI32(vec.z);
   }
+  void writeMsgpack(const meiose::variant&);
 };
 
 class Exception : public std::exception {

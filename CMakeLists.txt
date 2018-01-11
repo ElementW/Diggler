@@ -69,6 +69,12 @@ find_package(OpenGL REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(LuaJIT REQUIRED)
 
+find_package(meiose REQUIRED)
+if(NOT MPACK_FOUND)
+  message(FATAL_ERROR "Bundled meiose not found. Have you checked out submodules?
+git submodule update --init")
+endif()
+
 find_package(Optional REQUIRED)
 
 pkg_search_module(GLFW REQUIRED glfw3)
@@ -77,6 +83,7 @@ pkg_search_module(LIBSODIUM REQUIRED libsodium)
 include_directories(BEFORE
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
   ${ETC_INCLUDE_DIRS}
+  ${MEIOSE_INCLUDE_DIR}
   ${LUA_INCLUDE_DIR}
   ${LZFX_INCLUDE_DIRS}
   ${ENET_INCLUDE_DIRS}
@@ -86,10 +93,6 @@ include_directories(BEFORE
   ${OPENAL_INCLUDE_DIR}
   ${OPTIONAL_INCLUDE_DIR}
 )
-
-# Glob all source files so they show up in Qt Creator
-#file(GLOB_RECURSE FILELIST "*.h" "*.hpp" "*.cpp")
-#add_custom_target(files SOURCES ${FILELIST})
 
 ### Allow subdirs to add params to the `diggler` target
 # Sources
@@ -146,6 +149,7 @@ get_property(LIBS GLOBAL PROPERTY DIGGLER_LINK_LIBRARIES)
 target_link_libraries(diggler
   ${LIBS}
   ${ETC_LIBRARIES}
+  ${MEIOSE_LIBRARY}
   ${LUA_LIBRARY}
   ${LZFX_LIBRARIES}
   ${ENET_LIBRARIES}

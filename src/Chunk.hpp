@@ -49,13 +49,18 @@ public:
 
   const int wcx, wcy, wcz;
 
+  /**
+   * @brief Struct holding the Chunk's block contents.
+   * @note This structure must be a Plain Old Data struct.
+   */
   struct Data {
     static constexpr FourCC MagicMarker = MakeFourCC("CKDT");
-    FourCC magic;
-    // Keep me Plain Old Data!
-    BlockId id[CX*CY*CZ];
-    BlockData data[CX*CY*CZ];
-    LightData light[CX*CY*CZ];
+    FourCC magic; /**< Magic marker. Used for Chunk eviction checking. */
+
+    BlockId id[CX*CY*CZ]; /**< Block IDs. */
+    BlockData data[CX*CY*CZ]; /**< Block data. */
+    LightData light[CX*CY*CZ]; /**< Block light info. */
+
     void clear();
   };
 

@@ -374,7 +374,8 @@ struct ServerInfoResponse {
 The client asks for a list of information, and the server simply replies. Different infos are identified by a short string describing both what it is and optional parameters, separated by dot characters (`.`, U+002E).
 The server may reply to the client with only some of the requested information, and/or information with different parameters, but is expected to do its best effort to send back the most appropriate information. It is up to the client to choose what to do with this data and put it to best use.
 
-Parameters that expresses languages are substituted by `XXX` in the following table, and are expected to be ISO 639-3 alpha-3-*type* codes. Language codes that are not part of ISO 639-3 are considered **valid** and may very well be used for alternative languages, such as `zls` for 1337$P34|< ([leetspeak](https://en.wikipedia.org/wiki/Leet)).
+Parameters that expresses languages are substituted by `XXXX` in the following table, and are expected to be ISO 639-3 alpha-3-*like* codes for "real" languages (which can be fictive and constructed, like Klingon). Language codes that are not part of ISO 639-3 are considered **valid**.
+For other languages, a code of the form `!ABC` where `ABC` is the language code. For example, for 1337$P34|< ([leetspeak](https://en.wikipedia.org/wiki/Leet)), the code could be `!lts`.
 When that language specification is shown between parentheses, it is optional and the server is free to return said information in any language if unspecified, whichever is the most appropriate (e.g. according to the server's homeland or client location guessed from its IP address).
 
 Info name       | Reply type | Reply data

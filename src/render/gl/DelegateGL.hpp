@@ -1,6 +1,7 @@
 #ifndef DIGGLER_RENDER_GL_DELEGATE_GL_HPP
 #define DIGGLER_RENDER_GL_DELEGATE_GL_HPP
 
+#include <future>
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -37,6 +38,16 @@ public:
   static void texSubImage2D(GLuint texture, GLint level, GLint xoffset, GLint yoffset,
     GLsizei width, GLsizei height, GLenum format, GLenum type,
     std::unique_ptr<const uint8[]> &&data);
+
+  template<typename Func>
+  static std::future<decltype(std::declval<Func>()())> run(Func &&func) {
+    std::promise<decltype(std::declval<Func>()())> promise;
+    auto future = promise.get_future();
+    push([func { std::move(func) }, promise { std::move(promise) }] {
+      promise.set_value_at_thread_exit(func());
+    });
+    return future;
+  }
 
   static void execute();
 };

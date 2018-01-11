@@ -211,7 +211,20 @@ void GameWindow::run() {
   while (m_nextState != nullptr && !glfwWindowShouldClose(m_window)) {
     m_currentState = std::move(m_nextState);
     m_nextState = nullptr;
-    m_currentState->run();
+    m_currentState->onCreate();
+    m_currentState->onStart();
+    m_currentState->m_runTime = glfwGetTime();
+    while (m_nextState == nullptr && !glfwWindowShouldClose(m_window)) {
+      double newTime = glfwGetTime();
+      m_currentState->m_deltaTime = newTime - m_currentState->m_runTime;
+      m_currentState->m_runTime = newTime;
+      glfwPollEvents();
+      m_currentState->onLogicTick();
+      m_currentState->onFrameTick();
+      glfwSwapBuffers(m_window);
+    }
+    m_currentState->onStop();
+    m_currentState->onDestroy();
     m_currentState.reset();
   }
 }

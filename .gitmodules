@@ -7,9 +7,6 @@
 [submodule "ext/enet"]
 	path = ext/enet
 	url = https://github.com/freeminer/enet.git
-[submodule "ext/goodform"]
-	path = ext/goodform
-	url = https://github.com/ElementW/goodform.git
 [submodule "ext/torch7"]
 	path = ext/torch7
 	url = https://github.com/torch/torch7.git
@@ -25,3 +22,6 @@
 [submodule "assets/lua/modules/lds"]
 	path = assets/lua/modules/lds
 	url = https://github.com/neomantra/lds.git
+[submodule "ext/meiose"]
+	path = ext/meiose
+	url = https://github.com/ElementW/meiose.git
