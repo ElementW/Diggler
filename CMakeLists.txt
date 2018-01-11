@@ -65,7 +65,6 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/lzfx")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/etc")
 find_package(glm)
 find_package(OpenAL REQUIRED)
-find_package(OpenGL REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(LuaJIT REQUIRED)
 
