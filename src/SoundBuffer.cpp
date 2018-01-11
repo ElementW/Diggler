@@ -2,6 +2,7 @@
 
 #include <stb_vorbis.h>
 
+#include "platform/Types.hpp"
 #include "util/Log.hpp"
 
 namespace Diggler {
