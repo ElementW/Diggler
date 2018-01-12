@@ -42,7 +42,7 @@ std::string Diggler::proc::getExecutablePath() {
 std::string Diggler::proc::getExecutableDirectory() {
   if (pathCache.executableDir.length() == 0) {
     std::string filename(getExecutablePath());
-    const size_t last_sep_idx = std::max(filename.rfind('/'), filename.rfind('\\'));
+    const size_t last_sep_idx = filename.rfind('\\');
     if (last_sep_idx != std::string::npos) {
       pathCache.executableDir = filename.substr(0, last_sep_idx);
     } else {
