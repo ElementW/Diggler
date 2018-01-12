@@ -21,7 +21,59 @@ static struct PathCache {
 
 #if defined(BUILDINFO_PLATFORM_WINDOWS) // Windows
 
-// Put windows crap here
+#include <cmath>
+#include <cstring>
+#include <shlobj.h>
+#include <windows.h>
+#include "platform/Fixes.hpp"
+
+std::string Diggler::proc::getExecutablePath() {
+  if (pathCache.executableBin.length() == 0) {
+    HMODULE hModule = GetModuleHandleW(NULL);
+    WCHAR path[MAX_PATH];
+    GetModuleFileNameW(hModule, path, MAX_PATH);
+    char utf8Path[MAX_PATH];
+    WideCharToMultiByte(CP_UTF8, 0, path, -1, utf8Path, MAX_PATH, nullptr, nullptr);
+    pathCache.executableBin = utf8Path;
+  }
+  return pathCache.executableBin;
+}
+
+std::string Diggler::proc::getExecutableDirectory() {
+  if (pathCache.executableDir.length() == 0) {
+    std::string filename(getExecutablePath());
+    const size_t last_sep_idx = std::max(filename.rfind('/'), filename.rfind('\\'));
+    if (last_sep_idx != std::string::npos) {
+      pathCache.executableDir = filename.substr(0, last_sep_idx);
+    } else {
+      Log(Warning, TAG) << "Ill-formed executable path: " << filename;
+      pathCache.executableDir = filename;
+    }
+  }
+  return pathCache.executableDir;
+}
+
+std::string Diggler::getCacheDirectory() {
+  if (pathCache.cacheDir.length() == 0) {
+    WCHAR ucs2Path[MAX_PATH];
+    SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, ucs2Path);
+    char utf8Path[MAX_PATH];
+    WideCharToMultiByte(CP_UTF8, 0, ucs2Path, -1, utf8Path, MAX_PATH, nullptr, nullptr);
+    pathCache.cacheDir = std::string(utf8Path) + "/" + UserdataDirsName + "/cache/";
+  }
+  return pathCache.cacheDir;
+}
+
+std::string Diggler::getConfigDirectory() {
+  if (pathCache.cacheDir.length() == 0) {
+    WCHAR ucs2Path[MAX_PATH];
+    SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, ucs2Path);
+    char utf8Path[MAX_PATH];
+    WideCharToMultiByte(CP_UTF8, 0, ucs2Path, -1, utf8Path, MAX_PATH, nullptr, nullptr);
+    pathCache.configDir = std::string(utf8Path) + "/" + UserdataDirsName + "/config/";
+  }
+  return pathCache.configDir;
+}
 
 #elif defined(BUILDINFO_PLATFORM_UNIXLIKE) // Linux and UNIX alike
 

@@ -6,7 +6,95 @@
 
 #if defined(BUILDINFO_PLATFORM_WINDOWS) // Windows
 
-// Put windows crap here
+#include <cmath>
+#include <windows.h>
+#include "Fixes.hpp"
+
+std::string Diggler::fs::getParent(const std::string &path) {
+  auto slash = path.find_last_of('/'), backslash = path.find_last_of('\\');
+  return path.substr(std::max(slash, backslash));
+}
+
+std::vector<std::string> Diggler::fs::getContents(const std::string &path) {
+  WIN32_FIND_DATA fdFile;
+  HANDLE hFind = NULL;
+  wchar_t sPath[2048];
+  MultiByteToWideChar(CP_UTF8, 0, path.data(), path.size(), sPath, 2048);
+  wsprintf(sPath, L"%s\\*.*", sPath);
+
+  if((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE) {
+    return {};
+  }
+
+  std::vector<std::string> entities;
+  do {
+    if (wcscmp(fdFile.cFileName, L".") != 0 && wcscmp(fdFile.cFileName, L"..") != 0) {
+      char entry[512];
+      WideCharToMultiByte(CP_UTF8, 0, fdFile.cFileName, -1, entry, 512, nullptr, nullptr);
+      entities.push_back(entry);
+    }
+  } while(FindNextFile(hFind, &fdFile));
+  FindClose(hFind);
+  return entities;
+}
+
+std::vector<std::string> Diggler::fs::getDirs(const std::string &path) {
+  WIN32_FIND_DATA fdFile;
+  HANDLE hFind = NULL;
+  wchar_t sPath[2048];
+  MultiByteToWideChar(CP_UTF8, 0, path.data(), path.size(), sPath, 2048);
+  wsprintf(sPath, L"%s\\*.*", sPath);
+
+  if((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE) {
+    return {};
+  }
+
+  std::vector<std::string> entities;
+  do {
+    if (wcscmp(fdFile.cFileName, L".") != 0 && wcscmp(fdFile.cFileName, L"..") != 0) {
+      if(fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+        char entry[512];
+        WideCharToMultiByte(CP_UTF8, 0, fdFile.cFileName, -1, entry, 512, nullptr, nullptr);
+        entities.push_back(entry);
+      }
+    }
+  } while(FindNextFile(hFind, &fdFile));
+  FindClose(hFind);
+  return entities;
+}
+
+std::vector<std::string> Diggler::fs::getFiles(const std::string &path) {
+  WIN32_FIND_DATA fdFile;
+  HANDLE hFind = NULL;
+  wchar_t sPath[2048];
+  MultiByteToWideChar(CP_UTF8, 0, path.data(), path.size(), sPath, 2048);
+  wsprintf(sPath, L"%s\\*.*", sPath);
+
+  if((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE) {
+    return {};
+  }
+
+  std::vector<std::string> entities;
+  do {
+    if (wcscmp(fdFile.cFileName, L".") != 0 && wcscmp(fdFile.cFileName, L"..") != 0) {
+      if(!(fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+        char entry[512];
+        WideCharToMultiByte(CP_UTF8, 0, fdFile.cFileName, -1, entry, 512, nullptr, nullptr);
+        entities.push_back(entry);
+      }
+    }
+  } while(FindNextFile(hFind, &fdFile));
+  FindClose(hFind);
+  return entities;
+}
+
+inline bool Diggler::fs::isDir(const std::string &path) {
+  wchar_t szPath[2048];
+  MultiByteToWideChar(CP_UTF8, 0, path.data(), path.size(), szPath, 2048);
+  DWORD dwAttrib = GetFileAttributes(szPath);
+  return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
+         (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
 
 #elif defined(BUILDINFO_PLATFORM_UNIXLIKE) // Linux and UNIX alike
 

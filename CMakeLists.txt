@@ -31,20 +31,32 @@ endif()
 message(">> Path to topdir: ${PATH_TO_TOPDIR}")
 
 ### Compiler & build options
+if(MINGW)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -municode -mwindows")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -municode -mwindows")
+  add_definitions(-DHAS_INET_PTON=1) # Override ENet's CMakeFile broken pton/ntop detection
+  add_definitions(-DHAS_INET_NTOP=1)
+endif()
 # Disable narrow convert warnings and disable deprecated GLM degrees usage
 add_definitions(-DGLM_FORCE_RADIANS)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -ffast-math")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall") # -Wextra")
-
-# Compile as Position Independent Executable, enabling ASLR
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -pie")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -pie")
 
 if(NOT CMAKE_BUILD_TYPE) # Defaults to release
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type: Debug or Release" FORCE)
 endif()
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   set(USE_GCC_LTO FALSE CACHE BOOL "Use GCC LTOs")
+
+  # Compile as Position Independent Code
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
+  if(NOT (MINGW OR WIN32))
+    # On non-Windows platforms, make the whole executable position-independent
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pie")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pie")
+  endif()
 endif()
 
 message(">> Using ${CMAKE_BUILD_TYPE} build configuration")
@@ -159,13 +171,24 @@ target_link_libraries(diggler
   pthread
 )
 
-add_custom_command(TARGET diggler PRE_BUILD
-  COMMAND ${CMAKE_COMMAND} -E create_symlink "${PATH_TO_TOPDIR}/assets"
-  "${PROJECT_BINARY_DIR}/assets")
+if(MINGW)
+  target_link_libraries(diggler
+    stdc++
+    ws2_32
+    openal.dll
+    winmm
+  )
+endif()
 
-add_custom_command(TARGET diggler PRE_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/src/scripting/lua/api"
-  "${PROJECT_BINARY_DIR}/assets/lua/ffi")
+if(NOT WIN32 AND NOT MINGW)
+  add_custom_command(TARGET diggler PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E create_symlink "${PATH_TO_TOPDIR}/assets"
+    "${PROJECT_BINARY_DIR}/assets")
+
+  add_custom_command(TARGET diggler PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/src/scripting/lua/api"
+    "${PROJECT_BINARY_DIR}/assets/lua/ffi")
+endif()
 
 #install(TARGETS digglerz RUNTIME DESTINATION bin)
 

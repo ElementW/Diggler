@@ -164,6 +164,24 @@ int main(int argc, char **argv) {
 
 }
 
+#ifdef __MINGW32__
+#include <wchar.h>
+#include <windows.h>
+extern "C"
+int wmain(int argc, wchar_t **argv) {
+  printf("hi\n");
+  std::unique_ptr<std::unique_ptr<char[]>[]> u8args(new std::unique_ptr<char[]>[argc]);
+  std::unique_ptr<char*[]> u8argv(new char*[argc]);
+  for (size_t i = 0; i < static_cast<size_t>(argc); ++i) {
+    const size_t len = wcslen(argv[i]) * 4;
+    u8args[i].reset(new char[len]);
+    WideCharToMultiByte(CP_UTF8, 0, argv[i], -1, u8args[i].get(), len, nullptr, nullptr);
+    u8argv[i] = u8args[i].get();
+  }
+  return Diggler::main(argc, u8argv.get());
+}
+#endif
+
 int main(int argc, char **argv) {
   //try {
     return Diggler::main(argc, argv);
