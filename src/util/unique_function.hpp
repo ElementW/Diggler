@@ -4,7 +4,7 @@
 #include <memory>
 #include <utility>
 
-namespace Diggler {
+namespace diggler {
 namespace Util {
 
 template <typename T>

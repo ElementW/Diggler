@@ -3,7 +3,7 @@
 #include <AL/al.h>
 #include <string>
 
-namespace Diggler {
+namespace diggler {
 
 class SoundBuffer {
 private:

@@ -8,8 +8,8 @@
 #include "../../Chunk.hpp"
 #include "../../World.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace MsgTypes {
 
 enum class ChunkTransferSubtype : uint8 {

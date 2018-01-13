@@ -8,28 +8,32 @@
 
 using std::shared_ptr;
 
-namespace Diggler {
+namespace diggler {
 
-namespace Content {
+namespace content {
 class AssetManager;
 class ModManager;
 class Registry;
 }
 
-namespace Render {
+namespace gfx {
+class Device;
+}
+
+namespace render {
 class Renderer;
 namespace gl {
 class ProgramManager;
 }
 }
 
-namespace Scripting {
-namespace Lua {
+namespace scripting {
+namespace lua {
 class State;
 }
 }
 
-namespace UI {
+namespace ui {
 class FontManager;
 class Manager;
 }
@@ -50,30 +54,31 @@ public:
   // Shared
   Config *C;
   double Time; uint64 TimeMs;
-  Net::Host H;
+  net::Host H;
   Universe *U;
   PlayerList players;
-  Content::Registry *CR;
-  ptr<Content::AssetManager> AM;
-  ptr<Content::ModManager> MM;
-  Scripting::Lua::State *LS;
+  content::Registry *CR;
+  ptr<content::AssetManager> AM;
+  ptr<content::ModManager> MM;
+  scripting::lua::State *LS;
 
   // Server
   Server *S;
 
   // Client
+  ptr<gfx::Device> GD;
   GameWindow *GW;
-  UI::Manager *UIM;
+  ui::Manager *UIM;
   LocalPlayer *LP;
-  Render::gl::ProgramManager *PM;
-  Render::Renderer *R;
-  ptr<UI::FontManager> FM;
+  render::gl::ProgramManager *PM;
+  render::Renderer *R;
+  ptr<ui::FontManager> FM;
   struct RenderProperties {
     bool bloom, wavingLiquids;
     float fogStart, fogEnd;
   } *RP;
   Audio *A;
-  Net::Peer *NS;
+  net::Peer *NS;
   KeyBinds *KB;
   int PlayerPosUpdateFreq;
 

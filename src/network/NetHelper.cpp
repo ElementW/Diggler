@@ -7,9 +7,9 @@
 #include "../Player.hpp"
 #include "../Server.hpp"
 
-namespace Diggler {
+namespace diggler {
 
-using namespace Net;
+using namespace net;
 
 namespace NetHelper {
 
@@ -24,7 +24,7 @@ void Broadcast(Game &G, const OutMessage &msg, Tfer tfer, Channels chan) {
 }
 
 void SendChat(Game *G, const std::string &str) {
-  Net::MsgTypes::ChatSend cs;
+  net::MsgTypes::ChatSend cs;
   cs.msg = meiose::variant::map {
     {"plaintext", str}
   };

@@ -6,7 +6,7 @@
 
 #include "platform/types/vec3.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 ///
 /// @brief Axis-Aligned Bounding Box.

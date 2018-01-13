@@ -6,11 +6,11 @@
 #include "../../Texture.hpp"
 #include "../image/ImageLoader.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
 
-namespace Content {
+namespace content {
 namespace Texture {
 
 class TextureLoader {
@@ -20,13 +20,13 @@ public:
     using LoadParams = Image::ImageLoader::LoadParams;
 
     std::shared_ptr<Image::ImageLoader::Loading> imageLoading;
-    std::shared_ptr<Diggler::Texture> texture;
+    std::shared_ptr<diggler::Texture> texture;
   };
 
   static std::shared_ptr<Loading> load(Game&, Image::Format, const std::string &path,
       PixelFormat pixFormat);
 
-  static std::shared_ptr<Loading> load(Game&, Image::Format, std::unique_ptr<IO::InStream> &&stream,
+  static std::shared_ptr<Loading> load(Game&, Image::Format, std::unique_ptr<io::InStream> &&stream,
       PixelFormat pixFormat);
 };
 

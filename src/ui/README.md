@@ -9,6 +9,6 @@ Some elements are handled in a more "traditional" way: they are drawn manually b
 
 Making a control
 ----
-* Your class **must** derive from `Diggler::UI::Element` in order to be controlled by the `UIManager`.
+* Your class **must** derive from `diggler::ui::Element` in order to be controlled by the `UIManager`.
 * All your constructors must take a `UIManager*` as first argument, called `M` if sticking to the projet's code style. They must then call `Element(M)` in the initializer list.
 * Override the `Element` methods you want, and implement the mandatory (pure virtual) `render()` one.

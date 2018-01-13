@@ -5,7 +5,7 @@
 #include <string>
 #include "Player.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
 
@@ -42,7 +42,7 @@ public:
    * @brief Gets a Player using its network peer object
    * @return Pointer to Player, may be nullptr if not found
    */
-  Player* getByPeer(const Net::Peer&);
+  Player* getByPeer(const net::Peer&);
 
   Player& add();
   void remove(const Player&);

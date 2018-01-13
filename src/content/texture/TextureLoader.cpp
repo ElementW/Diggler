@@ -4,8 +4,8 @@
 #include "../../render/Renderer.hpp"
 #include "../../util/ColorUtil.hpp"
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 namespace Texture {
 
 using Loading = TextureLoader::Loading;
@@ -57,7 +57,7 @@ std::shared_ptr<Loading> TextureLoader::load(Game &G, Image::Format format, cons
 }
 
 std::shared_ptr<Loading> TextureLoader::load(Game &G, Image::Format format,
-    std::unique_ptr<IO::InStream> &&stream, PixelFormat pixFormat) {
+    std::unique_ptr<io::InStream> &&stream, PixelFormat pixFormat) {
   LoadParams lp = getLoadParams(pixFormat);
   std::shared_ptr<Loading> l = std::make_shared<Loading>();
   lp.userdata = l;

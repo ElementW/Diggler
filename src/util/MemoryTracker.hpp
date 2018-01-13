@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace Diggler {
+namespace diggler {
 namespace Util {
 namespace MemoryTracker {
 

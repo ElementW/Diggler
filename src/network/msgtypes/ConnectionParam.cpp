@@ -1,7 +1,7 @@
 #include "ConnectionParam.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace MsgTypes {
 
 void ConnectionParamDHKeyExchange::writeToMsg(OutMessage &msg) const {

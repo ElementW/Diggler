@@ -4,8 +4,8 @@
 
 #include "Manager.hpp"
 
-namespace Diggler {
-namespace UI {
+namespace diggler {
+namespace ui {
 
 bool Element::Area::isIn(int x, int y) const {
   return x >= this->x && x < (this->x + this->w) &&

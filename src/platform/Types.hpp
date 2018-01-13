@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <string>
 
-namespace Diggler {
+namespace diggler {
 
 using uint   = std::uint32_t;
 using uint32 = std::uint32_t;

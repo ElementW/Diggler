@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace Diggler {
+namespace diggler {
 namespace fs {
 
 /**

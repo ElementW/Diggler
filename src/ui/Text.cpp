@@ -8,14 +8,14 @@
 #include "FontManager.hpp"
 #include "Manager.hpp"
 
-namespace Diggler {
-namespace UI {
+namespace diggler {
+namespace ui {
 
 Text::Text(Manager *M) :
   Element(M),
   m_scaleX(1),
   m_scaleY(1),
-  m_textBufUsage(Render::FontRendererTextBufferUsage::Default) {
+  m_textBufUsage(render::FontRendererTextBufferUsage::Default) {
   updateMatrix();
 }
 
@@ -23,7 +23,7 @@ Text::Text(Manager *M, const std::string &text, int scaleX, int scaleY) :
   Element(M),
   m_scaleX(scaleX),
   m_scaleY(scaleY),
-  m_textBufUsage(Render::FontRendererTextBufferUsage::Default),
+  m_textBufUsage(render::FontRendererTextBufferUsage::Default),
   m_text(text) {
   updateText();
   updateMatrix();
@@ -32,7 +32,7 @@ Text::Text(Manager *M, const std::string &text, int scaleX, int scaleY) :
 Text::~Text() {
 }
 
-void Text::setUpdateFrequencyHint(Render::FontRendererTextBufferUsage usage) {
+void Text::setUpdateFrequencyHint(render::FontRendererTextBufferUsage usage) {
   if (usage != m_textBufUsage) {
     m_textBufUsage = usage;
     m_textBuf.reset();

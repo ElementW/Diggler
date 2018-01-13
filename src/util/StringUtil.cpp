@@ -3,7 +3,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Diggler {
+namespace diggler {
 namespace Util {
 
 std::vector<std::string> explode(const std::string &s, char delim) {

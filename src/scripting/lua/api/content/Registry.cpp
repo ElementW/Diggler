@@ -4,11 +4,11 @@
 #include "../../../../content/Registry.hpp"
 #include "../../../../Game.hpp"
 
-using namespace Diggler;
+using namespace diggler;
 
 void Diggler_Content_Registry_registerBlock(struct Diggler_Game *cG,
   const char *name, struct Diggler_Content_BlockDef *cBdef) {
-  using namespace Content;
+  using namespace content;
   Game &G = *reinterpret_cast<Game*>(cG);
   Registry::BlockRegistration br(G.CR->registerBlock(name));
   { decltype(cBdef->appearance) &cApp = cBdef->appearance;

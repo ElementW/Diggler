@@ -1,15 +1,14 @@
 #include "ContentHandler.hpp"
 
-#include "../../GameState.hpp"
 #include "../msgtypes/Content.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace Client {
 
-using namespace Net::MsgTypes;
+using namespace net::MsgTypes;
 
-bool ContentHandler::handle(GameState &GS, InMessage &msg) {
+bool ContentHandler::handle(Game &G, InMessage &msg) {
   using S = ContentSubtype;
   switch (msg.getSubtype<S>()) {
   case S::AssetResponse: {

@@ -3,7 +3,7 @@
 
 struct GLFWwindow;
 
-namespace Diggler {
+namespace diggler {
 
 class GameWindow;
 

@@ -4,8 +4,8 @@
 
 #include "../../util/BitmapDumper.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 DelegateGL DelegateGL::instance;

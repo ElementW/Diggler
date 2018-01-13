@@ -7,7 +7,7 @@
 #include "Sound.hpp"
 #include "SoundBuffer.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
 

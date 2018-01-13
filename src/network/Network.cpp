@@ -28,9 +28,9 @@ struct membuf : std::streambuf {
 };
 class omsgbuf : public std::streambuf {
 protected:
-  Diggler::Net::OutMessage &omsg;
+  diggler::net::OutMessage &omsg;
 public:
-  omsgbuf(Diggler::Net::OutMessage &o) : omsg(o) {}
+  omsgbuf(diggler::net::OutMessage &o) : omsg(o) {}
 protected:
   std::streamsize xsputn(const char_type* s, std::streamsize n) override {
     omsg.writeData(s, n);
@@ -42,8 +42,8 @@ protected:
   }
 };
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 
 using Util::Log;
 using namespace Util::Logging::LogLevels;

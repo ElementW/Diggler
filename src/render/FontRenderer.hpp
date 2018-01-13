@@ -8,8 +8,8 @@
 #include "../platform/PreprocUtils.hpp"
 #include "../ui/Font.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 
 class FontRendererTextBuffer {
 protected:
@@ -30,10 +30,10 @@ inline FontRendererTextBuffer::~FontRendererTextBuffer() {}
 
 class FontRenderer {
 protected:
-  inline uintptr_t getRendererData(const UI::Font &f) const {
+  inline uintptr_t getRendererData(const ui::Font &f) const {
     return f.rendererData;
   }
-  inline void setRendererData(UI::Font &f, uintptr_t data) const {
+  inline void setRendererData(ui::Font &f, uintptr_t data) const {
     f.rendererData = data;
   }
 
@@ -44,15 +44,15 @@ public:
   FontRenderer() {}
   virtual ~FontRenderer() = 0;
 
-  virtual void registerFont(UI::Font&) = 0;
-  virtual void unregisterFont(UI::Font&) = 0;
+  virtual void registerFont(ui::Font&) = 0;
+  virtual void unregisterFont(ui::Font&) = 0;
 
   virtual TextBufferRef createTextBuffer(
       FontRendererTextBufferUsage = FontRendererTextBufferUsage::Default) = 0;
   virtual void updateTextBuffer(TextBufferRef&, const TextBuffer::Vertex *vertices,
       uint vertexCount) = 0;
 
-  virtual void render(const UI::Font&, const TextBufferRef&, const glm::mat4&) = 0;
+  virtual void render(const ui::Font&, const TextBufferRef&, const glm::mat4&) = 0;
 };
 
 inline FontRenderer::~FontRenderer() {}

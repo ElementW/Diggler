@@ -3,7 +3,7 @@
 
 #include "../platform/Types.hpp"
 
-namespace Diggler {
+namespace diggler {
 namespace Util {
 namespace ColorUtil {
 

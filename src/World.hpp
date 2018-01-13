@@ -16,10 +16,10 @@
 #include "network/Network.hpp"
 #include "Particles.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
-namespace Net {
+namespace net {
 class InMessage;
 class OutMessage;
 }
@@ -165,10 +165,10 @@ public:
 
   /* ============ Serialization ============ */
 
-  void write(IO::OutStream&) const;
-  void read(IO::InStream&);
-  void send(Net::OutMessage&) const;
-  void recv(Net::InMessage&);
+  void write(io::OutStream&) const;
+  void read(io::InStream&);
+  void send(net::OutMessage&) const;
+  void recv(net::InMessage&);
 };
 
 using WorldRef = std::shared_ptr<World>;

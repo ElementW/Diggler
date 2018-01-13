@@ -131,7 +131,7 @@ void operator delete[](void* ptr, const std::nothrow_t& tag) noexcept {
 }
 
 
-namespace Diggler {
+namespace diggler {
 namespace Util {
 namespace MemoryTracker {
 

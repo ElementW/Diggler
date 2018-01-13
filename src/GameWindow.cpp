@@ -10,8 +10,8 @@
 #include "Game.hpp"
 #include "GlobalProperties.hpp"
 #include "GLFWHandler.hpp"
-#include "GameState.hpp"
-#include "MessageState.hpp"
+#include "states/GameState.hpp"
+#include "states/MessageState.hpp"
 #include "Audio.hpp"
 #include "ui/FontManager.hpp"
 #include "ui/Manager.hpp"
@@ -19,7 +19,7 @@
 #include "util/Log.hpp"
 #include "util/MemoryTracker.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 using Util::Log;
 using namespace Util::Logging::LogLevels;
@@ -50,10 +50,10 @@ GameWindow::GameWindow(Game *G) : G(G) {
 
   m_w = 640; m_h = 480;
 
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
   glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API /*GLFW_OPENGL_ES_API*/);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+  //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
   glfwWindowHint(GLFW_SAMPLES, 0); // Gimme aliasing everywhere
   //glfwWindowHint(GLFW_STENCIL_BITS, 8);
 
@@ -68,10 +68,10 @@ GameWindow::GameWindow(Game *G) : G(G) {
   }
   glfwMakeContextCurrent(m_window);
 
-  Render::gl::OpenGL::init();
+  render::gl::OpenGL::init();
 
 #ifdef DEBUG
-  Render::gl::Debug::enable();
+  render::gl::Debug::enable();
 #endif
   glfwSetFramebufferSizeCallback(m_window, GLFWHandler::resize);
   glfwSetCursorPosCallback(m_window, GLFWHandler::cursorPos);
@@ -111,9 +111,9 @@ GameWindow::GameWindow(Game *G) : G(G) {
 #endif
   ;
 
-  auto glver = Render::gl::OpenGL::version();
-  Log(Info, TAG) << Render::gl::OpenGL::loaderName() << ' ' <<
-                    Render::gl::OpenGL::loaderVersion() << " -- GL" <<
+  auto glver = render::gl::OpenGL::version();
+  Log(Info, TAG) << render::gl::OpenGL::loaderName() << ' ' <<
+                    render::gl::OpenGL::loaderVersion() << " -- GL" <<
                     (glver.isGLES ? "ES" : "") << ' ' <<
                     glver.major << '.' << glver.minor <<
                     (glver.isCore ? " Core" : "") <<
@@ -127,7 +127,7 @@ GameWindow::GameWindow(Game *G) : G(G) {
   }
 
   { Util::MemoryTracker::ScopedCategory sc(nullptr);
-    UIM = new UI::Manager;
+    UIM = new ui::Manager;
     UIM->onResize(m_w, m_h);
 
     G->init();
@@ -203,7 +203,11 @@ void GameWindow::cbResize(int w, int h) {
   m_currentState->onResize(w, h);
 }
 
-void GameWindow::setNextState(std::unique_ptr<State> &&next) {
+states::State& GameWindow::state() const {
+  return *m_currentState;
+}
+
+void GameWindow::setNextState(std::unique_ptr<states::State> &&next) {
   m_nextState = std::move(next);
 }
 
@@ -230,7 +234,7 @@ void GameWindow::run() {
 }
 
 void GameWindow::showMessage(const std::string &msg, const std::string &submsg) {
-  setNextState(std::make_unique<MessageState>(this, msg, submsg));
+  setNextState(std::make_unique<states::MessageState>(this, msg, submsg));
 }
 
 }

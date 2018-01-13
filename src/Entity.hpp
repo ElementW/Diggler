@@ -2,7 +2,7 @@
 #define ENTITY_HPP
 #include "Platform.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Entity {
 public:

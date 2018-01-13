@@ -2,8 +2,8 @@
 #define DIGGLER_CONTENT_OBJECT_DEF_HPP
 #include "../Platform.hpp"
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 
 class ObjectDef {
 public:

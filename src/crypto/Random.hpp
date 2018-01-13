@@ -6,7 +6,7 @@
 #include "CryptoData.hpp"
 #include "../platform/Types.hpp"
 
-namespace Diggler {
+namespace diggler {
 namespace Crypto {
 namespace Random {
 

@@ -4,8 +4,8 @@
 #include "FeatureSupport.hpp"
 #include "Util.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 using Util::Log;

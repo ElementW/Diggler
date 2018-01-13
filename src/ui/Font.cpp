@@ -10,8 +10,8 @@
 #include "../render/Renderer.hpp"
 #include "../Game.hpp"
 
-namespace Diggler {
-namespace UI {
+namespace diggler {
+namespace ui {
 
 static const struct { float r, g, b; } ColorTable[16] = {
   {1.0f, 1.0f, 1.0f},
@@ -33,11 +33,10 @@ static const struct { float r, g, b; } ColorTable[16] = {
 };
 
 Font::Font(Game *G, const std::string& path) : G(G) {
-  m_texture = Content::Texture::TextureLoader::load(*G, Content::Image::ImageFormats::PNG, path,
+  m_texture = content::Texture::TextureLoader::load(*G, content::Image::ImageFormats::PNG, path,
       PixelFormat::RGBA)->texture;
-  std::ifstream source(path + ".fdf", std::ios_base::binary);
+  std::ifstream source(path + ".fdf", std::ios_base::binary | std::ios_base::ate);
   if (source.good()) {
-    source.seekg(0, std::ios_base::end);
     int size = (int)source.tellg() - 1; // Last byte is font's height
     source.seekg(0, std::ios_base::beg);
     //widths = new uint8[size];
@@ -64,20 +63,20 @@ Font::Font(Game *G, const std::string& path) : G(G) {
   G->R->renderers.font->registerFont(*this);
 }
 
-using Vertex = Render::FontRenderer::TextBuffer::Vertex;
+using Vertex = render::FontRenderer::TextBuffer::Vertex;
 
-Render::FontRendererTextBufferRef Font::createTextBuffer() const {
+render::FontRendererTextBufferRef Font::createTextBuffer() const {
   return G->R->renderers.font->createTextBuffer();
 }
 
-Render::FontRendererTextBufferRef Font::createTextBuffer(
-    Render::FontRendererTextBufferUsage usage) const {
+render::FontRendererTextBufferRef Font::createTextBuffer(
+    render::FontRendererTextBufferUsage usage) const {
   return G->R->renderers.font->createTextBuffer(usage);
 }
 
 #define eraseCurChar() vertCount -= 6;
 
-void Font::updateTextBuffer(Render::FontRendererTextBufferRef &buf, const std::string &text) const {
+void Font::updateTextBuffer(render::FontRendererTextBufferRef &buf, const std::string &text) const {
   uint vertCount = text.size()*6;
   std::unique_ptr<Vertex[]> verts(new Vertex[vertCount]);
   int16 c, w, line = 0, cx = 0, v = 0;
@@ -129,7 +128,7 @@ void Font::updateTextBuffer(Render::FontRendererTextBufferRef &buf, const std::s
   G->R->renderers.font->updateTextBuffer(buf, verts.get(), vertCount);
 }
 
-void Font::draw(const Render::FontRendererTextBufferRef &buf, const glm::mat4 &matrix) const {
+void Font::draw(const render::FontRendererTextBufferRef &buf, const glm::mat4 &matrix) const {
   G->R->renderers.font->render(*this, buf, matrix);
 }
 

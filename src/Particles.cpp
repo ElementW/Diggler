@@ -4,7 +4,7 @@
 #include "Game.hpp"
 #include "render/Renderer.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 ParticleEmitter::ParticleEmitter(Game *G) :
   G(G) {

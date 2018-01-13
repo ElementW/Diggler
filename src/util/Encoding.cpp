@@ -3,7 +3,7 @@
 #include <codecvt>
 #include <locale>
 
-namespace Diggler {
+namespace diggler {
 namespace Util {
 namespace Encoding {
 

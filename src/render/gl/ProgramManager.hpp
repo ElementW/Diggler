@@ -9,11 +9,11 @@
 
 #include "Program.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
 
-namespace Render {
+namespace render {
 namespace gl {
 
 struct ProgramMetadata {
@@ -32,9 +32,9 @@ struct ProgramMetadata {
 namespace std {
 
 template <>
-class hash<Diggler::Render::gl::ProgramMetadata> {
+class hash<diggler::render::gl::ProgramMetadata> {
 public:
-size_t operator()(const Diggler::Render::gl::ProgramMetadata &meta) const {
+size_t operator()(const diggler::render::gl::ProgramMetadata &meta) const {
   std::size_t hash = std::hash<std::string>{}(meta.name);
   for (const std::string &s : meta.enabledBindings) {
     hash ^= (std::hash<std::string>{}(s) << 1);
@@ -45,8 +45,8 @@ size_t operator()(const Diggler::Render::gl::ProgramMetadata &meta) const {
 
 }
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 class ProgramManager {

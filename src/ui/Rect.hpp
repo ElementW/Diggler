@@ -2,8 +2,8 @@
 #define RECT_HPP
 #include "Element.hpp"
 
-namespace Diggler {
-namespace UI {
+namespace diggler {
+namespace ui {
 
 class Rect : public Element {
 private:

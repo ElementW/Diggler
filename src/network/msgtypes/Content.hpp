@@ -8,8 +8,8 @@
 
 #include "../../content/Mod.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace MsgTypes {
 
 enum class ContentSubtype : uint8 {
@@ -33,7 +33,7 @@ struct ContentModListRequest : public MsgType {
 };
 
 struct ContentModListResponse : public MsgType {
-  std::vector<Content::ModId> modsIds;
+  std::vector<content::ModId> modsIds;
 
   void writeToMsg(OutMessage&) const override;
   void readFromMsg(InMessage&) override;
@@ -44,7 +44,7 @@ struct ContentModInfoRequest : public ContentModListResponse {
 };
 
 struct ContentModInfoResponse : public MsgType {
-  // TODO std::map<Content::ModId, > mods;
+  // TODO std::map<content::ModId, > mods;
 
   void writeToMsg(OutMessage&) const override;
   void readFromMsg(InMessage&) override;

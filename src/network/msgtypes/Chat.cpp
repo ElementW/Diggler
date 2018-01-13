@@ -1,7 +1,7 @@
 #include "Chat.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace MsgTypes {
 
 void ChatSend::writeToMsg(OutMessage &omsg) const {

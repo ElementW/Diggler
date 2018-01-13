@@ -9,11 +9,11 @@
 #include "VAO.hpp"
 #include "VBO.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
 
-namespace Render {
+namespace render {
 namespace gl {
 
 class GLWorldRenderer : public WorldRenderer {

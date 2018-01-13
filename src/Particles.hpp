@@ -7,9 +7,9 @@
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 
-namespace Diggler {
+namespace diggler {
 
-namespace Render {
+namespace render {
 class ParticlesRenderer;
 }
 class Game;
@@ -22,7 +22,7 @@ struct Particle {
 };
 
 class ParticleEmitter {
-  friend class Render::ParticlesRenderer;
+  friend class render::ParticlesRenderer;
   uintptr_t rendererData;
 
   Game *G;

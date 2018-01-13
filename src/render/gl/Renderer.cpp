@@ -8,8 +8,8 @@
 #include "TextureManager.hpp"
 #include "WorldRenderer.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 using Util::Log;

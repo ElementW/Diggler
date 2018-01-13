@@ -1,6 +1,6 @@
 #include "Logger.hpp"
 
-namespace Diggler {
+namespace diggler {
 namespace Util {
 namespace Logging {
 

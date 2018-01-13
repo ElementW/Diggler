@@ -9,9 +9,9 @@ extern "C" {
 #include <luajit.h>
 }
 
-namespace Diggler {
-namespace Scripting {
-namespace Lua {
+namespace diggler {
+namespace scripting {
+namespace lua {
 
 static int wrap_exceptions(lua_State *L, lua_CFunction f) {
   try {

@@ -1,14 +1,16 @@
-#ifndef STATE_HPP
-#define STATE_HPP
-#include "Platform.hpp"
+#ifndef DIGGLER_STATES_STATE_HPP
+#define DIGGLER_STATES_STATE_HPP
+#include "../platform/Types.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class GameWindow;
 
+namespace states {
+
 class State {
 private:
-  friend GameWindow;
+  friend diggler::GameWindow;
 
   double m_runTime, m_deltaTime;
 
@@ -43,5 +45,6 @@ public:
 };
 
 }
+}
 
-#endif
+#endif /* DIGGLER_STATES_STATE_HPP */

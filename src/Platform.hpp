@@ -12,7 +12,7 @@
 #include "platform/Math.hpp"
 #include "platform/Types.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 namespace proc {
   /// @returns The executable's absolute path

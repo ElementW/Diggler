@@ -4,8 +4,8 @@
 #include <cstring>
 #include <stdexcept>
 
-namespace Diggler {
-namespace IO {
+namespace diggler {
+namespace io {
 
 MemoryStream::MemoryStream(void *data, SizeT len) :
   m_data(static_cast<uint8*>(data)),

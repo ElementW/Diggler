@@ -7,11 +7,11 @@
 #include "../../Texture.hpp"
 #include "OpenGL.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
-class Texture : public Diggler::Texture {
+class Texture : public diggler::Texture {
 private:
   // maybe ? TextureManager &TM;
   GLuint m_id;
@@ -36,7 +36,7 @@ public:
   void setFiltering(Filter min, Filter mag) override;
 
   void setWrapping(Wrapping s, Wrapping t) override;
-  using Diggler::Texture::setWrapping;
+  using diggler::Texture::setWrapping;
 
   void bind() const {
     glBindTexture(GL_TEXTURE_2D, m_id);

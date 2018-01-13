@@ -4,10 +4,10 @@
 #include <thread>
 #include <chrono>
 
-#include "ConnectingState.hpp"
+#include "states/ConnectingState.hpp"
 #include "Game.hpp"
 #include "GameWindow.hpp"
-#include "MessageState.hpp"
+#include "states/MessageState.hpp"
 #include "GlobalProperties.hpp"
 #include "Server.hpp"
 #include "network/Network.hpp"
@@ -15,9 +15,9 @@
 #include "util/Log.hpp"
 #include "util/MemoryTracker.hpp"
 
-#include "UITestState.hpp"
+#include "states/UITestState.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 using Util::Log;
 using namespace Util::Logging::LogLevels;
@@ -27,8 +27,8 @@ static const char *TAG = "main()";
 using std::string;
 
 static bool InitNetwork() {
-  std::cout << Net::GetNetworkLibVersion() << std::endl;
-  return Net::Init();
+  std::cout << net::GetNetworkLibVersion() << std::endl;
+  return net::Init();
 }
 
 static void InitRand() {
@@ -139,7 +139,7 @@ int main(int argc, char **argv) {
 
       /*/GW.setNextState(std::make_shared<UITestState>(&GW));/*/
       if (networkSuccess)
-        GW.setNextState(std::make_unique<ConnectingState>(&GW, host, port));
+        GW.setNextState(std::make_unique<states::ConnectingState>(&GW, host, port));
       else
         GW.showMessage("Network init failed!");
       /**/
@@ -178,13 +178,13 @@ int wmain(int argc, wchar_t **argv) {
     WideCharToMultiByte(CP_UTF8, 0, argv[i], -1, u8args[i].get(), len, nullptr, nullptr);
     u8argv[i] = u8args[i].get();
   }
-  return Diggler::main(argc, u8argv.get());
+  return diggler::main(argc, u8argv.get());
 }
 #endif
 
 int main(int argc, char **argv) {
   //try {
-    return Diggler::main(argc, argv);
+    return diggler::main(argc, argv);
   /*} catch (std::exception &e) {
     std::cerr << "==== CRASHED (std::exception) ===" << std::endl << e.what() << std::endl;
   } catch (std::string &e) {

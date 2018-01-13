@@ -5,8 +5,8 @@
 
 #include "Stream.hpp"
 
-namespace Diggler {
-namespace IO {
+namespace diggler {
+namespace io {
 
 class InFileStream : public InSeekableStream, public SizedStream {
 protected:
@@ -14,7 +14,7 @@ protected:
 
 public:
   InFileStream(const std::string &path);
-  ~InFileStream();
+  ~InFileStream() override;
 
   SizeT length() const override;
 
@@ -29,7 +29,7 @@ protected:
 
 public:
   OutFileStream(const std::string &path);
-  ~OutFileStream();
+  ~OutFileStream() override;
 
   virtual bool eos() const override {
     return false;

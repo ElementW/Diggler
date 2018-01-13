@@ -6,8 +6,8 @@
 #include "../Frustum.hpp"
 #include "../World.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 
 class RenderParams {
 public:

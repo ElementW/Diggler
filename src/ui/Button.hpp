@@ -5,8 +5,8 @@
 
 #include <memory>
 
-namespace Diggler {
-namespace UI {
+namespace diggler {
+namespace ui {
 
 class Text;
 

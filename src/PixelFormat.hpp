@@ -3,7 +3,7 @@
 
 #include "platform/Types.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 enum class PixelFormat : uint8 {
   RGB,

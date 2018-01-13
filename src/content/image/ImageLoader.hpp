@@ -8,8 +8,8 @@
 #include "../../PixelFormat.hpp"
 #include "ImageFormat.hpp"
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 namespace Image {
 
 class ImageLoader final {
@@ -60,12 +60,12 @@ public:
 
   class Loading {
   protected:
-    Loading(std::unique_ptr<IO::InStream>&&, const LoadParams&);
+    Loading(std::unique_ptr<io::InStream>&&, const LoadParams&);
 
   public:
     virtual ~Loading();
 
-    std::unique_ptr<IO::InStream> stream;
+    std::unique_ptr<io::InStream> stream;
     LoadParams loadParams;
     uint w, h;
     byte *pixels;
@@ -74,7 +74,7 @@ public:
   static std::shared_ptr<Loading> load(Format, const std::string &path, PixelFormat pixFormat,
       const LoadParams&);
 
-  static std::shared_ptr<Loading> load(Format, std::unique_ptr<IO::InStream> &&stream,
+  static std::shared_ptr<Loading> load(Format, std::unique_ptr<io::InStream> &&stream,
       PixelFormat pixFormat, const LoadParams&);
 };
 

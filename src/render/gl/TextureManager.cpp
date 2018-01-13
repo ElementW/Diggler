@@ -3,8 +3,8 @@
 #include "../../util/ColorUtil.hpp"
 #include "Texture.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 TextureManager::TextureManager(Game &G) :

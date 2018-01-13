@@ -11,11 +11,11 @@
 #include "../Game.hpp"
 #include "../GameWindow.hpp"
 
-namespace Diggler {
-namespace UI {
+namespace diggler {
+namespace ui {
 
 struct Renderer {
-  const Render::gl::Program *prog;
+  const render::gl::Program *prog;
   GLint att_texcoord, att_coord, uni_mvp, uni_unicolor;
 } R{}, RR{};
 
@@ -42,7 +42,7 @@ void Manager::setup(Game *G) {
     RR.uni_mvp = RR.prog->uni("mvp");
     RR.uni_unicolor = RR.prog->uni("unicolor");
   }
-  m_rectVbo.reset(new Render::gl::VBO);
+  m_rectVbo.reset(new render::gl::VBO);
   const uint8 verts[6*4] = {
     0, 0, 0, 1,
     1, 0, 1, 1,
@@ -53,8 +53,8 @@ void Manager::setup(Game *G) {
     1, 1, 1, 0
   };
   m_rectVbo->setData(verts, 6*4);
-  m_rectVao = std::make_unique<Render::gl::VAO>();
-  { Render::gl::VAO::Config cfg = m_rectVao->configure();
+  m_rectVao = std::make_unique<render::gl::VAO>();
+  { render::gl::VAO::Config cfg = m_rectVao->configure();
     cfg.vertexAttrib(*m_rectVbo, RR.att_coord, 2, GL_UNSIGNED_BYTE, 4*sizeof(uint8));
     cfg.vertexAttrib(*m_rectVbo, R.att_texcoord, 2, GL_UNSIGNED_BYTE, 4*sizeof(uint8), 2*sizeof(uint8));
     cfg.commit();

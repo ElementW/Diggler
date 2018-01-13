@@ -5,11 +5,11 @@
 
 #include <glm/detail/type_mat3x3.hpp>
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
 
-namespace UI {
+namespace ui {
 
 class Manager;
 

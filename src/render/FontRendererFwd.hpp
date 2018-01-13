@@ -5,8 +5,8 @@
 
 #include "../platform/Types.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 
 enum class FontRendererTextBufferUsage : uint8 {
   Static,

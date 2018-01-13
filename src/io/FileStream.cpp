@@ -1,7 +1,7 @@
 #include "FileStream.hpp"
 
-namespace Diggler {
-namespace IO {
+namespace diggler {
+namespace io {
 
 inline std::ios::seekdir getSeekDir(SeekableStream::Whence whence) {
   switch (whence) {

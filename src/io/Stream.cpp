@@ -19,8 +19,8 @@
  * - Backward absolute seekable : can go back anywhere in the stream. Implies Tellable.
  */
 
-namespace Diggler {
-namespace IO {
+namespace diggler {
+namespace io {
 
 Stream::~Stream() {
 }

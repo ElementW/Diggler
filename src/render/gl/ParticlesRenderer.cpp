@@ -5,8 +5,8 @@
 #include "../../Game.hpp"
 #include "ProgramManager.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 using GLParticle = ParticleEmitter::ParticleRenderData;

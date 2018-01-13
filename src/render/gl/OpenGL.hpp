@@ -20,8 +20,8 @@
   #error "No OpenGL loader selected"
 #endif
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 class OpenGL {

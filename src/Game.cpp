@@ -1,18 +1,19 @@
 #include "Game.hpp"
 
-#include "Audio.hpp"
 #include "content/AssetManager.hpp"
 #include "content/ModManager.hpp"
 #include "content/Registry.hpp"
-#include "GlobalProperties.hpp"
-#include "KeyBinds.hpp"
-#include "LocalPlayer.hpp"
+#include "gfx/Device.hpp"
 #include "render/gl/ProgramManager.hpp"
 #include "render/gl/Renderer.hpp"
 #include "scripting/lua/State.hpp"
 #include "ui/FontManager.hpp"
+#include "Audio.hpp"
+#include "GlobalProperties.hpp"
+#include "KeyBinds.hpp"
+#include "LocalPlayer.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 Game::Game() :
   C(nullptr),
@@ -35,9 +36,9 @@ Game::Game() :
 }
 
 void Game::init() {
-  AM = std::make_unique<Content::AssetManager>(this);
-  MM = std::make_unique<Content::ModManager>(this);
-  LS = new Scripting::Lua::State(this);
+  AM = std::make_unique<content::AssetManager>(this);
+  MM = std::make_unique<content::ModManager>(this);
+  LS = new scripting::lua::State(this);
   if (GlobalProperties::IsClient) {
     initClient();
   }
@@ -47,7 +48,7 @@ void Game::init() {
 }
 
 void Game::initClient() {
-  PM = new Render::gl::ProgramManager(*this);
+  PM = new render::gl::ProgramManager(*this);
   LP = new LocalPlayer(this);
   RP = new RenderProperties; { // TODO move somewhere else?
     RP->bloom = true;
@@ -55,9 +56,9 @@ void Game::initClient() {
     RP->fogStart = 16;
     RP->fogEnd = 24;
   }
-  R = new Render::gl::GLRenderer(this);
-  CR = new Content::Registry(*this);
-  FM = std::make_unique<UI::FontManager>(*this);
+  R = new render::gl::GLRenderer(this);
+  CR = new content::Registry(*this);
+  FM = std::make_unique<ui::FontManager>(*this);
   A = new Audio(*this);
   KB = new KeyBinds;
   LP = new LocalPlayer(this);
@@ -65,7 +66,7 @@ void Game::initClient() {
 }
 
 void Game::initServer() {
-  CR = new Content::Registry(*this);
+  CR = new content::Registry(*this);
 }
 
 void Game::finalize() {

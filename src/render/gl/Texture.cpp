@@ -11,8 +11,8 @@
 #define PushBoundTex() GLint currentBoundTex; glGetIntegerv(GL_TEXTURE_BINDING_2D, &currentBoundTex);
 #define PopBoundTex() glBindTexture(GL_TEXTURE_2D, currentBoundTex);
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 static GLenum getGlTexFormat(PixelFormat fmt) {
@@ -28,7 +28,7 @@ static GLenum getGlTexFormat(PixelFormat fmt) {
 }
 
 Texture::Texture(uint w, uint h, PixelFormat format, const uint8 *data) :
-  Diggler::Texture(w, h, format) {
+  diggler::Texture(w, h, format) {
   PushBoundTex();
   glGenTextures(1, &m_id);
   glBindTexture(GL_TEXTURE_2D, m_id);

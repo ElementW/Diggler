@@ -10,8 +10,8 @@
 #include "../../World.hpp"
 #include "ProgramManager.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 using GLCoord = Chunk::Vertex;

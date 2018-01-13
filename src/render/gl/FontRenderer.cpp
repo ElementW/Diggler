@@ -5,8 +5,8 @@
 #include "../../Game.hpp"
 #include "ProgramManager.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 GLFontRenderer::GLTextBuffer::GLTextBuffer(const GLFontRenderer &parent,
@@ -40,11 +40,11 @@ GLFontRenderer::TextBufferRef GLFontRenderer::createTextBuffer(FontRendererTextB
   return std::make_unique<GLTextBuffer>(*this, use);
 }
 
-void GLFontRenderer::registerFont(UI::Font&) {
+void GLFontRenderer::registerFont(ui::Font&) {
 
 }
 
-void GLFontRenderer::unregisterFont(UI::Font&) {
+void GLFontRenderer::unregisterFont(ui::Font&) {
 
 }
 
@@ -67,7 +67,7 @@ void GLFontRenderer::updateTextBuffer(TextBufferRef &buf, const TextBuffer::Vert
   glbuf.vertexCount = static_cast<GLsizei>(vertexCount);
 }
 
-void GLFontRenderer::render(const UI::Font &font, const TextBufferRef &buf,
+void GLFontRenderer::render(const ui::Font &font, const TextBufferRef &buf,
     const glm::mat4 &matrix) {
   const GLTextBuffer &glbuf = *reinterpret_cast<const GLTextBuffer*>(buf.get());
   prog->bind();

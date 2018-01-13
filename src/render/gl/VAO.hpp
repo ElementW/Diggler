@@ -11,8 +11,8 @@
 #include "Util.hpp"
 #include "VBO.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 class VAO {

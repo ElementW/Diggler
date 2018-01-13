@@ -3,7 +3,7 @@
 
 #include <vector>
 
-namespace Diggler {
+namespace diggler {
 namespace Util {
 
 class Tipsify {

@@ -2,8 +2,8 @@
 
 #include <array>
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 void OpenGL::init() {

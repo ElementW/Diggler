@@ -6,11 +6,11 @@
 #include "TextureManager.hpp"
 #include "WorldRenderer.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
 
-namespace Render {
+namespace render {
 
 class Renderer {
 protected:

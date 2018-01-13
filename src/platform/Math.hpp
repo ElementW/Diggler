@@ -1,7 +1,7 @@
 #ifndef DIGGLER_PLATFORM_MATH_HPP
 #define DIGGLER_PLATFORM_MATH_HPP
 
-namespace Diggler {
+namespace diggler {
 
 ///
 /// Real Modulus

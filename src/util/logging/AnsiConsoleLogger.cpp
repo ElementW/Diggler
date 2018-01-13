@@ -5,7 +5,7 @@
 
 using std::cout;
 
-namespace Diggler {
+namespace diggler {
 namespace Util {
 namespace Logging {
 

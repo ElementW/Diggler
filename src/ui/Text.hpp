@@ -7,14 +7,14 @@
 #include "Element.hpp"
 #include "../render/FontRendererFwd.hpp"
 
-namespace Diggler {
-namespace UI {
+namespace diggler {
+namespace ui {
 
 class Text : public Element {
 private:
   int m_scaleX, m_scaleY;
-  Render::FontRendererTextBufferUsage m_textBufUsage;
-  Render::FontRendererTextBufferRef m_textBuf;
+  render::FontRendererTextBufferUsage m_textBufUsage;
+  render::FontRendererTextBufferRef m_textBuf;
   std::string m_fontName;
   glm::mat4 m_matrix;
   std::string m_text;
@@ -37,7 +37,7 @@ public:
   /**
    * Hints if frequent updates should be expected for this Text object
    */
-  void setUpdateFrequencyHint(Render::FontRendererTextBufferUsage);
+  void setUpdateFrequencyHint(render::FontRendererTextBufferUsage);
 
   /**
    * @param text Text to display

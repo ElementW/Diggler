@@ -9,8 +9,8 @@
 #include "OpenGL.hpp"
 #include "Texture.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 class FBO {

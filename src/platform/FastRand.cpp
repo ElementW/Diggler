@@ -2,7 +2,7 @@
 
 #include <random>
 
-namespace Diggler {
+namespace diggler {
 
 uint FastRandInit() {
   static std::random_device rd;

@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace Diggler {
+namespace diggler {
 
 constexpr uint16_t byteSwap16(uint16_t x) {
 #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)

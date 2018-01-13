@@ -2,8 +2,8 @@
 
 #include "../Game.hpp"
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 
 AssetManager::AssetManager(Game *G) :
   G(G) {

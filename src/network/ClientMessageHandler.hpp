@@ -3,17 +3,19 @@
 
 #include "Network.hpp"
 
-namespace Diggler {
+namespace diggler {
 
+namespace states {
 class GameState;
+}
 
-namespace Net {
+namespace net {
 
 class ClientMessageHandler {
 public:
-  GameState &GS;
+  states::GameState &GS;
 
-  ClientMessageHandler(GameState&);
+  ClientMessageHandler(states::GameState&);
 
   bool handleMessage(InMessage&);
 };

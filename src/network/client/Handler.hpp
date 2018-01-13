@@ -1,11 +1,11 @@
 #ifndef DIGGLER_NET_CLIENT_HANDLER_HPP
 #define DIGGLER_NET_CLIENT_HANDLER_HPP
 
-namespace Diggler {
+namespace diggler {
 
-class GameState;
+class Game;
 
-namespace Net {
+namespace net {
 
 class InMessage;
 

@@ -1,6 +1,6 @@
 #include "GlobalProperties.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 bool GlobalProperties::IsClient = true;
 bool GlobalProperties::IsServer = false;

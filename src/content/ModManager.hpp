@@ -3,11 +3,11 @@
 
 #include "Mod.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
 
-namespace Content {
+namespace content {
 
 class ModManager final {
 private:

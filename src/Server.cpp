@@ -24,9 +24,9 @@
 using std::cout;
 using std::endl;
 
-using namespace Diggler::Net;
+using namespace diggler::net;
 
-namespace Diggler {
+namespace diggler {
 
 using Util::Log;
 using namespace Util::Logging::LogLevels;
@@ -135,8 +135,8 @@ void Server::handleDisconnect(Peer &peer) {
   handlePlayerQuit(peer, QuitReason::Timeout);
 }
 
-void Server::handleContentMessage(Net::InMessage &msg, Net::Peer &peer) {
-  using namespace Net::MsgTypes;
+void Server::handleContentMessage(net::InMessage &msg, net::Peer &peer) {
+  using namespace net::MsgTypes;
   using S = ContentSubtype;
   switch (msg.getSubtype<MsgTypes::ContentSubtype>()) {
   case S::ModListRequest: {
@@ -152,7 +152,7 @@ void Server::handleContentMessage(Net::InMessage &msg, Net::Peer &peer) {
 }
 
 void Server::handleChat(InMessage &msg, Player *plr) {
-  using namespace Net::MsgTypes;
+  using namespace net::MsgTypes;
   using S = ChatSubtype;
   switch (msg.getSubtype<S>()) {
     case S::Send: {
@@ -178,7 +178,7 @@ void Server::handleCommand(Player *plr, const std::string &command, const std::v
 }
 
 void Server::handlePlayerUpdate(InMessage &msg, Player &plr) {
-  using namespace Net::MsgTypes;
+  using namespace net::MsgTypes;
   using S = PlayerUpdateSubtype;
   switch (msg.getSubtype<S>()) {
   case S::Move: {
@@ -207,9 +207,9 @@ void Server::schedSendChunk(ChunkRef C, Player &P) {
 }
 
 void Server::sendChunks(const std::list<ChunkRef> &cs, Player &P) {
-  using namespace Net::MsgTypes;
+  using namespace net::MsgTypes;
   ChunkTransferResponse ctr;
-  std::vector<IO::OutMemoryStream> chunkBufs(cs.size());
+  std::vector<io::OutMemoryStream> chunkBufs(cs.size());
   size_t i = 0;
   for (const ChunkRef &cr : cs) {
     ctr.chunks.emplace_back();
@@ -228,7 +228,7 @@ void Server::sendChunks(const std::list<ChunkRef> &cs, Player &P) {
 }
 
 void Server::handlePlayerChunkRequest(InMessage &msg, Player &plr) {
-  using namespace Net::MsgTypes;
+  using namespace net::MsgTypes;
   using S = ChunkTransferSubtype;
   switch (msg.getSubtype<S>()) {
     case S::Request: {
@@ -251,7 +251,7 @@ void Server::handlePlayerChunkRequest(InMessage &msg, Player &plr) {
 
 void Server::handlePlayerMapUpdate(InMessage &msg, Player &plr) {
   // TODO: distance & tool check, i.e. legitimate update
-  using namespace Net::MsgTypes;
+  using namespace net::MsgTypes;
   using S = BlockUpdateSubtype;
   constexpr auto CX = Chunk::CX, CY = Chunk::CY, CZ = Chunk::CZ;
   switch (msg.getSubtype<S>()) {
@@ -285,7 +285,7 @@ void Server::handlePlayerMapUpdate(InMessage &msg, Player &plr) {
         ChunkRef c = w->getChunkAtCoords(bub.pos);
         if (c) {
           c->setBlock(rmod(bub.pos.x, CX), rmod(bub.pos.y, CY), rmod(bub.pos.z, CZ),
-                      Content::BlockAirId, 0);
+                      content::BlockAirId, 0);
           if (!c->CH.empty()) {
             BlockUpdateNotify bun;
             c->CH.flush(bun);
@@ -300,7 +300,7 @@ void Server::handlePlayerMapUpdate(InMessage &msg, Player &plr) {
 }
 
 void Server::handlePlayerDeath(InMessage &msg, Player &plr) {
-  using namespace Net::MsgTypes;
+  using namespace net::MsgTypes;
   PlayerUpdateDie pud;
   pud.readFromMsg(msg);
   pud.plrSessId = plr.sessId;
@@ -340,7 +340,7 @@ Server::Server(Game &G, uint16 port) : G(G) {
 
   try {
     H.create(port);
-  } catch (Net::Exception &e) {
+  } catch (net::Exception &e) {
     Log(Error, TAG) << "Couldn't open port " << port << " for listening\n" <<
         "Make sure no other server instance is running";
     if (port <= 1024) {
@@ -392,7 +392,7 @@ void Server::chunkUpdater(WorldRef WR, bool &continueUpdate) {
     for (auto pair : W) {
       if ((c = pair.second.lock()) && !c->CH.empty()) {
         // TODO: view range
-        Net::MsgTypes::BlockUpdateNotify bun;
+        net::MsgTypes::BlockUpdateNotify bun;
         c->CH.flush(bun);
         OutMessage msg;
         bun.writeToMsg(msg);
@@ -481,7 +481,7 @@ bool Server::isPlayerOnline(const std::string &playername) const {
   return false;
 }
 
-void Server::kick(Player &p, Net::QuitReason r, const std::string &message) {
+void Server::kick(Player &p, net::QuitReason r, const std::string &message) {
   OutMessage msg(MessageType::PlayerQuit, r);
   msg.writeU32(p.sessId);
   msg.writeString(message);

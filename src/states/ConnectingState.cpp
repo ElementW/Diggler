@@ -5,23 +5,25 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "Game.hpp"
+#include "../Game.hpp"
 #include "GameState.hpp"
-#include "GlobalProperties.hpp"
-#include "LocalPlayer.hpp"
-#include "network/msgtypes/PlayerJoin.hpp"
-#include "render/Renderer.hpp"
-#include "ui/Manager.hpp"
-#include "ui/Text.hpp"
-#include "util/Log.hpp"
+#include "../GlobalProperties.hpp"
+#include "../LocalPlayer.hpp"
+#include "../network/msgtypes/PlayerJoin.hpp"
+#include "../render/Renderer.hpp"
+#include "../ui/Manager.hpp"
+#include "../ui/Text.hpp"
+#include "../util/Log.hpp"
 
 // TODO: move elsewhere
-#include "scripting/lua/State.hpp"
+#include "../scripting/lua/State.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 using Util::Log;
 using namespace Util::Logging::LogLevels;
+
+namespace states {
 
 static const char *TAG = "ConnectingState";
 
@@ -37,8 +39,8 @@ ConnectingState::~ConnectingState() {
 }
 
 void ConnectingState::setupUI() {
-  txtConnecting = W->G->UIM->addManual<UI::Text>("Connecting");
-  txtDot = W->G->UIM->addManual<UI::Text>(".");
+  txtConnecting = W->G->UIM->addManual<ui::Text>("Connecting");
+  txtDot = W->G->UIM->addManual<ui::Text>(".");
   updateViewport();
 }
 
@@ -72,20 +74,20 @@ void ConnectingState::onLogicTick() {
       LocalPlayer &LP = *G->LP;
       LP.name = GlobalProperties::PlayerName;
 
-      Net::MsgTypes::PlayerJoinRequest pjr;
+      net::MsgTypes::PlayerJoinRequest pjr;
       pjr.name = G->LP->name;
-      Net::OutMessage join; pjr.writeToMsg(join);
-      G->H.send(*G->NS, join, Net::Tfer::Rel, Net::Channels::Base);
+      net::OutMessage join; pjr.writeToMsg(join);
+      G->H.send(*G->NS, join, net::Tfer::Rel, net::Channels::Base);
 
-      Net::InMessage m_msg;
+      net::InMessage m_msg;
       bool received = G->H.recv(m_msg, 5000);
       if (!received) {
         W->showMessage("Connected but got no response", "after 5 seconds");
         return;
       }
       bool msgGood = false;
-      if (m_msg.getType() == Net::MessageType::PlayerJoin) {
-        using PJS = Net::MsgTypes::PlayerJoinSubtype;
+      if (m_msg.getType() == net::MessageType::PlayerJoin) {
+        using PJS = net::MsgTypes::PlayerJoinSubtype;
         switch (m_msg.getSubtype<PJS>()) {
         case PJS::Success:
           msgGood = true;
@@ -128,7 +130,7 @@ void ConnectingState::onFrameTick() {
   Game *const G = W->G;
   glm::mat4 mat;
 
-  UI::Text::Size sz = txtConnecting->getSize();
+  ui::Text::Size sz = txtConnecting->getSize();
   const glm::mat4 textMat = glm::scale(glm::translate(*G->UIM->PM, glm::vec3(W->getW()/2-sz.x,
       W->getH()/2, 0.f)), glm::vec3(2.f, 2.f, 1.f));
 
@@ -157,4 +159,5 @@ void ConnectingState::onResize(int w, int h) {
   updateViewport();
 }
 
+}
 }

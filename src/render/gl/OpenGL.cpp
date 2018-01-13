@@ -2,8 +2,8 @@
 
 #include <sstream>
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 static std::set<std::string> extensionsSet;

@@ -1,6 +1,6 @@
 #include "ClientMessageHandler.hpp"
 
-#include "../GameState.hpp"
+#include "../states/GameState.hpp"
 #include "client/BlockUpdateHandler.hpp"
 #include "client/ContentHandler.hpp"
 #include "client/ChatHandler.hpp"
@@ -9,35 +9,36 @@
 #include "client/PlayerUpdateHandler.hpp"
 #include "client/PlayerQuitHandler.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 
-ClientMessageHandler::ClientMessageHandler(GameState &gameState) :
+ClientMessageHandler::ClientMessageHandler(states::GameState &gameState) :
   GS(gameState) {
 }
 
 bool ClientMessageHandler::handleMessage(InMessage &msg) {
-  using namespace Net::MsgTypes;
+  using namespace net::MsgTypes;
+  Game &G = *GS.G;
   switch (msg.getType()) {
     case MessageType::NetDisconnect:
       GS.GW->showMessage("Disconnected", "Timed out");
       return false;
 
     case MessageType::ChunkTransfer:
-      return Client::ChunkTransferHandler::handle(GS, msg);
+      return Client::ChunkTransferHandler::handle(G, msg);
 
     case MessageType::Chat:
-      return Client::ChatHandler::handle(GS, msg);
+      return Client::ChatHandler::handle(G, msg);
 
     case MessageType::PlayerJoin:
-      return Client::PlayerJoinHandler::handle(GS, msg);
+      return Client::PlayerJoinHandler::handle(G, msg);
     case MessageType::PlayerQuit:
-      return Client::PlayerQuitHandler::handle(GS, msg);
+      return Client::PlayerQuitHandler::handle(G, msg);
     case MessageType::PlayerUpdate:
-      return Client::PlayerUpdateHandler::handle(GS, msg);
+      return Client::PlayerUpdateHandler::handle(G, msg);
 
     case MessageType::BlockUpdate:
-      return Client::BlockUpdateHandler::handle(GS, msg);
+      return Client::BlockUpdateHandler::handle(G, msg);
 
     case MessageType::ServerInfo:
     case MessageType::NetConnect:

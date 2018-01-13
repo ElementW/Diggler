@@ -10,12 +10,12 @@
 #include <windows.h>
 #include "Fixes.hpp"
 
-std::string Diggler::fs::getParent(const std::string &path) {
+std::string diggler::fs::getParent(const std::string &path) {
   auto slash = path.find_last_of('/'), backslash = path.find_last_of('\\');
   return path.substr(std::max(slash, backslash));
 }
 
-std::vector<std::string> Diggler::fs::getContents(const std::string &path) {
+std::vector<std::string> diggler::fs::getContents(const std::string &path) {
   WIN32_FIND_DATA fdFile;
   HANDLE hFind = NULL;
   wchar_t sPath[2048];
@@ -38,7 +38,7 @@ std::vector<std::string> Diggler::fs::getContents(const std::string &path) {
   return entities;
 }
 
-std::vector<std::string> Diggler::fs::getDirs(const std::string &path) {
+std::vector<std::string> diggler::fs::getDirs(const std::string &path) {
   WIN32_FIND_DATA fdFile;
   HANDLE hFind = NULL;
   wchar_t sPath[2048];
@@ -63,7 +63,7 @@ std::vector<std::string> Diggler::fs::getDirs(const std::string &path) {
   return entities;
 }
 
-std::vector<std::string> Diggler::fs::getFiles(const std::string &path) {
+std::vector<std::string> diggler::fs::getFiles(const std::string &path) {
   WIN32_FIND_DATA fdFile;
   HANDLE hFind = NULL;
   wchar_t sPath[2048];
@@ -88,7 +88,7 @@ std::vector<std::string> Diggler::fs::getFiles(const std::string &path) {
   return entities;
 }
 
-inline bool Diggler::fs::isDir(const std::string &path) {
+inline bool diggler::fs::isDir(const std::string &path) {
   wchar_t szPath[2048];
   MultiByteToWideChar(CP_UTF8, 0, path.data(), path.size(), szPath, 2048);
   DWORD dwAttrib = GetFileAttributes(szPath);
@@ -119,17 +119,17 @@ std::string do_readlink(const std::string &path) {
   return do_readlink(path.c_str());
 }
 
-std::string Diggler::fs::pathCat(const std::string &first, const std::string &second) {
+std::string diggler::fs::pathCat(const std::string &first, const std::string &second) {
   if(first.at(first.length()-1) == '/')
     return first + second;
   return first + '/' + second;
 }
 
-std::string Diggler::fs::getParent(const std::string &path) {
+std::string diggler::fs::getParent(const std::string &path) {
   return path.substr(path.find_last_of('/'));
 }
 
-std::vector<std::string> Diggler::fs::getContents(const std::string &path) {
+std::vector<std::string> diggler::fs::getContents(const std::string &path) {
   DIR *dir = opendir(path.c_str());
   if(dir == 0)
     return std::vector<std::string>();
@@ -144,7 +144,7 @@ std::vector<std::string> Diggler::fs::getContents(const std::string &path) {
   return entitys;
 }
 
-std::vector<std::string> Diggler::fs::getDirs(const std::string &path) {
+std::vector<std::string> diggler::fs::getDirs(const std::string &path) {
   DIR *dir = opendir(path.c_str());
   if(dir == 0)
     return std::vector<std::string>();
@@ -160,7 +160,7 @@ std::vector<std::string> Diggler::fs::getDirs(const std::string &path) {
   return entitys;
 }
 
-std::vector<std::string> Diggler::fs::getFiles(const std::string &path) {
+std::vector<std::string> diggler::fs::getFiles(const std::string &path) {
   DIR *dir = opendir(path.c_str());
   if(dir == 0)
     return std::vector<std::string>();
@@ -176,7 +176,7 @@ std::vector<std::string> Diggler::fs::getFiles(const std::string &path) {
   return entitys;
 }
 
-inline bool Diggler::fs::isDir(const std::string &path) {
+inline bool diggler::fs::isDir(const std::string &path) {
   DIR *dir = opendir(path.c_str());
   if(dir)
   {
@@ -192,7 +192,7 @@ inline bool Diggler::fs::isDir(const std::string &path) {
 
 #endif
 
-namespace Diggler {
+namespace diggler {
 namespace fs {
 
 std::string readFile(const std::string &path) {

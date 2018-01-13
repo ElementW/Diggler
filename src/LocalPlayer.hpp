@@ -10,7 +10,7 @@
 #include "render/gl/VAO.hpp"
 #include "render/gl/VBO.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
 
@@ -20,8 +20,8 @@ private:
   bool hasGravity, hasNoclip, onGround, onRoad;
 
   // debugging
-  mutable Render::gl::VBO vbo;
-  mutable Render::gl::VAO vao;
+  mutable render::gl::VBO vbo;
+  mutable render::gl::VAO vao;
   mutable bool vaoConfigured = false;
 
 public:

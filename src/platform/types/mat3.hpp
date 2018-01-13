@@ -5,7 +5,7 @@
 
 #include "../Types.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 using mat3f   = glm::tmat3x3<float>;
 using mat3d   = glm::tmat3x3<double>;

@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace Diggler {
+namespace diggler {
 namespace Util {
 namespace Logging {
 

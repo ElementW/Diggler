@@ -2,16 +2,18 @@
 
 #include "../../Chatbox.hpp"
 #include "../../Game.hpp"
-#include "../../GameState.hpp"
+#include "../../states/GameState.hpp"
 #include "../msgtypes/Chat.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace Client {
 
-using namespace Net::MsgTypes;
+using namespace net::MsgTypes;
 
-bool ChatHandler::handle(GameState &GS, InMessage &msg) {
+bool ChatHandler::handle(Game &G, InMessage &msg) {
+  // TODO: get rid of
+  states::GameState &GS = static_cast<states::GameState&>(G.GW->state());
   using S = ChatSubtype;
   switch (msg.getSubtype<S>()) {
     case S::Send: {
@@ -32,7 +34,7 @@ bool ChatHandler::handle(GameState &GS, InMessage &msg) {
       if (cpt.msg.isStr()) {
         std::string playerName;
         if (cpt.player.display.isNil()) {
-          const Player *blabbermouth = GS.G->players.getBySessId(cpt.player.id);
+          const Player *blabbermouth = G.players.getBySessId(cpt.player.id);
           if (blabbermouth != nullptr) {
             playerName = blabbermouth->name + "> ";
           } else {

@@ -11,34 +11,35 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Audio.hpp"
-#include "CaveGenerator.hpp"
-#include "Chatbox.hpp"
-#include "Clouds.hpp"
-#include "content/Registry.hpp"
-#include "content/texture/TextureLoader.hpp"
-#include "EscMenu.hpp"
-#include "Game.hpp"
-#include "GlobalProperties.hpp"
-#include "KeyBinds.hpp"
-#include "LocalPlayer.hpp"
-#include "network/msgtypes/BlockUpdate.hpp"
-#include "network/msgtypes/PlayerJoin.hpp"
-#include "network/msgtypes/PlayerUpdate.hpp"
-#include "network/NetHelper.hpp"
-#include "Particles.hpp"
-#include "render/gl/FBO.hpp"
-#include "render/gl/ProgramManager.hpp"
-#include "render/Renderer.hpp"
-#include "scripting/lua/State.hpp"
-#include "Skybox.hpp"
-#include "ui/FontManager.hpp"
-#include "ui/Manager.hpp"
-#include "util/MemoryTracker.hpp"
+#include "../Audio.hpp"
+#include "../CaveGenerator.hpp"
+#include "../Chatbox.hpp"
+#include "../Clouds.hpp"
+#include "../content/Registry.hpp"
+#include "../content/texture/TextureLoader.hpp"
+#include "../EscMenu.hpp"
+#include "../Game.hpp"
+#include "../GlobalProperties.hpp"
+#include "../KeyBinds.hpp"
+#include "../LocalPlayer.hpp"
+#include "../network/msgtypes/BlockUpdate.hpp"
+#include "../network/msgtypes/PlayerJoin.hpp"
+#include "../network/msgtypes/PlayerUpdate.hpp"
+#include "../network/NetHelper.hpp"
+#include "../Particles.hpp"
+#include "../render/gl/FBO.hpp"
+#include "../render/gl/ProgramManager.hpp"
+#include "../render/Renderer.hpp"
+#include "../scripting/lua/State.hpp"
+#include "../Skybox.hpp"
+#include "../ui/FontManager.hpp"
+#include "../ui/Manager.hpp"
+#include "../util/MemoryTracker.hpp"
 
 using std::unique_ptr;
 
-namespace Diggler {
+namespace diggler {
+namespace states {
 
 GameState::GameState(GameWindow *GW) :
   GW(GW),
@@ -99,14 +100,14 @@ GameState::GameState(GameWindow *GW) :
   m_highlightBox.att_coord = m_highlightBox.program->att("coord");
   m_highlightBox.uni_unicolor = m_highlightBox.program->uni("unicolor");
   m_highlightBox.uni_mvp = m_highlightBox.program->uni("mvp");
-  { Render::gl::VAO::Config cfg = m_highlightBox.vao.configure();
+  { render::gl::VAO::Config cfg = m_highlightBox.vao.configure();
     cfg.vertexAttrib(m_highlightBox.vbo, m_highlightBox.att_coord, 3, GL_FLOAT, 0);
     cfg.commit();
   }
 
-  m_3dFbo = new Render::gl::FBO(w, h, PixelFormat::RGB, true);
+  m_3dFbo = new render::gl::FBO(w, h, PixelFormat::RGB, true);
   m_3dFbo->tex->setWrapping(Texture::Wrapping::ClampEdge);
-  m_3dRenderVBO = new Render::gl::VBO();
+  m_3dRenderVBO = new render::gl::VBO();
   m_clouds = new Clouds(G, 32, 32, 4);
   //m_sky = new Skybox(G, getAssetPath("alpine"));
   m_3dFboRenderer = G->PM->getProgram("2d", "texture0", "texcoord0"); //getSpecialProgram("effect3dRender");
@@ -125,7 +126,7 @@ GameState::GameState(GameWindow *GW) :
   };
   m_3dRenderVBO->setData(renderQuad, 6*sizeof(Coord2DTex));
 
-  m_crossHair.tex = Content::Texture::TextureLoader::load(*G, Content::Image::ImageFormats::PNG,
+  m_crossHair.tex = content::Texture::TextureLoader::load(*G, content::Image::ImageFormats::PNG,
       getAssetPath("crosshair.png"), PixelFormat::RGBA)->texture;
 
   //"\f0H\f1e\f2l\f3l\f4l\f5o \f6d\f7e\f8m\f9b\faa\fbz\fcz\fde\fes\ff,\n\f0ye see,it werks purrfektly :D\n(and also; it's optimized)"
@@ -140,7 +141,7 @@ GameState::Bloom::Bloom(Game &G) {
   enable = true;
   scale = 4;
 
-  extractor.fbo = new Render::gl::FBO(G.GW->getW()/scale, G.GW->getH()/scale, PixelFormat::RGBA);
+  extractor.fbo = new render::gl::FBO(G.GW->getW()/scale, G.GW->getH()/scale, PixelFormat::RGBA);
   extractor.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
   extractor.fbo->tex->setWrapping(Texture::Wrapping::ClampEdge);
   extractor.prog = G.PM->getProgram("bloomExtractor");
@@ -148,7 +149,7 @@ GameState::Bloom::Bloom(Game &G) {
   extractor.att_texcoord = extractor.prog->att("texcoord");
   extractor.uni_mvp = extractor.prog->uni("mvp");
 
-  renderer.fbo = new Render::gl::FBO(G.GW->getW()/scale, G.GW->getH()/scale, PixelFormat::RGBA);
+  renderer.fbo = new render::gl::FBO(G.GW->getW()/scale, G.GW->getH()/scale, PixelFormat::RGBA);
   renderer.fbo->tex->setFiltering(Texture::Filter::Linear, Texture::Filter::Linear);
   renderer.fbo->tex->setWrapping(Texture::Wrapping::ClampEdge);
   renderer.prog = G.PM->getProgram("bloom");
@@ -164,12 +165,12 @@ GameState::Bloom::~Bloom() {
 }
 
 void GameState::setupUI() {
-  UI.FPS = G->UIM->add<UI::Text>();
-  UI.FPS->setUpdateFrequencyHint(Render::FontRendererTextBufferUsage::Dynamic);
+  UI.FPS = G->UIM->add<ui::Text>();
+  UI.FPS->setUpdateFrequencyHint(render::FontRendererTextBufferUsage::Dynamic);
   UI.FPS->setScale(2, 2);
 
-  UI.DebugInfo = G->UIM->add<UI::Text>();
-  UI.DebugInfo->setUpdateFrequencyHint(Render::FontRendererTextBufferUsage::Stream);
+  UI.DebugInfo = G->UIM->add<ui::Text>();
+  UI.DebugInfo->setUpdateFrequencyHint(render::FontRendererTextBufferUsage::Stream);
   UI.DebugInfo->setVisible(false);
 
   UI.EM = G->UIM->add<EscMenu>();
@@ -325,21 +326,21 @@ void GameState::onMouseButton(int key, int action, int mods) {
   if (action == GLFW_PRESS) {
     glm::ivec3 pointed, face;
     if (G->LP->raytracePointed(32, &pointed, &face)) {
-      Net::OutMessage msg;
+      net::OutMessage msg;
       if (key == GLFW_MOUSE_BUTTON_LEFT) {
-        Net::MsgTypes::BlockUpdateBreak bub;
+        net::MsgTypes::BlockUpdateBreak bub;
         bub.worldId = G->LP->W->id;
         bub.pos = pointed;
         bub.writeToMsg(msg);
       } else {
-        Net::MsgTypes::BlockUpdatePlace bup;
+        net::MsgTypes::BlockUpdatePlace bup;
         bup.worldId = G->LP->W->id;
         bup.pos = face;
-        bup.id = 2; //Content::BlockUnknownId;
+        bup.id = 2; //content::BlockUnknownId;
         bup.data = 0;
         bup.writeToMsg(msg);
       }
-      sendMsg(msg, Net::Tfer::Rel, Net::Channels::MapUpdate);
+      sendMsg(msg, net::Tfer::Rel, net::Channels::MapUpdate);
     }
   }
 }
@@ -384,7 +385,7 @@ void GameState::onMouseScroll(double x, double y) {
 
 void GameState::updateViewport() {
   int w = GW->getW(), h = GW->getH();
-  UI::Manager &UIM = *G->UIM;
+  ui::Manager &UIM = *G->UIM;
   G->LP->camera.setPersp((float)M_PI/180*75.0f, (float)w / h, 0.1f, 32.0f);
   m_3dFbo->resize(w, h);
   bloom.extractor.fbo->resize(w/bloom.scale, h/bloom.scale);
@@ -403,13 +404,13 @@ void GameState::updateViewport() {
   UI.FPS->setPos(16, 16);
   UI.DebugInfo->setPos(0, h-(lineHeight+UI.DebugInfo->getSize().y));
   const int menuWidth = G->UIM->scale*128;
-  UI.EM->setArea(UI::Element::Area(w - menuWidth, 0, menuWidth, h));
+  UI.EM->setArea(ui::Element::Area(w - menuWidth, 0, menuWidth, h));
 
   m_chatBox->setPosition(4, 64);
   updateUI();
 }
 
-void GameState::sendMsg(Net::OutMessage &msg, Net::Tfer mode, Net::Channels chan) {
+void GameState::sendMsg(net::OutMessage &msg, net::Tfer mode, net::Channels chan) {
   G->H.send(*G->NS, msg, mode, chan);
 }
 
@@ -452,15 +453,15 @@ void GameState::onFrameTick() {
   LocalPlayer *LP = G->LP;
   double T = G->Time;
   if (runTime() > nextNetUpdate) {
-    Net::MsgTypes::PlayerUpdateMove pum;
+    net::MsgTypes::PlayerUpdateMove pum;
     pum.position = LP->position;
     if (LP->velocity != glm::vec3()) {
       pum.velocity = LP->velocity;
       pum.accel = LP->accel;
     }
     pum.angle = LP->angle;
-    Net::OutMessage msg; pum.writeToMsg(msg);
-    sendMsg(msg, Net::Tfer::Unrel, Net::Channels::Movement);
+    net::OutMessage msg; pum.writeToMsg(msg);
+    sendMsg(msg, net::Tfer::Unrel, net::Channels::Movement);
     nextNetUpdate = T+1.0/G->PlayerPosUpdateFreq;
   }
 
@@ -485,7 +486,7 @@ void GameState::onFrameTick() {
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
 
-  Render::RenderParams rp;
+  render::RenderParams rp;
   rp.world = WR.get();
   rp.transform = m_transform;
   rp.frustum = G->LP->camera.frustum;
@@ -513,7 +514,7 @@ void GameState::onFrameTick() {
   pe.velAmpl = glm::vec3(0, 2, 0); rain
 
   pe.update(deltaT);
-  Render::RenderParams rp;
+  render::RenderParams rp;
   rp.transform = m_transform;
   G->R->PR->render(rp);*/
 
@@ -545,8 +546,8 @@ void GameState::onFrameTick() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     if (!bloom.vao) {
-      bloom.vao = std::make_unique<Render::gl::VAO>();
-      Render::gl::VAO::Config cfg = bloom.vao->configure();
+      bloom.vao = std::make_unique<render::gl::VAO>();
+      render::gl::VAO::Config cfg = bloom.vao->configure();
       cfg.vertexAttrib(*m_3dRenderVBO, bloom.extractor.att_coord, 2, GL_SHORT, sizeof(Coord2DTex), 0);
       cfg.vertexAttrib(*m_3dRenderVBO, bloom.extractor.att_texcoord, 2, GL_BYTE, sizeof(Coord2DTex), offsetof(Coord2DTex, u));
       cfg.commit();
@@ -590,8 +591,8 @@ void GameState::onFrameTick() {
 }
 
 void GameState::onStop() {
-  Net::OutMessage quit(Net::MessageType::PlayerQuit);
-  sendMsg(quit, Net::Tfer::Rel);
+  net::OutMessage quit(net::MessageType::PlayerQuit);
+  sendMsg(quit, net::Tfer::Rel);
 
   G->LS->finalize();
 }
@@ -655,7 +656,7 @@ void GameState::drawUI() {
   G->UIM->drawTex(m_crossHair.mat, *m_crossHair.tex);
   // TODO render weapon
 
-  G->UIM->drawTex(*G->UIM->PM, UI::Element::Area{0,0,128,128}, *G->CR->getAtlas());
+  G->UIM->drawTex(*G->UIM->PM, ui::Element::Area{0,0,128,128}, *G->CR->getAtlas());
 }
 
 bool GameState::processNetwork() {
@@ -667,4 +668,5 @@ bool GameState::processNetwork() {
   return true;
 }
 
+}
 }

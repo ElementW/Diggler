@@ -5,14 +5,14 @@
 
 #include "../TextureManager.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
 
-namespace Render {
+namespace render {
 namespace gl {
 
-class TextureManager : public Render::TextureManager {
+class TextureManager : public render::TextureManager {
 private:
   Game &G;
 

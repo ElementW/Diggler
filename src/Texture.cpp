@@ -1,6 +1,6 @@
 ﻿#include "Texture.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 uint Texture::requiredBufferSize() {
   uint texelSize;

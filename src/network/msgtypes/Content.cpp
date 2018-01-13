@@ -1,7 +1,7 @@
 #include "Content.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace MsgTypes {
 
 void ContentModListRequest::writeToMsg(OutMessage&) const {
@@ -15,7 +15,7 @@ void ContentModListRequest::readFromMsg(InMessage&) {
 
 void ContentModListResponse::writeToMsg(OutMessage &msg) const {
   msg.writeI32(modsIds.size());
-  for (const Content::ModId &modId : modsIds) {
+  for (const content::ModId &modId : modsIds) {
     msg.writeData(&modId, sizeof(modId));
   }
 }

@@ -1,7 +1,7 @@
 #ifndef DIGGLER_VERSION_INFO_HPP
 #define DIGGLER_VERSION_INFO_HPP
 
-namespace Diggler {
+namespace diggler {
   const char* VersionString = "0.1.0";
   int VersionMajor = 0;
   int VersionMinor = 1;

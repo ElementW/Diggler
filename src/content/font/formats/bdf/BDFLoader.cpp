@@ -2,8 +2,8 @@
 
 #include "../../../../util/StringUtil.hpp"
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 namespace Font {
 namespace Formats {
 namespace BDF {

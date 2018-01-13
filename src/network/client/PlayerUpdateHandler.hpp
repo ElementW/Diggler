@@ -3,13 +3,13 @@
 
 #include "Handler.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace Client {
 
 class PlayerUpdateHandler : public Handler {
 public:
-  static bool handle(GameState&, InMessage&);
+  static bool handle(Game&, InMessage&);
 };
 
 }

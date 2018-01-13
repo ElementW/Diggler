@@ -4,9 +4,9 @@
 #include <memory>
 #include "Element.hpp"
 
-namespace Diggler {
+namespace diggler {
 
-namespace Render {
+namespace render {
 namespace gl {
 class VAO;
 class VBO;
@@ -15,12 +15,12 @@ class VBO;
 class GameWindow;
 class Texture;
 
-namespace UI {
+namespace ui {
 
 class Manager {
 private:
-  std::unique_ptr<Render::gl::VBO> m_rectVbo;
-  std::unique_ptr<Render::gl::VAO> m_rectVao;
+  std::unique_ptr<render::gl::VBO> m_rectVbo;
+  std::unique_ptr<render::gl::VAO> m_rectVao;
   std::list<std::weak_ptr<Element>> m_elements;
   std::weak_ptr<Element> m_hoveredElement;
   std::weak_ptr<Element> m_focusedElement;

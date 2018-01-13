@@ -8,8 +8,8 @@
 #include "../../content/Content.hpp"
 #include "../../World.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace MsgTypes {
 
 enum class BlockUpdateSubtype : uint8 {

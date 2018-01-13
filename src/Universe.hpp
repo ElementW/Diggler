@@ -3,7 +3,7 @@
 #include <map>
 #include "World.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 using UniverseWorldMap = std::map<WorldId, WorldWeakRef>;
 
@@ -47,10 +47,10 @@ public:
 
   /* ============ Serialization ============ */
 
-  void write(IO::OutStream&) const;
-  void read(IO::InStream&);
+  void write(io::OutStream&) const;
+  void read(io::InStream&);
 
-  void recv(Net::InMessage&);
+  void recv(net::InMessage&);
 };
 
 }

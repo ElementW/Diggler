@@ -7,9 +7,9 @@ extern "C" {
 
 #include "../../Game.hpp"
 
-namespace Diggler {
-namespace Scripting {
-namespace Lua {
+namespace diggler {
+namespace scripting {
+namespace lua {
 
 class State {
 private:

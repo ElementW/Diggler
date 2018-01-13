@@ -15,8 +15,8 @@ namespace meiose {
 class variant;
 }
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 
 bool Init();
 void DeInit();
@@ -71,7 +71,7 @@ enum QuitReason : uint8 {
 
 using EventType = uint32;
 
-class Message : public virtual IO::MemoryStream {
+class Message : public virtual io::MemoryStream {
 protected:
   friend class Host;
   MessageType m_type;
@@ -95,7 +95,7 @@ public:
   inline T getSubtype() const { return static_cast<T>(m_subtype); }
 };
 
-class InMessage : public Message, public IO::InMemoryStream {
+class InMessage : public Message, public io::InMemoryStream {
 protected:
   friend class Host;
   Channels m_chan;
@@ -122,7 +122,7 @@ public:
   Channels getChannel() const;
 };
 
-class OutMessage : public Message, public IO::OutMemoryStream {
+class OutMessage : public Message, public io::OutMemoryStream {
 protected:
   friend class Host;
   mutable uint8 *m_actualData;

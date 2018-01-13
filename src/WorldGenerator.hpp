@@ -3,7 +3,7 @@
 
 #include <glm/vec3.hpp>
 
-namespace Diggler {
+namespace diggler {
 
 class World;
 

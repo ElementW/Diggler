@@ -4,30 +4,30 @@
 
 #include <stb_image.h>
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 namespace Image {
 namespace Formats {
 
 static int stream_read(void *user, char *data, int size) {
-  IO::InStream &stream = *reinterpret_cast<IO::InStream*>(user);
+  io::InStream &stream = *reinterpret_cast<io::InStream*>(user);
   stream.readData(data, size);
   return size;
 }
 
 static void stream_skip(void *user, int n) {
-  IO::InStream &stream = *reinterpret_cast<IO::InStream*>(user);
+  io::InStream &stream = *reinterpret_cast<io::InStream*>(user);
   stream.skip(n);
 }
 
 static int stream_eof(void *user) {
-  IO::InStream &stream = *reinterpret_cast<IO::InStream*>(user);
+  io::InStream &stream = *reinterpret_cast<io::InStream*>(user);
   return stream.eos();
 }
 
 class STBILoading final : public STBImageLoader::Loading {
 public:
-  STBILoading(std::unique_ptr<IO::InStream> &&stream, const ImageLoader::LoadParams &lp) :
+  STBILoading(std::unique_ptr<io::InStream> &&stream, const ImageLoader::LoadParams &lp) :
     Loading(std::move(stream), lp) {
   }
 
@@ -41,7 +41,7 @@ STBILoading::~STBILoading() {
 }
 
 std::shared_ptr<STBImageLoader::Loading> STBImageLoader::load(Format format,
-    std::unique_ptr<IO::InStream> &&stream, PixelFormat pixFormat, const LoadParams &lp) const {
+    std::unique_ptr<io::InStream> &&stream, PixelFormat pixFormat, const LoadParams &lp) const {
   auto loading = std::make_shared<STBILoading>(std::move(stream), lp);
   loading->thread = std::thread([pixFormat, loading]() {
     stbi_io_callbacks cbs;

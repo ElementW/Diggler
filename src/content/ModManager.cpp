@@ -2,8 +2,8 @@
 
 #include "../Game.hpp"
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 
 ModManager::ModManager(Game *G) :
   G(G) {

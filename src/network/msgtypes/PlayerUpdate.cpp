@@ -1,7 +1,7 @@
 #include "PlayerUpdate.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace MsgTypes {
 
 enum FieldFlags {

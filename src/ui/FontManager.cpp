@@ -1,7 +1,7 @@
 #include "FontManager.hpp"
 
-namespace Diggler {
-namespace UI {
+namespace diggler {
+namespace ui {
 
 FontManager::FontManager(Game &G) : G(G) {
 }

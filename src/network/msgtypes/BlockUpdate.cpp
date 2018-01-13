@@ -3,8 +3,8 @@
 #include <limits>
 #include <stdexcept>
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace MsgTypes {
 
 void BlockUpdateNotify::writeToMsg(OutMessage &msg) const {

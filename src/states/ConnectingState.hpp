@@ -1,25 +1,27 @@
-#ifndef DIGGLER_CONNECTING_STATE_HPP
-#define DIGGLER_CONNECTING_STATE_HPP
+#ifndef DIGGLER_STATES_CONNECTING_STATE_HPP
+#define DIGGLER_STATES_CONNECTING_STATE_HPP
+#include "State.hpp"
 
 #include <memory>
 #include <string>
 #include <thread>
 
-#include "State.hpp"
-#include "GameWindow.hpp"
-#include "ui/Text.hpp"
+#include "../GameWindow.hpp"
+#include "../ui/Text.hpp"
 
-namespace Diggler {
+namespace diggler {
 
-namespace UI {
+namespace ui {
 class Text;
 }
+
+namespace states {
 
 class ConnectingState : public State {
 private:
   GameWindow *W;
 
-  std::shared_ptr<UI::Text> txtConnecting, txtDot;
+  std::shared_ptr<ui::Text> txtConnecting, txtDot;
 
   std::string m_serverHost;
   int m_serverPort;
@@ -32,7 +34,7 @@ private:
 
 public:
   ConnectingState(GameWindow *W, const std::string &servHost, int servPort);
-  ~ConnectingState();
+  ~ConnectingState() override;
 
   void onStart() override;
   void onLogicTick() override;
@@ -41,11 +43,12 @@ public:
 
   //void onMouseButton(int key, int action, int mods);
   //void onCursorPos(double x, double y);
-  void onResize(int w, int h);
+  void onResize(int w, int h) override;
 
   void updateViewport();
 };
 
 }
+}
 
-#endif /* DIGGLER_CONNECTING_STATE_HPP */
+#endif /* DIGGLER_STATES_CONNECTING_STATE_HPP */

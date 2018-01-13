@@ -3,8 +3,8 @@
 
 #include "../Renderer.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 class GLRenderer : public Renderer {

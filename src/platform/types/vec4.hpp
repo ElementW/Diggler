@@ -5,7 +5,7 @@
 
 #include "../Types.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 using vec4u8  = glm::tvec4<uint8>;
 using vec4u16 = glm::tvec4<uint16>;

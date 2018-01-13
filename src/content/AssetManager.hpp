@@ -7,11 +7,11 @@
 #include "Asset.hpp"
 #include "Mod.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
 
-namespace Content {
+namespace content {
 
 class AssetManager final {
 private:

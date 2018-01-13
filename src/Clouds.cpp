@@ -9,7 +9,7 @@
 #include "render/Renderer.hpp"
 #include "Texture.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 Clouds::Renderer Clouds::R = {0};
 

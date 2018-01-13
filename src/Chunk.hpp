@@ -13,18 +13,18 @@
 #define CHUNK_INMEM_COMPRESS 1
 #define CHUNK_INMEM_COMPRESS_DELAY 2000 /* ms */
 
-namespace Diggler {
+namespace diggler {
 
 class CaveGenerator;
 class Game;
 class World;
 using WorldRef = std::shared_ptr<World>;
 
-namespace Render {
+namespace render {
 class WorldRenderer;
 }
 
-namespace Net {
+namespace net {
 namespace MsgTypes {
 struct BlockUpdateNotify;
 }
@@ -34,7 +34,7 @@ class Chunk {
 private:
   friend World;
   friend CaveGenerator;
-  friend class Render::WorldRenderer;
+  friend class render::WorldRenderer;
   uintptr_t rendererData;
 
 public:
@@ -119,7 +119,7 @@ public:
     void add(int x, int y, int z);
     bool empty() const;
     int count() const;
-    void flush(Net::MsgTypes::BlockUpdateNotify&);
+    void flush(net::MsgTypes::BlockUpdateNotify&);
     void discard();
   } CH;
 
@@ -240,8 +240,8 @@ public:
 
   /* ============ Serialization ============ */
 
-  void write(IO::OutStream&) const;
-  void read(IO::InStream&);
+  void write(io::OutStream&) const;
+  void read(io::InStream&);
 };
 
 using ChunkRef = std::shared_ptr<Chunk>;

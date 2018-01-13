@@ -5,7 +5,7 @@
 
 #include "../platform/Types.hpp"
 
-namespace Diggler {
+namespace diggler {
 namespace Util {
 
 void memset8(void *dst, byte val, uint num) {

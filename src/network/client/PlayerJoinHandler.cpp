@@ -1,27 +1,26 @@
 #include "PlayerJoinHandler.hpp"
 
 #include "../../Game.hpp"
-#include "../../GameState.hpp"
 #include "../../util/Log.hpp"
 #include "../msgtypes/PlayerJoin.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace Client {
 
-using namespace Net::MsgTypes;
+using namespace net::MsgTypes;
 using Util::Log;
 using namespace Util::Logging::LogLevels;
 
 static const char *TAG = "CNH:PlayerJoin";
 
-bool PlayerJoinHandler::handle(GameState &GS, InMessage &msg) {
+bool PlayerJoinHandler::handle(Game &G, InMessage &msg) {
   using S = PlayerJoinSubtype;
   switch (msg.getSubtype<S>()) {
     case S::Broadcast: {
       PlayerJoinBroadcast pjb;
       pjb.readFromMsg(msg);
-      Player &plr = GS.G->players.add();
+      Player &plr = G.players.add();
       plr.sessId = pjb.sessId;
       plr.name = pjb.name;
       Log(Info, TAG) << "Player " << pjb.name << '(' << pjb.sessId << ") joined the party!";

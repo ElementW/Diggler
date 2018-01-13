@@ -9,12 +9,12 @@
 #include "platform/Types.hpp"
 #include "render/gl/VBO.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
 class Texture;
 
-namespace Render {
+namespace render {
 namespace gl {
 class Program;
 }
@@ -23,11 +23,11 @@ class Program;
 class Clouds {
 private:
   static struct Renderer {
-    const Render::gl::Program *prog;
+    const render::gl::Program *prog;
     GLint att_coord, att_texcoord, uni_mvp, uni_texshift;
   } R;
   std::vector<std::shared_ptr<Texture>> m_tex;
-  Render::gl::VBO m_vbo;
+  render::gl::VBO m_vbo;
   int m_layers;
   Game *G;
   struct Coord { uint8 x, y, z, u, v; };

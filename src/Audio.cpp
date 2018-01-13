@@ -14,7 +14,7 @@
 
 #define AUDIO_GC_DEBUG 0
 
-namespace Diggler {
+namespace diggler {
 
 using Util::Log;
 using namespace Util::Logging::LogLevels;

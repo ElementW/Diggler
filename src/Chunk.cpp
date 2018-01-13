@@ -24,7 +24,7 @@
 
 #define SHOW_CHUNK_UPDATES 1
 
-namespace Diggler {
+namespace diggler {
 
 using Util::Log;
 using namespace Util::Logging::LogLevels;
@@ -52,7 +52,7 @@ void Chunk::ChangeHelper::add(int x, int y, int z) {
   m_changes.emplace_back(x, y, z);
 }
 
-using Net::MsgTypes::BlockUpdateNotify;
+using net::MsgTypes::BlockUpdateNotify;
 void Chunk::ChangeHelper::flush(BlockUpdateNotify &bun) {
   for (glm::ivec3 &c : m_changes) {
     bun.updates.emplace_back();
@@ -284,7 +284,7 @@ void Chunk::updateClient() {
   imcUncompress();
 #endif
   mut.lock();
-  Content::Registry &CR = *G->CR;
+  content::Registry &CR = *G->CR;
   Vertex vertex[CX * CY * CZ * 6 /* faces */ * 4 /* vertices */ / 2 /* face removing (HSR) makes a lower vert max */];
   ushort idxOpaque[CX * CY * CZ * 6 /* faces */ * 6 /* indices */ / 2 /* HSR */],
          idxTransp[CX*CY*CZ*6*6/2];
@@ -299,8 +299,8 @@ void Chunk::updateClient() {
         bt = data->id[I(x,y,z)];
 
         // Empty block?
-        if (bt == Content::BlockAirId ||
-          bt == Content::BlockIgnoreId)
+        if (bt == content::BlockAirId ||
+          bt == content::BlockIgnoreId)
           continue;
 
 #if 0
@@ -429,7 +429,7 @@ void Chunk::updateClient() {
   mut.unlock();
 }
 
-void Chunk::write(IO::OutStream &os) const {
+void Chunk::write(io::OutStream &os) const {
   const uint dataSize = Chunk::AllocaSize;
   uint compressedSize;
   byte *compressed = new byte[dataSize];
@@ -448,7 +448,7 @@ void Chunk::write(IO::OutStream &os) const {
   delete[] compressed;
 }
 
-void Chunk::read(IO::InStream &is) {
+void Chunk::read(io::InStream &is) {
   uint compressedSize = is.readU16();
   const uint targetDataSize = Chunk::AllocaSize;
   byte *compressedData = new byte[compressedSize];

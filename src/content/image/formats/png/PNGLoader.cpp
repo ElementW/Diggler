@@ -1,7 +1,7 @@
 #include "PNGLoader.hpp"
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 namespace Image {
 namespace Formats {
 namespace PNG {

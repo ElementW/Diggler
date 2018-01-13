@@ -8,8 +8,8 @@
 
 #include "Font.hpp"
 
-namespace Diggler {
-namespace UI {
+namespace diggler {
+namespace ui {
 
 class FontManager {
 private:

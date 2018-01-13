@@ -5,9 +5,9 @@
 #include "render/gl/ProgramManager.hpp"
 #include "Texture.hpp"
 
-namespace Diggler {
+namespace diggler {
 
-const Render::gl::Program *Skybox::RenderProgram = nullptr;
+const render::gl::Program *Skybox::RenderProgram = nullptr;
 GLint Skybox::RenderProgram_attrib_texcoord = -1;
 GLint Skybox::RenderProgram_attrib_coord = -1;
 GLint Skybox::RenderProgram_uni_mvp = -1;

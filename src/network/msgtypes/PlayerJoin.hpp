@@ -4,8 +4,8 @@
 #include "MsgType.hpp"
 #include "../../Player.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace MsgTypes {
 
 enum class PlayerJoinSubtype : uint8 {

@@ -1,7 +1,7 @@
 #include "BitmapDumper.hpp"
 #include <cstdio>
 
-namespace Diggler {
+namespace diggler {
 
 bool BitmapDumper::dumpAsPpm(int w, int h, const void *data, const char *path) {
   const char *bytes = static_cast<const char*>(data);

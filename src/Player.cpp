@@ -10,7 +10,7 @@
 #include "render/gl/ProgramManager.hpp"
 #include "render/gl/VBO.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 Player::Renderer Player::R = {};
 
@@ -38,7 +38,7 @@ Player::Player(Game *G) :
         -sz, .0f, 0.0f,
          sz, szH, 0.0f,
       };
-      R.vbo = std::make_unique<Render::gl::VBO>();
+      R.vbo = std::make_unique<render::gl::VBO>();
       R.vbo->setData(coords, 6*3);
     }
   }

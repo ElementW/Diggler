@@ -5,8 +5,8 @@
 
 #include <meiose/variant.hpp>
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace MsgTypes {
 
 enum class ServerInfoSubtype : uint8 {

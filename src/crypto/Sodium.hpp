@@ -1,7 +1,7 @@
 #ifndef DIGGLER_CRYPTO_SODIUM_HPP
 #define DIGGLER_CRYPTO_SODIUM_HPP
 
-namespace Diggler {
+namespace diggler {
 namespace Crypto {
 
 class Sodium {

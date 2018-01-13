@@ -12,9 +12,9 @@
 #include "render/gl/VBO.hpp"
 #include "ui/Text.hpp"
 
-namespace Diggler {
+namespace diggler {
 
-namespace Render {
+namespace render {
 namespace gl {
 class Program;
 }
@@ -28,7 +28,7 @@ public:
   using time_point = std::chrono::time_point<system_clock>;
 
 private:
-  static const Render::gl::Program *RenderProgram;
+  static const render::gl::Program *RenderProgram;
   static GLint RenderProgram_coord, RenderProgram_color, RenderProgram_mvp;
   
   bool m_isChatting;
@@ -36,7 +36,7 @@ private:
   struct ChatEntry {
     time_point date;
     int height;
-    std::shared_ptr<UI::Text> text;
+    std::shared_ptr<ui::Text> text;
     
     ~ChatEntry();
   };
@@ -44,12 +44,12 @@ private:
   // TODO: Update when libstdc++ supports locale codecvt facets
   //std::u32string m_chatString;
   std::string m_chatString;
-  std::shared_ptr<UI::Text> m_chatText;
+  std::shared_ptr<ui::Text> m_chatText;
   struct Vertex {
     float x, y, r, g, b, a;
   };
-  Render::gl::VBO m_vbo;
-  Render::gl::VAO m_vao;
+  render::gl::VBO m_vbo;
+  render::gl::VAO m_vao;
   int m_posX, m_posY;
 
 public:

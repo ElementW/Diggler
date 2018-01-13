@@ -1,18 +1,20 @@
-#ifndef UI_TEST_STATE_HPP
-#define UI_TEST_STATE_HPP
+#ifndef DIGGLER_STATES_UI_TEST_STATE_HPP
+#define DIGGLER_STATES_UI_TEST_STATE_HPP
 #include "State.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class GameWindow;
-namespace UI {
+namespace ui {
 class Text;
 }
+
+namespace states {
 
 class UITestState : public State {
 private:
   GameWindow *GW;
-  UI::Text *txt;
+  ui::Text *txt;
 
 public:
   UITestState(GameWindow*);
@@ -28,5 +30,6 @@ public:
 };
 
 }
+}
 
-#endif
+#endif /* DIGGLER_STATES_UI_TEST_STATE_HPP */

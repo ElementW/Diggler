@@ -8,7 +8,7 @@
 
 using std::unique_ptr;
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
 
@@ -21,18 +21,18 @@ private:
 
   void handleCommand(Player*, const std::string &command, const std::vector<std::string> &args);
 
-  void handlePlayerJoin(Net::InMessage&, Net::Peer&);
-  void handlePlayerQuit(Net::Peer&, Net::QuitReason reason = Net::QuitReason::Quit);
-  void handleDisconnect(Net::Peer&);
+  void handlePlayerJoin(net::InMessage&, net::Peer&);
+  void handlePlayerQuit(net::Peer&, net::QuitReason reason = net::QuitReason::Quit);
+  void handleDisconnect(net::Peer&);
 
-  void handleContentMessage(Net::InMessage&, Net::Peer&);
+  void handleContentMessage(net::InMessage&, net::Peer&);
 
-  void handleChat(Net::InMessage&, Player*);
+  void handleChat(net::InMessage&, Player*);
 
-  void handlePlayerUpdate(Net::InMessage&, Player&);
-    void handlePlayerDeath(Net::InMessage&, Player&);
-  void handlePlayerChunkRequest(Net::InMessage&, Player&);
-  void handlePlayerMapUpdate(Net::InMessage&, Player&);
+  void handlePlayerUpdate(net::InMessage&, Player&);
+    void handlePlayerDeath(net::InMessage&, Player&);
+  void handlePlayerChunkRequest(net::InMessage&, Player&);
+  void handlePlayerMapUpdate(net::InMessage&, Player&);
 
   void schedSendChunk(ChunkRef, Player&);
   void sendChunks(const std::list<ChunkRef>&, Player&);
@@ -40,7 +40,7 @@ private:
   void chunkUpdater(WorldRef WR, bool &continueUpdate);
 
 public:
-  Net::Host H;
+  net::Host H;
 
   Server(Game &G, uint16 port);
   ~Server();
@@ -53,9 +53,9 @@ public:
   bool isPlayerOnline(const std::string &playername) const;
   bool isIPOnline(const std::string &ip) const;
   Player* getPlayerBySessId(uint32 id);
-  Player* getPlayerByPeer(const Net::Peer &peer);
+  Player* getPlayerByPeer(const net::Peer &peer);
   Player* getPlayerByName(const std::string &name);
-  void kick(Player &p, Net::QuitReason r = Net::QuitReason::Kicked, const std::string& message = "");
+  void kick(Player &p, net::QuitReason r = net::QuitReason::Kicked, const std::string& message = "");
 };
 
 }

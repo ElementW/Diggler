@@ -6,7 +6,7 @@
 
 #include "Frustum.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Camera {
   friend class LocalPlayer;

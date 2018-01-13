@@ -3,7 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
-namespace Diggler {
+namespace diggler {
 
 Camera::Camera() {
   m_worldUp = vec3(0, 1, 0);

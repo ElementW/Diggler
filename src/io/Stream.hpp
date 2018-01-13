@@ -3,8 +3,8 @@
 
 #include "../Platform.hpp"
 
-namespace Diggler {
-namespace IO {
+namespace diggler {
+namespace io {
 
 class Stream {
 public:

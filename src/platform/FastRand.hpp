@@ -3,7 +3,7 @@
 
 #include "Types.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 uint FastRandInit();
 static thread_local uint FastRand_Seed = FastRandInit();

@@ -1,6 +1,6 @@
 #include "Config.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 Config::Config() {
   

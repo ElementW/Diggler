@@ -6,7 +6,7 @@
 #include "Platform.hpp"
 #include <simplexnoise.h>
 
-namespace Diggler {
+namespace diggler {
 
 CaveGenerator::GenConf::GenConf() :
   groundLevel(0.9), oreFactor(0.5) {
@@ -62,11 +62,11 @@ void CaveGenerator::Generate(WorldRef wr, const GenConf &gc, ChunkRef cr) {
   for (int y = 0; y < CY; ++y)
     for (int x = 0; x < CX; ++x)
       for (int z = 0; z < CZ; ++z)
-        c.setBlock(x, y, z, y < 8 ? Content::BlockUnknownId : Content::BlockAirId);
+        c.setBlock(x, y, z, y < 8 ? content::BlockUnknownId : content::BlockAirId);
   for (int y = CY; y > 8; --y)
     for (int x = 0; x < CX; ++x) {
-      c.setBlock(x, y, 0, Content::BlockUnknownId);
-      c.setBlock(x, y, CZ-1, Content::BlockUnknownId);
+      c.setBlock(x, y, 0, content::BlockUnknownId);
+      c.setBlock(x, y, CZ-1, content::BlockUnknownId);
     }*/
 
   constexpr auto CX = Chunk::CX, CY = Chunk::CY, CZ = Chunk::CZ;
@@ -78,9 +78,9 @@ void CaveGenerator::Generate(WorldRef wr, const GenConf &gc, ChunkRef cr) {
       for (int lz = 0; lz < CZ; ++lz) {
         int z = cp.z + lz;
         if (y >= -8) {
-          c.setBlock(lx, ly, lz, y < raw_noise_3d(x/16.f, 0, z/16.f)*8 ? Content::BlockUnknownId : Content::BlockAirId);
+          c.setBlock(lx, ly, lz, y < raw_noise_3d(x/16.f, 0, z/16.f)*8 ? content::BlockUnknownId : content::BlockAirId);
         } else {
-          c.setBlock(lx, ly, lz, raw_noise_3d(x/16.f, y/16.f, z/16.f) > 0.7 ? Content::BlockAirId : Content::BlockUnknownId);
+          c.setBlock(lx, ly, lz, raw_noise_3d(x/16.f, y/16.f, z/16.f) > 0.7 ? content::BlockAirId : content::BlockUnknownId);
         }
       }
     }

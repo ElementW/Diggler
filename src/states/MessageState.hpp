@@ -1,16 +1,21 @@
-#ifndef MESSAGE_STATE_HPP
-#define MESSAGE_STATE_HPP
+#ifndef DIGGLER_STATES_MESSAGE_STATE_HPP
+#define DIGGLER_STATES_MESSAGE_STATE_HPP
 #include "State.hpp"
-#include "GameWindow.hpp"
-#include "ui/Text.hpp"
 
-namespace Diggler {
+#include <memory>
+#include <string>
+
+#include "../GameWindow.hpp"
+#include "../ui/Text.hpp"
+
+namespace diggler {
+namespace states {
 
 class MessageState : public State {
 private:
   GameWindow *W;
   std::string msg, subMsg;
-  std::shared_ptr<UI::Text> txtMsg, txtSubMsg;
+  std::shared_ptr<ui::Text> txtMsg, txtSubMsg;
 
   void setupUI();
 
@@ -30,5 +35,6 @@ public:
 };
 
 }
+}
 
-#endif
+#endif /* DIGGLER_STATES_MESSAGE_STATE_HPP */

@@ -4,12 +4,12 @@
 
 #include "util/Log.hpp"
 
-using Diggler::Util::Log;
-using namespace Diggler::Util::Logging::LogLevels;
+using diggler::Util::Log;
+using namespace diggler::Util::Logging::LogLevels;
 
 static const char *TAG = "Platform";
 
-const char *Diggler::UserdataDirsName = "Diggler";
+const char *diggler::UserdataDirsName = "Diggler";
 
 static struct PathCache {
   std::string
@@ -27,7 +27,7 @@ static struct PathCache {
 #include <windows.h>
 #include "platform/Fixes.hpp"
 
-std::string Diggler::proc::getExecutablePath() {
+std::string diggler::proc::getExecutablePath() {
   if (pathCache.executableBin.length() == 0) {
     HMODULE hModule = GetModuleHandleW(NULL);
     WCHAR path[MAX_PATH];
@@ -39,7 +39,7 @@ std::string Diggler::proc::getExecutablePath() {
   return pathCache.executableBin;
 }
 
-std::string Diggler::proc::getExecutableDirectory() {
+std::string diggler::proc::getExecutableDirectory() {
   if (pathCache.executableDir.length() == 0) {
     std::string filename(getExecutablePath());
     const size_t last_sep_idx = filename.rfind('\\');
@@ -53,7 +53,7 @@ std::string Diggler::proc::getExecutableDirectory() {
   return pathCache.executableDir;
 }
 
-std::string Diggler::getCacheDirectory() {
+std::string diggler::getCacheDirectory() {
   if (pathCache.cacheDir.length() == 0) {
     WCHAR ucs2Path[MAX_PATH];
     SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, ucs2Path);
@@ -64,7 +64,7 @@ std::string Diggler::getCacheDirectory() {
   return pathCache.cacheDir;
 }
 
-std::string Diggler::getConfigDirectory() {
+std::string diggler::getConfigDirectory() {
   if (pathCache.cacheDir.length() == 0) {
     WCHAR ucs2Path[MAX_PATH];
     SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, ucs2Path);
@@ -86,7 +86,7 @@ std::string do_readlink(const char *path);
 std::string do_readlink(const std::string &path);
 
 #if defined(BUILDINFO_PLATFORM_LINUX)
-std::string Diggler::proc::getExecutablePath() {
+std::string diggler::proc::getExecutablePath() {
   if (pathCache.executableBin.length() == 0) {
     pid_t pid = getpid();
     // Assuming 32-bit pid -> max of 10 digits, we need only "/proc/xxxxxxxxxx/exe" space
@@ -100,7 +100,7 @@ std::string Diggler::proc::getExecutablePath() {
 // TODO: getExecutablePath for those without procfs
 #endif
 
-std::string Diggler::proc::getExecutableDirectory() {
+std::string diggler::proc::getExecutableDirectory() {
   if (pathCache.executableDir.length() == 0) {
     std::string filename(getExecutablePath());
     const size_t last_slash_idx = filename.rfind('/');
@@ -114,7 +114,7 @@ std::string Diggler::proc::getExecutableDirectory() {
   return pathCache.executableDir;
 }
 
-std::string Diggler::getCacheDirectory() {
+std::string diggler::getCacheDirectory() {
   if (pathCache.cacheDir.length() == 0) {
     const char *xdgCache = std::getenv("XDG_CACHE_HOME");
     if (xdgCache) {
@@ -126,7 +126,7 @@ std::string Diggler::getCacheDirectory() {
   return pathCache.cacheDir;
 }
 
-std::string Diggler::getConfigDirectory() {
+std::string diggler::getConfigDirectory() {
   if (pathCache.configDir.length() == 0) {
     const char *xdgCache = std::getenv("XDG_CONFIG_HOME");
     if (xdgCache) {
@@ -148,7 +148,7 @@ std::string Diggler::getConfigDirectory() {
 
 #endif
 
-namespace Diggler {
+namespace diggler {
 
 std::string getAssetsDirectory() {
   return proc::getExecutableDirectory() + "/assets";

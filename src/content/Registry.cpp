@@ -6,8 +6,8 @@
 
 #define PRINT_BLOCK_REGISTRATIONS 1
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 
 using Util::Log;
 using namespace Util::Logging::LogLevels;
@@ -82,7 +82,7 @@ static const DefBlocksInfo DefBlocksInfos[] = {
 };
 
 bool Registry::isTransparent(BlockId id) const {
-  if (id == Content::BlockAirId)
+  if (id == content::BlockAirId)
     return true;
   return false;
   // TODO return getBlockDef(id).isTransparent;
@@ -98,7 +98,7 @@ bool Registry::isFaceVisible(BlockId id1, BlockId id2) const {
 }
 
 bool Registry::canEntityGoThrough(BlockId id/* , Entity& ent*/) const {
-  if (id == Content::BlockAirId)
+  if (id == content::BlockAirId)
     return true;
   return false;
   /*return (t == BlockType::TransRed && team == Player::Team::Red) ||
@@ -110,13 +110,13 @@ static Coord unk1, unk2, unk3, unk4, unk5, unk6, unk7, unk8;
 #define AddTex(b, t) Coord b = m_texturePacker->add(getAssetPath("blocks", t));
 Registry::Registry(Game &G) :
   m_atlas(nullptr),
-  m_nextMaxBlockId(Content::BlockUnknownId + 1) {
-  { Registry::BlockRegistration br(registerBlock(Content::BlockAirId, "air"));
+  m_nextMaxBlockId(content::BlockUnknownId + 1) {
+  { Registry::BlockRegistration br(registerBlock(content::BlockAirId, "air"));
     br.def.appearance.look.type = BlockDef::Appearance::Look::Type::Hidden;
     br.def.phys.hasCollision = false;
     br.commit();
   }
-  { Registry::BlockRegistration br(registerBlock(Content::BlockUnknownId, "unknown"));
+  { Registry::BlockRegistration br(registerBlock(content::BlockUnknownId, "unknown"));
     br.def.appearance.look.type = BlockDef::Appearance::Look::Type::Hidden;
     br.def.phys.hasCollision = true;
     br.commit();
@@ -158,7 +158,7 @@ Util::TexturePacker::Coord Registry::addTexture(const std::string &texName,
 
 const Util::TexturePacker::Coord* Registry::blockTexCoord(BlockId t, FaceDirection d,
   const glm::ivec3 &pos) const {
-  if (t == Content::BlockUnknownId) {
+  if (t == content::BlockUnknownId) {
     const Coord *unk[] = {
       &unk1, &unk2, &unk3, &unk4, &unk5, &unk6, &unk7, &unk8
     };
@@ -226,7 +226,7 @@ Registry::BlockRegistration Registry::registerBlock(BlockId id, const char *name
 }
 
 Registry::BlockRegistration Registry::registerBlock(const char *name) {
-  BlockId id = Content::BlockUnknownId;
+  BlockId id = content::BlockUnknownId;
   if (m_freedBlockIds.empty()) {
     id = m_nextMaxBlockId;
     ++m_nextMaxBlockId;

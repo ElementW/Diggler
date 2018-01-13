@@ -5,7 +5,7 @@
 #include "platform/Types.hpp"
 #include "util/Log.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 using Util::Log;
 using namespace Util::Logging::LogLevels;

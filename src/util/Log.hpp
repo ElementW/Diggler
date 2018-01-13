@@ -5,7 +5,7 @@
 
 #include "logging/LogInput.hpp"
 
-namespace Diggler {
+namespace diggler {
 namespace Util {
 
 extern std::unique_ptr<Logging::Logger> CurrentLogger;

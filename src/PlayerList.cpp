@@ -5,7 +5,7 @@
 #include "Game.hpp"
 #include "LocalPlayer.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 PlayerList::PlayerList(Game *G) : G(G) {
 }
@@ -58,7 +58,7 @@ Player* PlayerList::getByName(const std::string &name) {
   return nullptr;
 }
 
-Player* PlayerList::getByPeer(const Net::Peer &peer) {
+Player* PlayerList::getByPeer(const net::Peer &peer) {
   for (auto it = begin();
     it != end(); ++it) {
     if (*it->peer == peer) {

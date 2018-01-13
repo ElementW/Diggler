@@ -10,7 +10,7 @@
 // TODO: remove me
 #include "render/gl/OpenGL.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Texture {
 public:

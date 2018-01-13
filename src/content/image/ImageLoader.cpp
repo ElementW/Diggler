@@ -7,11 +7,11 @@
 #include "formats/png/PNGLoader.hpp"
 #include "formats/ImageLoader.hpp"
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 namespace Image {
 
-ImageLoader::Loading::Loading(std::unique_ptr<IO::InStream> &&stream, const LoadParams &lp) :
+ImageLoader::Loading::Loading(std::unique_ptr<io::InStream> &&stream, const LoadParams &lp) :
   stream(std::move(stream)),
   loadParams(lp),
   w(0),
@@ -40,7 +40,7 @@ std::shared_ptr<ImageLoader::Loading> ImageLoader::load(Format format, const std
 }
 
 std::shared_ptr<ImageLoader::Loading> ImageLoader::load(Format format,
-    std::unique_ptr<IO::InStream> &&stream, PixelFormat pixFormat, const LoadParams &lp) {
+    std::unique_ptr<io::InStream> &&stream, PixelFormat pixFormat, const LoadParams &lp) {
   return getFormatLoader(format)->load(format, std::move(stream), pixFormat, lp);
 }
 

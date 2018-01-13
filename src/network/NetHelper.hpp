@@ -3,7 +3,7 @@
 #include <string>
 #include "Network.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Player;
 class Game;
@@ -11,13 +11,13 @@ class Game;
 namespace NetHelper {
 
 // Server only
-void Broadcast(Game*, const Net::OutMessage&, Net::Tfer = Net::Tfer::Rel, Net::Channels = Net::Channels::Base);
-void Broadcast(Game&, const Net::OutMessage&, Net::Tfer = Net::Tfer::Rel, Net::Channels = Net::Channels::Base);
-void MakeEvent(Net::OutMessage&, Net::EventType, const glm::vec3&);
-void MakeEvent(Net::OutMessage&, Net::EventType, const Player&);
+void Broadcast(Game*, const net::OutMessage&, net::Tfer = net::Tfer::Rel, net::Channels = net::Channels::Base);
+void Broadcast(Game&, const net::OutMessage&, net::Tfer = net::Tfer::Rel, net::Channels = net::Channels::Base);
+void MakeEvent(net::OutMessage&, net::EventType, const glm::vec3&);
+void MakeEvent(net::OutMessage&, net::EventType, const Player&);
 
 // Client only
-void SendEvent(Game*, Net::EventType);
+void SendEvent(Game*, net::EventType);
 
 void SendChat(Game*, const std::string&);
 

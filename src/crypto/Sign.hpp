@@ -5,7 +5,7 @@
 
 #include "CryptoData.hpp"
 
-namespace Diggler {
+namespace diggler {
 namespace Crypto {
 namespace Sign {
 

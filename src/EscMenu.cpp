@@ -10,17 +10,17 @@
 #include "ui/Manager.hpp"
 #include "ui/Text.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 struct EscMenu::MenuEntryImpl {
   Area inputArea;
-  std::shared_ptr<UI::Text> txtText;
+  std::shared_ptr<ui::Text> txtText;
 };
 
-EscMenu::EscMenu(UI::Manager *UIM) :
-  UI::Element(UIM),
+EscMenu::EscMenu(ui::Manager *UIM) :
+  ui::Element(UIM),
   G(UIM->G) {
-  txtMenuTitle = G->UIM->addManual<UI::Text>(" Menu", 3, 3);
+  txtMenuTitle = G->UIM->addManual<ui::Text>(" Menu", 3, 3);
   //m_button = new UIButton(G, glm::mat);
   for (int i=0;i<10;++i)
     addMenuEntry("hello " + std::to_string(i));
@@ -43,7 +43,7 @@ void EscMenu::refresh() {
 
 void EscMenu::addMenuEntry(const std::string &text) {
   entries.emplace_back(MenuEntry { text, std::make_unique<MenuEntryImpl>() });
-  entries.back().impl->txtText = G->UIM->addManual<UI::Text>(text, 2, 2);
+  entries.back().impl->txtText = G->UIM->addManual<ui::Text>(text, 2, 2);
   refresh();
 }
 
@@ -62,7 +62,7 @@ void EscMenu::onInputAreaChanged() {
 }
 
 void EscMenu::setVisible(bool v) {
-  UI::Element::setVisible(v);
+  ui::Element::setVisible(v);
   if (v) {
     m_transition.start = G->Time;
     m_transition.duration = .3;
@@ -89,7 +89,7 @@ void EscMenu::render(const glm::mat4 &baseMatrix) const {
 
   const int width = renderArea().w;
   const int pxScroll = (1 - scroll) * width;
-  G->UIM->drawRect(baseMatrix, UI::Element::Area { pxScroll, 0, width, renderArea().h },
+  G->UIM->drawRect(baseMatrix, ui::Element::Area { pxScroll, 0, width, renderArea().h },
       glm::vec4(0.f, 0.f, 0.f, 0.8f));
 
   int y = renderArea().h;

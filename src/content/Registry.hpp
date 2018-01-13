@@ -11,7 +11,7 @@
 #include "../Texture.hpp"
 #include "../util/TexturePacker.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 enum class FaceDirection : uint8_t {
   XInc = 0,
@@ -24,7 +24,7 @@ enum class FaceDirection : uint8_t {
 
 class Game;
 
-namespace Content {
+namespace content {
 
 class Registry {
 public:

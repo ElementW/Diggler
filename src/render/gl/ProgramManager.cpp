@@ -8,8 +8,8 @@
 
 #define PROGRAM_MANAGER_DEBUG 0
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 using Util::Log;

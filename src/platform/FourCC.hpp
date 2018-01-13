@@ -3,7 +3,7 @@
 
 #include "Types.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 using FourCC = uint32;
 

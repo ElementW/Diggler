@@ -1,7 +1,7 @@
 #include "Sound.hpp"
 #include "Platform.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 Sound::Sound(const SoundBuffer *buffer) : buffer(buffer), createdRelative(true) {
   alGenSources(1, &id);

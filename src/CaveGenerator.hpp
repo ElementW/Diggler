@@ -4,7 +4,7 @@
 #include "World.hpp"
 #include "WorldGenerator.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class CaveGenerator : public WorldGenerator {
 private:

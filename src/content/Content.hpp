@@ -6,7 +6,7 @@
 #include <limits>
 #include <type_traits>
 
-namespace Diggler {
+namespace diggler {
 
 using BlockId = uint16;
 using BlockData = uint16;
@@ -36,7 +36,7 @@ struct LightData {
 static_assert(sizeof(LightData) == 2, "LightData has extra padding");
 static_assert(std::is_pod<LightData>::value, "LightData is not POD");
 
-namespace Content {
+namespace content {
   const BlockId BlockAirId = 0;
   const BlockId BlockIgnoreId = std::numeric_limits<BlockData>::max();
   const BlockId BlockUnknownId = 1;

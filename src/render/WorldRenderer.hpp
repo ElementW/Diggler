@@ -4,8 +4,8 @@
 #include "RenderParams.hpp"
 #include "../World.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 
 class WorldRenderer {
 protected:

@@ -11,7 +11,7 @@
 #include "Universe.hpp"
 #include "util/Log.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 using Util::Log;
 using namespace Util::Logging::LogLevels;
@@ -156,7 +156,7 @@ BlockId World::getBlockId(int x, int y, int z) {
       return cr->getBlockId(rmod(x, CX), rmod(y, CY), rmod(z, CZ));
     }
   }
-  return Content::BlockIgnoreId;
+  return content::BlockIgnoreId;
 }
 
 BlockData World::getBlockData(int x, int y, int z) {
@@ -191,7 +191,7 @@ bool World::raytrace(glm::vec3 pos, glm::vec3 dir, float range, glm::ivec3 *poin
   do {
     BlockId testBlock = getBlockId(xPos, yPos, zPos);
     /// @todo Actual block non-solidity (cursorwise) check
-    if (testBlock != Content::BlockAirId) {
+    if (testBlock != content::BlockAirId) {
       if (pointed)
         *pointed = glm::ivec3(xPos, yPos, zPos);
       if (facing)
@@ -308,7 +308,7 @@ void World::refresh() {
       c->markAsDirty();
 }
 
-void World::write(IO::OutStream &msg) const {
+void World::write(io::OutStream &msg) const {
   const void *chunkData = nullptr;
   const uint dataSize = Chunk::AllocaSize;
   uint compressedSize;
@@ -336,7 +336,7 @@ void World::write(IO::OutStream &msg) const {
   delete[] compressed;
 }
 
-void World::read(IO::InStream &M) {
+void World::read(io::InStream &M) {
   int bytesRead = 0;
   uint size = M.readU16();
   for (uint n=0; n < size; ++n) {

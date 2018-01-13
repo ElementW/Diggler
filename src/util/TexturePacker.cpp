@@ -20,7 +20,7 @@ using namespace std;
   #include <chrono>
 #endif
 
-namespace Diggler {
+namespace diggler {
 namespace Util {
 
 using namespace Logging::LogLevels;

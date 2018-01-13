@@ -3,8 +3,8 @@
 
 #include "../../platform/FourCC.hpp"
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 namespace Image {
 
 using Format = FourCC;

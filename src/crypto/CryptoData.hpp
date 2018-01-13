@@ -8,7 +8,7 @@
 
 #include <sodium.h>
 
-namespace Diggler {
+namespace diggler {
 namespace Crypto {
 
 template<size_t B>

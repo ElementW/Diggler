@@ -3,8 +3,8 @@
 
 #include "../Network.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace MsgTypes {
 
 struct MsgType {

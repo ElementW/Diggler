@@ -5,7 +5,7 @@
 
 #include "../PixelFormat.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class BitmapDumper final {
   BitmapDumper() = delete;

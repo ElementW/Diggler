@@ -79,7 +79,7 @@ int Get_next_vertex(const int i, int k, const std::map<int, bool> &N, const std:
   return n;
 }
 
-namespace Diggler {
+namespace diggler {
 namespace Util {
 
 std::vector<int[3]> Tipsify::tipsify(std::size_t vertexCount, const std::vector<int[3]> &I, int k) {

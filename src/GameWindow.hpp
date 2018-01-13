@@ -13,13 +13,13 @@
 
 #include "StateMachine.hpp"
 #include "Platform.hpp"
+#include "platform/Types.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
-class State;
 
-namespace UI {
+namespace ui {
 class Manager;
 }
 
@@ -30,15 +30,15 @@ private:
   GLFWwindow *m_window;
   int m_w, m_h;
 
-  std::unique_ptr<State> m_currentState, m_nextState;
+  std::unique_ptr<states::State> m_currentState, m_nextState;
 
 public:
-  UI::Manager *UIM;
+  ui::Manager *UIM;
 
   Game *G;
 
   GameWindow(Game*);
-  ~GameWindow();
+  ~GameWindow() override;
 
   operator GLFWwindow&() const { return *m_window; }
   operator GLFWwindow*() const { return m_window; }
@@ -60,7 +60,9 @@ public:
 
   void updateViewport();
 
-  void setNextState(std::unique_ptr<State> &&next) override;
+  states::State& state() const override;
+  void setNextState(std::unique_ptr<states::State> &&next) override;
+
   void run();
 
   void showMessage(const std::string &msg, const std::string &submsg = "");

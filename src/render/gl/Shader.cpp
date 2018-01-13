@@ -7,8 +7,8 @@
 #include "../../platform/fs.hpp"
 #include "../../util/Log.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 using Util::Log;

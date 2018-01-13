@@ -4,8 +4,8 @@
 
 #include <goodform/variant.hpp>
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 
 AssetContentMetadata::AssetContentMetadata(AssetManager &am) :
   m_assetManager(am) {

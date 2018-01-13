@@ -4,8 +4,8 @@
 
 #include "AssetManager.hpp"
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 
 Asset::Asset(const std::shared_ptr<AssetContentMetadata> &acm) :
   m_contentMetadata(acm) {

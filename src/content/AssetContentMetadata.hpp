@@ -6,8 +6,8 @@
 #include "../crypto/SHA256.hpp"
 #include "../platform/Types.hpp"
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 
 class AssetManager;
 

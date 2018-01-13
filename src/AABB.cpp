@@ -1,6 +1,6 @@
 #include "AABB.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 template class AABB<>;
 

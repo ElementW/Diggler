@@ -2,7 +2,7 @@
 #define SETTINGS_HPP
 #include <string>
 
-namespace Diggler {
+namespace diggler {
 
 class Config {
 private:

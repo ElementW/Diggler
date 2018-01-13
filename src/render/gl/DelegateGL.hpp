@@ -12,8 +12,8 @@
 #include "../../util/unique_function.hpp"
 #include "OpenGL.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 class DelegateGL {

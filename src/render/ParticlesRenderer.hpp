@@ -4,8 +4,8 @@
 #include "RenderParams.hpp"
 #include "../Particles.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 
 class ParticlesRenderer {
 protected:

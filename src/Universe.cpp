@@ -1,6 +1,6 @@
 #include "Universe.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 Universe::Universe(Game *G, bool remote) :
   G(G), isRemote(remote) {
@@ -33,7 +33,7 @@ WorldRef Universe::createWorld(WorldId id) {
   return w;
 }
 
-void Universe::recv(Net::InMessage &msg) {
+void Universe::recv(net::InMessage &msg) {
 
 }
 

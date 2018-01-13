@@ -17,11 +17,9 @@ diggler_add_sources(
   ${CSD}/Chunk.cpp
   ${CSD}/Clouds.cpp
   ${CSD}/Config.cpp
-  ${CSD}/ConnectingState.cpp
   ${CSD}/EscMenu.cpp
   ${CSD}/Frustum.cpp
   ${CSD}/Game.cpp
-  ${CSD}/GameState.cpp
   ${CSD}/GameWindow.cpp
   ${CSD}/GLFWHandler.cpp
   ${CSD}/GlobalProperties.cpp
@@ -31,7 +29,6 @@ diggler_add_sources(
   ${CSD}/KeyBinds.cpp
   ${CSD}/LocalPlayer.cpp
   ${CSD}/main.cpp
-  ${CSD}/MessageState.cpp
   ${CSD}/network/client/BlockUpdateHandler.cpp
   ${CSD}/network/client/ChatHandler.cpp
   ${CSD}/network/client/ChunkTransferHandler.cpp
@@ -60,13 +57,16 @@ diggler_add_sources(
   ${CSD}/Skybox.cpp
   ${CSD}/SoundBuffer.cpp
   ${CSD}/Sound.cpp
+  ${CSD}/states/ConnectingState.cpp
+  ${CSD}/states/GameState.cpp
+  ${CSD}/states/MessageState.cpp
+  ${CSD}/states/UITestState.cpp
   ${CSD}/Texture.cpp
   ${CSD}/ui/Button.cpp
   ${CSD}/ui/Element.cpp
   ${CSD}/ui/Font.cpp
   ${CSD}/ui/FontManager.cpp
   ${CSD}/ui/Manager.cpp
-  ${CSD}/UITestState.cpp
   ${CSD}/ui/Text.cpp
   ${CSD}/Universe.cpp
   ${CSD}/World.cpp

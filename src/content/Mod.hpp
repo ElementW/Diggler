@@ -6,8 +6,8 @@
 #include "../Platform.hpp"
 #include "../crypto/Sign.hpp"
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 
 union ModId {
   struct Parts {

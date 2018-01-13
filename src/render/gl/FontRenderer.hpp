@@ -7,11 +7,11 @@
 #include "VAO.hpp"
 #include "VBO.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
 
-namespace Render {
+namespace render {
 namespace gl {
 
 class GLFontRenderer : public FontRenderer {
@@ -39,14 +39,14 @@ public:
   GLFontRenderer(Game*);
   ~GLFontRenderer();
 
-  void registerFont(UI::Font&) final override;
-  void unregisterFont(UI::Font&) final override;
+  void registerFont(ui::Font&) final override;
+  void unregisterFont(ui::Font&) final override;
 
   TextBufferRef createTextBuffer(FontRendererTextBufferUsage) final override;
   void updateTextBuffer(TextBufferRef&, const TextBuffer::Vertex *vertices,
       uint vertexCount) final override;
 
-  void render(const UI::Font&, const TextBufferRef&, const glm::mat4&) final override;
+  void render(const ui::Font&, const TextBufferRef&, const glm::mat4&) final override;
 };
 
 }

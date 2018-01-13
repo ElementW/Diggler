@@ -1,7 +1,7 @@
 #include "PlayerJoin.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace MsgTypes {
 
 void PlayerJoinRequest::writeToMsg(OutMessage &msg) const {

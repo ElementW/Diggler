@@ -6,8 +6,8 @@
 #include "../platform/Types.hpp"
 #include "../Texture.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 
 using TextureRef = std::shared_ptr<Texture>;
 using TextureWeakref = std::weak_ptr<Texture>;

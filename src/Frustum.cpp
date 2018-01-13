@@ -2,7 +2,7 @@
 #include <cmath>
 #include <glm/glm.hpp>
 
-namespace Diggler {
+namespace diggler {
 
 void Frustum::setCamInternals(vec3vt rad, vec3vt ratio, vec3vt nearD, vec3vt farD) {
   this->ratio = ratio;

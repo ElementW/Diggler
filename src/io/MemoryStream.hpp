@@ -3,8 +3,8 @@
 
 #include "Stream.hpp"
 
-namespace Diggler {
-namespace IO {
+namespace diggler {
+namespace io {
 
 class MemoryStream : public virtual SeekableStream {
 protected:

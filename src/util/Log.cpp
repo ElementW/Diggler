@@ -2,7 +2,7 @@
 
 #include "logging/AnsiConsoleLogger.hpp"
 
-namespace Diggler {
+namespace diggler {
 namespace Util {
 
 using namespace Logging;

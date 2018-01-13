@@ -9,16 +9,16 @@
 #include "render/gl/ProgramManager.hpp"
 #include "ui/Manager.hpp"
 
-namespace Diggler {
+namespace diggler {
 
-const Render::gl::Program *Chatbox::RenderProgram = nullptr;
+const render::gl::Program *Chatbox::RenderProgram = nullptr;
 GLint Chatbox::RenderProgram_coord = -1;
 GLint Chatbox::RenderProgram_color = -1;
 GLint Chatbox::RenderProgram_mvp = -1;
 
 Chatbox::Chatbox(Game *G) : m_isChatting(false), G(G),
   m_posX(0), m_posY(0) {
-  m_chatText = G->UIM->addManual<UI::Text>("", 2, 2);
+  m_chatText = G->UIM->addManual<ui::Text>("", 2, 2);
   m_chatText->setPos(0, 0);
   if (RenderProgram == nullptr) {
     RenderProgram = G->PM->getProgram("2d", "color0");
@@ -35,7 +35,7 @@ Chatbox::Chatbox(Game *G) : m_isChatting(false), G(G),
     {0.f, 100.f, 0.f, 0.f, 0.f, .5f}
   };
   m_vbo.setData(verts, 6);
-  { Render::gl::VAO::Config cfg = m_vao.configure();
+  { render::gl::VAO::Config cfg = m_vao.configure();
     cfg.vertexAttrib(m_vbo, RenderProgram_coord, 2, GL_FLOAT, sizeof(Vertex), 0);
     cfg.vertexAttrib(m_vbo, RenderProgram_color, 4, GL_FLOAT, sizeof(Vertex), offsetof(Vertex, r));
     cfg.commit();
@@ -64,7 +64,7 @@ void Chatbox::addChatEntry(const std::string &text) {
   m_chatEntries.emplace_back();
   ChatEntry &entry = m_chatEntries.back();
   entry.date = system_clock::now();
-  entry.text = G->UIM->addManual<UI::Text>(text);
+  entry.text = G->UIM->addManual<ui::Text>(text);
   entry.height = entry.text->getSize().y;
 }
 

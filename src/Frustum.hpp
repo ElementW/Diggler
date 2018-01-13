@@ -9,7 +9,7 @@
 #undef NEAR
 #undef FAR
 
-namespace Diggler {
+namespace diggler {
 
 class Frustum {
 private:

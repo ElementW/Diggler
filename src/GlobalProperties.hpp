@@ -1,7 +1,7 @@
 #ifndef GLOBAL_PROPERTIES_HPP
 #define GLOBAL_PROPERTIES_HPP
 
-namespace Diggler {
+namespace diggler {
 
 namespace GlobalProperties {
   extern bool IsClient;

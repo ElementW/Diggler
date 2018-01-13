@@ -15,7 +15,7 @@
 #include "render/gl/ProgramManager.hpp"
 #include "util/Log.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 using Util::Log;
 using namespace Util::Logging::LogLevels;
@@ -148,7 +148,7 @@ void LocalPlayer::update(float delta) {
           for (int cz = min.z; cz < max.z; ++cz) {
             blockBox.v1.z = cz; blockBox.v2.z = cz + 1;
             BlockId id = W->getBlockId(cx, cy, cz);
-            if (id != Content::BlockAirId) {
+            if (id != content::BlockAirId) {
               glm::vec3 normal;
               float d = plrBox.sweptCollision(blockBox, dtvel.x, dtvel.y, dtvel.z, normal.x, normal.y, normal.z);
               if (d < pdelta) {
@@ -210,10 +210,10 @@ void LocalPlayer::render(const glm::mat4 &transform) const {
     { min.x, min.y, max.z, 0, 1, 0 },
   };
   vbo.setDataGrow(pts, sizeof(pts)/sizeof(Coord), GL_STREAM_DRAW);
-  const Render::gl::Program &P = *G->PM->getProgram("3d", "color0");
+  const render::gl::Program &P = *G->PM->getProgram("3d", "color0");
   if (!vaoConfigured) {
     vaoConfigured = true;
-    Render::gl::VAO::Config cfg = vao.configure();
+    render::gl::VAO::Config cfg = vao.configure();
     cfg.vertexAttrib(vbo, P.att("coord"), 3, GL_FLOAT, sizeof(Coord), 0);
     cfg.vertexAttrib(vbo, P.att("color"), 3, GL_UNSIGNED_BYTE, sizeof(Coord), offsetof(Coord, r));
     cfg.commit();

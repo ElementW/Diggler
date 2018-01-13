@@ -8,15 +8,15 @@
 #include "../util/TexturePacker.hpp"
 //#include "../AABB.hpp"
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 
 class BlockDef : public ObjectDef {
 public:
   struct Appearance {
     Variability variability;
     struct Texture {
-      Diggler::Texture *tex;
+      diggler::Texture *tex;
       Util::TexturePacker::Coord coord;
       std::vector<Util::TexturePacker::Coord> divCoords;
       struct Repeat {

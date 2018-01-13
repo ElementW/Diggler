@@ -1,16 +1,15 @@
 #include "BlockUpdateHandler.hpp"
 
 #include "../../Game.hpp"
-#include "../../GameState.hpp"
 #include "../msgtypes/BlockUpdate.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace Client {
 
-using namespace Net::MsgTypes;
+using namespace net::MsgTypes;
 
-bool BlockUpdateHandler::handle(GameState &GS, InMessage &msg) {
+bool BlockUpdateHandler::handle(Game &G, InMessage &msg) {
   // TODO handle that in Chunk's ChangeHelper
   using S = BlockUpdateSubtype;
   constexpr auto CX = Chunk::CX, CY = Chunk::CY, CZ = Chunk::CZ;
@@ -19,7 +18,7 @@ bool BlockUpdateHandler::handle(GameState &GS, InMessage &msg) {
       BlockUpdateNotify bun;
       bun.readFromMsg(msg);
       for (const BlockUpdateNotify::UpdateData &upd : bun.updates) {
-        WorldRef w = GS.G->U->getWorld(upd.worldId);
+        WorldRef w = G.U->getWorld(upd.worldId);
         if (w) {
           ChunkRef c = w->getChunkAtCoords(upd.pos);
           if (c) {

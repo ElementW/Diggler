@@ -6,8 +6,8 @@
 #include "MsgType.hpp"
 #include "../../Player.hpp" // for DeathReason
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace MsgTypes {
 
 enum class PlayerUpdateSubtype : uint8 {

@@ -13,9 +13,9 @@
 #include "network/Network.hpp"
 #include "World.hpp"
 
-namespace Diggler {
+namespace diggler {
 
-namespace Render {
+namespace render {
 class PlayerRenderer;
 namespace gl {
 class Program;
@@ -29,17 +29,17 @@ using PlayerGameID = uint32;
 
 class Player {
 protected:
-  friend class Render::PlayerRenderer;
+  friend class render::PlayerRenderer;
   uintptr_t rendererData;
 
   static struct Renderer {
-    const Render::gl::Program *prog;
+    const render::gl::Program *prog;
     GLint att_coord,
         uni_mvp,
         uni_unicolor,
         uni_fogStart,
         uni_fogEnd;
-    std::unique_ptr<Render::gl::VBO> vbo;
+    std::unique_ptr<render::gl::VBO> vbo;
   } R;
   double m_lastPosTime;
   glm::vec3 m_predictPos;
@@ -60,7 +60,7 @@ public:
   using SessionID = uint32;
   SessionID sessId;
   bool isAlive;
-  Net::Peer *peer;
+  net::Peer *peer;
   std::list<ChunkRef> pendingChunks;
 
   Player(Game *G = nullptr);

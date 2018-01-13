@@ -6,8 +6,8 @@
 #include <glbinding/glbinding-version.h>
 #include <glbinding/Version.h>
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 void OpenGL::init() {

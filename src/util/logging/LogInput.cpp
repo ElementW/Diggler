@@ -10,7 +10,7 @@
 
 #include "../Encoding.hpp"
 
-namespace Diggler {
+namespace diggler {
 namespace Util {
 namespace Logging {
 

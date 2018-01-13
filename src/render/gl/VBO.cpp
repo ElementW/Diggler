@@ -3,8 +3,8 @@
 #include "FeatureSupport.hpp"
 #include "Util.hpp"
 
-namespace Diggler {
-namespace Render {
+namespace diggler {
+namespace render {
 namespace gl {
 
 VBO::VBO() :

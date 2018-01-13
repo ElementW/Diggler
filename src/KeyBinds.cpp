@@ -7,7 +7,7 @@ using std::fwrite;
 using std::fread;
 using std::fclose;
 
-namespace Diggler {
+namespace diggler {
 
 KeyBinds::KeyBinds() {
   loadDefaults();

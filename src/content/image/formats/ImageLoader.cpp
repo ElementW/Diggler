@@ -1,7 +1,7 @@
 #include "ImageLoader.hpp"
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 namespace Image {
 namespace Formats {
 

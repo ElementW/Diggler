@@ -2,7 +2,7 @@
 #define KEY_BINDS_HPP
 #include <string>
 
-namespace Diggler {
+namespace diggler {
 
 class KeyBinds {
 public:

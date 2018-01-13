@@ -3,8 +3,8 @@
 #include "Manager.hpp"
 #include "Text.hpp"
 
-namespace Diggler {
-namespace UI {
+namespace diggler {
+namespace ui {
 
 Button::Button(Manager *M, const Area &area, const std::string &label) : Element(M) {
   setArea(area);

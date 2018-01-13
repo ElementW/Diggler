@@ -7,8 +7,8 @@
 #include "../../../PixelFormat.hpp"
 #include "../ImageLoader.hpp"
 
-namespace Diggler {
-namespace Content {
+namespace diggler {
+namespace content {
 namespace Image {
 namespace Formats {
 
@@ -22,7 +22,7 @@ public:
   virtual std::shared_ptr<Loading> load(Format, const std::string &path, PixelFormat pixFormat,
       const LoadParams&) const = 0;
 
-  virtual std::shared_ptr<Loading> load(Format, std::unique_ptr<IO::InStream> &&stream,
+  virtual std::shared_ptr<Loading> load(Format, std::unique_ptr<io::InStream> &&stream,
       PixelFormat pixFormat, const LoadParams&) const = 0;
 };
 

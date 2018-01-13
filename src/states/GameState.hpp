@@ -1,6 +1,5 @@
-#ifndef GAME_STATE_HPP
-#define GAME_STATE_HPP
-
+#ifndef DIGGLER_STATES_GAME_STATE_HPP
+#define DIGGLER_STATES_GAME_STATE_HPP
 #include "State.hpp"
 
 #include <thread>
@@ -10,32 +9,35 @@
 #include <glm/detail/type_vec2.hpp>
 #include <glm/detail/type_vec.hpp>
 
-#include "GameWindow.hpp"
-#include "render/gl/FBO.hpp"
-#include "render/gl/VBO.hpp"
-#include "render/gl/VAO.hpp"
-#include "content/Content.hpp"
-#include "network/Network.hpp"
-#include "network/ClientMessageHandler.hpp"
+#include "../GameWindow.hpp"
+#include "../render/gl/FBO.hpp"
+#include "../render/gl/VBO.hpp"
+#include "../render/gl/VAO.hpp"
+#include "../content/Content.hpp"
+#include "../network/Network.hpp"
+#include "../network/ClientMessageHandler.hpp"
 // TODO strip?
-#include "Chunk.hpp"
+#include "../Chunk.hpp"
 
-namespace Diggler {
+namespace diggler {
 
+class EscMenu;
 class Skybox;
 class KeyBindings;
 class Font;
 class Clouds;
 class Game;
 class Chatbox;
-namespace Render {
+namespace render {
 namespace gl {
 class Program;
 }
 }
-namespace UI {
+namespace ui {
 class Text;
 }
+
+namespace states {
 
 class GameState : public State {
 public:
@@ -43,34 +45,34 @@ public:
   Game *G;
 
 private:
-  Net::ClientMessageHandler CMH;
+  net::ClientMessageHandler CMH;
 
   glm::vec3 m_lookat;
   glm::vec2 m_angles;
 
-  Render::gl::FBO *m_3dFbo;
-  const Render::gl::Program *m_3dFboRenderer;
+  render::gl::FBO *m_3dFbo;
+  const render::gl::Program *m_3dFboRenderer;
   GLuint m_3dFboRenderer_coord, m_3dFboRenderer_texcoord, m_3dFboRenderer_mvp;
 
   struct Bloom {
     bool enable;
     int scale;
-    std::unique_ptr<Render::gl::VAO> vao;
+    std::unique_ptr<render::gl::VAO> vao;
     struct Extractor {
-      Render::gl::FBO *fbo;
-      const Render::gl::Program *prog;
+      render::gl::FBO *fbo;
+      const render::gl::Program *prog;
       GLuint att_coord, att_texcoord, uni_mvp;
     } extractor;
     struct Renderer {
-      Render::gl::FBO *fbo;
-      const Render::gl::Program *prog;
+      render::gl::FBO *fbo;
+      const render::gl::Program *prog;
       GLuint att_coord, att_texcoord, uni_pixshift, uni_mvp;
     } renderer;
     Bloom(Game&);
     ~Bloom();
   } bloom;
 
-  Render::gl::VBO *m_3dRenderVBO;
+  render::gl::VBO *m_3dRenderVBO;
   struct Coord2DTex { int16 x, y; uint8 u, v; };
   Clouds *m_clouds;
   Skybox *m_sky;
@@ -81,9 +83,9 @@ private:
   } m_crossHair;
 
   struct {
-    Render::gl::VBO vbo;
-    Render::gl::VAO vao;
-    const Render::gl::Program *program;
+    render::gl::VBO vbo;
+    render::gl::VAO vao;
+    const render::gl::Program *program;
     GLuint att_coord, uni_unicolor, uni_mvp;
   } m_highlightBox;
 
@@ -101,7 +103,7 @@ private:
 
   std::thread m_networkThread;
 
-  Net::InMessage m_msg;
+  net::InMessage m_msg;
   float nextNetUpdate;
 
   struct {
@@ -109,9 +111,9 @@ private:
   } debugInfo;
 
   struct {
-    std::shared_ptr<UI::Text> FPS;
-    std::shared_ptr<UI::Text> DebugInfo;
-    std::shared_ptr<class EscMenu> EM;
+    std::shared_ptr<ui::Text> FPS;
+    std::shared_ptr<ui::Text> DebugInfo;
+    std::shared_ptr<EscMenu> EM;
   } UI;
 
   int fpsCounter;
@@ -155,9 +157,10 @@ public:
   void drawUI();
   bool processNetwork();
 
-  void sendMsg(Net::OutMessage &msg, Net::Tfer mode, Net::Channels chan = Net::Channels::Base);
+  void sendMsg(net::OutMessage &msg, net::Tfer mode, net::Channels chan = net::Channels::Base);
 };
 
 }
+}
 
-#endif
+#endif /* DIGGLER_STATES_GAME_STATE_HPP */

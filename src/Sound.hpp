@@ -4,7 +4,7 @@
 #include "SoundBuffer.hpp"
 #include <glm/glm.hpp>
 
-namespace Diggler {
+namespace diggler {
 
 class Sound {
 private:

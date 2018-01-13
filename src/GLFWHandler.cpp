@@ -1,7 +1,7 @@
 #include "GLFWHandler.hpp"
 #include "GameWindow.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 void GLFWHandler::mouseButtonImpl(GLFWwindow *window, int key, int action, int mods) {
   (void)window;

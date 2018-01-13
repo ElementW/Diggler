@@ -7,7 +7,7 @@
 #include "../platform/Types.hpp"
 #include "../Texture.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Game;
 

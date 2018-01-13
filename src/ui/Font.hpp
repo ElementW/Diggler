@@ -8,19 +8,19 @@
 
 #include "../render/FontRendererFwd.hpp"
 
-namespace Diggler {
+namespace diggler {
 
 class Texture;
 class Program;
 class Game;
 
-namespace UI {
+namespace ui {
 
 class FontManager;
 
 class Font {
 private:
-  friend class Render::FontRenderer;
+  friend class render::FontRenderer;
   uintptr_t rendererData;
 
   std::shared_ptr<Texture> m_texture;
@@ -42,11 +42,11 @@ public:
   Font(Game *G, const std::string &path);
   ~Font();
 
-  Render::FontRendererTextBufferRef createTextBuffer() const;
-  Render::FontRendererTextBufferRef createTextBuffer(Render::FontRendererTextBufferUsage) const;
-  void updateTextBuffer(Render::FontRendererTextBufferRef&, const std::string &text) const;
+  render::FontRendererTextBufferRef createTextBuffer() const;
+  render::FontRendererTextBufferRef createTextBuffer(render::FontRendererTextBufferUsage) const;
+  void updateTextBuffer(render::FontRendererTextBufferRef&, const std::string &text) const;
 
-  void draw(const Render::FontRendererTextBufferRef&, const glm::mat4 &matrix) const;
+  void draw(const render::FontRendererTextBufferRef&, const glm::mat4 &matrix) const;
   Size getSize(const std::string &text) const;
   int getHeight() const;
   const std::shared_ptr<Texture> texture() const {

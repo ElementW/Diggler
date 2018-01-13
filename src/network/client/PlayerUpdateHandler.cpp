@@ -1,21 +1,20 @@
 #include "PlayerUpdateHandler.hpp"
 
 #include "../../Game.hpp"
-#include "../../GameState.hpp"
 #include "../../util/Log.hpp"
 #include "../msgtypes/PlayerUpdate.hpp"
 
-namespace Diggler {
-namespace Net {
+namespace diggler {
+namespace net {
 namespace Client {
 
-using namespace Net::MsgTypes;
+using namespace net::MsgTypes;
 using Util::Log;
 using namespace Util::Logging::LogLevels;
 
 static const char *TAG = "CNH:PlayerUpdate";
 
-bool PlayerUpdateHandler::handle(GameState &GS, InMessage &msg) {
+bool PlayerUpdateHandler::handle(Game &G, InMessage &msg) {
   using S = PlayerUpdateSubtype;
   switch (msg.getSubtype<S>()) {
     case S::Move: {
@@ -25,7 +24,7 @@ bool PlayerUpdateHandler::handle(GameState &GS, InMessage &msg) {
         Log(Debug, TAG) << "Move without player session ID";
         return true;
       }
-      Player *plr = GS.G->players.getBySessId(*pum.plrSessId);
+      Player *plr = G.players.getBySessId(*pum.plrSessId);
       if (!plr) {
         Log(Debug, TAG) <<"Move: sess#" << *pum.plrSessId <<
             " is not on server";
@@ -40,7 +39,7 @@ bool PlayerUpdateHandler::handle(GameState &GS, InMessage &msg) {
     case S::Die: {
       PlayerUpdateDie pud;
       pud.readFromMsg(msg);
-      Player *plr = GS.G->players.getBySessId(pud.plrSessId);
+      Player *plr = G.players.getBySessId(pud.plrSessId);
       if (!plr) {
         Log(Debug, TAG) << "Die: sess#" << pud.plrSessId <<
             " is not on server";
@@ -51,7 +50,7 @@ bool PlayerUpdateHandler::handle(GameState &GS, InMessage &msg) {
     case S::Respawn: {
       PlayerUpdateRespawn pur;
       pur.readFromMsg(msg);
-      Player *plr = GS.G->players.getBySessId(pur.plrSessId);
+      Player *plr = G.players.getBySessId(pur.plrSessId);
       if (!plr) {
         Log(Debug, TAG) << "Respawn: sess#" << pur.plrSessId <<
             " is not on server";
