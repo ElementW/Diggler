@@ -73,6 +73,9 @@ Audio::~Audio() {
   if (!GlobalProperties::IsSoundEnabled)
     return;
 
+  m_playing.clear();
+  m_sounds.clear();
+
   alcMakeContextCurrent(nullptr);
   alcDestroyContext(m_audioContext);
   alcCloseDevice(m_audioDevice);
