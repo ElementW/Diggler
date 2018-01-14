@@ -1,6 +1,7 @@
 #include "Debug.hpp"
 
 #include "../../util/Log.hpp"
+#include "FeatureSupport.hpp"
 
 namespace diggler {
 namespace render {
@@ -86,12 +87,27 @@ void Debug::glDebugCallback(GLenum source, GLenum type, GLuint id,
 }
 
 void Debug::enable() {
+  if (!isAvailable()) {
+    return;
+  }
   glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
   glDebugMessageCallback(glDebugCallback, nullptr);
 }
 
 void Debug::disable() {
+  if (!isAvailable()) {
+    return;
+  }
   glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_FALSE);
+}
+
+bool Debug::isAvailable() {
+  if (!FeatureSupport::debug) {
+    return false;
+  }
+  GLint enabled;
+  glGetIntegerv(GL_CONTEXT_FLAGS, &enabled);
+  return enabled & GL_CONTEXT_FLAG_DEBUG_BIT;
 }
 
 }

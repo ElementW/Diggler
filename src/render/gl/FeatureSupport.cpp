@@ -17,17 +17,19 @@ bool
   F::DSA,
   F::shader_image_load_store,
   F::FBO_ARB,
-  F::buffer_storage;
+  F::buffer_storage,
+  F::debug;
 
 void F::probe() {
-  VAO = OpenGL::hasExtension("GL_ARB_vertex_array_object") or
-        OpenGL::hasExtension("GL_OES_vertex_array_object");
-  DSA_ARB = OpenGL::hasExtension("GL_ARB_direct_state_access");
-  DSA_EXT = OpenGL::hasExtension("GL_EXT_direct_state_access");
+#define has(ext) OpenGL::hasExtension(ext)
+  VAO = has("GL_ARB_vertex_array_object") or has("GL_OES_vertex_array_object");
+  DSA_ARB = has("GL_ARB_direct_state_access");
+  DSA_EXT = has("GL_EXT_direct_state_access");
   DSA = DSA_ARB or DSA_EXT;
-  shader_image_load_store = OpenGL::hasExtension("GL_ARB_shader_image_load_store");
-  FBO_ARB = OpenGL::hasExtension("GL_ARB_framebuffer_object");
-  buffer_storage = OpenGL::hasExtension("GL_ARB_buffer_storage");
+  shader_image_load_store = has("GL_ARB_shader_image_load_store");
+  FBO_ARB = has("GL_ARB_framebuffer_object");
+  buffer_storage = has("GL_ARB_buffer_storage");
+  debug = has("GL_KHR_debug") or has("GL_ARB_debug_output") or has("GL_AMD_debug_output");
 }
 
 #define feature(x) if(x){oss<<#x<<std::endl;}
@@ -40,6 +42,7 @@ std::string F::supported() {
   feature(shader_image_load_store);
   feature(FBO_ARB);
   feature(buffer_storage);
+  feature(debug);
   return oss.str();
 }
 #undef feature
