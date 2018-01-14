@@ -16,7 +16,7 @@ inline std::ios::seekdir getSeekDir(SeekableStream::Whence whence) {
 }
 
 InFileStream::InFileStream(const std::string &path) {
-  strm.open(path);
+  strm.open(path, std::ios_base::in | std::ios_base::binary);
 }
 
 InFileStream::~InFileStream() {
@@ -45,7 +45,7 @@ void InFileStream::seek(OffT off, Whence whence) {
 
 
 OutFileStream::OutFileStream(const std::string &path) {
-  strm.open(path);
+  strm.open(path, std::ios_base::out | std::ios_base::binary);
 }
 
 OutFileStream::~OutFileStream() {
