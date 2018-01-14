@@ -1,5 +1,6 @@
 #include "GameWindow.hpp"
 
+#include <cctype>
 #include <sstream>
 
 #include <al.h>
@@ -18,6 +19,7 @@
 #include "render/gl/Debug.hpp"
 #include "util/Log.hpp"
 #include "util/MemoryTracker.hpp"
+#include "util/StringUtil.hpp"
 
 namespace diggler {
 
@@ -50,10 +52,28 @@ GameWindow::GameWindow(Game *G) : G(G) {
 
   m_w = 640; m_h = 480;
 
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-  glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API /*GLFW_OPENGL_ES_API*/);
-  //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+  if (GlobalProperties::GfxOverrides != nullptr) {
+    for (const std::string &opt : Util::StringUtil::explode(GlobalProperties::GfxOverrides, ',')) {
+      if (opt.size() == 4 && opt[0] == 'g' && opt[1] == 'l' &&
+          isdigit(opt[2]) && isdigit(opt[3])) {
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, opt[2] - '0');
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, opt[3] - '0');
+      } else if (opt.size() == 6 && opt[0] == 'g' && opt[1] == 'l' &&
+          opt[2] == 'e' && opt[3] == 's' && isdigit(opt[4]) && isdigit(opt[5])) {
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, opt[4] - '0');
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, opt[5] - '0');
+      } else if (opt == "fwd") {
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+      } else if (opt == "compat") {
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+      } else if (opt == "core") {
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+      }
+    }
+  }
+
   glfwWindowHint(GLFW_SAMPLES, 0); // Gimme aliasing everywhere
   //glfwWindowHint(GLFW_STENCIL_BITS, 8);
 

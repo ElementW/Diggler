@@ -15,5 +15,6 @@ bool GlobalProperties::IsSoundEnabled = true;
 
 int GlobalProperties::UIScale = 2;
 
+char *GlobalProperties::GfxOverrides = nullptr;
 
 }

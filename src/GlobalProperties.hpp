@@ -16,6 +16,8 @@ namespace GlobalProperties {
   extern bool IsSoundEnabled;
 
   extern int UIScale;
+
+  extern char *GfxOverrides;
 }
 
 }

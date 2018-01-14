@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
 
   string host = GlobalProperties::DefaultServerHost;
   int    port = GlobalProperties::DefaultServerPort;
-  for (int i=1; i < argc; i++) {
+  for (int i=1; i < argc; ++i) {
     if (strcmp(argv[i], "-h") == 0 ||
       strcmp(argv[i], "--help") == 0) {
       showHelp(argv);
@@ -95,6 +95,8 @@ int main(int argc, char **argv) {
         GlobalProperties::PlayerName = argv[++i];
         Log(Info, TAG) << "Player's name set to " << GlobalProperties::PlayerName;
       }
+    } else if (strcmp(argv[i], "-g") == 0) {
+      GlobalProperties::GfxOverrides = argv[++i];
     } else {
       // For now, assume it's the server address
       host = argv[i];
