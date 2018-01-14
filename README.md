@@ -28,7 +28,7 @@ make -j$(nproc)
 
 ### Dependencies
 
-Diggler is written in C++14, so you need GCC 5/clang 3.4 or more.
+Diggler is written in C++14, so you need GCC 7+/clang 3.4+.
 
 You need GLM, OpenAL, OpenGL (ES 2.0), libepoxy, glfw3, LuaJIT, sqlite3 and libsodium.
 
