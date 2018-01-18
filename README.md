@@ -41,3 +41,7 @@ Arch: `pacman -S glm openal libepoxy glfw luajit sqlite libsodium`
 Debian (Jessie **w/ testing**, or up) & derivatives: `apt-get install libglm-dev libopenal-dev libepoxy-dev libglfw3-dev libx{i,randr}-dev libluajit-5.1-dev libsqlite3-dev libsodium-dev`
 
 Fedora (tested on F24): `dnf install glm-devel openal-soft-devel libepoxy-devel glfw-devel luajit-devel sqlite-devel libsodium-devel`
+
+#### MinGW
+
+MinGW64: `pacman -S cmake gdb git make mingw-w64-x86_64-{gcc,glfw,glm,lib{epoxy,sodium},luajit-git,openal,sqlite3} unzip`
