@@ -1,6 +1,7 @@
 #include "Platform.hpp"
 
 #include <cmath>
+#include <stdexcept>
 
 #include "util/Log.hpp"
 
@@ -82,22 +83,34 @@ std::string diggler::getConfigDirectory() {
 #include <dirent.h>
 #include <cstdio>
 
+#if defined(BUILDINFO_PLATFORM_MAC)
+#include <cstdint>
+#include <sys/syslimits.h>
+#include <mach-o/dyld.h>
+#endif
+
 std::string do_readlink(const char *path);
 std::string do_readlink(const std::string &path);
 
 #if defined(BUILDINFO_PLATFORM_LINUX)
 std::string diggler::proc::getExecutablePath() {
   if (pathCache.executableBin.length() == 0) {
-    pid_t pid = getpid();
-    // Assuming 32-bit pid -> max of 10 digits, we need only "/proc/xxxxxxxxxx/exe" space
-    char path[21];
-    std::snprintf(path, 21, "/proc/%d/exe", pid);
-    pathCache.executableBin = do_readlink(path);
+    pathCache.executableBin = do_readlink("/proc/self/exe");
   }
   return pathCache.executableBin;
 }
-#else
-// TODO: getExecutablePath for those without procfs
+#elif defined(BUILDINFO_PLATFORM_MAC)
+std::string diggler::proc::getExecutablePath() {
+  if (pathCache.executableBin.length() == 0) {
+    char buff[PATH_MAX+1];
+    uint32_t size = PATH_MAX+1;
+    if (_NSGetExecutablePath(buff, &size) != 0) {
+      throw std::runtime_error("Executable path buffer too small");
+    }
+    pathCache.executableBin = buff;
+  }
+  return pathCache.executableBin;
+}
 #endif
 
 std::string diggler::proc::getExecutableDirectory() {
@@ -137,10 +150,6 @@ std::string diggler::getConfigDirectory() {
   }
   return pathCache.configDir;
 }
-
-#elif defined(BUILDINFO_PLATFORM_MAC) // Mac
-
-// Put Mac code here
 
 #else // Any other
 
