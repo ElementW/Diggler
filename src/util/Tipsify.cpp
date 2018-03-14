@@ -5,6 +5,8 @@
 #include <vector>
 #include <iostream>
 
+using Vector3 = diggler::Util::Tipsify::Vector3;
+
 /*
  * Implementation of AMD's Tipsy algorithm
  * Ported from Go, original at https://github.com/tfmoraes/Tipsify-Go
@@ -19,7 +21,7 @@ func Skip_dead_end(L []int, D *[]int, I [][3]int, i int) (int);
 func Get_next_vertex(I [][3]int, i int, k int, N map[int]bool, C []int, s int, L []int, D *[]int) (int);
 */
 std::pair<std::vector<std::vector<int>>, std::vector<int>>
-  BuildAdjacency(std::size_t vertexCount, const std::vector<int[3]> &I) {
+  BuildAdjacency(std::size_t vertexCount, const std::vector<Vector3> &I) {
   std::vector<std::vector<int>> A(vertexCount);
   std::vector<int> L(vertexCount, 0);
 
@@ -82,7 +84,7 @@ int Get_next_vertex(const int i, int k, const std::map<int, bool> &N, const std:
 namespace diggler {
 namespace Util {
 
-std::vector<int[3]> Tipsify::tipsify(std::size_t vertexCount, const std::vector<int[3]> &I, int k) {
+std::vector<Vector3> Tipsify::tipsify(std::size_t vertexCount, const std::vector<Vector3> &I, int k) {
   std::vector<std::vector<int>> A;
   std::vector<int> L;
   {
@@ -94,7 +96,7 @@ std::vector<int[3]> Tipsify::tipsify(std::size_t vertexCount, const std::vector<
   std::vector<bool> E(I.size());
   const int i = 1;
   int f = 0, s = k + 1, nf = 0;
-  std::vector<int[3]> O(I.size());
+  std::vector<Vector3> O(I.size());
   for (; f >= 0;) {
     std::map<int, bool> N;
     for (int t : A[f]) {
@@ -141,13 +143,13 @@ struct Cache {
   }
 };
 
-double Tipsify::calcACMR(const std::vector<int[3]> &faces, int cacheSize) {
+double Tipsify::calcACMR(const std::vector<Vector3> &faces, int cacheSize) {
   if (faces.empty()) {
     return 0;
   }
   Cache cache(cacheSize);
   int misses = 0;
-  for (const int *face : faces) {
+  for (const Vector3 &face : faces) {
     for (int i = 0; i < 3; ++i) {
       if (cache.push(face[i])) {
         ++misses;
