@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include <alc.h>
+#include "Audio.hpp"  // for alc.h
 
 #include "render/gl/OpenGL.hpp"
 #define GLFW_INCLUDE_NONE

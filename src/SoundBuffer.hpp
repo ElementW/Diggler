@@ -1,7 +1,14 @@
-#ifndef SOUND_BUFFER_HPP
-#define SOUND_BUFFER_HPP
-#include <AL/al.h>
+#ifndef DIGGLER_SOUND_BUFFER_HPP
+#define DIGGLER_SOUND_BUFFER_HPP
+
 #include <string>
+
+#include "platform/BuildInfo.hpp"
+#ifdef BUILDINFO_PLATFORM_MAC
+#include <OpenAL/al.h>
+#else
+#include <AL/al.h>
+#endif
 
 namespace diggler {
 
@@ -26,4 +33,4 @@ public:
 
 }
 
-#endif
+#endif /* DIGGLER_SOUND_BUFFER_HPP */

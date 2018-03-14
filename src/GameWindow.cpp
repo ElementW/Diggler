@@ -3,7 +3,13 @@
 #include <cctype>
 #include <sstream>
 
-#include <al.h>
+#include "platform/BuildInfo.hpp"
+#ifdef BUILDINFO_PLATFORM_MAC
+#include <OpenAL/al.h>
+#else
+#include <AL/al.h>
+#endif
+
 #include <glm/detail/setup.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>

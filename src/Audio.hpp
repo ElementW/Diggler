@@ -1,9 +1,18 @@
 #ifndef AUDIO_HPP
 #define AUDIO_HPP
+
 #include <map>
 #include <list>
+
 #include <glm/detail/type_vec3.hpp>
+
+#include "platform/BuildInfo.hpp"
+#ifdef BUILDINFO_PLATFORM_MAC
+#include <OpenAL/alc.h>
+#else
 #include <AL/alc.h>
+#endif
+
 #include "Sound.hpp"
 #include "SoundBuffer.hpp"
 

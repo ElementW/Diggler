@@ -3,8 +3,13 @@
 #include <cstring>
 #include <sstream>
 
+#include "platform/BuildInfo.hpp"
+#ifdef BUILDINFO_PLATFORM_MAC
+#include <OpenAL/al.h>
+#else
 #include <AL/al.h>
 #include <AL/alext.h>
+#endif
 
 #include "Game.hpp"
 #include "GlobalProperties.hpp"

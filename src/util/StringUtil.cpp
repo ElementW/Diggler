@@ -15,14 +15,14 @@ std::vector<std::string> StringUtil::explode(const std::string &s, char delim) {
   return result;
 }
 
-std::vector<std::u32string> StringUtil::explode(const std::u32string &s, char32_t delim) {
+/*std::vector<std::u32string> StringUtil::explode(const std::u32string &s, char32_t delim) {
   std::vector<std::u32string> result;
   std::basic_istringstream<char32_t> iss(s);
   for (std::u32string token; std::getline(iss, token, delim); ) {
       result.push_back(std::move(token));
   }
   return result;
-}
+}*/
 
 }
 }

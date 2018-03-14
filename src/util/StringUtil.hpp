@@ -12,7 +12,7 @@ public:
   StringUtil() = delete;
 
   static std::vector<std::string> explode(const std::string &s, char delim);
-  static std::vector<std::u32string> explode(const std::u32string &s, char32_t delim);
+  // static std::vector<std::u32string> explode(const std::u32string &s, char32_t delim);
 };
 
 }
