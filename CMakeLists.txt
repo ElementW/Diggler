@@ -58,6 +58,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pie")
   endif()
 endif()
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  # Fix LuaJIT failing to run on OS X
+  link_libraries("-pagezero_size 10000 -image_base 100000000")
+endif()
 
 message(">> Using ${CMAKE_BUILD_TYPE} build configuration")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -DDEBUG -g")
