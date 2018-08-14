@@ -85,7 +85,7 @@ find_package(PkgConfig REQUIRED)
 find_package(LuaJIT REQUIRED)
 
 find_package(meiose REQUIRED)
-if(NOT MPACK_FOUND)
+if(NOT MEIOSE_FOUND)
   message(FATAL_ERROR "Bundled meiose not found. Have you checked out submodules?
 git submodule update --init")
 endif()
