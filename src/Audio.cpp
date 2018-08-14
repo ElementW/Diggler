@@ -1,6 +1,7 @@
 #include "Audio.hpp"
 
 #include <cstring>
+#include <iostream>
 #include <sstream>
 
 #include "platform/BuildInfo.hpp"
@@ -11,11 +12,10 @@
 #include <AL/alext.h>
 #endif
 
+#include "util/Log.hpp"
 #include "Game.hpp"
 #include "GlobalProperties.hpp"
 #include "LocalPlayer.hpp"
-#include "Sound.hpp"
-#include "util/Log.hpp"
 
 #define AUDIO_GC_DEBUG 0
 
@@ -87,7 +87,7 @@ Audio::~Audio() {
 }
 
 void Audio::updateAngle() {
-  const glm::vec3
+  const vec3
     &at = G.LP->camera.getLookAt(),
     &up = G.LP->camera.getUp();
   ALfloat plrOrient[6];
@@ -101,7 +101,7 @@ void Audio::updateAngle() {
 }
 
 void Audio::updatePos() {
-  const glm::vec3
+  const vec3
     &pos = G.LP->position,
     &vel = G.LP->velocity;
   ALfloat float3data[3];
@@ -144,11 +144,11 @@ void Audio::playSound(const SoundBuffer &buf) {
   gc();
 }
 
-void Audio::playSound(const std::string &name, const glm::vec3 &pos) {
+void Audio::playSound(const std::string &name, const vec3 &pos) {
   playSound(m_sounds.at(name), pos);
 }
 
-void Audio::playSound(const SoundBuffer &buf, const glm::vec3& pos) {
+void Audio::playSound(const SoundBuffer &buf, const vec3 &pos) {
   m_playing.emplace_back(&buf, false, pos);
   m_playing.back().play();
   gc();

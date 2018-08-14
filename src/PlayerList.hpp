@@ -1,8 +1,9 @@
-#ifndef PLAYER_LIST_HPP
-#define PLAYER_LIST_HPP
-#include "Platform.hpp"
-#include <vector>
+#ifndef DIGGLER_PLAYER_LIST_HPP
+#define DIGGLER_PLAYER_LIST_HPP
+
 #include <string>
+#include <vector>
+
 #include "Player.hpp"
 
 namespace diggler {
@@ -51,4 +52,4 @@ public:
 
 }
 
-#endif
+#endif /* DIGGLER_PLAYER_LIST_HPP */

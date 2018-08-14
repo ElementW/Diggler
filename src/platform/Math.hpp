@@ -18,7 +18,7 @@ double rmod(double x, double y);
 /// Divide rounding down / Modulo quotient
 /// @returns x/y rounded down / Q in modulus' A=B×Q+R equation
 ///
-constexpr inline int divrd(int x, uint y) {
+constexpr inline int divrd(int x, unsigned int y) {
   return (x < 0) ? (x+1)/(int)y-1 : x/(int)y;
 }
 

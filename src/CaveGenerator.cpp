@@ -70,7 +70,7 @@ void CaveGenerator::Generate(WorldRef wr, const GenConf &gc, ChunkRef cr) {
     }*/
 
   constexpr auto CX = Chunk::CX, CY = Chunk::CY, CZ = Chunk::CZ;
-  const glm::ivec3 cp = c.getWorldChunkPos() * glm::ivec3(CX, CY, CZ);
+  const vec3i cp = c.getWorldChunkPos() * vec3i(CX, CY, CZ);
   for (int ly = 0; ly < CY; ++ly) {
     int y = cp.y + ly;
     for (int lx = 0; lx < CX; ++lx) {

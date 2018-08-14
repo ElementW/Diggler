@@ -128,7 +128,7 @@ void Font::updateTextBuffer(render::FontRendererTextBufferRef &buf, const std::s
   G->R->renderers.font->updateTextBuffer(buf, verts.get(), vertCount);
 }
 
-void Font::draw(const render::FontRendererTextBufferRef &buf, const glm::mat4 &matrix) const {
+void Font::draw(const render::FontRendererTextBufferRef &buf, const mat4 &matrix) const {
   G->R->renderers.font->render(*this, buf, matrix);
 }
 

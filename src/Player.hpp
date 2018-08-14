@@ -1,16 +1,18 @@
 #ifndef DIGGLER_PLAYER_HPP
 #define DIGGLER_PLAYER_HPP
-#include "Platform.hpp"
 
-#include <functional>
 #include <list>
 #include <memory>
 
-#include "render/gl/OpenGL.hpp"
-#include <glm/glm.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/vec3.hpp>
 
 #include "platform/PreprocUtils.hpp"
+#include "platform/Types.hpp"
+
 #include "network/Network.hpp"
+#include "render/gl/OpenGL.hpp"
+#include "Chunk.hpp"
 #include "World.hpp"
 
 namespace diggler {

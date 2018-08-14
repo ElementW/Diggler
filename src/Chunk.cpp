@@ -1,22 +1,15 @@
 #include "Chunk.hpp"
 
-#include "Platform.hpp"
-
-#include <cstring>
-#include <cstddef>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include <lzfx.h>
 #include <MurmurHash2.h>
 
-#include "GlobalProperties.hpp"
-#include "Game.hpp"
 #include "content/Registry.hpp"
 #include "network/msgtypes/BlockUpdate.hpp"
 #include "render/Renderer.hpp"
 #include "util/Log.hpp"
+#include "util/TexturePacker.hpp"
+#include "Game.hpp"
+#include "GlobalProperties.hpp"
 
 #if CHUNK_INMEM_COMPRESS
   #include <cstdlib>

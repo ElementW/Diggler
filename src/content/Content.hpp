@@ -1,10 +1,10 @@
 #ifndef DIGGLER_CONTENT_HPP
 #define DIGGLER_CONTENT_HPP
 
-#include "../platform/Types.hpp"
-
 #include <limits>
 #include <type_traits>
+
+#include "../platform/Types.hpp"
 
 namespace diggler {
 

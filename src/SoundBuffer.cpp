@@ -49,19 +49,21 @@ const char* alGetErrorString(ALenum error) {
   }
 }
 
-SoundBuffer::SoundBuffer() : moved(false) {
-  alGenBuffers(1, &id);
+SoundBuffer::SoundBuffer() : m_id(0) {
 }
 
 SoundBuffer::SoundBuffer(SoundBuffer &&b) {
-  id = b.id;
-  b.moved = true;
+  if (m_id != 0) {
+    alDeleteBuffers(1, &m_id);
+  }
+  m_id = b.m_id;
+  b.m_id = 0;
 }
 
 SoundBuffer::~SoundBuffer() {
-  if (moved)
-    return;
-  alDeleteBuffers(1, &id);
+  if (m_id != 0) {
+    alDeleteBuffers(1, &m_id);
+  }
 }
 
 void SoundBuffer::loadOgg(const std::string &path) {
@@ -83,8 +85,12 @@ void SoundBuffer::loadOgg(const std::string &path) {
   // Fill the buffer
   stb_vorbis_get_samples_short_interleaved(stream, info.channels, bufferData, bufferSize);
 
+  if (m_id == 0) {
+    alGenBuffers(1, &m_id);
+  }
+
   // Send the buffer data
-  alBufferData(id, format, bufferData, stb_vorbis_stream_length_in_samples(stream)*sizeof(ALshort), info.sample_rate);
+  alBufferData(m_id, format, bufferData, stb_vorbis_stream_length_in_samples(stream)*sizeof(ALshort), info.sample_rate);
   //getDebugStream() << path << ' ' << info.sample_rate << "Hz" << std::endl;
 
   delete[] bufferData;

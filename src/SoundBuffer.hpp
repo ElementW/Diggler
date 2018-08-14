@@ -14,21 +14,20 @@ namespace diggler {
 
 class SoundBuffer {
 private:
-  bool moved;
-  ALuint id;
+  ALuint m_id;
 
 public:
   SoundBuffer();
-  // No copy
+
   SoundBuffer(const SoundBuffer&) = delete;
-  // Move
   SoundBuffer(SoundBuffer&&);
+
   ~SoundBuffer();
   
   void loadOgg(const std::string &path);
   
-  operator ALint() const { return id; }
-  ALint getId() const { return id; }
+  operator ALint() const { return m_id; }
+  ALint id() const { return m_id; }
 };
 
 }

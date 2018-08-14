@@ -2,17 +2,10 @@
 
 #include <algorithm>
 
-#include <goodform/variant.hpp>
+#include <meiose/variant.hpp>
 
 namespace diggler {
 namespace content {
-
-AssetContentMetadata::AssetContentMetadata(AssetManager &am) :
-  m_assetManager(am) {
-}
-
-AssetContentMetadata::~AssetContentMetadata() {
-}
 
 bool AssetContentMetadata::validSchemeVersion(SchemeVersion v) {
   return v == 0;

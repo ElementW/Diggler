@@ -1,7 +1,9 @@
 #ifndef DIGGLER_IO_STREAM_HPP
 #define DIGGLER_IO_STREAM_HPP
 
-#include "../Platform.hpp"
+#include <string>
+
+#include "../platform/Types.hpp"
 
 namespace diggler {
 namespace io {

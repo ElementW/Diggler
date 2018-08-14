@@ -1,15 +1,14 @@
 #ifndef NETWORK_HPP
 #define NETWORK_HPP
 
-#include <exception>
-#include <type_traits>
+#include <string>
 
 #include <glm/vec3.hpp>
 
-#include "../Platform.hpp"
-#include "../platform/PreprocUtils.hpp"
 #include "../crypto/DiffieHellman.hpp"
 #include "../io/MemoryStream.hpp"
+#include "../platform/PreprocUtils.hpp"
+#include "../platform/Types.hpp"
 
 namespace meiose {
 class variant;

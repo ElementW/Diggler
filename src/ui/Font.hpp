@@ -1,11 +1,10 @@
 #ifndef FONT_HPP
 #define FONT_HPP
 
-#include "../Platform.hpp"
+#include <memory>
 
-#include "../render/gl/OpenGL.hpp"
-#include <glm/glm.hpp>
-
+#include "../platform/types/mat4.hpp"
+#include "../platform/Types.hpp"
 #include "../render/FontRendererFwd.hpp"
 
 namespace diggler {
@@ -46,7 +45,7 @@ public:
   render::FontRendererTextBufferRef createTextBuffer(render::FontRendererTextBufferUsage) const;
   void updateTextBuffer(render::FontRendererTextBufferRef&, const std::string &text) const;
 
-  void draw(const render::FontRendererTextBufferRef&, const glm::mat4 &matrix) const;
+  void draw(const render::FontRendererTextBufferRef&, const mat4 &matrix) const;
   Size getSize(const std::string &text) const;
   int getHeight() const;
   const std::shared_ptr<Texture> texture() const {

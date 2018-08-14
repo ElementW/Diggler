@@ -1,10 +1,8 @@
-#ifndef AUDIO_HPP
-#define AUDIO_HPP
+#ifndef DIGGLER_AUDIO_HPP
+#define DIGGLER_AUDIO_HPP
 
 #include <map>
 #include <list>
-
-#include <glm/detail/type_vec3.hpp>
 
 #include "platform/BuildInfo.hpp"
 #ifdef BUILDINFO_PLATFORM_MAC
@@ -13,6 +11,7 @@
 #include <AL/alc.h>
 #endif
 
+#include "platform/types/vec3.hpp"
 #include "Sound.hpp"
 #include "SoundBuffer.hpp"
 
@@ -44,10 +43,10 @@ public:
   void update();
   void playSound(const std::string &name);
   void playSound(const SoundBuffer &buf);
-  void playSound(const std::string &name, const glm::vec3 &pos);
-  void playSound(const SoundBuffer &buf, const glm::vec3 &pos);
+  void playSound(const std::string &name, const vec3 &pos);
+  void playSound(const SoundBuffer &buf, const vec3 &pos);
 };
 
 }
 
-#endif
+#endif /* DIGGLER_AUDIO_HPP */

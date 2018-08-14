@@ -2,7 +2,6 @@
 #define DIGGLER_PLATFORM_TYPES_HPP
 
 #include <cstdint>
-#include <string>
 
 namespace diggler {
 
@@ -19,8 +18,6 @@ using int8   = std::int8_t;
 using byte   = std::uint8_t;
 using char32 = char32_t;
 using char16 = char16_t;
-
-using String = std::string;
 
 }
 

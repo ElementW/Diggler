@@ -1,6 +1,8 @@
 #ifndef DIGGLER_RENDER_GL_FEATURE_SUPPORT_HPP
 #define DIGGLER_RENDER_GL_FEATURE_SUPPORT_HPP
 
+#include <string>
+
 #include "../../platform/Types.hpp"
 
 namespace diggler {

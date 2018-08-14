@@ -1,14 +1,13 @@
-#ifndef CHUNK_HPP
-#define CHUNK_HPP
+#ifndef DIGGLER_CHUNK_HPP
+#define DIGGLER_CHUNK_HPP
 
 #include <memory>
 #include <mutex>
+#include <vector>
 
-#include <glm/glm.hpp>
-
-#include "Texture.hpp"
 #include "content/Content.hpp"
-#include "network/Network.hpp"
+#include "platform/types/vec3.hpp"
+#include "platform/FourCC.hpp"
 
 #define CHUNK_INMEM_COMPRESS 1
 #define CHUNK_INMEM_COMPRESS_DELAY 2000 /* ms */
@@ -19,6 +18,11 @@ class CaveGenerator;
 class Game;
 class World;
 using WorldRef = std::shared_ptr<World>;
+
+namespace io {
+class InStream;
+class OutStream;
+}
 
 namespace render {
 class WorldRenderer;
@@ -144,8 +148,8 @@ public:
    * @brief Get this Chunk's position in the World.
    * @return Chunk's position in the World.
    */
-  inline glm::ivec3 getWorldChunkPos() const {
-    return glm::ivec3(wcx, wcy, wcz);
+  inline vec3i getWorldChunkPos() const {
+    return vec3i(wcx, wcy, wcz);
   }
 
   /**
@@ -249,4 +253,4 @@ using ChunkWeakRef = std::weak_ptr<Chunk>;
 
 }
 
-#endif
+#endif /* DIGGLER_CHUNK_HPP */

@@ -6,8 +6,8 @@
 #include <map>
 #include <list>
 
-#include <glm/detail/type_vec2.hpp>
-#include <glm/detail/type_vec.hpp>
+#include <glm/vec2.hpp>
+#include <glm/mat4x4.hpp>
 
 #include "../GameWindow.hpp"
 #include "../render/gl/FBO.hpp"

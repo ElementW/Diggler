@@ -1,8 +1,6 @@
 #ifndef DIGGLER_WORLD_HPP
 #define DIGGLER_WORLD_HPP
 
-#include "Chunk.hpp"
-
 #include <condition_variable>
 #include <functional>
 #include <map>
@@ -10,10 +8,11 @@
 #include <queue>
 #include <thread>
 
-#include <glm/detail/type_vec3.hpp>
+#include <glm/vec3.hpp>
 
+#include "Chunk.hpp"
 #include "io/Stream.hpp"
-#include "network/Network.hpp"
+#include "platform/Math.hpp"
 #include "Particles.hpp"
 
 namespace diggler {

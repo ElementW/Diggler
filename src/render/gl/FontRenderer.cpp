@@ -3,6 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "../../Game.hpp"
+#include "../../Texture.hpp"
 #include "ProgramManager.hpp"
 
 namespace diggler {

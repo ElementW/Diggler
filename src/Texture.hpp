@@ -2,7 +2,6 @@
 #define DIGGLER_TEXTURE_HPP
 
 #include <memory>
-#include <string>
 
 #include "PixelFormat.hpp"
 #include "platform/Types.hpp"
