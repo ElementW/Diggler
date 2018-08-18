@@ -21,6 +21,8 @@ public:
 
   SoundBuffer(const SoundBuffer&) = delete;
   SoundBuffer(SoundBuffer&&);
+  SoundBuffer& operator=(const SoundBuffer&) = delete;
+  SoundBuffer& operator=(SoundBuffer&&);
 
   ~SoundBuffer();
   

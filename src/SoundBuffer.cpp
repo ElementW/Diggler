@@ -52,12 +52,18 @@ const char* alGetErrorString(ALenum error) {
 SoundBuffer::SoundBuffer() : m_id(0) {
 }
 
-SoundBuffer::SoundBuffer(SoundBuffer &&b) {
+SoundBuffer::SoundBuffer(SoundBuffer &&b) :
+  m_id(b.m_id) {
+  b.m_id = 0;
+}
+
+SoundBuffer& SoundBuffer::operator=(SoundBuffer &&b) {
   if (m_id != 0) {
     alDeleteBuffers(1, &m_id);
   }
   m_id = b.m_id;
   b.m_id = 0;
+  return *this;
 }
 
 SoundBuffer::~SoundBuffer() {
