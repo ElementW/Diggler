@@ -39,6 +39,7 @@ if(MINGW)
 endif()
 # Disable narrow convert warnings and disable deprecated GLM degrees usage
 add_definitions(-DGLM_FORCE_RADIANS)
+add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -ffast-math")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall") # -Wextra")
 
