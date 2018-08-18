@@ -47,6 +47,9 @@ public:
   LogInput& operator<<(int64_t);
   LogInput& operator<<(float);
   LogInput& operator<<(double);
+#ifdef __APPLE__
+  LogInput& operator<<(size_t);
+#endif
   LogInput& operator<<(const void*);
 
   LogInput& operator<<(const glm::vec2&);

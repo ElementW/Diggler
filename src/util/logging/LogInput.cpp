@@ -110,6 +110,13 @@ LogInput& LogInput::operator<<(double f) {
   return *this;
 }
 
+#ifdef __APPLE__
+LogInput& LogInput::operator<<(size_t i) {
+  buf.append(std::to_string(i));
+  return *this;
+}
+#endif
+
 LogInput& LogInput::operator<<(const void *ptr) {
   std::stringbuf hbuf;
   std::ostream os(&hbuf);
