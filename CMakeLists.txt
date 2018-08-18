@@ -45,6 +45,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall") # -Wextra")
 if(NOT CMAKE_BUILD_TYPE) # Defaults to release
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type: Debug or Release" FORCE)
 endif()
+
+if("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
+  set(LINUX TRUE)
+endif()
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   set(USE_GCC_LTO FALSE CACHE BOOL "Use GCC LTOs")
 
@@ -52,8 +56,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
-  if(NOT (MINGW OR WIN32))
-    # On non-Windows platforms, make the whole executable position-independent
+  if(LINUX)
+    # On Linux, make the whole executable position-independent
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pie")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pie")
   endif()
@@ -77,7 +81,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/enet")
 set(ENET_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/ext/enet/include")
 set(ENET_LIBRARIES enet)
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/lzfx")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/lzo")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/etc")
 find_package(glm QUIET)
 find_package(OpenAL REQUIRED)
@@ -100,7 +104,7 @@ include_directories(BEFORE
   ${ETC_INCLUDE_DIRS}
   ${MEIOSE_INCLUDE_DIR}
   ${LUA_INCLUDE_DIR}
-  ${LZFX_INCLUDE_DIRS}
+  ${LZO_INCLUDE_DIRS}
   ${ENET_INCLUDE_DIRS}
   ${GLFW_INCLUDE_DIRS}
   ${LIBSODIUM_INCLUDE_DIRS}
@@ -166,7 +170,7 @@ target_link_libraries(diggler
   ${ETC_LIBRARIES}
   ${MEIOSE_LIBRARY}
   ${LUA_LIBRARY}
-  ${LZFX_LIBRARIES}
+  ${LZO_LIBRARIES}
   ${ENET_LIBRARIES}
   ${GLFW_LIBRARIES}
   ${LIBSODIUM_LIBRARIES}

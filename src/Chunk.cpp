@@ -1,6 +1,6 @@
 #include "Chunk.hpp"
 
-#include <lzfx.h>
+#include <minilzo.h>
 #include <MurmurHash2.h>
 
 #include "content/Registry.hpp"
@@ -22,7 +22,8 @@ namespace diggler {
 using Util::Log;
 using namespace Util::Logging::LogLevels;
 
-static const char *TAG = "Chunk";
+static constexpr char *TAG = "Chunk";
+static constexpr uint32 HashSeed = 0xFA0C778C;
 
 static constexpr int CXY = Chunk::CX*Chunk::CY;
 static constexpr int I(int x, int y, int z) {
@@ -112,9 +113,11 @@ void Chunk::calcMemUsage() {
 #if CHUNK_INMEM_COMPRESS
 void Chunk::imcCompress() {
   if (mut.try_lock()) {
-    uint isize = AllocaSize, osize = isize;
+    std::unique_ptr<byte[]> workmem(new byte[LZO1X_MEM_COMPRESS]);
+    lzo_uint isize = AllocaSize, osize = isize;
     imcData = std::malloc(osize);
-    lzfx_compress(data, isize, imcData, &osize);
+    lzo1x_1_compress(reinterpret_cast<unsigned char*>(data), isize,
+        reinterpret_cast<unsigned char*>(imcData), &osize, workmem.get());
     imcData = std::realloc(imcData, osize);
     imcSize = osize;
     delete data;
@@ -130,10 +133,11 @@ void Chunk::imcUncompress() {
     return;
   }
   mut.lock();
-  uint isize = imcSize, osize = AllocaSize;
+  lzo_uint isize = imcSize, osize = AllocaSize;
   imcUnusedSince = G->TimeMs;
   data = new Data;
-  lzfx_decompress(imcData, isize, data, &osize);
+  lzo1x_decompress(reinterpret_cast<unsigned char*>(imcData), isize,
+      reinterpret_cast<unsigned char*>(data), &osize, nullptr);
   std::free(imcData);
   imcData = nullptr;
   calcMemUsage();
@@ -423,20 +427,22 @@ void Chunk::updateClient() {
 }
 
 void Chunk::write(io::OutStream &os) const {
-  const uint dataSize = Chunk::AllocaSize;
-  uint compressedSize;
+  const lzo_uint dataSize = Chunk::AllocaSize;
+  std::unique_ptr<byte[]> workmem(new byte[LZO1X_MEM_COMPRESS]);
   byte *compressed = new byte[dataSize];
+  lzo_uint compressedSize = dataSize;
 
-  const void *chunkData = data;
-  compressedSize = dataSize;
-  int rz = lzfx_compress(chunkData, dataSize, compressed, &compressedSize);
+  int rz = lzo1x_1_compress(reinterpret_cast<const unsigned char*>(data), dataSize,
+      reinterpret_cast<unsigned char*>(compressed), &compressedSize, workmem.get());
+  Log(Verbose, TAG) << "Compressed " << dataSize << " to " << compressedSize << ", " <<
+      (compressedSize/double(dataSize)*100) << "%";
   if (rz < 0) {
     Log(Error, TAG) << "Failed compressing Chunk[" << wcx << ',' << wcy << ' ' << wcz << ']';
   } else {
     os.writeU16(compressedSize);
     os.writeData(compressed, compressedSize);
   }
-  os.writeU32(MurmurHash2(chunkData, dataSize, 0xFA0C778C));
+  os.writeU32(MurmurHash2(data, dataSize, HashSeed));
 
   delete[] compressed;
 }
@@ -447,8 +453,9 @@ void Chunk::read(io::InStream &is) {
   byte *compressedData = new byte[compressedSize];
   is.readData(compressedData, compressedSize);
 
-  uint outLen = targetDataSize;
-  int rz = lzfx_decompress(compressedData, compressedSize, data, &outLen);
+  lzo_uint outLen = targetDataSize;
+  int rz = lzo1x_decompress(compressedData, compressedSize,
+      reinterpret_cast<unsigned char*>(data), &outLen, nullptr);
   if (rz < 0 || outLen != targetDataSize) {
     if (rz < 0) {
       Log(Error, TAG) << "Chunk[" << wcx << ',' << wcy << ' ' << wcz <<
@@ -458,7 +465,7 @@ void Chunk::read(io::InStream &is) {
           "] has bad size " << outLen << '/' << targetDataSize;
     }
   }
-  if (is.readU32() != MurmurHash2(data, outLen, 0xFA0C778C)) {
+  if (is.readU32() != MurmurHash2(data, outLen, HashSeed)) {
     Log(Error, TAG) << "Chunk[" << wcx << ',' << wcy << ' ' << wcz <<
         "] decompression gave bad chunk content";
   }

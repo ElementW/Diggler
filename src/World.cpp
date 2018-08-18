@@ -4,7 +4,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <lzfx.h>
+#include <minilzo.h>
 
 #include "CaveGenerator.hpp"
 #include "Game.hpp"
@@ -309,6 +309,8 @@ void World::refresh() {
 }
 
 void World::write(io::OutStream &msg) const {
+  // TODO
+  /*
   const void *chunkData = nullptr;
   const uint dataSize = Chunk::AllocaSize;
   uint compressedSize;
@@ -334,9 +336,12 @@ void World::write(io::OutStream &msg) const {
     }
   }
   delete[] compressed;
+  */
 }
 
 void World::read(io::InStream &M) {
+  // TODO
+  /*
   int bytesRead = 0;
   uint size = M.readU16();
   for (uint n=0; n < size; ++n) {
@@ -362,6 +367,7 @@ void World::read(io::InStream &M) {
     delete[] compressedData;
   }
   Log(Debug, TAG) << "MapRead: read " << bytesRead;
+  */
 }
 
 }
