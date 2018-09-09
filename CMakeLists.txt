@@ -57,8 +57,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
-  if(LINUX)
-    # On Linux, make the whole executable position-independent
+  if(LINUX AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    # On Linux GCC, make the whole executable position-independent
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pie")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pie")
   endif()
