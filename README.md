@@ -24,7 +24,7 @@ cmake ..
 make -j$(nproc)
 ```
 
-**Important note**: Diggler does **not** suport in-source builds, i.e. running CMake in the top level directory, due to 1. the impossibility to have multiple builds that way, and 2. because of the frequent build structure fuckery it causes. Make sure to configure your IDE/run CMake to have the build directory elsewhere. Disregarding this will have CMake bail out instantly as well as remind you of this one more time.
+**Important note**: Diggler does **not** support in-source builds, i.e. running CMake in the top level directory, due to 1. the impossibility to have multiple builds that way, and 2. because of the frequent build structure fuckery it causes. Make sure to configure your IDE/run CMake to have the build directory elsewhere. Disregarding this will have CMake bail out instantly as well as remind you of this one more time.
 
 ### Dependencies
 
