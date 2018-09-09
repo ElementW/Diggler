@@ -15,9 +15,6 @@
 #include "../ui/Text.hpp"
 #include "../util/Log.hpp"
 
-// TODO: move elsewhere
-#include "../scripting/lua/State.hpp"
-
 namespace diggler {
 
 using Util::Log;
@@ -110,12 +107,6 @@ void ConnectingState::onLogicTick() {
         W->showMessage("Received unexpected packet", sstm.str());
         return;
       }
-
-      // TODO: move elsewhere
-      G->LS->initialize();
-      const std::string gameLuaRuntimePath(getAssetsDirectory() + "/lua");
-      G->LS->setGameLuaRuntimePath(gameLuaRuntimePath);
-      G->LS->dofile(gameLuaRuntimePath + "/Diggler.lua");
 
       Log(Info, TAG) << "Joined as " << LP.name << '/' << LP.sessId;
 

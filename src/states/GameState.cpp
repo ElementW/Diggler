@@ -30,7 +30,6 @@
 #include "../render/gl/FBO.hpp"
 #include "../render/gl/ProgramManager.hpp"
 #include "../render/Renderer.hpp"
-#include "../scripting/lua/State.hpp"
 #include "../Skybox.hpp"
 #include "../ui/FontManager.hpp"
 #include "../ui/Manager.hpp"
@@ -593,8 +592,6 @@ void GameState::onFrameTick() {
 void GameState::onStop() {
   net::OutMessage quit(net::MessageType::PlayerQuit);
   sendMsg(quit, net::Tfer::Rel);
-
-  G->LS->finalize();
 }
 
 void GameState::gameLoop() {

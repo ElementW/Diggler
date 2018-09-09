@@ -63,10 +63,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pie")
   endif()
 endif()
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  # Fix LuaJIT failing to run on OS X
-  link_libraries("-pagezero_size 10000 -image_base 100000000")
-endif()
 
 message(">> Using ${CMAKE_BUILD_TYPE} build configuration")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -DDEBUG -g")
@@ -87,7 +83,6 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/etc")
 find_package(glm QUIET)
 find_package(OpenAL REQUIRED)
 find_package(PkgConfig REQUIRED)
-find_package(LuaJIT REQUIRED)
 
 find_package(meiose REQUIRED)
 if(NOT MEIOSE_FOUND)
@@ -104,7 +99,6 @@ include_directories(BEFORE
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
   ${ETC_INCLUDE_DIRS}
   ${MEIOSE_INCLUDE_DIR}
-  ${LUA_INCLUDE_DIR}
   ${LZO_INCLUDE_DIRS}
   ${ENET_INCLUDE_DIRS}
   ${GLFW_INCLUDE_DIRS}
@@ -170,7 +164,6 @@ target_link_libraries(diggler
   ${LIBS}
   ${ETC_LIBRARIES}
   ${MEIOSE_LIBRARY}
-  ${LUA_LIBRARY}
   ${LZO_LIBRARIES}
   ${ENET_LIBRARIES}
   ${GLFW_LIBRARIES}
@@ -193,10 +186,6 @@ if(NOT WIN32 AND NOT MINGW)
   add_custom_command(TARGET diggler PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E create_symlink "${PATH_TO_TOPDIR}/assets"
     "${PROJECT_BINARY_DIR}/assets")
-
-  add_custom_command(TARGET diggler PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/src/scripting/lua/api"
-    "${PROJECT_BINARY_DIR}/assets/lua/ffi")
 endif()
 
 #install(TARGETS digglerz RUNTIME DESTINATION bin)

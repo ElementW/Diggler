@@ -27,12 +27,6 @@ class ProgramManager;
 }
 }
 
-namespace scripting {
-namespace lua {
-class State;
-}
-}
-
 namespace ui {
 class FontManager;
 class Manager;
@@ -60,7 +54,6 @@ public:
   content::Registry *CR;
   ptr<content::AssetManager> AM;
   ptr<content::ModManager> MM;
-  scripting::lua::State *LS;
 
   // Server
   Server *S;

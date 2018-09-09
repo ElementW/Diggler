@@ -5,8 +5,6 @@
 #include <thread>
 #include <sstream>
 
-#include <lua.h>
-
 #include "Game.hpp"
 #include "network/msgtypes/BlockUpdate.hpp"
 #include "network/msgtypes/Chat.hpp"
@@ -16,7 +14,6 @@
 #include "network/msgtypes/PlayerUpdate.hpp"
 #include "network/Network.hpp"
 #include "network/NetHelper.hpp"
-#include "scripting/lua/State.hpp"
 #include "VersionInfo.hpp"
 #include "CaveGenerator.hpp"
 #include "util/Log.hpp"
@@ -355,7 +352,6 @@ Server::Server(Game &G, uint16 port) : G(G) {
 }
 
 void Server::startInternals() {
-  G.LS->initialize();
 }
 
 // FIXME ugly ugly hack to keep it in mem
@@ -379,7 +375,6 @@ void Server::stop() {
 }
 
 void Server::stopInternals() {
-  G.LS->finalize();
 }
 
 void Server::chunkUpdater(WorldRef WR, bool &continueUpdate) {

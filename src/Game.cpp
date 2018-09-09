@@ -6,7 +6,6 @@
 #include "gfx/Device.hpp"
 #include "render/gl/ProgramManager.hpp"
 #include "render/gl/Renderer.hpp"
-#include "scripting/lua/State.hpp"
 #include "ui/FontManager.hpp"
 #include "Audio.hpp"
 #include "GlobalProperties.hpp"
@@ -20,7 +19,6 @@ Game::Game() :
   U(nullptr),
   players(this),
   CR(nullptr),
-  LS(nullptr),
 
   S(nullptr),
 
@@ -38,7 +36,6 @@ Game::Game() :
 void Game::init() {
   AM = std::make_unique<content::AssetManager>(this);
   MM = std::make_unique<content::ModManager>(this);
-  LS = new scripting::lua::State(this);
   if (GlobalProperties::IsClient) {
     initClient();
   }
@@ -76,7 +73,6 @@ void Game::finalize() {
   if (GlobalProperties::IsServer) {
     finalizeServer();
   }
-  delete LS; LS = nullptr;
   MM.reset();
   AM.reset();
   delete CR; CR = nullptr;
