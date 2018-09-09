@@ -22,7 +22,7 @@ namespace diggler {
 using Util::Log;
 using namespace Util::Logging::LogLevels;
 
-static constexpr char *TAG = "Chunk";
+static constexpr const char *TAG = "Chunk";
 static constexpr uint32 HashSeed = 0xFA0C778C;
 
 static constexpr int CXY = Chunk::CX*Chunk::CY;
