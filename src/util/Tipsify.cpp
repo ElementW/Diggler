@@ -38,7 +38,7 @@ std::pair<std::vector<std::vector<int>>, std::vector<int>>
   return std::make_pair(A, L);
 }
 
-int Skip_dead_end(const std::vector<int> &L, std::vector<int> &D, int i) {
+int Skip_dead_end(const std::vector<int> &L, std::vector<int> &D, size_t i) {
   std::vector<int> D_(D);
   for (; D_.size() > 0;) {
     int d = D_.back();
@@ -59,7 +59,7 @@ int Skip_dead_end(const std::vector<int> &L, std::vector<int> &D, int i) {
   return -1;
 }
 
-int Get_next_vertex(const int i, int k, const std::map<int, bool> &N, const std::vector<int> &C, int s,
+int Get_next_vertex(const size_t i, int k, const std::map<int, bool> &N, const std::vector<int> &C, int s,
   const std::vector<int> &L, std::vector<int> &D) {
   int n = -1, p = -1, m = 0;
   for (auto iter = N.begin(); iter != N.end(); ++iter) {
@@ -94,7 +94,7 @@ std::vector<Vector3> Tipsify::tipsify(std::size_t vertexCount, const std::vector
   }
   std::vector<int> C(vertexCount), D;
   std::vector<bool> E(I.size());
-  const int i = 1;
+  const size_t i = 1;
   int f = 0, s = k + 1, nf = 0;
   std::vector<Vector3> O(I.size());
   for (; f >= 0;) {

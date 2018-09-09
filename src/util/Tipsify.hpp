@@ -11,7 +11,7 @@ public:
   struct Vector3 {
     int pos[3];
     Vector3() = default;
-    inline Vector3(int pos[3]) : pos{pos[0], pos[1], pos[2]} {};
+    inline Vector3(int pos[3]) : pos{pos[0], pos[1], pos[2]} {}
     inline int operator[](size_t idx) const { return pos[idx]; }
     inline int& operator[](size_t idx) { return pos[idx]; }
     inline int operator*() const { return pos[0]; }
