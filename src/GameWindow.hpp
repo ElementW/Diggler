@@ -9,8 +9,6 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-#include <glm/detail/type_mat.hpp>
-
 #include "StateMachine.hpp"
 #include "Platform.hpp"
 #include "platform/Types.hpp"

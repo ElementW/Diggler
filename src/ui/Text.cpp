@@ -60,7 +60,7 @@ void Text::setScale(int scaleX, int scaleY) {
 }
 
 void Text::updateMatrix() {
-  m_matrix = glm::scale(glm::mat4(), glm::vec3(m_scaleX, m_scaleY, 1.f));
+  m_matrix = glm::scale(mat4(), vec3(m_scaleX, m_scaleY, 1.f));
 }
 
 void Text::updateText() {
@@ -70,7 +70,7 @@ void Text::updateText() {
   M->G->FM->getFont(m_fontName)->updateTextBuffer(m_textBuf, m_text);
 }
 
-void Text::render(const glm::mat4 &matrix) const {
+void Text::render(const mat4 &matrix) const {
   if (m_textBuf) {
     M->G->FM->getFont(m_fontName)->draw(m_textBuf, matrix * m_matrix);
   }

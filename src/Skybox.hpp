@@ -1,7 +1,7 @@
 #ifndef SKYBOX_HPP
 #define SKYBOX_HPP
 
-#include <glm/detail/type_mat.hpp>
+#include "platform/types/mat4.hpp"
 
 #include "render/gl/VBO.hpp"
 #include "Game.hpp"
@@ -28,7 +28,7 @@ private:
 public:
   Skybox(Game *G, const std::string &skyName);
   ~Skybox();
-  void render(const glm::mat4 &transform) const;
+  void render(const mat4 &transform) const;
 };
 
 }

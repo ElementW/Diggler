@@ -7,9 +7,9 @@
 
 namespace diggler {
 
-using mat3f   = glm::tmat3x3<float>;
-using mat3d   = glm::tmat3x3<double>;
-using mat3    = mat3d;
+using mat3f = glm::tmat3x3<float>;
+using mat3d = glm::tmat3x3<double>;
+using mat3  = mat3f;
 
 }
 

@@ -1,5 +1,8 @@
 #ifndef RECT_HPP
 #define RECT_HPP
+
+#include "../platform/types/mat4.hpp"
+
 #include "Element.hpp"
 
 namespace diggler {
@@ -9,7 +12,7 @@ class Rect : public Element {
 private:
   class VBO m_vbo;
   Color m_color;
-  glm::mat4 m_mat;
+  mat4 m_mat;
   class Texture *m_tex;
 
 public:

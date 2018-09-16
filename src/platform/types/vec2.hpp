@@ -23,7 +23,7 @@ using vec2ivt = vec2i::value_type;
 
 using vec2f   = glm::tvec2<float>;
 using vec2d   = glm::tvec2<double>;
-using vec2    = vec2d;
+using vec2    = vec2f;
 using vec2vt  = vec2::value_type;
 
 }

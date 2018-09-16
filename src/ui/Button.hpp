@@ -31,7 +31,7 @@ public:
   void onCursorEnter(int x, int y) override;
   void onCursorLeave(int x, int y) override;
 
-  void render(const glm::mat4&) const override;
+  void render(const mat4&) const override;
   using Element::render;
 };
 

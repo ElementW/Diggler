@@ -23,7 +23,7 @@ using vec3ivt = vec3i::value_type;
 
 using vec3f   = glm::tvec3<float>;
 using vec3d   = glm::tvec3<double>;
-using vec3    = vec3d;
+using vec3    = vec3f;
 using vec3vt  = vec3::value_type;
 
 }

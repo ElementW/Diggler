@@ -76,7 +76,7 @@ Skybox::Skybox(Game *G, const std::string &skyName) : G(G) {
   m_vbo.setData(coords, 6*6);
 }
 
-void Skybox::render(const glm::mat4 &transform) const {
+void Skybox::render(const mat4 &transform) const {
   RenderProgram->bind();
   m_vbo.bind();
   glEnableVertexAttribArray(RenderProgram_attrib_coord);

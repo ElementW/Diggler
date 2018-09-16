@@ -1,7 +1,12 @@
 #ifndef UI_MANAGER_HPP
 #define UI_MANAGER_HPP
+
 #include <list>
 #include <memory>
+
+#include "../platform/types/mat4.hpp"
+#include "../platform/types/vec4.hpp"
+
 #include "Element.hpp"
 
 namespace diggler {
@@ -24,17 +29,17 @@ private:
   std::list<std::weak_ptr<Element>> m_elements;
   std::weak_ptr<Element> m_hoveredElement;
   std::weak_ptr<Element> m_focusedElement;
-  glm::mat4 m_projMatrix, m_projMat1, m_projMat1V;
+  mat4 m_projMatrix, m_projMat1, m_projMat1V;
   
   friend GameWindow;
-  void setProjMat(const glm::mat4&);
+  void setProjMat(const mat4&);
   void add(std::weak_ptr<Element>);
   template<class T, typename... Args> std::shared_ptr<T> create(Args&&... args) {
     return std::make_shared<T>(this, std::forward<Args>(args)...);
   }
 
 public:
-  const glm::mat4 *PM, *PM1;
+  const mat4 *PM, *PM1;
   Game *G;
   int scale;
 
@@ -67,16 +72,16 @@ public:
 
   // Utility
 
-  void drawRect(const glm::mat4&, const Element::Area&, const glm::vec4 &color) const;
-  void drawRect(const glm::mat4&, int w, int h, const glm::vec4 &color) const;
-  void drawRect(const glm::mat4&, const glm::vec4 &color) const;
-  void drawFullRect(const glm::vec4 &color) const;
-  void drawTex(const glm::mat4&, const Element::Area&, const Texture&) const;
-  void drawTex(const glm::mat4&, int w, int h, const Texture&) const;
-  void drawTex(const glm::mat4&, const Texture&) const;
-  void drawTex(const glm::mat4&, const Texture&, const glm::vec4 &color) const;
+  void drawRect(const mat4&, const Element::Area&, const vec4 &color) const;
+  void drawRect(const mat4&, int w, int h, const vec4 &color) const;
+  void drawRect(const mat4&, const vec4 &color) const;
+  void drawFullRect(const vec4 &color) const;
+  void drawTex(const mat4&, const Element::Area&, const Texture&) const;
+  void drawTex(const mat4&, int w, int h, const Texture&) const;
+  void drawTex(const mat4&, const Texture&) const;
+  void drawTex(const mat4&, const Texture&, const vec4 &color) const;
   void drawFullTexV(const Texture&) const;
-  void drawFullTexV(const Texture&, const glm::vec4 &color) const;
+  void drawFullTexV(const Texture&, const vec4 &color) const;
 
   // Render
 

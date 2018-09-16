@@ -3,7 +3,7 @@
 
 #include "../Platform.hpp"
 
-#include <glm/detail/type_mat3x3.hpp>
+#include "../platform/types/mat4.hpp"
 
 namespace diggler {
 
@@ -89,7 +89,7 @@ public:
   virtual void setVisible(bool v) { m_isVisible = v; }
   bool isVisible() const { return m_isVisible; }
 
-  virtual void render(const glm::mat4&) const = 0;
+  virtual void render(const mat4&) const = 0;
   void render() const;
 };
 

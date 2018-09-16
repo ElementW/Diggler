@@ -16,7 +16,7 @@ private:
   render::FontRendererTextBufferUsage m_textBufUsage;
   render::FontRendererTextBufferRef m_textBuf;
   std::string m_fontName;
-  glm::mat4 m_matrix;
+  mat4 m_matrix;
   std::string m_text;
   
   Text(const Text&) = delete;
@@ -56,7 +56,7 @@ public:
   void setFont(const std::string &name);
   void setScale(int scaleX, int scaleY);
   Size getSize() const;
-  void render(const glm::mat4&) const override;
+  void render(const mat4&) const override;
   using Element::render;
 };
 

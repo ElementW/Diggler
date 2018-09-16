@@ -42,7 +42,7 @@ void Button::onCursorEnter(int x, int y) {
 void Button::onCursorLeave(int x, int y) {
 }
 
-void Button::render(const glm::mat4 &matrix) const {
+void Button::render(const mat4 &matrix) const {
   M->drawRect(matrix, glm::vec4(1, 1, 1, isCursorOver() ? 0.5 : 0.3));
   m_text->render(matrix);
 }

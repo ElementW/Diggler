@@ -23,7 +23,7 @@ using vec4ivt = vec4i::value_type;
 
 using vec4f   = glm::tvec4<float>;
 using vec4d   = glm::tvec4<double>;
-using vec4    = vec4d;
+using vec4    = vec4f;
 using vec4vt  = vec4::value_type;
 
 }
