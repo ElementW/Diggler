@@ -10,6 +10,7 @@
 #include "Game.hpp"
 #include "Universe.hpp"
 #include "util/Log.hpp"
+#include "world/Emerger.hpp"
 
 namespace diggler {
 
@@ -21,67 +22,12 @@ static const char *TAG = "World";
 World::World(Game *G, WorldId id, bool remote) :
   G(G), id(id), isRemote(remote) {
   // TODO: emerger thread setting, default to std::thread::hardware_concurrency()
-  for (int i=0; i < 2; ++i) {
-    emergerThreads.emplace_back(&World::emergerProc, this, i);
-  }
+  emerger.reset(new world::Emerger);
 }
 
 World::~World() {
-  emergerRun = false;
-  emergerCondVar.notify_all();
-  for (std::thread &t : emergerThreads) {
-    if (t.joinable())
-      t.join();
-  }
-  std::unique_lock<std::mutex> lk(emergeQueueMutex);
 }
 
-void World::addToEmergeQueue(ChunkRef &cr) {
-  { std::unique_lock<std::mutex> lk(emergeQueueMutex);
-    emergeQueue.emplace(cr);
-  }
-  emergerCondVar.notify_one();
-}
-void World::addToEmergeQueue(ChunkWeakRef &cwr) {
-  { std::unique_lock<std::mutex> lk(emergeQueueMutex);
-    emergeQueue.emplace(cwr);
-  }
-  emergerCondVar.notify_one();
-}
-
-void World::emergerProc(int emergerId) {
-  ChunkRef c;
-  emergerRun = true;
-  while (emergerRun) {
-    { std::unique_lock<std::mutex> lk(emergeQueueMutex);
-      if (emergeQueue.size() == 0) {
-        // No more chunks to emerge, wait for more
-        emergerCondVar.wait(lk);
-        if (emergeQueue.size() == 0) // Weird threading shenanigans
-          continue;
-        if (!emergerRun)
-          break;
-      }
-      c = emergeQueue.front().lock();
-      emergeQueue.pop();
-      if (!c) {
-        continue; // Chunk was not referenced anymore
-      }
-    }
-
-    // TODO: loading
-    auto genStart = std::chrono::high_resolution_clock::now();
-    CaveGenerator::GenConf gc;
-    CaveGenerator::Generate(c->getWorld(), gc, c);
-    auto genEnd = std::chrono::high_resolution_clock::now();
-    auto genDelta = std::chrono::duration_cast<std::chrono::milliseconds>(genEnd - genStart);
-    glm::ivec3 cp = c->getWorldChunkPos();
-    Log(Verbose, TAG) << "Map gen for " << id << '.' << cp.x << ',' << cp.y << ',' << cp.z <<
-      " took " << genDelta.count() << "ms, thread #" << emergerId;
-
-    c.reset(); // Release ref ownership
-  }
-}
 
 ChunkRef World::getNewEmptyChunk(int cx, int cy, int cz) {
   ChunkRef c = std::make_shared<Chunk>(G, G->U->getWorld(id), cx, cy, cz);
@@ -99,7 +45,7 @@ ChunkRef World::getChunk(int cx, int cy, int cz, bool load) {
   }
   if (load) {
     ChunkRef c = getNewEmptyChunk(cx, cy, cz);
-    addToEmergeQueue(c);
+    emerger->queue(c);
     return c;
   }
   return ChunkRef();

@@ -4,6 +4,7 @@
 #include <condition_variable>
 #include <functional>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <queue>
 #include <thread>
@@ -21,6 +22,10 @@ class Game;
 namespace net {
 class InMessage;
 class OutMessage;
+}
+
+namespace world {
+class Emerger;
 }
 
 using WorldId = int;
@@ -49,14 +54,7 @@ private:
 
   Game *G;
 
-  std::queue<ChunkWeakRef> emergeQueue;
-  std::mutex emergeQueueMutex;
-  void addToEmergeQueue(ChunkRef&);
-  void addToEmergeQueue(ChunkWeakRef&);
-  bool emergerRun;
-  std::vector<std::thread> emergerThreads;
-  std::condition_variable emergerCondVar;
-  void emergerProc(int);
+  std::unique_ptr<world::Emerger> emerger;
 
 public:
   using WorldChunkMap::size;
