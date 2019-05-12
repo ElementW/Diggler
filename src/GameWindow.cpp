@@ -15,7 +15,6 @@
 
 #include "Game.hpp"
 #include "GlobalProperties.hpp"
-#include "GLFWHandler.hpp"
 #include "states/GameState.hpp"
 #include "states/MessageState.hpp"
 #include "Audio.hpp"
@@ -39,6 +38,36 @@ static void glfwErrorCallback(int error, const char *description) {
   Log(Error, TAG) << "GLFW Error " << error << ": " << description;
 }
 
+void handleMouseButton(GLFWwindow *window, int key, int action, int mods) {
+  auto win = reinterpret_cast<GameWindow*>(glfwGetWindowUserPointer(window));
+  win->cbMouseButton(key, action, mods);
+}
+
+void handleCursorPos(GLFWwindow *window, double x, double y) {
+  auto win = reinterpret_cast<GameWindow*>(glfwGetWindowUserPointer(window));
+  win->cbCursorPos(x, y);
+}
+
+void handleMouseScroll(GLFWwindow *window, double x, double y) {
+  auto win = reinterpret_cast<GameWindow*>(glfwGetWindowUserPointer(window));
+  win->cbMouseScroll(x, y);
+}
+
+void handleKey(GLFWwindow *window, int key, int scancode, int action, int mods) {
+  auto win = reinterpret_cast<GameWindow*>(glfwGetWindowUserPointer(window));
+  win->cbKey(key, scancode, action, mods);
+}
+
+void handleUnichar(GLFWwindow *window, unsigned int unichar) {
+  auto win = reinterpret_cast<GameWindow*>(glfwGetWindowUserPointer(window));
+  win->cbChar(static_cast<char32>(unichar));
+}
+
+void handleResize(GLFWwindow *window, int w, int h) {
+  auto win = reinterpret_cast<GameWindow*>(glfwGetWindowUserPointer(window));
+  win->cbResize(w, h);
+}
+
 GameWindow::GameWindow(Game *G) : G(G) {
   Util::MemoryTracker::ScopedCategory sc("GLFW");
   if (InstanceCount++ == 0) {
@@ -52,8 +81,6 @@ GameWindow::GameWindow(Game *G) : G(G) {
     Log(Info, TAG) << "GLFW linked " << GLFW_VERSION_MAJOR << '.' << GLFW_VERSION_MINOR <<
         '.' << GLFW_VERSION_REVISION << ", using " << glfwGetVersionString();
   }
-
-  GLFWHandler::getInstance().setWindow(this, m_window);
 
   m_w = 640; m_h = 480;
 
@@ -98,12 +125,13 @@ GameWindow::GameWindow(Game *G) : G(G) {
 #ifdef DEBUG
   render::gl::Debug::enable();
 #endif
-  glfwSetFramebufferSizeCallback(m_window, GLFWHandler::resize);
-  glfwSetCursorPosCallback(m_window, GLFWHandler::cursorPos);
-  glfwSetKeyCallback(m_window, GLFWHandler::key);
-  glfwSetMouseButtonCallback(m_window, GLFWHandler::mouseButton);
-  glfwSetScrollCallback(m_window, GLFWHandler::mouseScroll);
-  glfwSetCharCallback(m_window, GLFWHandler::unichar);
+  glfwSetWindowUserPointer(m_window, this);
+  glfwSetFramebufferSizeCallback(m_window, handleResize);
+  glfwSetCursorPosCallback(m_window, handleCursorPos);
+  glfwSetKeyCallback(m_window, handleKey);
+  glfwSetMouseButtonCallback(m_window, handleMouseButton);
+  glfwSetScrollCallback(m_window, handleMouseScroll);
+  glfwSetCharCallback(m_window, handleUnichar);
   glfwSwapInterval(1);
   /*GLint bits;
   glGetIntegerv(GL_STENCIL_BITS, &bits);
