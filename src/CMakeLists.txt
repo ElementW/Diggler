@@ -21,7 +21,6 @@ diggler_add_sources(
   ${CSD}/Frustum.cpp
   ${CSD}/Game.cpp
   ${CSD}/GameWindow.cpp
-  ${CSD}/GLFWHandler.cpp
   ${CSD}/GlobalProperties.cpp
   ${CSD}/io/FileStream.cpp
   ${CSD}/io/MemoryStream.cpp
