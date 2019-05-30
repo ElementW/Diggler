@@ -5,7 +5,7 @@
 #include <list>
 
 #include "platform/BuildInfo.hpp"
-#ifdef BUILDINFO_PLATFORM_MAC
+#ifdef BUILDINFO_PLATFORM_MACOS
 #include <OpenAL/alc.h>
 #else
 #include <AL/alc.h>

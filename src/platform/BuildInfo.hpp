@@ -46,8 +46,8 @@
     #define BUILDINFO_PLATFORM_DRAGONFLYBSD
   #endif
 #elif (defined(__APPLE__) && defined(__MACH__)) // Mac
-  #define BUILDINFO_PLATFORM "Mac"
-  #define BUILDINFO_PLATFORM_MAC
+  #define BUILDINFO_PLATFORM "macOS"
+  #define BUILDINFO_PLATFORM_MACOS
   #define BUILDINFO_PLATFORM_MMAP
   #define BUILDINFO_PLATFORM_UNIXLIKE
 #else // Any other

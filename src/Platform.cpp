@@ -83,7 +83,7 @@ std::string diggler::getConfigDirectory() {
 #include <dirent.h>
 #include <cstdio>
 
-#if defined(BUILDINFO_PLATFORM_MAC)
+#if defined(BUILDINFO_PLATFORM_MACOS)
 #include <cstdint>
 #include <sys/syslimits.h>
 #include <mach-o/dyld.h>
@@ -99,7 +99,7 @@ std::string diggler::proc::getExecutablePath() {
   }
   return pathCache.executableBin;
 }
-#elif defined(BUILDINFO_PLATFORM_MAC)
+#elif defined(BUILDINFO_PLATFORM_MACOS)
 std::string diggler::proc::getExecutablePath() {
   if (pathCache.executableBin.length() == 0) {
     char buff[PATH_MAX+1];
