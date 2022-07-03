@@ -60,7 +60,7 @@ void Text::setScale(int scaleX, int scaleY) {
 }
 
 void Text::updateMatrix() {
-  m_matrix = glm::scale(mat4(), vec3(m_scaleX, m_scaleY, 1.f));
+  m_matrix = glm::scale(mat4(1.f), vec3(m_scaleX, m_scaleY, 1.f));
 }
 
 void Text::updateText() {
