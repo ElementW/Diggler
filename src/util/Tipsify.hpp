@@ -1,6 +1,7 @@
 #ifndef DIGGLER_TIPSIFY_HPP
 #define DIGGLER_TIPSIFY_HPP
 
+#include <cstddef>
 #include <vector>
 
 namespace diggler {

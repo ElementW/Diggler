@@ -11,9 +11,8 @@ class Emerger final {
 private:
   class Worker : public util::Worker<ChunkWeakRef> {
   public:
-    using util::Worker<ChunkWeakRef>::Worker;
-
-    ~Worker();
+    Worker(unsigned id);
+    virtual ~Worker();
 
     void processTask(Task&&) final override;
   };

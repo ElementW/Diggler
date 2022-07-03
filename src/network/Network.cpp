@@ -268,8 +268,7 @@ void Host::create(Port port, uint maxconn) {
     host = enet_host_create(nullptr, 1, static_cast<size_t>(Channels::MAX), 0, 0);
   } else { // Server
     ENetAddress address;
-    address.host = in6addr_any;
-    address.sin6_scope_id = 0;
+    address.host = 0;
     address.port = port;
     host = enet_host_create(&address, maxconn, static_cast<size_t>(Channels::MAX), 0, 0);
   }

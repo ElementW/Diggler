@@ -10,6 +10,9 @@ using namespace Util::Logging::LogLevels;
 
 namespace world {
 
+Emerger::Worker::Worker(unsigned id) : util::Worker<ChunkWeakRef>(id) {
+}
+
 Emerger::Worker::~Worker() {
 }
 

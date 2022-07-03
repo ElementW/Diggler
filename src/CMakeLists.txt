@@ -6,6 +6,7 @@ add_subdirectory("content")
 add_subdirectory("render")
 add_subdirectory("scripting")
 add_subdirectory("util")
+add_subdirectory("world")
 
 set(CSD ${CMAKE_CURRENT_SOURCE_DIR})
 diggler_add_sources(
